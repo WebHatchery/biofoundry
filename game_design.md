@@ -1,12 +1,10 @@
 # Biofoundry — Game Design
 
-*This document describes the game **as implemented** (all plan phases 0–5 and
-the automation plan phases 6–11 complete, July 2026). For the phase plans and
-pre-production notes see [`biofoundry_plan.md`](biofoundry_plan.md),
-[`automation_plan.md`](automation_plan.md), and
-[`new_gdd_notes.md`](new_gdd_notes.md). All numbers quoted here come from
-`assets/data/*.json` — that's the source of truth, and it's tunable without
-recompiling.*
+*This document describes the game **as implemented** — every phase of the
+original plan (0–5) and of the automation plan (6–11) has shipped. All numbers
+quoted here come from `assets/data/*.json`; that's the source of truth, and
+it's tunable without recompiling. Work still outstanding lives in
+[`TODO.md`](TODO.md).*
 
 > "An ant colony crossed with a factory builder, where every conveyor belt is
 > a creature with needs."
@@ -302,21 +300,7 @@ Repo-standard architecture; see `README.md` and `docs/`:
 
 ## 12. Backlog / future directions
 
-*The early-automation direction (staffed mines, blacksmith/ingots, equipment
-feedback loops, factory legibility, and the goblin evolution line) shipped as
-[`automation_plan.md`](automation_plan.md) phases 6–11.*
-
-Deferred from the original plan, in rough order of design interest:
-
-- **Slime Janitor + spoilage/troughs** — waste as a resource sink; troughs as
-  distributed food access (deepens the logistics-vs-abstraction question).
-- **Bat Courier** — terrain-ignoring hauling as a topology counter-play.
-- **Morale & overcrowding** — the second colony-sim pressure axis beyond
-  hunger.
-- **Multi-outpost worm transit** — the original "living train line" fantasy:
-  creatures enter the worm's mouth, exit at remote outposts. This is the
-  feature that would pull the game meaningfully back toward the automation
-  genre.
-- **Goblin evolution line** (Hobgoblin → Engineer → Overseer) — breeding
-  depth beyond beetles; overseers as living "beacons".
-- **Worm Shrine pause-feeding toggle** — small QoL on the endgame draw.
+The early-automation direction — staffed mines, the blacksmith and ingots,
+equipment feedback loops, factory legibility, and the hobgoblin/overseer
+breeding line — has shipped. What remains deferred from the original design,
+in rough order of design interest, is tracked in [`TODO.md`](TODO.md).

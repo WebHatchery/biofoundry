@@ -16,8 +16,8 @@ production/upkeep ledger, throughput-driven layout, and production chains.
 Simulation first, automation second. See
 [`game_design.md`](game_design.md) §1 for the full positioning.
 
-Design (as implemented): [`game_design.md`](game_design.md). Original phase
-plan: [`biofoundry_plan.md`](biofoundry_plan.md).
+Design (as implemented): [`game_design.md`](game_design.md). Outstanding work:
+[`TODO.md`](TODO.md).
 
 ## Status
 
@@ -73,10 +73,18 @@ plan: [`biofoundry_plan.md`](biofoundry_plan.md).
   actually does the thing (look around, reassign a job, weather the
   famine, place a building, win). Skippable; progress persists in saves.
 
-**All plan phases (0–5) are complete.** Deferred backlog: slime janitor,
-bat courier, spoilage/troughs (plan §Phase 2), morale/overcrowding and
-multi-outpost worm transit (§Phase 4), and a pause-feeding toggle for the
-Worm Shrine.
+- **Automation phases 6–11 (done)**: extraction became a staffed
+  **Mine** you place on a vein; the **Blacksmith** turns ore into **ingots**
+  from the first minutes; `equipment.json` gear (iron pickaxe, hauling
+  frame, smith's hammer, guard blade) is crafted from ingots and
+  auto-equipped by matching jobs, feeding throughput back into the chain;
+  in-world status icons and a chain-throughput panel make a stalled node
+  diagnosable at a glance; and the goblin line grew a **Hobgoblin**
+  heavyweight and a **Goblin Overseer** whose work-speed aura upgrades the
+  creature rather than the tool.
+
+**Every plan phase (0–5 and 6–11) is complete.** Remaining deferred work is
+tracked in [`TODO.md`](TODO.md).
 
 ## Run
 
