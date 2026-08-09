@@ -30,13 +30,15 @@ async fn main() {
     // Screenshot harness: when BIOFOUNDRY_CAPTURE_PATH is set, seed the named
     // scene ("menu" or "warren"), render deterministic frames, write a PNG,
     // and exit. Stubbed out on wasm32.
-    if let Some(config) = capture::CaptureConfig::from_env("BIOFOUNDRY") {
-        game.begin_capture_scene(&config.scene);
-        capture::run_capture(&config, |dt| {
-            game.update(dt);
-            game.draw();
-        })
-        .await;
+    if let Some(configs) = capture::CaptureConfig::all_from_env("BIOFOUNDRY") {
+        for config in configs {
+            game.begin_capture_scene(&config.scene);
+            capture::run_capture_once(&config, |dt| {
+                game.update(dt);
+                game.draw();
+            })
+            .await;
+        }
         return;
     }
 
