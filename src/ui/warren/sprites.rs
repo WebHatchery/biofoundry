@@ -77,28 +77,64 @@ pub fn draw_colossal_worm(sprites: &WorldSprites, center: Vec2, tick: u64, ts: f
 /// rectangles into cracked earth and irregular cave faces.
 pub fn draw_terrain_tile(sprites: &WorldSprites, tile: Tile, pos: TilePos, ts: f32) {
     let (frame, scale) = match tile {
-        Tile::Rock => (3, 1.02),
-        Tile::Floor => (0, 1.02),
+        // Ground cells are authored as repeatable textures. Keep them inside
+        // their logical tile so one cell cannot cover its neighbour's edge.
+        Tile::Rock => (3, 1.0),
+        Tile::Floor => (0, 1.0),
         Tile::Water => (2, 1.18),
         Tile::MushroomPatch => (3, 1.02),
         Tile::OreVein => (4, 1.04),
         Tile::Sporewood => (5, 1.06),
     };
     let center = vec2((pos.x as f32 + 0.5) * ts, (pos.y as f32 + 0.5) * ts);
-    let atlas = match tile {
-        Tile::Rock | Tile::Floor => &sprites.ground,
-        _ => &sprites.terrain,
+    let is_ground = matches!(tile, Tile::Rock | Tile::Floor);
+    let atlas = if is_ground {
+        &sprites.ground
+    } else {
+        &sprites.terrain
     };
     let tint = match tile {
         Tile::Rock | Tile::Floor => Color::new(1.0, 1.0, 1.0, 0.72),
         _ => WHITE,
     };
-    atlas.draw_frame(
-        frame,
-        center,
-        vec2(ts * scale, ts * scale),
-        (pos.x + pos.y).rem_euclid(2) == 0,
+    if is_ground {
+        draw_ground_patch(atlas, frame, pos, center, ts, tint);
+    } else {
+        let flip_x = (pos.x + pos.y).rem_euclid(2) == 0;
+        atlas.draw_frame(frame, center, vec2(ts * scale, ts * scale), flip_x, tint);
+    }
+}
+
+/// Sample a small, world-positioned patch from a ground cell. Sampling the
+/// full 512px panel for every logical tile made the panel's own edges visible
+/// as a grid; walking through the panel keeps adjacent floor tiles coherent.
+fn draw_ground_patch(
+    atlas: &SpriteAtlas,
+    frame: usize,
+    pos: TilePos,
+    center: Vec2,
+    ts: f32,
+    tint: Color,
+) {
+    const PATCH: f32 = 128.0;
+    let source = atlas.source_rect(frame);
+    let patch_x = pos.x.rem_euclid(4) as f32 * PATCH;
+    let patch_y = pos.y.rem_euclid(4) as f32 * PATCH;
+    draw_texture_ex(
+        &atlas.texture,
+        center.x - ts * 0.5,
+        center.y - ts * 0.5,
         tint,
+        DrawTextureParams {
+            dest_size: Some(vec2(ts, ts)),
+            source: Some(Rect::new(
+                source.x + patch_x,
+                source.y + patch_y,
+                PATCH,
+                PATCH,
+            )),
+            ..Default::default()
+        },
     );
 }
 
