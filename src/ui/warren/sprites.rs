@@ -15,6 +15,7 @@ const TERRAIN_ATLAS_BYTES: &[u8] = include_bytes!("../../../assets/sprites/terra
 const SPECIAL_ATLAS_BYTES: &[u8] = include_bytes!("../../../assets/sprites/special-atlas.png");
 const COLOSSAL_WORM_BYTES: &[u8] = include_bytes!("../../../assets/sprites/colossal-worm.png");
 const CARGO_ATLAS_BYTES: &[u8] = include_bytes!("../../../assets/sprites/cargo-atlas.png");
+const ROLE_PROP_ATLAS_BYTES: &[u8] = include_bytes!("../../../assets/sprites/role-prop-atlas.png");
 
 /// Hand-painted workers and production props, packed as three-by-two atlases.
 #[derive(Debug, Clone)]
@@ -25,6 +26,7 @@ pub struct WorldSprites {
     special: SpriteAtlas,
     colossal_worm: Texture2D,
     cargo: SpriteAtlas,
+    role_props: SpriteAtlas,
 }
 
 impl WorldSprites {
@@ -36,6 +38,7 @@ impl WorldSprites {
         let colossal_worm = Texture2D::from_file_with_format(COLOSSAL_WORM_BYTES, None);
         colossal_worm.set_filter(FilterMode::Linear);
         let cargo = load_atlas(CARGO_ATLAS_BYTES);
+        let role_props = load_atlas(ROLE_PROP_ATLAS_BYTES);
         Self {
             creatures,
             buildings,
@@ -43,6 +46,7 @@ impl WorldSprites {
             special,
             colossal_worm,
             cargo,
+            role_props,
         }
     }
 }
@@ -187,6 +191,7 @@ pub fn draw_creature(creature: &Creature, sprites: &WorldSprites, tick: u64, ts:
         .creatures
         .draw_frame(frame, vec2(x, y + bob), size, false, WHITE);
 
+    draw_role_prop(sprites, creature, x, y + bob, radius, ts);
     if creature.satiation <= 0.33 {
         draw_circle_lines(x, y, radius + 2.0, 2.0, dark::NEGATIVE);
     } else if creature.satiation <= 0.66 {
@@ -198,6 +203,36 @@ pub fn draw_creature(creature: &Creature, sprites: &WorldSprites, tick: u64, ts:
     if let Some((good, _)) = creature.carrying {
         draw_cargo(sprites, x, y + bob, radius, good, ts);
     }
+}
+
+/// A role's most oversized tool rides beside its bearer, letting a dense
+/// colony read like a moving production diagram rather than a field of dots.
+fn draw_role_prop(
+    sprites: &WorldSprites,
+    creature: &Creature,
+    x: f32,
+    y: f32,
+    radius: f32,
+    ts: f32,
+) {
+    if matches!(creature.species.as_str(), "beetle" | "salamander") {
+        return;
+    }
+    let frame = match creature.job {
+        Job::Miner => 0,
+        Job::Carrier => 1,
+        Job::Cook => 2,
+        Job::Smith | Job::Smelter => 3,
+        Job::Guard => 4,
+        Job::Idle => 5,
+    };
+    sprites.role_props.draw_frame(
+        frame,
+        vec2(x - radius * 0.50, y + radius * 0.08),
+        vec2(ts * 0.84, ts * 0.84),
+        false,
+        WHITE,
+    );
 }
 
 fn creature_sprite(creature: &Creature, ts: f32) -> (usize, Vec2) {
