@@ -42,6 +42,8 @@ pub struct Game {
     right_press: Vec2,
     /// Building tile the player clicked to inspect (first-pass legibility).
     selected_building: Option<TilePos>,
+    /// Embedded storybook creature atlas used by the warren renderer.
+    world_sprites: ui::warren::WorldSprites,
 }
 
 impl Game {
@@ -70,6 +72,7 @@ impl Game {
             save_exists,
             right_press: vec2(0.0, 0.0),
             selected_building: None,
+            world_sprites: ui::warren::WorldSprites::load(),
         }
     }
 
@@ -485,6 +488,7 @@ impl Game {
                 ui::warren::draw_world(
                     session,
                     &self.data,
+                    &self.world_sprites,
                     self.data.config.tile_size,
                     &self.mode,
                     hover,

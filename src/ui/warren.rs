@@ -10,12 +10,38 @@ use crate::ui::UiMode;
 use macroquad::prelude::*;
 use macroquad_toolkit::grid::TilePos;
 use macroquad_toolkit::prelude::*;
+use macroquad_toolkit::sprite::SpriteAtlas;
+
+const CREATURE_ATLAS_BYTES: &[u8] = include_bytes!("../../assets/sprites/creature-atlas.png");
+const BUILDING_ATLAS_BYTES: &[u8] = include_bytes!("../../assets/sprites/building-atlas.png");
+
+/// The hand-painted workers that turn the colony's logistics into something
+/// the player can read at a glance. The atlas has three columns and two rows.
+#[derive(Debug, Clone)]
+pub struct WorldSprites {
+    creatures: SpriteAtlas,
+    buildings: SpriteAtlas,
+}
+
+impl WorldSprites {
+    pub fn load() -> Self {
+        let texture = Texture2D::from_file_with_format(CREATURE_ATLAS_BYTES, None);
+        texture.set_filter(FilterMode::Linear);
+        let building_texture = Texture2D::from_file_with_format(BUILDING_ATLAS_BYTES, None);
+        building_texture.set_filter(FilterMode::Linear);
+        Self {
+            creatures: SpriteAtlas::new(texture, 512.0, 512.0),
+            buildings: SpriteAtlas::new(building_texture, 512.0, 512.0),
+        }
+    }
+}
 
 /// Draw the world in camera space. `hover` is the tile under the cursor
 /// when the pointer is free (used for build/dig ghosts).
 pub fn draw_world(
     session: &GameSession,
     data: &GameData,
+    sprites: &WorldSprites,
     tile_size: f32,
     mode: &UiMode,
     hover: Option<TilePos>,
@@ -23,7 +49,7 @@ pub fn draw_world(
     draw_tiles(session, tile_size);
     draw_dig_marks(session, tile_size);
     for building in &session.buildings {
-        draw_building(session, data, building, tile_size);
+        draw_building(session, data, sprites, building, tile_size);
     }
     for building in &session.buildings {
         if let Some(status) = crate::ui::legibility::building_status(session, data, building) {
@@ -44,7 +70,7 @@ pub fn draw_world(
         }
     }
     for creature in &session.creatures {
-        draw_creature(creature, tile_size);
+        draw_creature(creature, sprites, session.tick, tile_size);
     }
     for wild in &session.wilds {
         draw_wild(wild, tile_size);
@@ -189,9 +215,54 @@ fn draw_dig_marks(session: &GameSession, ts: f32) {
     }
 }
 
-fn draw_building(session: &GameSession, data: &GameData, building: &Building, ts: f32) {
+/// Returns whether the building has a painted counterpart in the atlas. The
+/// remaining structures keep their procedural icon until their sprite pass.
+fn draw_building_sprite(
+    sprites: &WorldSprites,
+    building: &Building,
+    x: f32,
+    y: f32,
+    ts: f32,
+) -> bool {
+    let Some(frame) = (match building.kind.as_str() {
+        "farm" => Some(0),
+        "cook_pot" => Some(1),
+        "blacksmith" => Some(2),
+        "mine" => Some(3),
+        "smelter" => Some(4),
+        "stockpile" => Some(5),
+        _ => None,
+    }) else {
+        return false;
+    };
+    let size = ts * 1.54;
+    let center = vec2(x + ts * 0.5, y + ts * 0.51);
+    draw_ellipse(
+        center.x,
+        center.y + size * 0.24,
+        size * 0.34,
+        size * 0.10,
+        0.0,
+        Color::new(0.02, 0.015, 0.02, 0.38),
+    );
+    sprites
+        .buildings
+        .draw_frame(frame, center, vec2(size, size), false, WHITE);
+    true
+}
+
+fn draw_building(
+    session: &GameSession,
+    data: &GameData,
+    sprites: &WorldSprites,
+    building: &Building,
+    ts: f32,
+) {
     use crate::state::creatures::Good;
     let (x, y) = (building.pos.x as f32 * ts, building.pos.y as f32 * ts);
+    if draw_building_sprite(sprites, building, x, y, ts) {
+        return;
+    }
     match building.kind.as_str() {
         "farm" => {
             draw_rectangle(
@@ -601,13 +672,31 @@ fn draw_tool_ghost(session: &GameSession, ts: f32, mode: &UiMode, hover: Option<
     }
 }
 
-fn draw_creature(creature: &Creature, ts: f32) {
+fn draw_creature(creature: &Creature, sprites: &WorldSprites, tick: u64, ts: f32) {
     let x = creature.x * ts;
     let y = creature.y * ts;
-    let big = creature.species != "goblin";
-    let radius = if big { ts * 0.34 } else { ts * 0.24 };
+    let (frame, size) = creature_sprite(creature, ts);
+    let moving = !creature.path.is_empty();
+    let phase = tick as f32 * 0.22 + creature.id as f32 * 1.7;
+    let bob = if moving {
+        phase.sin() * ts * 0.045
+    } else {
+        phase.sin() * ts * 0.018
+    };
+    let radius = size.x * 0.30;
 
-    draw_circle(x, y, radius, creature_color(creature));
+    // Soft shadows put the workers into the cave rather than on top of it.
+    draw_ellipse(
+        x,
+        y + size.y * 0.28,
+        size.x * 0.31,
+        size.y * 0.10,
+        0.0,
+        Color::new(0.02, 0.015, 0.02, 0.42),
+    );
+    sprites
+        .creatures
+        .draw_frame(frame, vec2(x, y + bob), size, false, WHITE);
 
     // Hunger telegraph: amber ring when hungry, red when starving.
     if creature.satiation <= 0.33 {
@@ -619,49 +708,92 @@ fn draw_creature(creature: &Creature, ts: f32) {
     // Equipped gear: a bright glint on the shoulder marks an upgraded worker.
     if creature.equipment.is_some() {
         draw_circle(
-            x + radius * 0.7,
-            y - radius * 0.7,
+            x + radius * 0.72,
+            y - radius * 0.78 + bob,
             ts * 0.07,
             Color::new(0.95, 0.9, 0.6, 1.0),
         );
         draw_circle_lines(
-            x + radius * 0.7,
-            y - radius * 0.7,
+            x + radius * 0.72,
+            y - radius * 0.78 + bob,
             ts * 0.07,
             1.0,
             Color::new(0.5, 0.42, 0.2, 0.9),
         );
     }
 
-    // Carried goods: a small dot on the back.
+    // Cargo remains physical at game scale: bright goods swell into an
+    // oversized bundle rather than disappearing into a number in the HUD.
     if let Some((good, _)) = creature.carrying {
-        let color = match good {
-            crate::state::creatures::Good::Mushroom => Color::new(0.9, 0.85, 0.7, 1.0),
-            crate::state::creatures::Good::Ore => Color::new(0.75, 0.62, 0.35, 1.0),
-            crate::state::creatures::Good::Wood => Color::new(0.55, 0.42, 0.28, 1.0),
-            crate::state::creatures::Good::Charcoal => Color::new(0.15, 0.15, 0.16, 1.0),
-            crate::state::creatures::Good::Ingot => Color::new(0.80, 0.82, 0.88, 1.0),
-        };
-        draw_circle(x, y - radius * 0.9, ts * 0.09, color);
+        draw_cargo(x, y + bob, radius, good, ts);
     }
 }
 
-fn creature_color(creature: &Creature) -> Color {
-    match creature.species.as_str() {
-        "beetle" => Color::new(0.62, 0.40, 0.75, 1.0),
-        "salamander" => Color::new(0.92, 0.35, 0.18, 1.0),
-        // A heavyweight, darker green-goblin.
-        "hobgoblin" => Color::new(0.34, 0.52, 0.28, 1.0),
-        // The Overseer beacon: amber, matching its aura.
-        "overseer" => Color::new(0.90, 0.72, 0.30, 1.0),
-        _ => match creature.job {
-            Job::Miner => Color::new(0.45, 0.62, 0.85, 1.0),
-            Job::Carrier => Color::new(0.85, 0.75, 0.38, 1.0),
-            Job::Cook => Color::new(0.88, 0.52, 0.28, 1.0),
-            Job::Smith => Color::new(0.70, 0.72, 0.80, 1.0),
-            Job::Guard => Color::new(0.72, 0.30, 0.30, 1.0),
-            Job::Smelter => Color::new(0.92, 0.35, 0.18, 1.0),
-            Job::Idle => Color::new(0.55, 0.55, 0.58, 1.0),
-        },
+fn creature_sprite(creature: &Creature, ts: f32) -> (usize, Vec2) {
+    let frame = match creature.species.as_str() {
+        "beetle" => 2,
+        "salamander" => 3,
+        "hobgoblin" => 4,
+        "overseer" => 5,
+        _ if creature.job == Job::Miner => 1,
+        _ => 0,
+    };
+    let scale = match frame {
+        2 | 4 => 1.62,
+        1 | 3 => 1.42,
+        _ => 1.28,
+    };
+    (frame, vec2(ts * scale, ts * scale))
+}
+
+fn draw_cargo(x: f32, y: f32, radius: f32, good: crate::state::creatures::Good, ts: f32) {
+    use crate::state::creatures::Good;
+    let (cx, cy) = (x + radius * 0.56, y - radius * 0.48);
+    match good {
+        Good::Mushroom => {
+            for (dx, dy, cap) in [(-0.12, 0.04, 0.11), (0.06, -0.05, 0.13), (0.17, 0.06, 0.09)] {
+                draw_rectangle(
+                    cx + dx * ts - ts * 0.022,
+                    cy + dy * ts,
+                    ts * 0.044,
+                    ts * 0.11,
+                    Color::new(0.78, 0.68, 0.46, 1.0),
+                );
+                draw_circle(
+                    cx + dx * ts,
+                    cy + dy * ts,
+                    ts * cap,
+                    Color::new(0.48, 0.22, 0.58, 1.0),
+                );
+            }
+        }
+        Good::Ore | Good::Charcoal | Good::Ingot => {
+            let color = match good {
+                Good::Ore => Color::new(0.74, 0.60, 0.34, 1.0),
+                Good::Charcoal => Color::new(0.12, 0.12, 0.14, 1.0),
+                Good::Ingot => Color::new(0.70, 0.76, 0.82, 1.0),
+                _ => unreachable!(),
+            };
+            for (dx, dy) in [(-0.10, 0.03), (0.08, -0.04), (0.18, 0.07)] {
+                draw_circle(cx + dx * ts, cy + dy * ts, ts * 0.105, color);
+            }
+        }
+        Good::Wood => {
+            for dy in [-0.04, 0.08] {
+                draw_rectangle(
+                    cx - ts * 0.12,
+                    cy + dy * ts,
+                    ts * 0.42,
+                    ts * 0.09,
+                    Color::new(0.46, 0.28, 0.14, 1.0),
+                );
+                draw_circle(
+                    cx + ts * 0.30,
+                    cy + dy * ts + ts * 0.045,
+                    ts * 0.045,
+                    Color::new(0.72, 0.50, 0.25, 1.0),
+                );
+            }
+        }
     }
 }
