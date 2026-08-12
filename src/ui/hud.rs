@@ -13,18 +13,52 @@ mod widgets;
 
 use crate::data::GameData;
 use crate::simulation;
+use crate::state::creatures::Job;
 use crate::state::GameSession;
 use crate::ui::{HudFrame, UiAction, UiMode, LOGICAL_WIDTH};
 use macroquad::prelude::*;
 use macroquad_toolkit::grid::TilePos;
 use macroquad_toolkit::prelude::*;
+use macroquad_toolkit::sprite::SpriteAtlas;
+
+const JOB_ICON_ATLAS_BYTES: &[u8] = include_bytes!("../../assets/sprites/job-icon-atlas.png");
 
 const PANEL_W: f32 = 252.0;
+
+/// Compact illustrated role markers used inside the text-forward HUD.
+#[derive(Debug, Clone)]
+pub struct HudSprites {
+    jobs: SpriteAtlas,
+}
+
+impl HudSprites {
+    pub fn load() -> Self {
+        let texture = Texture2D::from_file_with_format(JOB_ICON_ATLAS_BYTES, None);
+        texture.set_filter(FilterMode::Linear);
+        Self {
+            jobs: SpriteAtlas::new(texture, 512.0, 512.0),
+        }
+    }
+
+    pub fn draw_job(&self, job: Job, center: Vec2) {
+        let frame = match job {
+            Job::Miner => 0,
+            Job::Carrier => 1,
+            Job::Cook => 2,
+            Job::Smith | Job::Smelter => 3,
+            Job::Guard => 4,
+            Job::Idle => 5,
+        };
+        self.jobs
+            .draw_frame(frame, center, vec2(20.0, 20.0), false, WHITE);
+    }
+}
 
 pub fn draw(
     session: &GameSession,
     data: &GameData,
     ui: &VirtualUi,
+    sprites: &HudSprites,
     mode: &UiMode,
     selected: Option<TilePos>,
 ) -> HudFrame {
@@ -38,7 +72,7 @@ pub fn draw(
 
     panels::draw_top_bar(session, top_bar, mouse, &mut actions);
     panels::draw_food_grid_panel(session, data, food_panel);
-    panels::draw_jobs_panel(session, data, jobs_panel, mouse, &mut actions);
+    panels::draw_jobs_panel(session, data, sprites, jobs_panel, mouse, &mut actions);
     panels::draw_tools_panel(session, data, tools_panel, mode, mouse, &mut actions);
     let tutorial_panel = panels::draw_tutorial_panel(session, data, mouse, &mut actions);
     let inspect_panel = selected

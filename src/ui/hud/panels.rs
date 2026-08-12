@@ -6,6 +6,7 @@ use crate::simulation::{self, food};
 use crate::state::creatures::Job;
 use crate::state::GameSession;
 use crate::ui::hud::widgets::{hud_button, panel_style};
+use crate::ui::hud::HudSprites;
 use crate::ui::{UiAction, UiMode, LOGICAL_WIDTH};
 use macroquad::prelude::*;
 use macroquad_toolkit::prelude::*;
@@ -207,6 +208,7 @@ pub(super) fn draw_food_grid_panel(session: &GameSession, data: &GameData, panel
 pub(super) fn draw_jobs_panel(
     session: &GameSession,
     data: &GameData,
+    sprites: &HudSprites,
     panel: Rect,
     mouse: Vec2,
     actions: &mut Vec<UiAction>,
@@ -224,9 +226,10 @@ pub(super) fn draw_jobs_panel(
 
     for job in [Job::Miner, Job::Carrier, Job::Cook, Job::Smith, Job::Guard] {
         let count = session.job_count(job);
+        sprites.draw_job(job, vec2(x + 9.0, y + 13.0));
         draw_ui_text_ex(
-            &format!("{:<8}{count}", job.label()),
-            x,
+            &format!("{} {count}", job.label()),
+            x + 22.0,
             y + 19.0,
             TextStyle::new(16.0, dark::TEXT).params(),
         );
@@ -239,9 +242,10 @@ pub(super) fn draw_jobs_panel(
         y += 32.0;
     }
 
+    sprites.draw_job(Job::Idle, vec2(x + 9.0, y + 13.0));
     draw_ui_text_ex(
-        &format!("Idle    {idle}"),
-        x,
+        &format!("Idle {idle}"),
+        x + 22.0,
         y + 18.0,
         TextStyle::new(16.0, dark::TEXT_DIM).params(),
     );

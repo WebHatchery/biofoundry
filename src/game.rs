@@ -46,6 +46,8 @@ pub struct Game {
     world_sprites: ui::warren::WorldSprites,
     /// Hand-painted cavern tableau used by the title menu.
     menu_sprites: ui::menu::MenuSprites,
+    /// Illustrated job markers used by the text-forward HUD.
+    hud_sprites: ui::hud::HudSprites,
 }
 
 impl Game {
@@ -76,6 +78,7 @@ impl Game {
             selected_building: None,
             world_sprites: ui::warren::WorldSprites::load(),
             menu_sprites: ui::menu::MenuSprites::load(),
+            hud_sprites: ui::hud::HudSprites::load(),
         }
     }
 
@@ -504,6 +507,7 @@ impl Game {
                     session,
                     &self.data,
                     &virtual_ui,
+                    &self.hud_sprites,
                     &self.mode,
                     self.selected_building,
                 );
