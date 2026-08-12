@@ -16,6 +16,7 @@ const SPECIAL_ATLAS_BYTES: &[u8] = include_bytes!("../../../assets/sprites/speci
 const COLOSSAL_WORM_BYTES: &[u8] = include_bytes!("../../../assets/sprites/colossal-worm.png");
 const CARGO_ATLAS_BYTES: &[u8] = include_bytes!("../../../assets/sprites/cargo-atlas.png");
 const ROLE_PROP_ATLAS_BYTES: &[u8] = include_bytes!("../../../assets/sprites/role-prop-atlas.png");
+const GROUND_ATLAS_BYTES: &[u8] = include_bytes!("../../../assets/sprites/ground-atlas.png");
 
 /// Hand-painted workers and production props, packed as three-by-two atlases.
 #[derive(Debug, Clone)]
@@ -27,6 +28,7 @@ pub struct WorldSprites {
     colossal_worm: Texture2D,
     cargo: SpriteAtlas,
     role_props: SpriteAtlas,
+    ground: SpriteAtlas,
 }
 
 impl WorldSprites {
@@ -39,6 +41,7 @@ impl WorldSprites {
         colossal_worm.set_filter(FilterMode::Linear);
         let cargo = load_atlas(CARGO_ATLAS_BYTES);
         let role_props = load_atlas(ROLE_PROP_ATLAS_BYTES);
+        let ground = load_atlas(GROUND_ATLAS_BYTES);
         Self {
             creatures,
             buildings,
@@ -47,6 +50,7 @@ impl WorldSprites {
             colossal_worm,
             cargo,
             role_props,
+            ground,
         }
     }
 }
@@ -68,24 +72,33 @@ pub fn draw_colossal_worm(sprites: &WorldSprites, center: Vec2, tick: u64, ts: f
     );
 }
 
-/// Overlay the hand-painted terrain component over the quiet logical tile.
-/// Floor repeats cleanly; resource frames stay sparse and high-contrast.
+/// Overlay hand-painted terrain over the quiet logical tile. The base fill
+/// supplies a stable grid for interaction; the atlas breaks its prototype
+/// rectangles into cracked earth and irregular cave faces.
 pub fn draw_terrain_tile(sprites: &WorldSprites, tile: Tile, pos: TilePos, ts: f32) {
     let (frame, scale) = match tile {
+        Tile::Rock => (3, 1.02),
+        Tile::Floor => (0, 1.02),
         Tile::Water => (2, 1.18),
         Tile::MushroomPatch => (3, 1.02),
         Tile::OreVein => (4, 1.04),
         Tile::Sporewood => (5, 1.06),
-        Tile::Rock => return,
-        Tile::Floor => return,
     };
     let center = vec2((pos.x as f32 + 0.5) * ts, (pos.y as f32 + 0.5) * ts);
-    sprites.terrain.draw_frame(
+    let atlas = match tile {
+        Tile::Rock | Tile::Floor => &sprites.ground,
+        _ => &sprites.terrain,
+    };
+    let tint = match tile {
+        Tile::Rock | Tile::Floor => Color::new(1.0, 1.0, 1.0, 0.72),
+        _ => WHITE,
+    };
+    atlas.draw_frame(
         frame,
         center,
         vec2(ts * scale, ts * scale),
-        pos.x.rem_euclid(2) == 0,
-        WHITE,
+        (pos.x + pos.y).rem_euclid(2) == 0,
+        tint,
     );
 }
 
