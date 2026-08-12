@@ -14,6 +14,7 @@ const BUILDING_ATLAS_BYTES: &[u8] = include_bytes!("../../../assets/sprites/buil
 const TERRAIN_ATLAS_BYTES: &[u8] = include_bytes!("../../../assets/sprites/terrain-atlas.png");
 const SPECIAL_ATLAS_BYTES: &[u8] = include_bytes!("../../../assets/sprites/special-atlas.png");
 const COLOSSAL_WORM_BYTES: &[u8] = include_bytes!("../../../assets/sprites/colossal-worm.png");
+const CARGO_ATLAS_BYTES: &[u8] = include_bytes!("../../../assets/sprites/cargo-atlas.png");
 
 /// Hand-painted workers and production props, packed as three-by-two atlases.
 #[derive(Debug, Clone)]
@@ -23,6 +24,7 @@ pub struct WorldSprites {
     terrain: SpriteAtlas,
     special: SpriteAtlas,
     colossal_worm: Texture2D,
+    cargo: SpriteAtlas,
 }
 
 impl WorldSprites {
@@ -33,12 +35,14 @@ impl WorldSprites {
         let special = load_atlas(SPECIAL_ATLAS_BYTES);
         let colossal_worm = Texture2D::from_file_with_format(COLOSSAL_WORM_BYTES, None);
         colossal_worm.set_filter(FilterMode::Linear);
+        let cargo = load_atlas(CARGO_ATLAS_BYTES);
         Self {
             creatures,
             buildings,
             terrain,
             special,
             colossal_worm,
+            cargo,
         }
     }
 }
@@ -192,7 +196,7 @@ pub fn draw_creature(creature: &Creature, sprites: &WorldSprites, tick: u64, ts:
         draw_gear_glint(x, y + bob, radius, ts);
     }
     if let Some((good, _)) = creature.carrying {
-        draw_cargo(x, y + bob, radius, good, ts);
+        draw_cargo(sprites, x, y + bob, radius, good, ts);
     }
 }
 
@@ -219,59 +223,20 @@ fn draw_gear_glint(x: f32, y: f32, radius: f32, ts: f32) {
     draw_circle_lines(gx, gy, ts * 0.07, 1.0, Color::new(0.5, 0.42, 0.2, 0.9));
 }
 
-fn draw_cargo(x: f32, y: f32, radius: f32, good: Good, ts: f32) {
+fn draw_cargo(sprites: &WorldSprites, x: f32, y: f32, radius: f32, good: Good, ts: f32) {
     let (cx, cy) = (x + radius * 0.56, y - radius * 0.48);
-    match good {
-        Good::Mushroom => draw_mushrooms(cx, cy, ts),
-        Good::Ore | Good::Charcoal | Good::Ingot => draw_minerals(cx, cy, good, ts),
-        Good::Wood => draw_logs(cx, cy, ts),
-    }
-}
-
-fn draw_mushrooms(cx: f32, cy: f32, ts: f32) {
-    for (dx, dy, cap) in [(-0.12, 0.04, 0.11), (0.06, -0.05, 0.13), (0.17, 0.06, 0.09)] {
-        draw_rectangle(
-            cx + dx * ts - ts * 0.022,
-            cy + dy * ts,
-            ts * 0.044,
-            ts * 0.11,
-            Color::new(0.78, 0.68, 0.46, 1.0),
-        );
-        draw_circle(
-            cx + dx * ts,
-            cy + dy * ts,
-            ts * cap,
-            Color::new(0.48, 0.22, 0.58, 1.0),
-        );
-    }
-}
-
-fn draw_minerals(cx: f32, cy: f32, good: Good, ts: f32) {
-    let color = match good {
-        Good::Ore => Color::new(0.74, 0.60, 0.34, 1.0),
-        Good::Charcoal => Color::new(0.12, 0.12, 0.14, 1.0),
-        Good::Ingot => Color::new(0.70, 0.76, 0.82, 1.0),
-        _ => unreachable!(),
+    let frame = match good {
+        Good::Mushroom => 0,
+        Good::Ore => 1,
+        Good::Ingot => 2,
+        Good::Wood => 3,
+        Good::Charcoal => 4,
     };
-    for (dx, dy) in [(-0.10, 0.03), (0.08, -0.04), (0.18, 0.07)] {
-        draw_circle(cx + dx * ts, cy + dy * ts, ts * 0.105, color);
-    }
-}
-
-fn draw_logs(cx: f32, cy: f32, ts: f32) {
-    for dy in [-0.04, 0.08] {
-        draw_rectangle(
-            cx - ts * 0.12,
-            cy + dy * ts,
-            ts * 0.42,
-            ts * 0.09,
-            Color::new(0.46, 0.28, 0.14, 1.0),
-        );
-        draw_circle(
-            cx + ts * 0.30,
-            cy + dy * ts + ts * 0.045,
-            ts * 0.045,
-            Color::new(0.72, 0.50, 0.25, 1.0),
-        );
-    }
+    sprites.cargo.draw_frame(
+        frame,
+        vec2(cx, cy),
+        vec2(ts * 0.54, ts * 0.54),
+        false,
+        WHITE,
+    );
 }
