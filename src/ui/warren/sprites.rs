@@ -89,6 +89,7 @@ pub fn draw_terrain_tile(sprites: &WorldSprites, tile: Tile, pos: TilePos, ts: f
     let center = vec2((pos.x as f32 + 0.5) * ts, (pos.y as f32 + 0.5) * ts);
     let is_ground = matches!(tile, Tile::Rock | Tile::Floor);
     let substrate_frame = match tile {
+        Tile::Water => Some(3),
         Tile::OreVein => Some(3),
         Tile::MushroomPatch | Tile::Sporewood => Some(0),
         _ => None,

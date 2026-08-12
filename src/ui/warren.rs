@@ -93,7 +93,7 @@ fn tile_color(tile: Tile) -> Color {
     match tile {
         Tile::Rock => Color::new(0.13, 0.12, 0.14, 1.0),
         Tile::Floor => Color::new(0.24, 0.20, 0.17, 1.0),
-        Tile::Water => Color::new(0.16, 0.30, 0.42, 1.0),
+        Tile::Water => Color::new(0.13, 0.12, 0.14, 1.0),
         // Resource sprites are transparent overlays; keep their tile base
         // identical to floor so their clear pixels reveal the flooring.
         Tile::MushroomPatch | Tile::Sporewood => Color::new(0.24, 0.20, 0.17, 1.0),
