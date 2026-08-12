@@ -44,6 +44,8 @@ pub struct Game {
     selected_building: Option<TilePos>,
     /// Embedded storybook creature atlas used by the warren renderer.
     world_sprites: ui::warren::WorldSprites,
+    /// Hand-painted cavern tableau used by the title menu.
+    menu_sprites: ui::menu::MenuSprites,
 }
 
 impl Game {
@@ -73,6 +75,7 @@ impl Game {
             right_press: vec2(0.0, 0.0),
             selected_building: None,
             world_sprites: ui::warren::WorldSprites::load(),
+            menu_sprites: ui::menu::MenuSprites::load(),
         }
     }
 
@@ -474,6 +477,7 @@ impl Game {
                 let actions = ui::menu::draw(
                     &self.data,
                     &virtual_ui,
+                    &self.menu_sprites,
                     self.save_exists,
                     self.settings_open,
                     self.audio.volume(),

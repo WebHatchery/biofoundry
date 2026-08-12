@@ -6,9 +6,25 @@ use macroquad::prelude::*;
 use macroquad_toolkit::prelude::*;
 use macroquad_toolkit::ui::draw_ui_text_ex;
 
+const TITLE_TABLEAU_BYTES: &[u8] = include_bytes!("../../assets/sprites/title-tableau.png");
+
+/// The hand-painted cavern framing the title screen.
+pub struct MenuSprites {
+    tableau: Texture2D,
+}
+
+impl MenuSprites {
+    pub fn load() -> Self {
+        let tableau = Texture2D::from_file_with_format(TITLE_TABLEAU_BYTES, None);
+        tableau.set_filter(FilterMode::Linear);
+        Self { tableau }
+    }
+}
+
 pub fn draw(
     data: &GameData,
     ui: &VirtualUi,
+    sprites: &MenuSprites,
     save_exists: bool,
     settings_open: bool,
     sfx_volume: f32,
@@ -16,7 +32,7 @@ pub fn draw(
     let mut actions = Vec::new();
     let mouse = ui.mouse_position();
 
-    draw_backdrop();
+    draw_backdrop(sprites);
 
     let title = &data.config.display_name;
     let title_size = 72.0;
@@ -77,42 +93,25 @@ pub fn draw(
     actions
 }
 
-/// A quiet cavern tableau behind the title: a worm silhouette arcing
-/// through the dark, mushroom clusters along the floor.
-fn draw_backdrop() {
-    // The worm: a broad arc of dim segments across the upper screen.
-    for i in 0..14 {
-        let t = i as f32 / 13.0;
-        let x = LOGICAL_WIDTH * (0.08 + 0.84 * t);
-        let y = 120.0 - (t * std::f32::consts::PI).sin() * 70.0 + 430.0;
-        let r = 46.0 - (t - 0.5).abs() * 30.0;
-        draw_circle(x, y, r, Color::new(0.16, 0.13, 0.19, 1.0));
-        draw_circle_lines(x, y, r, 2.0, Color::new(0.30, 0.24, 0.38, 0.8));
-    }
-
-    // Mushroom clusters along the cave floor.
-    let clusters = [
-        (90.0, 690.0, 1.2),
-        (240.0, 705.0, 0.8),
-        (1050.0, 695.0, 1.1),
-        (1180.0, 708.0, 0.7),
-        (620.0, 712.0, 0.9),
-    ];
-    for (cx, cy, s) in clusters {
-        for (dx, h, r) in [(-18.0, 26.0, 13.0), (2.0, 40.0, 18.0), (22.0, 20.0, 10.0)] {
-            let stem = Color::new(0.30, 0.27, 0.22, 1.0);
-            let cap = Color::new(0.52, 0.44, 0.30, 1.0);
-            draw_rectangle(cx + dx * s - 3.0 * s, cy - h * s, 6.0 * s, h * s, stem);
-            draw_circle(cx + dx * s, cy - h * s, r * s, cap);
-        }
-    }
-
-    // Drifting spores.
-    for i in 0..24 {
-        let x = (i as f32 * 157.3) % LOGICAL_WIDTH;
-        let y = 80.0 + (i as f32 * 97.7) % 560.0;
-        draw_circle(x, y, 2.0, Color::new(0.55, 0.60, 0.45, 0.20));
-    }
+/// Draw the full-screen illustrated cave, keeping its centre open for the UI.
+fn draw_backdrop(sprites: &MenuSprites) {
+    draw_rectangle(
+        0.0,
+        0.0,
+        LOGICAL_WIDTH,
+        LOGICAL_HEIGHT,
+        Color::new(0.055, 0.045, 0.075, 1.0),
+    );
+    draw_texture_ex(
+        &sprites.tableau,
+        0.0,
+        0.0,
+        Color::new(1.0, 1.0, 1.0, 0.96),
+        DrawTextureParams {
+            dest_size: Some(vec2(LOGICAL_WIDTH, LOGICAL_HEIGHT)),
+            ..Default::default()
+        },
+    );
 }
 
 /// The volume stepper and a Done button, in place of the main menu stack.
