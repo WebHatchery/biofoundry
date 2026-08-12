@@ -88,6 +88,11 @@ pub fn draw_terrain_tile(sprites: &WorldSprites, tile: Tile, pos: TilePos, ts: f
     };
     let center = vec2((pos.x as f32 + 0.5) * ts, (pos.y as f32 + 0.5) * ts);
     let is_ground = matches!(tile, Tile::Rock | Tile::Floor);
+    let substrate_frame = match tile {
+        Tile::OreVein => Some(3),
+        Tile::MushroomPatch | Tile::Sporewood => Some(0),
+        _ => None,
+    };
     let atlas = if is_ground {
         &sprites.ground
     } else {
@@ -97,6 +102,16 @@ pub fn draw_terrain_tile(sprites: &WorldSprites, tile: Tile, pos: TilePos, ts: f
         Tile::Rock | Tile::Floor => Color::new(1.0, 1.0, 1.0, 0.72),
         _ => WHITE,
     };
+    if let Some(substrate_frame) = substrate_frame {
+        draw_ground_patch(
+            &sprites.ground,
+            substrate_frame,
+            pos,
+            center,
+            ts,
+            Color::new(1.0, 1.0, 1.0, 0.72),
+        );
+    }
     if is_ground {
         draw_ground_patch(atlas, frame, pos, center, ts, tint);
     } else {
