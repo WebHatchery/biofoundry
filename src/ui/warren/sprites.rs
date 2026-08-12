@@ -13,6 +13,7 @@ const CREATURE_ATLAS_BYTES: &[u8] = include_bytes!("../../../assets/sprites/crea
 const BUILDING_ATLAS_BYTES: &[u8] = include_bytes!("../../../assets/sprites/building-atlas.png");
 const TERRAIN_ATLAS_BYTES: &[u8] = include_bytes!("../../../assets/sprites/terrain-atlas.png");
 const SPECIAL_ATLAS_BYTES: &[u8] = include_bytes!("../../../assets/sprites/special-atlas.png");
+const COLOSSAL_WORM_BYTES: &[u8] = include_bytes!("../../../assets/sprites/colossal-worm.png");
 
 /// Hand-painted workers and production props, packed as three-by-two atlases.
 #[derive(Debug, Clone)]
@@ -21,6 +22,7 @@ pub struct WorldSprites {
     buildings: SpriteAtlas,
     terrain: SpriteAtlas,
     special: SpriteAtlas,
+    colossal_worm: Texture2D,
 }
 
 impl WorldSprites {
@@ -29,13 +31,33 @@ impl WorldSprites {
         let buildings = load_atlas(BUILDING_ATLAS_BYTES);
         let terrain = load_atlas(TERRAIN_ATLAS_BYTES);
         let special = load_atlas(SPECIAL_ATLAS_BYTES);
+        let colossal_worm = Texture2D::from_file_with_format(COLOSSAL_WORM_BYTES, None);
+        colossal_worm.set_filter(FilterMode::Linear);
         Self {
             creatures,
             buildings,
             terrain,
             special,
+            colossal_worm,
         }
     }
+}
+
+/// Draw the awakened worm as a single monumental illustration, with only a
+/// small breathing motion so it remains a landmark rather than visual noise.
+pub fn draw_colossal_worm(sprites: &WorldSprites, center: Vec2, tick: u64, ts: f32) {
+    let pulse = (tick as f32 * 0.028).sin();
+    let size = ts * (6.35 + pulse * 0.10);
+    draw_texture_ex(
+        &sprites.colossal_worm,
+        center.x - size * 0.5,
+        center.y - size * 0.53 + pulse * ts * 0.06,
+        WHITE,
+        DrawTextureParams {
+            dest_size: Some(vec2(size, size)),
+            ..Default::default()
+        },
+    );
 }
 
 /// Overlay the hand-painted terrain component over the quiet logical tile.

@@ -52,14 +52,14 @@ pub fn draw_world(
         sprites::draw_wild(wild, sprites, tile_size);
     }
     if session.worm_awake {
-        draw_colossal_worm(session, tile_size);
+        draw_colossal_worm(session, sprites, tile_size);
     }
     draw_tool_ghost(session, tile_size, mode, hover);
 }
 
-/// The awakened monument: a vast segmented worm coiling out of the
-/// shrine — cosmetic, but it earns its screen space.
-fn draw_colossal_worm(session: &GameSession, ts: f32) {
+/// The awakened monument rises from its shrine as a proper illustrated
+/// landmark, rather than a procedural ring of segments.
+fn draw_colossal_worm(session: &GameSession, sprites: &WorldSprites, ts: f32) {
     let Some(shrine) = session.buildings_of("worm_shrine").next() else {
         return;
     };
@@ -67,24 +67,7 @@ fn draw_colossal_worm(session: &GameSession, ts: f32) {
         shrine.pos.x as f32 * ts + ts * 0.5,
         shrine.pos.y as f32 * ts + ts * 0.5,
     );
-    let t = session.tick as f32 * 0.02;
-    for i in (0..12).rev() {
-        let u = i as f32;
-        let angle = t + u * 0.55;
-        let radius = ts * (0.6 + u * 0.34);
-        let px = sx + angle.cos() * radius;
-        let py = sy + angle.sin() * radius * 0.55;
-        let size = ts * (0.42 - u * 0.02);
-        draw_circle(px, py, size, Color::new(0.42, 0.32, 0.45, 1.0));
-        draw_circle_lines(px, py, size, 2.0, Color::new(0.70, 0.55, 0.85, 0.9));
-    }
-    // The head, nearest the shrine.
-    draw_circle(
-        sx + t.cos() * ts * 0.6,
-        sy + t.sin() * ts * 0.33,
-        ts * 0.46,
-        Color::new(0.50, 0.38, 0.55, 1.0),
-    );
+    sprites::draw_colossal_worm(sprites, vec2(sx, sy), session.tick, ts);
 }
 
 fn draw_tiles(session: &GameSession, sprites: &WorldSprites, ts: f32) {
