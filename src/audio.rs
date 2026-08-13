@@ -55,12 +55,11 @@ pub struct Audio {
 }
 
 impl Audio {
-    /// Loads every SFX; checks the published asset pack first, then loose
-    /// files. Missing sounds are skipped silently.
+    /// Loads every SFX from the registered loose-file asset set. Missing
+    /// sounds are skipped silently.
     pub async fn load() -> Self {
         let mut manager = SoundManager::new();
         manager.sfx_volume = 0.6;
-        let _ = manager.load_asset_pack("assets.zip").await;
         for sfx in Sfx::ALL {
             let _ = manager.load_sound(sfx, sfx.file()).await;
         }

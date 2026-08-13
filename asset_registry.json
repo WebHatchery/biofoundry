@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "assets": [
+    "assets/sfx/alarm.wav",
+    "assets/sfx/build.wav",
+    "assets/sfx/capture.wav",
+    "assets/sfx/complete.wav",
+    "assets/sfx/deny.wav",
+    "assets/sfx/select.wav",
+    "assets/sfx/worm.wav"
+  ]
+}
