@@ -1,10 +1,10 @@
 # Biofoundry — Game Design
 
 *This document describes the game **as implemented** — every phase of the
-original plan (0–5) and of the automation plan (6–11) has shipped. All numbers
-quoted here come from `assets/data/*.json`; that's the source of truth, and
-it's tunable without recompiling. Work still outstanding lives in
-[`TODO.md`](TODO.md).*
+original plan (0–5), the automation plan (6–11), and the colony/endgame
+extension has shipped. All numbers quoted here come from
+`assets/data/*.json`; that's the source of truth, and it's tunable without
+recompiling. The completed backlog remains recorded in [`TODO.md`](TODO.md).*
 
 > "An ant colony crossed with a factory builder, where every conveyor belt is
 > a creature with needs."
@@ -211,6 +211,19 @@ a Hobgoblin miner (×2) wearing an Iron Pickaxe (×1.5), standing in a Goblin
 Overseer's aura (×1.35), mines at ~4× a bare goblin — so a mature warren runs
 on *fewer, better* creatures than a mid-game crowd at the same throughput.
 
+## 6c. Colony pressure and food variety
+
+Raw mushrooms, cooked food, and spoilage are separate ledgers. Stored raw
+ingredients and trough reserves spoil at configurable rates and become waste;
+Slime Janitors remove that waste and redistribute cooked food through visible
+Feeding Troughs. The food HUD exposes raw stock, cooked battery, and waste so
+the player can distinguish a recipe shortage from a storage problem.
+
+Every creature carries persisted morale. Usable walkable floor determines local
+warren capacity, active outposts add remote rooms, and overcrowding lowers
+morale and work speed before it creates desertion pressure. Space, recovery,
+and food are therefore three readable ways to stabilize the colony.
+
 ## 7. Progression: capture → study → adapt
 
 No tech tree. `assets/data/unlocks.json` defines event-counter unlocks —
@@ -228,6 +241,15 @@ progression is a side effect of playing, and crises double as gates:
 The capture loop: wild beetles wander the map → place snare traps in their
 path → captured specimens go to Study Pens → knowledge accumulates → counters
 tick → unlocks fire with a toast.
+
+## 7b. Remote worm logistics
+
+After the shrine awakens, Worm Outposts can be built and activated as route
+endpoints. A transit carries cargo and nearby crew through a timed, persisted
+state machine; an inactive endpoint fails the trip and returns the cargo to its
+origin. The shrine's visible pause toggle stops new mixed offerings while
+preserving the food and ingot reserve guards. Awakening requires both configured
+food and ingot offerings, so the endgame stresses the kitchen and the forges.
 
 ## 8. Threats & the campaign arc
 

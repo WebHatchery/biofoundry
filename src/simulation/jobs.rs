@@ -8,9 +8,11 @@
 
 mod carrier;
 mod cook;
+mod engineer;
 mod equipment;
 mod guard;
 mod hauling;
+mod janitor;
 mod miner;
 mod routing;
 mod smelter;
@@ -90,6 +92,9 @@ fn tick_creature(
         Job::Smith => smith::tick_smith(creature, session, data, dt, work_boost),
         Job::Guard => guard::tick_guard(creature, session, data, dt, work_boost),
         Job::Smelter => smelter::tick_smelter(creature, session, data, dt, work_boost),
+        Job::Janitor => janitor::tick_janitor(creature, session, data, dt, work_boost),
+        Job::Courier => carrier::tick_carrier(creature, session, data, &species, dt, work_boost),
+        Job::Engineer => engineer::tick_engineer(creature, session, data, dt, claims, work_boost),
     }
 }
 

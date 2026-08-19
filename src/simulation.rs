@@ -6,9 +6,11 @@
 //! globals — so integration tests can run headless for thousands of ticks.
 
 pub mod actions;
+pub mod colony;
 pub mod food;
 pub mod jobs;
 pub mod nav;
+pub mod outposts;
 pub mod wildlife;
 
 #[cfg(test)]
@@ -19,8 +21,8 @@ use crate::state::creatures::Creature;
 use crate::state::GameSession;
 
 pub use actions::{
-    try_attract_beetle, try_attract_salamander, try_breed_hobgoblin, try_breed_overseer,
-    try_place_build_site,
+    try_attract_bat_courier, try_attract_beetle, try_attract_salamander, try_attract_slime_janitor,
+    try_breed_engineer, try_breed_hobgoblin, try_breed_overseer, try_place_build_site,
 };
 
 /// Fixed simulation timestep in seconds (10 ticks per second).
@@ -44,6 +46,9 @@ pub fn tick(session: &mut GameSession, data: &GameData) -> TickReport {
     session.tick += 1;
     let dt = SIM_DT;
     let balance = &data.balance;
+
+    colony::tick_colony_pressure(session, data, dt);
+    colony::tick_spoilage(session, data, dt);
 
     // Generators: farms grow, kilns smoulder, wild flora regrows.
     use crate::state::creatures::Good;
@@ -93,6 +98,7 @@ pub fn tick(session: &mut GameSession, data: &GameData) -> TickReport {
         (ingot_per_min - session.economy.ingot_ema_per_min) * smoothing;
     let wild = wildlife::tick_wildlife(session, data, dt);
     let deserters = food::tick_hunger(session, data, dt);
+    outposts::tick_transit(session, data, dt);
 
     let mut won_this_tick = false;
     if !session.won
@@ -113,18 +119,40 @@ pub fn tick(session: &mut GameSession, data: &GameData) -> TickReport {
     // power draw), pausing below the reserve so feeding can't blackout
     // the warren on its own.
     let mut worm_this_tick = false;
-    if !session.worm_awake && session.buildings_of("worm_shrine").next().is_some() {
+    if !session.worm_awake
+        && !session.worm_feeding_paused
+        && session.buildings_of("worm_shrine").next().is_some()
+    {
         let headroom = (session.economy.food - balance.worm_feed_reserve).max(0.0);
         let bite = (balance.worm_food_per_min / 60.0 * dt).min(headroom);
         if bite > 0.0 {
             session.economy.food -= bite;
             session.worm_fed += bite;
         }
-        if session.worm_fed >= balance.worm_awaken_at {
+        // Ingot offerings are discrete and are reserved above the normal
+        // stockpile guard. The food threshold remains useful progress even
+        // when the forge has not supplied the next ingot yet.
+        let food_per_offering = if balance.worm_food_per_offering > 0.0 {
+            balance.worm_food_per_offering
+        } else {
+            balance.worm_awaken_at / balance.worm_awaken_ingots.max(1) as f32
+        };
+        let completed_offerings = (session.worm_fed / food_per_offering.max(1.0)).floor() as u32;
+        let wanted_ingots = completed_offerings * balance.worm_ingots_per_offering;
+        while session.worm_ingots_fed < wanted_ingots
+            && session.economy.ingots_stock > balance.worm_ingot_reserve
+        {
+            session.economy.ingots_stock -= 1;
+            session.worm_ingots_fed += 1;
+        }
+        if session.worm_fed >= balance.worm_awaken_at
+            && session.worm_ingots_fed >= balance.worm_awaken_ingots
+        {
             session.worm_awake = true;
             worm_this_tick = true;
         }
     }
+    session.economy.cooked_food = session.economy.food;
 
     TickReport {
         deserters,

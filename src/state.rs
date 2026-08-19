@@ -6,6 +6,7 @@
 //! by `simulation` services and dispatched `UiAction`s.
 
 pub mod creatures;
+pub mod outposts;
 pub mod serde_helpers;
 pub mod structures;
 pub mod wildlife;
@@ -15,6 +16,7 @@ use crate::data::{Balance, GameData};
 use creatures::{Creature, Job};
 use macroquad_toolkit::grid::TilePos;
 use macroquad_toolkit::rng::SeededRng;
+use outposts::{Outpost, WormTransit};
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 use structures::{BuildSite, Building};
@@ -38,6 +40,18 @@ pub enum StateTransition {
 pub struct Economy {
     /// Cooked food stockpile — the electricity of the warren.
     pub food: f32,
+    /// Raw ingredients aggregated from farms and cook pots for the food
+    /// variety readout. Mushroom stock remains physically stored per node.
+    #[serde(default)]
+    pub raw_food: f32,
+    /// Cooked-food alias for new saves; `food` remains the compatible battery
+    /// field used by the original simulation.
+    #[serde(default)]
+    pub cooked_food: f32,
+    #[serde(default)]
+    pub waste: f32,
+    #[serde(default)]
+    pub waste_processed: f32,
     /// Ore sitting at the stockpile, spendable on construction/upgrades.
     pub ore_stock: u32,
     /// Lifetime ore delivered (win condition counter; never spent).
@@ -114,6 +128,10 @@ pub struct GameSession {
     pub famine_active: bool,
     /// Food offered at the Worm Shrine so far.
     pub worm_fed: f32,
+    #[serde(default)]
+    pub worm_ingots_fed: u32,
+    #[serde(default)]
+    pub worm_feeding_paused: bool,
     /// The campaign monument: the Colossal Worm has awakened.
     pub worm_awake: bool,
     pub worm_shown: bool,
@@ -124,6 +142,12 @@ pub struct GameSession {
     /// Action flags the tutorial watches for.
     pub tutorial_reassigned: bool,
     pub tutorial_built: bool,
+    #[serde(default)]
+    pub outposts: Vec<Outpost>,
+    #[serde(default)]
+    pub worm_transit: Option<WormTransit>,
+    #[serde(default)]
+    pub last_transit_failure: Option<String>,
 }
 
 impl GameSession {
@@ -162,6 +186,10 @@ impl GameSession {
             dig_marks: HashSet::new(),
             economy: Economy {
                 food: balance.start_food,
+                raw_food: 0.0,
+                cooked_food: balance.start_food,
+                waste: 0.0,
+                waste_processed: 0.0,
                 ore_stock: 0,
                 ore_delivered_total: 0,
                 ingots_forged: 0,
@@ -193,12 +221,17 @@ impl GameSession {
             breed_in: balance.breed_interval_sec,
             famine_active: false,
             worm_fed: 0.0,
+            worm_ingots_fed: 0,
+            worm_feeding_paused: false,
             worm_awake: false,
             worm_shown: false,
             tutorial_step: 0,
             tutorial_dismissed: false,
             tutorial_reassigned: false,
             tutorial_built: false,
+            outposts: Vec::new(),
+            worm_transit: None,
+            last_transit_failure: None,
         };
 
         for _ in 0..balance.start_miners {
@@ -267,7 +300,36 @@ impl GameSession {
         if kind == "mine" {
             return self.adjacent_ore_vein(pos).is_some();
         }
+        if kind == "outpost" {
+            return self.buildings_of("worm_shrine").next().is_some()
+                && self.outposts.iter().all(|o| o.pos != pos);
+        }
         true
+    }
+
+    /// Number of usable tiles, plus the rooms remote outposts provide.
+    pub fn usable_warren_capacity(&self, data: &GameData) -> usize {
+        let floor_tiles = self
+            .world
+            .tiles
+            .iter_with_pos()
+            .filter(|(_, t)| t.walkable())
+            .count() as f32;
+        let local = (floor_tiles / data.balance.capacity_tiles_per_creature).floor() as usize;
+        local
+            + self.outposts.iter().filter(|o| o.active).count()
+                * data.balance.outpost_capacity as usize
+    }
+
+    pub fn overcrowding_ratio(&self, data: &GameData) -> f32 {
+        let capacity = self.usable_warren_capacity(data).max(1) as f32;
+        self.creatures.len() as f32 / capacity
+    }
+
+    pub fn ensure_outpost(&mut self, pos: TilePos) {
+        if self.outposts.iter().all(|o| o.pos != pos) {
+            self.outposts.push(Outpost::new(pos));
+        }
     }
 
     /// A 4-neighbour ore-vein tile of `pos`, if any (Mine placement).

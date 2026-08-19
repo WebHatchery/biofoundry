@@ -24,6 +24,9 @@ pub struct Building {
     /// works the front order once it has banked enough ingots.
     #[serde(default)]
     pub orders: Vec<String>,
+    /// Spoiled stock waiting for a Slime Janitor.
+    #[serde(default)]
+    pub waste: f32,
 }
 
 impl Building {
@@ -34,6 +37,7 @@ impl Building {
             stocks: HashMap::new(),
             reserve: 0.0,
             orders: Vec::new(),
+            waste: 0.0,
         }
     }
 

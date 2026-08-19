@@ -83,8 +83,16 @@ Design (as implemented): [`game_design.md`](game_design.md). Outstanding work:
   heavyweight and a **Goblin Overseer** whose work-speed aura upgrades the
   creature rather than the tool.
 
-**Every plan phase (0–5 and 6–11) is complete.** Remaining deferred work is
-tracked in [`TODO.md`](TODO.md).
+- **Colony extension (done)**: Slime Janitors clean persisted spoilage and
+  stock feeding troughs; Bat Couriers fly over terrain with high-capacity
+  logistics; and Engineers auto-claim Mine posts with compatible equipment.
+  Morale and usable-warren capacity create a readable overcrowding pressure,
+  while raw ingredients, cooked reserves, and waste are tracked separately.
+  Mixed food-and-ingot shrine offerings can be paused, and an awakened shrine
+  can activate persisted Worm Outposts for timed cargo and crew transit with
+  recoverable route failures.
+
+**Every item in [`TODO.md`](TODO.md) is complete.**
 
 ## Run
 

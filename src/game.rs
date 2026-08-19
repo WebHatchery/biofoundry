@@ -20,6 +20,9 @@ use macroquad_toolkit::persistence::{
 };
 use macroquad_toolkit::prelude::{begin_virtual_ui_frame, dark, end_virtual_ui_frame, InputState};
 
+#[path = "game_actions.rs"]
+mod game_actions;
+
 pub struct Game {
     data: GameData,
     state: GameState,
@@ -337,6 +340,7 @@ impl Game {
                     session.factory_complete = true;
                     session.factory_shown = true;
                     session.worm_fed = self.data.balance.worm_awaken_at;
+                    session.worm_ingots_fed = self.data.balance.worm_awaken_ingots;
                     session.worm_awake = true;
                     session.worm_shown = true;
                     for _ in 0..300 {
@@ -542,120 +546,6 @@ impl Game {
         let ts = self.data.config.tile_size;
         let tile = TilePos::new((world.x / ts).floor() as i32, (world.y / ts).floor() as i32);
         session.world.tiles.is_valid(tile).then_some(tile)
-    }
-
-    fn apply_action(&mut self, action: UiAction) {
-        match action {
-            UiAction::StartWarren => self.transition(StateTransition::StartWarren),
-            UiAction::BackToMenu => self.transition(StateTransition::BackToMenu),
-            UiAction::Assign(job) => self.reassign(Job::Idle, job),
-            UiAction::Unassign(job) => self.reassign(job, Job::Idle),
-            UiAction::AttractBeetle => {
-                if let GameState::Warren(session) = &mut self.state {
-                    if simulation::try_attract_beetle(session, &self.data) {
-                        self.notifications
-                            .success("A beetle hauler joins the warren.");
-                        self.audio.play(Sfx::Capture);
-                    } else {
-                        self.notifications.warning("Not enough ore banked.");
-                        self.audio.play(Sfx::Deny);
-                    }
-                }
-            }
-            UiAction::AttractSalamander => {
-                if let GameState::Warren(session) = &mut self.state {
-                    if simulation::try_attract_salamander(session, &self.data) {
-                        self.notifications
-                            .success("A salamander curls into the smelter den.");
-                        self.audio.play(Sfx::Capture);
-                    } else {
-                        self.notifications
-                            .warning("Needs a Smelter Den and enough banked ore.");
-                        self.audio.play(Sfx::Deny);
-                    }
-                }
-            }
-            UiAction::DismissVictory => {
-                if let GameState::Warren(session) = &mut self.state {
-                    session.victory_shown = true;
-                }
-            }
-            UiAction::DismissFactory => {
-                if let GameState::Warren(session) = &mut self.state {
-                    session.factory_shown = true;
-                }
-            }
-            UiAction::DismissWorm => {
-                if let GameState::Warren(session) = &mut self.state {
-                    session.worm_shown = true;
-                }
-            }
-            UiAction::SkipTutorial => {
-                if let GameState::Warren(session) = &mut self.state {
-                    session.tutorial_dismissed = true;
-                    self.audio.play(Sfx::Select);
-                }
-            }
-            UiAction::SetMode(mode) => {
-                self.mode = if self.mode == mode {
-                    UiMode::Inspect
-                } else {
-                    mode
-                };
-                self.audio.play(Sfx::Select);
-            }
-            UiAction::Breed(species) => {
-                if let GameState::Warren(session) = &mut self.state {
-                    let ok = match species.as_str() {
-                        "hobgoblin" => simulation::try_breed_hobgoblin(session, &self.data),
-                        "overseer" => simulation::try_breed_overseer(session, &self.data),
-                        _ => false,
-                    };
-                    if ok {
-                        let name = if species == "overseer" {
-                            "A Goblin Overseer takes its post."
-                        } else {
-                            "A Hobgoblin lumbers out of the pit."
-                        };
-                        self.notifications.success(name);
-                        self.audio.play(Sfx::Capture);
-                    } else {
-                        self.notifications
-                            .warning("Needs the unlock, a breeding pit, and banked ingots.");
-                        self.audio.play(Sfx::Deny);
-                    }
-                }
-            }
-            UiAction::WorldClick(tile) => self.world_click(tile),
-            UiAction::QueueOrder(pos, item) => {
-                let cap = self.data.balance.order_queue_size;
-                if let GameState::Warren(session) = &mut self.state {
-                    if let Some(b) = session.building_at_mut(pos) {
-                        if b.kind == "blacksmith" && b.orders.len() < cap {
-                            b.orders.push(item);
-                            self.notifications.info("Order queued.");
-                            self.audio.play(Sfx::Select);
-                        } else {
-                            self.audio.play(Sfx::Deny);
-                        }
-                    }
-                }
-            }
-            UiAction::Save => self.save_game(),
-            UiAction::Load => self.load_game(),
-            UiAction::ToggleSettings => {
-                self.settings_open = !self.settings_open;
-                self.audio.play(Sfx::Select);
-            }
-            UiAction::AdjustVolume(steps) => {
-                let volume = (self.audio.volume() * 10.0 + steps as f32).round() / 10.0;
-                self.audio.set_volume(volume);
-                self.audio.save_settings(&self.data.config.game_name);
-                // Chirp at the new level so the change is audible.
-                self.audio.play(Sfx::Select);
-            }
-            UiAction::ExitGame => macroquad::miniquad::window::quit(),
-        }
     }
 
     fn world_click(&mut self, tile: TilePos) {

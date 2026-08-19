@@ -29,7 +29,8 @@ pub(super) fn draw_inspect_panel(
     // buttons, and the breeding pit its breed buttons — both taller.
     let height = match building.kind.as_str() {
         "blacksmith" => 150.0 + data.equipment.len() as f32 * 26.0,
-        "breeding_pit" => 172.0,
+        "breeding_pit" => 210.0,
+        "worm_shrine" | "outpost" => 220.0,
         _ => 132.0,
     };
     let panel = Rect::new(LOGICAL_WIDTH - 262.0, 210.0, 250.0, height);
@@ -120,6 +121,29 @@ pub(super) fn draw_inspect_panel(
                 &mut y,
             );
             line("Cooks turn mushrooms → stew", dark::TEXT_DIM, &mut y);
+        }
+        "feeding_trough" => {
+            line(
+                &format!(
+                    "Cooked food {:.1}/{:.1}",
+                    building.stock(Good::CookedFood),
+                    data.balance.trough_food_cap
+                ),
+                dark::TEXT,
+                &mut y,
+            );
+            line(
+                &format!(
+                    "Waste {:.1} · Slime janitor distributes food",
+                    building.waste
+                ),
+                if building.waste > 0.0 {
+                    dark::WARNING
+                } else {
+                    dark::TEXT_DIM
+                },
+                &mut y,
+            );
         }
         "blacksmith" => {
             let staffed = session.creatures.iter().any(|c| {
@@ -214,6 +238,12 @@ pub(super) fn draw_inspect_panel(
                     data.balance.overseer_ingot_cost,
                     has_overseer,
                 ),
+                (
+                    "engineer",
+                    "engineer",
+                    data.balance.engineer_ingot_cost,
+                    session.creatures.iter().any(|c| c.species == "engineer"),
+                ),
             ] {
                 let unlocked = session.unlocked.contains(unlock);
                 let name = data.species.get(id).map(|s| s.name.as_str()).unwrap_or(id);
@@ -229,6 +259,102 @@ pub(super) fn draw_inspect_panel(
                     actions.push(UiAction::Breed(id.to_owned()));
                 }
                 y += 28.0;
+            }
+        }
+        "worm_shrine" => {
+            let paused = session.worm_feeding_paused;
+            line(
+                &format!(
+                    "Food {:.0}/{:.0} · Ingots {}/{}",
+                    session.worm_fed,
+                    data.balance.worm_awaken_at,
+                    session.worm_ingots_fed,
+                    data.balance.worm_awaken_ingots
+                ),
+                dark::TEXT,
+                &mut y,
+            );
+            line(
+                if session.worm_awake {
+                    "The Colossal Worm is awake"
+                } else if paused {
+                    "Offerings paused — reserve protected"
+                } else {
+                    "Offering food and ingots"
+                },
+                if paused {
+                    dark::WARNING
+                } else {
+                    dark::POSITIVE
+                },
+                &mut y,
+            );
+            if hud_button(
+                Rect::new(x, y, panel.w - 28.0, 24.0),
+                if paused {
+                    "Resume offerings"
+                } else {
+                    "Pause offerings"
+                },
+                !session.worm_awake,
+                mouse,
+            ) {
+                actions.push(UiAction::ToggleShrineFeeding(pos));
+            }
+        }
+        "outpost" => {
+            let outpost = session.outposts.iter().find(|o| o.pos == pos);
+            let active = outpost.is_some_and(|o| o.active);
+            let cargo = outpost.map(|o| o.cargo_total()).unwrap_or(0);
+            line(
+                &format!(
+                    "{} · Cargo {} · Crew {}",
+                    if active { "Active" } else { "Inactive" },
+                    cargo,
+                    outpost.map(|o| o.crew.len()).unwrap_or(0)
+                ),
+                if active {
+                    dark::POSITIVE
+                } else {
+                    dark::WARNING
+                },
+                &mut y,
+            );
+            if hud_button(
+                Rect::new(x, y, panel.w - 28.0, 24.0),
+                if active {
+                    "Deactivate route"
+                } else {
+                    "Activate route"
+                },
+                session.worm_transit.is_none(),
+                mouse,
+            ) {
+                actions.push(UiAction::ActivateOutpost(pos));
+            }
+            y += 28.0;
+            if active && session.worm_awake {
+                if hud_button(
+                    Rect::new(x, y, panel.w - 28.0, 24.0),
+                    "Send shrine cargo",
+                    session.worm_transit.is_none() && cargo > 0,
+                    mouse,
+                ) {
+                    actions.push(UiAction::TransitToShrine(pos));
+                }
+                y += 28.0;
+                if hud_button(
+                    Rect::new(x, y, panel.w - 28.0, 24.0),
+                    "Send cargo to outpost",
+                    session.worm_transit.is_none()
+                        && session.economy.ore_stock + session.economy.ingots_stock > 0,
+                    mouse,
+                ) {
+                    actions.push(UiAction::TransitToOutpost(pos));
+                }
+            }
+            if let Some(failure) = outpost.and_then(|o| o.last_failure.as_deref()) {
+                line(failure, dark::NEGATIVE, &mut y);
             }
         }
         _ => {

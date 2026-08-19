@@ -29,8 +29,24 @@ pub fn consumption_per_min(session: &GameSession, data: &GameData) -> f32 {
 /// smelt, and only hunger slowly between meals.
 pub fn tick_hunger(session: &mut GameSession, data: &GameData, dt: f32) -> Vec<Creature> {
     let consumption = consumption_per_min(session, data);
-    let fed = session.economy.food > 0.0;
-    session.economy.food = (session.economy.food - consumption / 60.0 * dt).max(0.0);
+    let requested = consumption / 60.0 * dt;
+    let from_stockpile = requested.min(session.economy.food);
+    session.economy.food -= from_stockpile;
+    let mut remaining = requested - from_stockpile;
+    // Troughs are a physical reserve for the same cooked-food battery. They
+    // are consumed only after the central stockpile reaches empty.
+    for trough in session
+        .buildings
+        .iter_mut()
+        .filter(|b| b.kind == "feeding_trough")
+    {
+        if remaining <= 0.0 {
+            break;
+        }
+        let taken = trough.take_stock(crate::state::creatures::Good::CookedFood, remaining);
+        remaining -= taken;
+    }
+    let fed = from_stockpile + (requested - from_stockpile - remaining) > 0.0;
 
     let b = &data.balance;
     for creature in &mut session.creatures {
@@ -65,7 +81,9 @@ pub fn tick_hunger(session: &mut GameSession, data: &GameData, dt: f32) -> Vec<C
     let mut deserters = Vec::new();
     let mut i = 0;
     while i < session.creatures.len() {
-        if session.creatures[i].starving_for >= desert_after {
+        if session.creatures[i].starving_for >= desert_after
+            || session.creatures[i].morale_stress_for >= b.morale_desertion_sec
+        {
             deserters.push(session.creatures.remove(i));
         } else {
             i += 1;

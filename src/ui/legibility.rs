@@ -48,6 +48,8 @@ pub enum BuildingStatus {
     Exhausted,
     /// A Farm sitting at its storage cap, idle until a carrier drains it.
     AwaitingHaul,
+    /// Spoiled stores are accumulating faster than they are cleaned.
+    WasteOverflow,
 }
 
 impl BuildingStatus {
@@ -59,6 +61,7 @@ impl BuildingStatus {
             BuildingStatus::OutputFull => "Backed up",
             BuildingStatus::Exhausted => "Exhausted",
             BuildingStatus::AwaitingHaul => "Awaiting haul",
+            BuildingStatus::WasteOverflow => "Waste accumulating",
         }
     }
 }
@@ -130,7 +133,9 @@ pub fn building_status(
             None
         }
         "cook_pot" => {
-            if building.stock(Good::Mushroom) < data.balance.cook_batch_mushrooms as f32 {
+            if building.stock(Good::Mushroom)
+                < data.balance.cook_batch_mushrooms as f32 * data.balance.raw_recipe_multiplier
+            {
                 return Some(BuildingStatus::InputStarved);
             }
             None
@@ -140,6 +145,16 @@ pub fn building_status(
                 return Some(BuildingStatus::InputStarved);
             }
             None
+        }
+        "feeding_trough" if building.waste > 0.0 => Some(BuildingStatus::WasteOverflow),
+        "outpost"
+            if session
+                .outposts
+                .iter()
+                .find(|o| o.pos == pos)
+                .is_some_and(|o| !o.active) =>
+        {
+            Some(BuildingStatus::InputStarved)
         }
         _ => None,
     }

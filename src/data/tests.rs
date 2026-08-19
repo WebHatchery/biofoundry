@@ -26,6 +26,13 @@ fn species_cross_references_hold() {
         "beetle must haul at least 5x a goblin (plan)"
     );
     assert!(beetle.food_per_min > goblin.food_per_min);
+
+    let slime = data.species.get("slime_janitor").expect("slime janitor");
+    assert!(!slime.reassignable);
+    let bat = data.species.get("bat_courier").expect("bat courier");
+    assert!(bat.carry_capacity > beetle.carry_capacity);
+    let engineer = data.species.get("engineer").expect("engineer");
+    assert!(engineer.work_mult > 1.0);
 }
 
 #[test]
@@ -57,6 +64,10 @@ fn balance_values_are_playable() {
     assert!(b.start_miners + b.start_carriers + b.start_cooks >= 3);
     assert!(b.cook_batch_mushrooms > 0);
     assert!(b.cook_batch_food > 0.0);
+    assert!(b.raw_recipe_multiplier > 0.0);
+    assert!(b.cooked_recipe_multiplier > 0.0);
+    assert!(b.waste_storage_cap > 0.0);
+    assert!(b.outpost_capacity > 0);
     assert!(b.win_ore_delivered > 0);
     assert!(b.win_food_surplus > b.start_food);
     // Cooking must multiply calories, or the loop can never go positive.

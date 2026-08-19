@@ -72,6 +72,20 @@
     "requires_unlock": "worm_shrine"
   },
   {
+    "id": "feeding_trough",
+    "name": "Feeding Trough",
+    "cost_ore": 8,
+    "buildable": true,
+    "requires_unlock": "slime_janitor"
+  },
+  {
+    "id": "outpost",
+    "name": "Worm Outpost",
+    "cost_ore": 30,
+    "buildable": true,
+    "requires_unlock": "worm_transit"
+  },
+  {
     "id": "stockpile",
     "name": "Stockpile",
     "cost_ore": 0,

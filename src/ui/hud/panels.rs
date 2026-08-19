@@ -39,7 +39,24 @@ pub(super) fn draw_top_bar(
         TextStyle::new(18.0, dark::TEXT).params(),
     );
 
-    if session.raid_active {
+    if let Some(transit) = &session.worm_transit {
+        draw_ui_text_ex(
+            &format!(
+                "WORM TRANSIT — {:.0}s remaining",
+                transit.remaining.max(0.0)
+            ),
+            bar.x + 380.0,
+            bar.y + 31.0,
+            TextStyle::new(18.0, dark::POSITIVE).params(),
+        );
+    } else if session.last_transit_failure.is_some() {
+        draw_ui_text_ex(
+            "WORM ROUTE FAILED — inspect the outpost",
+            bar.x + 380.0,
+            bar.y + 31.0,
+            TextStyle::new(18.0, dark::NEGATIVE).params(),
+        );
+    } else if session.raid_active {
         draw_ui_text_ex(
             "RAID — gnarls are after the larder!",
             bar.x + 380.0,
@@ -183,8 +200,16 @@ pub(super) fn draw_food_grid_panel(session: &GameSession, data: &GameData, panel
         " · Worm AWAKE".to_owned()
     } else if shrine_built {
         format!(
-            " · Worm {:.0}/{:.0}",
-            session.worm_fed, data.balance.worm_awaken_at
+            " · Worm {:.0}/{:.0} food · {}/{} ingots{}",
+            session.worm_fed,
+            data.balance.worm_awaken_at,
+            session.worm_ingots_fed,
+            data.balance.worm_awaken_ingots,
+            if session.worm_feeding_paused {
+                " PAUSED"
+            } else {
+                ""
+            }
         )
     } else {
         String::new()
@@ -202,6 +227,18 @@ pub(super) fn draw_food_grid_panel(session: &GameSession, data: &GameData, panel
         x,
         y,
         TextStyle::new(14.0, ingot_color).params(),
+    );
+    draw_ui_text_ex(
+        &format!(
+            "Raw {:.0} · Cooked {:.0} · Waste {:.1} · Morale {}",
+            session.economy.raw_food,
+            session.economy.cooked_food,
+            session.economy.waste,
+            crate::simulation::colony::morale_status(session, data),
+        ),
+        x,
+        y + 20.0,
+        TextStyle::new(13.0, dark::TEXT_DIM).params(),
     );
 }
 
@@ -261,6 +298,16 @@ pub(super) fn draw_jobs_panel(
         .iter()
         .filter(|c| c.species == "salamander")
         .count();
+    let janitors = session
+        .creatures
+        .iter()
+        .filter(|c| c.species == "slime_janitor")
+        .count();
+    let couriers = session
+        .creatures
+        .iter()
+        .filter(|c| c.species == "bat_courier")
+        .count();
     let half = (panel.w - 36.0) / 2.0;
     if hud_button(
         Rect::new(x, y, half, 30.0),
@@ -282,6 +329,39 @@ pub(super) fn draw_jobs_panel(
     ) {
         actions.push(UiAction::AttractSalamander);
     }
+    y += 34.0;
+    if hud_button(
+        Rect::new(x, y, half, 30.0),
+        &format!("Slime {}", janitors),
+        session.unlocked.contains("slime_janitor") && janitors == 0,
+        mouse,
+    ) {
+        actions.push(UiAction::AttractSlimeJanitor);
+    }
+    if hud_button(
+        Rect::new(x + half + 8.0, y, half, 30.0),
+        &format!("Bat {}", couriers),
+        session.unlocked.contains("bat_courier") && couriers == 0,
+        mouse,
+    ) {
+        actions.push(UiAction::AttractBatCourier);
+    }
+    y += 32.0;
+    draw_ui_text_ex(
+        &format!(
+            "Engineer {} · Outposts {}/{}",
+            session
+                .creatures
+                .iter()
+                .filter(|c| c.species == "engineer")
+                .count(),
+            session.outposts.iter().filter(|o| o.active).count(),
+            session.outposts.len()
+        ),
+        x,
+        y + 18.0,
+        TextStyle::new(13.0, dark::TEXT_DIM).params(),
+    );
 }
 
 pub(super) fn draw_tools_panel(
@@ -300,16 +380,16 @@ pub(super) fn draw_tools_panel(
     );
 
     let x = panel.x + 14.0;
-    let mut y = panel.y + 34.0;
+    let mut y = panel.y + 28.0;
     let w = panel.w - 28.0;
-    let half = (w - 8.0) / 2.0;
+    let cell = (w - 16.0) / 3.0;
 
     // Build buttons, two per row: label is the short name + cost. Locked
     // kinds stay visible but disabled (progression is discoverable).
     let mut defs: Vec<_> = data.buildings.iter().filter(|(_, d)| d.buildable).collect();
     defs.sort_by(|a, b| a.0.cmp(b.0));
-    for pair in defs.chunks(2) {
-        for (i, (id, def)) in pair.iter().enumerate() {
+    for row in defs.chunks(3) {
+        for (i, (id, def)) in row.iter().enumerate() {
             let active = *mode == UiMode::Build((*id).clone());
             let unlocked = session.building_unlocked(def);
             let short = def.name.split_whitespace().last().unwrap_or(&def.name);
@@ -322,8 +402,8 @@ pub(super) fn draw_tools_panel(
             } else {
                 format!("{short} 🔒")
             };
-            let bx = x + (half + 8.0) * i as f32;
-            if hud_button(Rect::new(bx, y, half, 22.0), &label, unlocked, mouse) {
+            let bx = x + (cell + 8.0) * i as f32;
+            if hud_button(Rect::new(bx, y, cell, 22.0), &label, unlocked, mouse) {
                 actions.push(UiAction::SetMode(UiMode::Build((*id).clone())));
             }
         }
@@ -332,7 +412,7 @@ pub(super) fn draw_tools_panel(
 
     let dig_active = *mode == UiMode::Dig;
     let dig_label = if dig_active { "▶ Dig" } else { "Dig" };
-    if hud_button(Rect::new(x, y, half, 22.0), dig_label, true, mouse) {
+    if hud_button(Rect::new(x, y, cell, 22.0), dig_label, true, mouse) {
         actions.push(UiAction::SetMode(UiMode::Dig));
     }
     // Show pending construction so hauling progress is visible.
@@ -340,7 +420,7 @@ pub(super) fn draw_tools_panel(
         let pending: u32 = session.build_sites.iter().map(|s| s.remaining()).sum();
         draw_ui_text_ex(
             &format!("{} site(s) · {} ore", session.build_sites.len(), pending),
-            x + half + 8.0,
+            x + cell + 8.0,
             y + 16.0,
             TextStyle::new(13.0, dark::TEXT_DIM).params(),
         );

@@ -151,6 +151,9 @@ pub struct Balance {
     pub hobgoblin_ingot_cost: u32,
     /// Ingots to breed a Goblin Overseer (the work-speed beacon).
     pub overseer_ingot_cost: u32,
+    /// Ingots to breed a Goblin Engineer at the Breeding Pit.
+    #[serde(default = "default_engineer_ingot_cost")]
+    pub engineer_ingot_cost: u32,
     /// Overseer aura radius (tiles) and its work-speed multiplier for
     /// workers standing within it.
     pub overseer_aura_radius: f32,
@@ -169,6 +172,128 @@ pub struct Balance {
     pub worm_feed_reserve: f32,
     /// Total food offerings required to awaken the Colossal Worm.
     pub worm_awaken_at: f32,
+    /// Food carried by the kitchen as a raw ingredient per cooking batch.
+    #[serde(default = "default_raw_food_multiplier")]
+    pub raw_food_multiplier: f32,
+    #[serde(default = "default_raw_recipe_multiplier")]
+    pub raw_recipe_multiplier: f32,
+    #[serde(default = "default_cooked_recipe_multiplier")]
+    pub cooked_recipe_multiplier: f32,
+    /// Spoilage rate for raw ingredients stored in buildings, per minute.
+    #[serde(default = "default_raw_spoilage")]
+    pub raw_spoilage_per_min: f32,
+    /// Spoilage rate for cooked food kept in feeding troughs, per minute.
+    #[serde(default = "default_cooked_spoilage")]
+    pub cooked_spoilage_per_min: f32,
+    /// Waste produced when stored food spoils, and waste removed by a janitor.
+    #[serde(default = "default_waste_production")]
+    pub waste_production_per_min: f32,
+    #[serde(default = "default_waste_storage")]
+    pub waste_storage_cap: f32,
+    #[serde(default = "default_waste_decay")]
+    pub waste_decay_per_min: f32,
+    #[serde(default = "default_janitor_rate")]
+    pub janitor_clean_per_min: f32,
+    #[serde(default = "default_trough_cap")]
+    pub trough_food_cap: f32,
+    #[serde(default = "default_trough_feed_rate")]
+    pub trough_feed_per_min: f32,
+    /// One creature per this many usable floor tiles before overcrowding.
+    #[serde(default = "default_capacity_tiles")]
+    pub capacity_tiles_per_creature: f32,
+    #[serde(default = "default_overcrowding_penalty")]
+    pub overcrowding_work_penalty: f32,
+    #[serde(default = "default_morale_recovery")]
+    pub morale_recovery_per_sec: f32,
+    #[serde(default = "default_morale_desertion")]
+    pub morale_desertion_sec: f32,
+    #[serde(default = "default_outpost_capacity")]
+    pub outpost_capacity: u32,
+    #[serde(default = "default_outpost_storage")]
+    pub outpost_storage_cap: u32,
+    #[serde(default = "default_worm_transit_time")]
+    pub worm_transit_time_sec: f32,
+    /// Ingot offerings are reserved above this banked amount.
+    #[serde(default = "default_worm_ingot_reserve")]
+    pub worm_ingot_reserve: u32,
+    /// Food cost of one completed offering.
+    #[serde(default = "default_worm_food_per_offering")]
+    pub worm_food_per_offering: f32,
+    /// Each completed offering consumes this many ingots alongside food.
+    #[serde(default = "default_worm_ingots_per_offering")]
+    pub worm_ingots_per_offering: u32,
+    #[serde(default = "default_worm_awaken_ingots")]
+    pub worm_awaken_ingots: u32,
+}
+
+fn default_raw_food_multiplier() -> f32 {
+    1.0
+}
+fn default_raw_recipe_multiplier() -> f32 {
+    1.0
+}
+fn default_cooked_recipe_multiplier() -> f32 {
+    1.0
+}
+fn default_raw_spoilage() -> f32 {
+    0.02
+}
+fn default_cooked_spoilage() -> f32 {
+    0.01
+}
+fn default_waste_production() -> f32 {
+    0.08
+}
+fn default_waste_storage() -> f32 {
+    40.0
+}
+fn default_waste_decay() -> f32 {
+    0.01
+}
+fn default_janitor_rate() -> f32 {
+    6.0
+}
+fn default_trough_cap() -> f32 {
+    12.0
+}
+fn default_trough_feed_rate() -> f32 {
+    4.0
+}
+fn default_capacity_tiles() -> f32 {
+    10.0
+}
+fn default_overcrowding_penalty() -> f32 {
+    0.35
+}
+fn default_morale_recovery() -> f32 {
+    0.015
+}
+fn default_morale_desertion() -> f32 {
+    180.0
+}
+fn default_outpost_capacity() -> u32 {
+    4
+}
+fn default_outpost_storage() -> u32 {
+    12
+}
+fn default_worm_transit_time() -> f32 {
+    18.0
+}
+fn default_worm_ingot_reserve() -> u32 {
+    4
+}
+fn default_worm_ingots_per_offering() -> u32 {
+    1
+}
+fn default_worm_food_per_offering() -> f32 {
+    11.0
+}
+fn default_worm_awaken_ingots() -> u32 {
+    10
+}
+fn default_engineer_ingot_cost() -> u32 {
+    8
 }
 
 /// A staffed workstation: creatures of `job` claim up to `slots` places at

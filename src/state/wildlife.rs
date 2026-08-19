@@ -63,6 +63,12 @@ pub struct Progress {
     pub specimens: u32,
     /// Accumulated observation at study pens (flavor + future unlocks).
     pub knowledge: f32,
+    /// Lifetime waste removed by Slime Janitors.
+    #[serde(default)]
+    pub waste_processed: u32,
+    /// Successful remote deliveries, used by courier progression.
+    #[serde(default)]
+    pub courier_deliveries: u32,
 }
 
 impl Progress {
@@ -72,6 +78,8 @@ impl Progress {
             "beetles_captured" => self.beetles_captured,
             "raids_survived" => self.raids_survived,
             "famines_survived" => self.famines_survived,
+            "waste_processed" => self.waste_processed,
+            "courier_deliveries" => self.courier_deliveries,
             _ => 0,
         }
     }

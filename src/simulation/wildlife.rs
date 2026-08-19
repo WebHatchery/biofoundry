@@ -301,6 +301,8 @@ fn grant_unlocks(session: &mut GameSession, data: &GameData, report: &mut WildRe
 fn counter_value(session: &GameSession, name: &str) -> u32 {
     match name {
         "ingots_forged" => session.economy.ingots_forged,
+        "ore_delivered_total" => session.economy.ore_delivered_total,
+        "waste_processed" => session.progress.waste_processed,
         other => session.progress.counter(other),
     }
 }

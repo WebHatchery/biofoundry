@@ -33,9 +33,15 @@ pub enum UiAction {
     Unassign(Job),
     AttractBeetle,
     AttractSalamander,
+    AttractSlimeJanitor,
+    AttractBatCourier,
     /// Breed a special creature (species id: "hobgoblin"/"overseer") at the
     /// Breeding Pit.
     Breed(String),
+    ToggleShrineFeeding(TilePos),
+    ActivateOutpost(TilePos),
+    TransitToOutpost(TilePos),
+    TransitToShrine(TilePos),
     DismissVictory,
     DismissFactory,
     DismissWorm,

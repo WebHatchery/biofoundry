@@ -45,8 +45,10 @@ impl HudSprites {
             Job::Miner => 0,
             Job::Carrier => 1,
             Job::Cook => 2,
-            Job::Smith | Job::Smelter => 3,
+            Job::Smith | Job::Smelter | Job::Engineer => 3,
             Job::Guard => 4,
+            Job::Janitor => 2,
+            Job::Courier => 1,
             Job::Idle => 5,
         };
         self.jobs
@@ -67,8 +69,8 @@ pub fn draw(
 
     let top_bar = Rect::new(12.0, 12.0, LOGICAL_WIDTH - 24.0, 48.0);
     let food_panel = Rect::new(12.0, 66.0, PANEL_W, 184.0);
-    let jobs_panel = Rect::new(12.0, 256.0, PANEL_W, 262.0);
-    let tools_panel = Rect::new(12.0, 522.0, PANEL_W, 190.0);
+    let jobs_panel = Rect::new(12.0, 256.0, PANEL_W, 304.0);
+    let tools_panel = Rect::new(12.0, 566.0, PANEL_W, 144.0);
 
     panels::draw_top_bar(session, top_bar, mouse, &mut actions);
     panels::draw_food_grid_panel(session, data, food_panel);

@@ -9,7 +9,7 @@ use crate::state::GameSession;
 /// The equipment job-affinity key for a job, if it can wear gear.
 fn job_key(job: Job) -> Option<&'static str> {
     match job {
-        Job::Miner => Some("miner"),
+        Job::Miner | Job::Engineer => Some("miner"),
         Job::Carrier => Some("carrier"),
         Job::Smith => Some("smith"),
         Job::Guard => Some("guard"),

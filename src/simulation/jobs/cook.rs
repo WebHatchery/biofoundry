@@ -12,7 +12,8 @@ pub(super) fn tick_cook(
     dt: f32,
     work_boost: f32,
 ) {
-    let batch = data.balance.cook_batch_mushrooms;
+    let batch = (data.balance.cook_batch_mushrooms as f32 * data.balance.raw_recipe_multiplier)
+        .ceil() as u32;
     match creature.task.clone() {
         Task::Idle => {
             // Work the nearest pot with a full batch waiting.
@@ -51,7 +52,8 @@ pub(super) fn tick_cook(
                     remaining: left,
                 };
             } else {
-                session.economy.food += data.balance.cook_batch_food;
+                session.economy.food +=
+                    data.balance.cook_batch_food * data.balance.cooked_recipe_multiplier;
                 creature.task = Task::Idle;
             }
         }

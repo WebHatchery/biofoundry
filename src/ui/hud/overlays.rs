@@ -74,6 +74,7 @@ pub(super) fn draw_status_legend() {
         (St::OutputFull, Color::new(0.92, 0.32, 0.26, 1.0)),
         (St::AwaitingHaul, Color::new(0.40, 0.80, 0.92, 1.0)),
         (St::Exhausted, Color::new(0.60, 0.60, 0.66, 1.0)),
+        (St::WasteOverflow, Color::new(0.65, 0.85, 0.35, 1.0)),
     ];
     let mut lx = strip.x + 12.0;
     let cy = strip.y + strip.h * 0.5;

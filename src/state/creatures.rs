@@ -14,6 +14,12 @@ pub enum Job {
     Guard,
     /// Salamanders only: the living furnace at a smelter den.
     Smelter,
+    /// Slime Janitors remove spoiled food and keep feeding troughs stocked.
+    Janitor,
+    /// Bat Couriers use the carrier logic but fly over terrain.
+    Courier,
+    /// Engineers are bred specialists that service the nearest workstation.
+    Engineer,
     Idle,
 }
 
@@ -26,6 +32,9 @@ impl Job {
             Job::Smith => "Smith",
             Job::Guard => "Guard",
             Job::Smelter => "Smelter",
+            Job::Janitor => "Janitor",
+            Job::Courier => "Courier",
+            Job::Engineer => "Engineer",
             Job::Idle => "Idle",
         }
     }
@@ -35,6 +44,10 @@ impl Job {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum Good {
     Mushroom,
+    /// Explicit aliases for the food loop's raw/cooked accounting. Mushroom
+    /// remains the authored farm good for old saves and existing recipes.
+    RawFood,
+    CookedFood,
     Ore,
     Wood,
     Charcoal,
@@ -106,6 +119,17 @@ pub enum Task {
     },
     /// Walking to the stockpile to pick up matching gear.
     GoEquip,
+    /// Walking to a building with spoiled stock.
+    GoClean(TilePos),
+    /// Removing waste and distributing cooked food at a feeding trough.
+    Cleaning {
+        building: TilePos,
+        remaining: f32,
+    },
+    Feeding {
+        trough: TilePos,
+        remaining: f32,
+    },
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -132,6 +156,17 @@ pub struct Creature {
     /// job. Boosts throughput; dropped back to the pool on reassignment.
     #[serde(default)]
     pub equipment: Option<String>,
+    /// Social/colony wellbeing. It is persisted so a save cannot erase a
+    /// crowding crisis or its recovery.
+    #[serde(default = "default_morale")]
+    pub morale: f32,
+    /// Seconds spent under morale pressure before desertion becomes likely.
+    #[serde(default)]
+    pub morale_stress_for: f32,
+}
+
+fn default_morale() -> f32 {
+    1.0
 }
 
 impl Creature {
@@ -149,6 +184,8 @@ impl Creature {
             starving_for: 0.0,
             hp: 1.0,
             equipment: None,
+            morale: 1.0,
+            morale_stress_for: 0.0,
         }
     }
 
@@ -191,13 +228,14 @@ impl Creature {
 
     /// Brownout curve: fed 100%, hungry 50%, starving 25%.
     pub fn work_speed(&self) -> f32 {
-        if self.satiation > 0.66 {
+        let hunger = if self.satiation > 0.66 {
             1.0
         } else if self.satiation > 0.33 {
             0.5
         } else {
             0.25
-        }
+        };
+        hunger * self.morale.clamp(0.35, 1.0)
     }
 
     /// Reset activity when reassigned or interrupted; drops carried goods.

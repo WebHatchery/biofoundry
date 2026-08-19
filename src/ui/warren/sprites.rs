@@ -287,8 +287,10 @@ fn draw_role_prop(
         Job::Miner => 0,
         Job::Carrier => 1,
         Job::Cook => 2,
-        Job::Smith | Job::Smelter => 3,
+        Job::Smith | Job::Smelter | Job::Engineer => 3,
         Job::Guard => 4,
+        Job::Janitor => 2,
+        Job::Courier => 1,
         Job::Idle => 5,
     };
     sprites.role_props.draw_frame(
@@ -331,6 +333,7 @@ fn draw_cargo(sprites: &WorldSprites, x: f32, y: f32, radius: f32, good: Good, t
         Good::Ingot => 2,
         Good::Wood => 3,
         Good::Charcoal => 4,
+        Good::RawFood | Good::CookedFood => 0,
     };
     sprites.cargo.draw_frame(
         frame,

@@ -6,6 +6,7 @@ mod crafting;
 mod determinism;
 mod economy;
 mod mining;
+mod novel;
 mod wild;
 
 use super::*;

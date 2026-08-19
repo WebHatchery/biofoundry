@@ -69,6 +69,42 @@ fn starved_blacksmith_and_kiln_read_starved() {
 }
 
 #[test]
+fn trough_waste_and_inactive_outpost_are_visible_states() {
+    let data = GameData::load().unwrap();
+    let mut session = GameSession::new(&data, 44);
+    let pos = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(p, t)| t.walkable() && session.can_place_building(*p))
+        .map(|(p, _)| p)
+        .unwrap();
+    let mut trough = Building::new("feeding_trough", pos);
+    trough.waste = 1.0;
+    session.buildings.push(trough);
+    assert_eq!(
+        building_status(&session, &data, session.building_at(pos).unwrap()),
+        Some(BuildingStatus::WasteOverflow)
+    );
+
+    let outpost_pos = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(p, t)| t.walkable() && session.can_place_building(*p))
+        .map(|(p, _)| p)
+        .unwrap();
+    session
+        .buildings
+        .push(Building::new("outpost", outpost_pos));
+    session.ensure_outpost(outpost_pos);
+    assert_eq!(
+        building_status(&session, &data, session.building_at(outpost_pos).unwrap()),
+        Some(BuildingStatus::InputStarved)
+    );
+}
+
+#[test]
 fn pending_hauls_counts_waiting_goods() {
     let (_data, mut session) = boot();
     let mine = session.buildings_of("mine").next().unwrap().pos;

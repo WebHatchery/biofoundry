@@ -314,6 +314,32 @@ fn draw_building(
                 );
             }
         }
+        "feeding_trough" => {
+            draw_rectangle(
+                x + 3.0,
+                y + ts * 0.38,
+                ts - 6.0,
+                ts * 0.30,
+                Color::new(0.46, 0.28, 0.16, 1.0),
+            );
+            draw_rectangle_lines(
+                x + 3.0,
+                y + ts * 0.38,
+                ts - 6.0,
+                ts * 0.30,
+                2.0,
+                Color::new(0.82, 0.55, 0.28, 0.9),
+            );
+            if building.stock(Good::CookedFood) > 0.0 {
+                draw_rectangle(
+                    x + ts * 0.20,
+                    y + ts * 0.46,
+                    ts * 0.60,
+                    ts * 0.12,
+                    Color::new(0.84, 0.72, 0.46, 1.0),
+                );
+            }
+        }
         "trap" => {
             // Snare jaws: two arcs facing each other.
             let (cx, cy) = (x + ts * 0.5, y + ts * 0.5);
@@ -384,7 +410,10 @@ fn draw_building(
                 );
             }
             // Offering progress ring.
-            let frac = (session.worm_fed / data.balance.worm_awaken_at).clamp(0.0, 1.0);
+            let food_frac = session.worm_fed / data.balance.worm_awaken_at;
+            let ingot_frac =
+                session.worm_ingots_fed as f32 / data.balance.worm_awaken_ingots.max(1) as f32;
+            let frac = food_frac.min(ingot_frac).clamp(0.0, 1.0);
             if frac > 0.0 {
                 draw_circle_lines(
                     cx,
@@ -394,6 +423,34 @@ fn draw_building(
                     Color::new(0.75, 0.55, 0.95, 0.35 + 0.6 * frac),
                 );
             }
+        }
+        "outpost" => {
+            let active = session
+                .outposts
+                .iter()
+                .find(|o| o.pos == building.pos)
+                .is_some_and(|o| o.active);
+            draw_rectangle(
+                x + 4.0,
+                y + 4.0,
+                ts - 8.0,
+                ts - 8.0,
+                if active {
+                    Color::new(0.22, 0.30, 0.42, 1.0)
+                } else {
+                    Color::new(0.20, 0.20, 0.24, 1.0)
+                },
+            );
+            draw_circle(
+                x + ts * 0.5,
+                y + ts * 0.5,
+                ts * 0.17,
+                if active {
+                    Color::new(0.55, 0.82, 0.95, 1.0)
+                } else {
+                    Color::new(0.48, 0.48, 0.54, 1.0)
+                },
+            );
         }
         "stockpile" => {
             draw_rectangle_lines(
@@ -437,6 +494,7 @@ fn draw_status_badge(pos: TilePos, ts: f32, status: crate::ui::legibility::Build
         St::OutputFull => Color::new(0.92, 0.32, 0.26, 1.0),
         St::Exhausted => Color::new(0.60, 0.60, 0.66, 1.0),
         St::AwaitingHaul => Color::new(0.40, 0.80, 0.92, 1.0),
+        St::WasteOverflow => Color::new(0.65, 0.85, 0.35, 1.0),
     };
     let s = r * 0.85;
     match status {
@@ -472,6 +530,10 @@ fn draw_status_badge(pos: TilePos, ts: f32, status: crate::ui::legibility::Build
                 1.0,
                 Color::new(0.1, 0.2, 0.25, 1.0),
             );
+        }
+        St::WasteOverflow => {
+            draw_circle(bx, by, s, color);
+            draw_circle(bx, by, s * 0.35, Color::new(0.12, 0.18, 0.08, 1.0));
         }
     }
 }

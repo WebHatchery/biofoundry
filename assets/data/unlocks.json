@@ -58,5 +58,45 @@
     "effect": "unlock_creature",
     "value": 0.0,
     "building": null
+  },
+  {
+    "id": "slime_janitor",
+    "name": "Slime Janitor",
+    "description": "A waste-fed slime joins the warren and keeps spoiled stores from choking the food loop.",
+    "counter": "waste_processed",
+    "threshold": 10,
+    "effect": "unlock_creature",
+    "value": 0.0,
+    "building": null
+  },
+  {
+    "id": "bat_courier",
+    "name": "Bat Courier",
+    "description": "A courier bat learns the warren's routes and carries more than a goblin through the dark.",
+    "counter": "ore_delivered_total",
+    "threshold": 75,
+    "effect": "unlock_creature",
+    "value": 0.0,
+    "building": null
+  },
+  {
+    "id": "engineer",
+    "name": "Goblin Engineer",
+    "description": "The forge teaches a goblin to fit machines together. The Breeding Pit can raise an Engineer.",
+    "counter": "ingots_forged",
+    "threshold": 60,
+    "effect": "unlock_creature",
+    "value": 0.0,
+    "building": null
+  },
+  {
+    "id": "worm_transit",
+    "name": "Worm Transit",
+    "description": "The awakened routes beneath the shrine can carry cargo and creatures to remote outposts.",
+    "counter": "ingots_forged",
+    "threshold": 60,
+    "effect": "unlock_building",
+    "value": 0.0,
+    "building": "outpost"
   }
 ]

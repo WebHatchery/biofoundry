@@ -166,7 +166,7 @@ fn choose_carrier_work(
     let bal = &data.balance;
     if food < bal.carrier_food_reserve {
         if try_farm_haul(creature, session)
-            || try_patch_forage(creature, session)
+            || (species.id != "bat_courier" && try_patch_forage(creature, session))
             || try_industry_chain(creature, session, data)
         {
             return;
@@ -175,14 +175,14 @@ fn choose_carrier_work(
         if try_industry_chain(creature, session, data)
             || try_farm_haul(creature, session)
             || try_mine_drain(creature, session)
-            || try_patch_forage(creature, session)
+            || (species.id != "bat_courier" && try_patch_forage(creature, session))
         {
             return;
         }
     } else if try_industry_chain(creature, session, data)
         || try_mine_drain(creature, session)
         || try_farm_haul(creature, session)
-        || try_patch_forage(creature, session)
+        || (species.id != "bat_courier" && try_patch_forage(creature, session))
     {
         return;
     }

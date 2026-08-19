@@ -18,6 +18,16 @@ pub(super) fn send_to(creature: &mut Creature, session: &GameSession, target: Ti
 
 /// Compute and cache a walkable path. Returns false when unreachable.
 pub(super) fn set_path(creature: &mut Creature, session: &GameSession, target: TilePos) -> bool {
+    // Courier bats fly in a straight line. Pickup and drop-off validation is
+    // still performed by the carrier/job logic; only terrain is ignored.
+    if creature.species == "bat_courier" {
+        creature.path = if creature.tile() == target {
+            Vec::new()
+        } else {
+            vec![target]
+        };
+        return true;
+    }
     let Some(path) = nav::find_path(session, creature.tile(), target) else {
         return false;
     };
