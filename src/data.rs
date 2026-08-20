@@ -7,6 +7,8 @@
 use macroquad_toolkit::data_loader::{load_embedded_json_labeled, DataRegistry};
 use serde::{Deserialize, Serialize};
 
+mod validation;
+
 const GAME_CONFIG_JSON: &str =
     macroquad_toolkit::include_json_str!("../assets/data/game_config.json");
 const SPECIES_JSON: &str = macroquad_toolkit::include_json_str!("../assets/data/species.json");
@@ -404,9 +406,12 @@ impl GameData {
     pub fn equipment_def(&self, id: &str) -> Option<&EquipmentDef> {
         self.equipment.iter().find(|e| e.id == id)
     }
-}
 
-impl GameData {
+    /// Validate cross-file references before the runtime starts using them.
+    pub fn validate(&self) -> Result<(), String> {
+        validation::validate(self)
+    }
+
     pub fn load() -> Result<Self, String> {
         let config = load_embedded_json_labeled("game_config", GAME_CONFIG_JSON)?;
         let species = DataRegistry::from_embedded_json(SPECIES_JSON, "id")?;
@@ -416,7 +421,7 @@ impl GameData {
         let tutorial: Vec<TutorialStepDef> = load_embedded_json_labeled("tutorial", TUTORIAL_JSON)?;
         let balance = load_embedded_json_labeled("balance", BALANCE_JSON)?;
 
-        Ok(Self {
+        let data = Self {
             config,
             species,
             buildings,
@@ -424,7 +429,9 @@ impl GameData {
             equipment,
             tutorial,
             balance,
-        })
+        };
+        data.validate()?;
+        Ok(data)
     }
 }
 

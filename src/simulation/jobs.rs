@@ -60,12 +60,12 @@ fn tick_creature(
     claims: &mut MineClaims,
     overseers: &[(f32, f32)],
 ) {
-    let Some(species) = data.species.get(&creature.species).cloned() else {
+    let Some(species) = data.species.get(&creature.species) else {
         return;
     };
 
     if !creature.path.is_empty() {
-        walk(creature, &species, dt);
+        walk(creature, species, dt);
         return;
     }
 
@@ -87,13 +87,13 @@ fn tick_creature(
             }
         }
         Job::Miner => miner::tick_miner(creature, session, data, dt, claims, work_boost),
-        Job::Carrier => carrier::tick_carrier(creature, session, data, &species, dt, work_boost),
+        Job::Carrier => carrier::tick_carrier(creature, session, data, species, dt, work_boost),
         Job::Cook => cook::tick_cook(creature, session, data, dt, work_boost),
         Job::Smith => smith::tick_smith(creature, session, data, dt, work_boost),
         Job::Guard => guard::tick_guard(creature, session, data, dt, work_boost),
         Job::Smelter => smelter::tick_smelter(creature, session, data, dt, work_boost),
         Job::Janitor => janitor::tick_janitor(creature, session, data, dt, work_boost),
-        Job::Courier => carrier::tick_carrier(creature, session, data, &species, dt, work_boost),
+        Job::Courier => carrier::tick_carrier(creature, session, data, species, dt, work_boost),
         Job::Engineer => engineer::tick_engineer(creature, session, data, dt, claims, work_boost),
     }
 }

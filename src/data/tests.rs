@@ -73,3 +73,14 @@ fn balance_values_are_playable() {
     // Cooking must multiply calories, or the loop can never go positive.
     assert!(b.cook_batch_food / b.cook_batch_mushrooms as f32 > 1.0);
 }
+
+#[test]
+fn content_validation_rejects_broken_references() {
+    let mut data = GameData::load().unwrap();
+    data.unlocks[0].building = Some("missing_building".to_owned());
+
+    let error = data
+        .validate()
+        .expect_err("broken content should be rejected");
+    assert!(error.contains("missing_building"));
+}

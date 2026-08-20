@@ -104,3 +104,15 @@ fn beetles_cannot_be_reassigned() {
 
     assert!(!moved);
 }
+
+#[test]
+fn progression_counter_lookup_includes_study_metrics() {
+    let progress = wildlife::Progress {
+        specimens: 3,
+        knowledge: 4.8,
+        ..Default::default()
+    };
+
+    assert_eq!(progress.counter("specimens"), 3);
+    assert_eq!(progress.counter("knowledge"), 4);
+}

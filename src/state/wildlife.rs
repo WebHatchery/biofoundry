@@ -78,6 +78,8 @@ impl Progress {
             "beetles_captured" => self.beetles_captured,
             "raids_survived" => self.raids_survived,
             "famines_survived" => self.famines_survived,
+            "specimens" => self.specimens,
+            "knowledge" => self.knowledge.max(0.0).floor() as u32,
             "waste_processed" => self.waste_processed,
             "courier_deliveries" => self.courier_deliveries,
             _ => 0,
