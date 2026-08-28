@@ -12,6 +12,7 @@ use macroquad::prelude::*;
 use macroquad_toolkit::camera::{Camera2D, Camera2DConfig, CameraBounds};
 use macroquad_toolkit::events::EventBus;
 use macroquad_toolkit::grid::TilePos;
+use macroquad_toolkit::input::TouchGesture;
 use macroquad_toolkit::notifications::{
     NotificationAnchor, NotificationManager, NotificationRenderConfig,
 };
@@ -19,6 +20,8 @@ use macroquad_toolkit::persistence::{
     load_from_slot_with_migration, save_to_slot_with_version, slot_exists,
 };
 use macroquad_toolkit::prelude::{begin_virtual_ui_frame, dark, end_virtual_ui_frame, InputState};
+
+const CAMERA_DRAG_THRESHOLD: f32 = 6.0;
 
 mod capture_scenes;
 #[path = "game_actions.rs"]
@@ -44,6 +47,14 @@ pub struct Game {
     save_exists: bool,
     /// Where the right button went down, to tell a click from a camera drag.
     right_press: Vec2,
+    /// Where the primary pointer went down for direct map panning.
+    mouse_pan_start: Option<Vec2>,
+    /// Whether this frame's primary-pointer gesture claimed the map.
+    camera_input_claimed: bool,
+    /// Touch recognizer for one-finger map drags and two-finger pinch zoom.
+    touch_gesture: TouchGesture,
+    /// Keeps a claimed touch drag from becoming a synthetic mouse tap.
+    touch_camera_claimed: bool,
     /// Building tile the player clicked to inspect (first-pass legibility).
     selected_building: Option<TilePos>,
     /// Embedded storybook creature atlas used by the warren renderer.
@@ -79,6 +90,10 @@ impl Game {
             settings_open: false,
             save_exists,
             right_press: vec2(0.0, 0.0),
+            mouse_pan_start: None,
+            camera_input_claimed: false,
+            touch_gesture: TouchGesture::new(),
+            touch_camera_claimed: false,
             selected_building: None,
             world_sprites: ui::warren::WorldSprites::load(),
             menu_sprites: ui::menu::MenuSprites::load(),
@@ -94,6 +109,13 @@ impl Game {
     pub fn update(&mut self, dt: f32) {
         self.notifications.update(dt);
         let input = InputState::capture();
+
+        // The camera owns the primary pointer and touch gestures before the
+        // HUD turns a release into a world click. A claimed drag is carried
+        // through the release frame so it cannot also select a tile.
+        if matches!(&self.state, GameState::Warren(_)) {
+            self.update_camera_input(dt);
+        }
 
         if let GameState::Warren(session) = &mut self.state {
             self.accumulator += dt;
@@ -166,10 +188,7 @@ impl Game {
                 self.famine_announced = false;
             }
 
-            self.camera.update(dt, false);
-
             // Tutorial: advance any steps the player just satisfied. The
-            // "look around" step keys off actual camera motion.
             let camera_moved = (self.camera.target - self.last_camera.0).length() > 4.0
                 || (self.camera.zoom - self.last_camera.1).abs() > 0.01;
             if tutorial::advance(session, &self.data, TutorialInputs { camera_moved }) {
@@ -177,7 +196,7 @@ impl Game {
             }
             self.last_camera = (self.camera.target, self.camera.zoom);
 
-            // F-keys avoid colliding with WASD camera pan.
+            // Keyboard shortcuts remain secondary to the visible controls.
             if is_key_pressed(KeyCode::F5) {
                 self.events.push(UiAction::Save);
             }
@@ -255,9 +274,17 @@ impl Game {
                 end_virtual_ui_frame();
 
                 let mut actions = frame.actions;
+                // A claimed drag must not activate a HUD button when the
+                // browser delivers the touch/mouse release over that button.
+                if self.camera_input_claimed {
+                    actions.clear();
+                }
                 // Left-click routes to the world in every mode: tools act,
                 // Inspect selects the building under the cursor.
-                if !frame.pointer_over_ui && is_mouse_button_released(MouseButton::Left) {
+                if !frame.pointer_over_ui
+                    && !self.camera_input_claimed
+                    && is_mouse_button_released(MouseButton::Left)
+                {
                     if let Some(tile) = hover {
                         actions.push(UiAction::WorldClick(tile));
                     }
@@ -408,13 +435,72 @@ impl Game {
         // Don't let the reset itself count as "the player looked around".
         self.last_camera = (self.camera.target, self.camera.zoom);
     }
+
+    /// Apply touch gestures and primary-pointer dragging to the warren camera.
+    ///
+    /// Touches are handled explicitly because browsers may synthesize a left
+    /// mouse click for the first finger. A drag must pan the map while a short
+    /// contact must remain available to the HUD and world tools as a tap.
+    fn update_camera_input(&mut self, dt: f32) {
+        self.camera_input_claimed = false;
+        let touch = self.touch_gesture.update();
+        let previous_touch_claim = self.touch_camera_claimed;
+        if touch.active && touch.claimed {
+            self.touch_camera_claimed = true;
+        }
+        let touch_claimed = touch.claimed || previous_touch_claim;
+
+        if touch.pan.length_squared() > 0.0 {
+            self.camera.pan(-touch.pan / self.camera.zoom);
+        }
+        if (touch.scale - 1.0).abs() > f32::EPSILON {
+            self.camera.zoom_at(touch.scale, touch.center);
+        }
+
+        // Ignore synthetic mouse events while a finger is on the canvas or
+        // while a claimed touch is being released.
+        if touch.active || self.touch_camera_claimed {
+            self.mouse_pan_start = None;
+        } else {
+            let mouse: Vec2 = mouse_position().into();
+            if is_mouse_button_pressed(MouseButton::Left) {
+                self.mouse_pan_start = Some(mouse);
+                self.camera_input_claimed = false;
+            }
+            if let Some(start) = self.mouse_pan_start {
+                if is_mouse_button_down(MouseButton::Left)
+                    && mouse.distance(start) > CAMERA_DRAG_THRESHOLD
+                {
+                    self.camera_input_claimed = true;
+                    self.camera.pan(-(mouse - start) / self.camera.zoom);
+                    // Continue from the current pointer position so the
+                    // camera follows the drag without accumulating rounding.
+                    self.mouse_pan_start = Some(mouse);
+                }
+                if is_mouse_button_released(MouseButton::Left) {
+                    self.mouse_pan_start = None;
+                }
+            }
+        }
+
+        if !touch.active {
+            self.touch_camera_claimed = false;
+        }
+        self.camera_input_claimed |= touch_claimed;
+
+        // Keep optional keyboard and wheel shortcuts working while direct
+        // primary-pointer and touch gestures remain the required path.
+        self.camera.update(dt, false);
+    }
 }
 
 fn camera_config(data: &GameData, tile_size: f32) -> Camera2DConfig {
     let world_w = data.config.world_width as f32 * tile_size;
     let world_h = data.config.world_height as f32 * tile_size;
     Camera2DConfig {
-        drag_button: Some(MouseButton::Right),
+        // Game handles direct mouse and touch gestures so a primary-pointer
+        // drag can pan without turning the release into a world click.
+        drag_button: None,
         min_zoom: 0.5,
         max_zoom: 3.0,
         bounds: Some(CameraBounds::new(vec2(0.0, 0.0), vec2(world_w, world_h))),

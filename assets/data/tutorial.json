@@ -2,7 +2,7 @@
   {
     "id": "welcome",
     "title": "Welcome to the warren",
-    "body": "Every worker is a creature, and food is the power grid. Right-drag or WASD to look around; scroll to zoom.",
+    "body": "Every worker is a creature, and food is the power grid. Drag the map to look around. Tap + or − to zoom.",
     "done": { "kind": "camera_moved" }
   },
   {
@@ -14,7 +14,7 @@
   {
     "id": "mine",
     "title": "The Mine runs itself",
-    "body": "A goblin already works the Ore Mine beside the warren, extracting ore into a buffer that carriers haul to the stockpile — the first live automation loop. Click the Mine to watch its rate.",
+    "body": "A goblin already works the Ore Mine beside the warren, extracting ore into a buffer that carriers haul to the stockpile — the first live automation loop. Tap the Mine to watch its rate.",
     "done": { "kind": "mine_working" }
   },
   {
@@ -32,13 +32,13 @@
   {
     "id": "pickaxe",
     "title": "Close the loop",
-    "body": "Click the Blacksmith and queue an Iron Pickaxe. A miner picks it up on its own and the Mine speeds up — extraction feeding processing feeding extraction. That is the factory.",
+    "body": "Tap the Blacksmith, then tap Iron Pickaxe. A miner picks it up on its own and the Mine speeds up — extraction feeding processing feeding extraction. That is the factory.",
     "done": { "kind": "gear_crafted", "item": "iron_pickaxe" }
   },
   {
     "id": "goals",
     "title": "Awaken the Worm",
-    "body": "Deliver 50 ore and hold a 100-food surplus to secure the warren. Then forge 20 ingots, raise the Worm Shrine, and feed the Colossal Worm sleeping below.",
-    "done": { "kind": "won" }
+    "body": "Deliver 50 ore and hold a 100-food surplus to secure the warren. Then forge 20 ingots, raise the Worm Shrine, and feed the Colossal Worm sleeping below. This tutorial completes when the worm awakens.",
+    "done": { "kind": "worm_awake" }
   }
 ]

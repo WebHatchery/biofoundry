@@ -358,7 +358,7 @@ pub(super) fn draw_inspect_panel(
             }
         }
         _ => {
-            line("Click empty ground to deselect", dark::TEXT_DIM, &mut y);
+            line("Tap empty ground to deselect", dark::TEXT_DIM, &mut y);
         }
     }
 

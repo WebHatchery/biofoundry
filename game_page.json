@@ -5,27 +5,29 @@
     "class": "playable"
   },
   "canvas_rendering": "pixelated",
+  "controls_hint": "Drag the map or tap +/− to zoom; use the visible buttons for every required action",
   "about": [
     "Build a living factory beneath the earth. Dig tunnels, feed your goblins, and keep a hungry colony supplied as it grows."
   ],
   "controls": [
     {
-      "key": "Right Mouse",
-      "desc": "Drag camera"
+      "key": "Mouse / Touch",
+      "desc": "Drag the map to look around"
     },
     {
-      "key": "WASD / Arrows",
-      "desc": "Pan camera"
+      "key": "+ / − buttons",
+      "desc": "Tap to zoom the camera"
     },
     {
-      "key": "Mouse Wheel",
-      "desc": "Zoom camera"
+      "key": "Visible buttons",
+      "desc": "Tap New Warren, Save, Load, Continue, and Menu"
     },
     {
-      "key": "Esc",
-      "desc": "Back to menu"
+      "key": "Map taps",
+      "desc": "Tap buildings, tools, and tutorial actions where shown"
     }
   ],
+  "controls_note": "Pinch zoom is also supported on touch screens.",
   "details": [
     {
       "label": "Genre",

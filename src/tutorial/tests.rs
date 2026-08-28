@@ -14,7 +14,7 @@ fn tutorial_data_loads_in_teaching_order() {
     assert_eq!(data.tutorial.first().unwrap().id, "welcome");
     assert!(matches!(
         data.tutorial.last().unwrap().done,
-        TutorialDone::Won
+        TutorialDone::WormAwake
     ));
 }
 
@@ -79,13 +79,26 @@ fn steps_complete_from_player_actions() {
         .insert("iron_pickaxe".to_owned(), 1);
     assert!(advance(&mut session, &data, none));
 
-    // 7. Win finishes the tutorial.
+    // 7. The awakened worm finishes the tutorial.
     assert_eq!(current_step(&session, &data).unwrap().id, "goals");
-    session.won = true;
+    session.worm_awake = true;
     assert!(advance(&mut session, &data, none));
     assert!(current_step(&session, &data).is_none(), "tutorial finished");
     let (done, total) = progress(&session, &data);
     assert_eq!(done, total);
+}
+
+#[test]
+fn final_tutorial_waits_for_the_worm() {
+    let (data, mut session) = boot();
+    let none = TutorialInputs::default();
+    session.tutorial_step = data.tutorial.iter().position(|s| s.id == "goals").unwrap();
+    session.won = true;
+
+    assert!(!advance(&mut session, &data, none));
+    session.worm_awake = true;
+    assert!(advance(&mut session, &data, none));
+    assert!(current_step(&session, &data).is_none());
 }
 
 #[test]

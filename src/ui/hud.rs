@@ -70,7 +70,10 @@ pub fn draw(
     let top_bar = Rect::new(12.0, 12.0, LOGICAL_WIDTH - 24.0, 48.0);
     let food_panel = Rect::new(12.0, 66.0, PANEL_W, 184.0);
     let jobs_panel = Rect::new(12.0, 256.0, PANEL_W, 304.0);
-    let tools_panel = Rect::new(12.0, 566.0, PANEL_W, 144.0);
+    // Keep Build & Dig beside the other opening controls. The WebGL page can
+    // show a 1200x675 canvas below a header; putting this panel at the bottom
+    // makes its buttons disappear below the browser fold at 1280x720.
+    let tools_panel = Rect::new(PANEL_W + 28.0, 66.0, PANEL_W, 160.0);
 
     panels::draw_top_bar(session, top_bar, mouse, &mut actions);
     panels::draw_food_grid_panel(session, data, food_panel);

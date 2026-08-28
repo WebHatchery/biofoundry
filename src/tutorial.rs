@@ -79,7 +79,7 @@ fn step_done(
                     .iter()
                     .any(|c| c.equipment.as_deref() == Some(item.as_str()))
         }
-        TutorialDone::Won => session.won,
+        TutorialDone::WormAwake => session.worm_awake,
     }
 }
 

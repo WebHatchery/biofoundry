@@ -72,7 +72,7 @@ pub(super) fn draw_top_bar(
         );
     } else {
         draw_ui_text_ex(
-            "Right-drag / WASD pan · wheel zoom · Esc cancel/menu",
+            "Drag map · tap +/− to zoom · Save / Load / Menu",
             bar.x + 380.0,
             bar.y + 31.0,
             TextStyle::new(15.0, dark::TEXT_DIM).params(),
@@ -88,8 +88,24 @@ pub(super) fn draw_top_bar(
         actions.push(UiAction::BackToMenu);
     }
     if hud_button(
+        Rect::new(bar.right() - 354.0, bar.y + 4.0, 40.0, 40.0),
+        "−",
+        true,
+        mouse,
+    ) {
+        actions.push(UiAction::ZoomCamera(-1));
+    }
+    if hud_button(
+        Rect::new(bar.right() - 310.0, bar.y + 4.0, 40.0, 40.0),
+        "+",
+        true,
+        mouse,
+    ) {
+        actions.push(UiAction::ZoomCamera(1));
+    }
+    if hud_button(
         Rect::new(bar.right() - 254.0, bar.y + 8.0, 74.0, 32.0),
-        "Save F5",
+        "Save",
         true,
         mouse,
     ) {
@@ -97,7 +113,7 @@ pub(super) fn draw_top_bar(
     }
     if hud_button(
         Rect::new(bar.right() - 176.0, bar.y + 8.0, 74.0, 32.0),
-        "Load F9",
+        "Load",
         true,
         mouse,
     ) {

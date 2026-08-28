@@ -58,6 +58,8 @@ pub enum UiAction {
     ToggleSettings,
     /// Nudge the sound volume by this many 10% steps.
     AdjustVolume(i8),
+    /// Zoom the warren camera around the screen centre.
+    ZoomCamera(i8),
     ExitGame,
 }
 

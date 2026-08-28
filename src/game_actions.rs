@@ -6,6 +6,7 @@ use crate::simulation;
 use crate::state::creatures::Job;
 use crate::state::{GameState, StateTransition};
 use crate::ui::{UiAction, UiMode};
+use macroquad::prelude::*;
 
 impl Game {
     pub(super) fn apply_action(&mut self, action: UiAction) {
@@ -184,6 +185,15 @@ impl Game {
                 self.audio.set_volume(volume);
                 self.audio.save_settings(&self.data.config.game_name);
                 self.audio.play(Sfx::Select);
+            }
+            UiAction::ZoomCamera(direction) => {
+                let factor = if direction >= 0 {
+                    self.camera.config.zoom_in_factor
+                } else {
+                    self.camera.config.zoom_out_factor
+                };
+                self.camera
+                    .zoom_at(factor, vec2(screen_width(), screen_height()) * 0.5);
             }
             UiAction::ExitGame => macroquad::miniquad::window::quit(),
         }

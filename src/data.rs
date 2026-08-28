@@ -378,8 +378,8 @@ pub enum TutorialDone {
     /// A piece of equipment (item id) has been crafted — in the stockpile
     /// pool or already worn.
     GearCrafted { item: String },
-    /// The first victory landed.
-    Won,
+    /// The Colossal Worm has awakened, completing the campaign tutorial.
+    WormAwake,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
