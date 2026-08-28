@@ -17,9 +17,9 @@ can reproduce campaign blockers.
 - [ ] Record actual timing for the critical-path beats on the shipping build.
 - [ ] Verify New Warren, Continue, save/load, campaign completion, endless
   continuation, and return-to-menu behavior in Windows and WebGL.
-- [ ] Classify every implemented system as critical-path, optional depth, or
+- [x] Classify every implemented system as critical-path, optional depth, or
   post-campaign.
-- [ ] Turn findings into small implementation issues with reproduction steps
+- [x] Turn findings into small implementation issues with reproduction steps
   and acceptance criteria.
 
 **Acceptance:** a baseline report contains the run outcome, beat times,

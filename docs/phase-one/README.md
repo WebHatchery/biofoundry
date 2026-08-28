@@ -30,6 +30,7 @@ instructions.”
 | [`PLAYABLE_SLICE.md`](PLAYABLE_SLICE.md) | Player journey, rules, pacing, UX, and completion contract |
 | [`PRODUCTION_PLAN.md`](PRODUCTION_PLAN.md) | Ordered work, acceptance criteria, dependencies, and exit gate |
 | [`PLAYTEST_PLAN.md`](PLAYTEST_PLAN.md) | Test cohorts, sessions, metrics, issue severity, and reporting |
+| [`P0_BASELINE_REPORT.md`](P0_BASELINE_REPORT.md) | Current-build platform checks, timing evidence, system classification, and reproducible findings |
 
 ## Source-of-truth rules
 
