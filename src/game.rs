@@ -319,6 +319,10 @@ impl Game {
             }
         };
 
+        // Roll the HUD's visible controls into the next frame's neighbor map
+        // so the shared toolkit can grow their touch hit areas safely.
+        macroquad_toolkit::ui::end_frame_neighbours();
+
         for action in actions {
             self.events.push(action);
         }

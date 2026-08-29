@@ -1,7 +1,9 @@
 //! The HUD's shared look: the panel surface style and the one button.
 
+use crate::ui::{LOGICAL_HEIGHT, LOGICAL_WIDTH};
 use macroquad::prelude::*;
 use macroquad_toolkit::prelude::*;
+use macroquad_toolkit::ui::{note_neighbour, touch_area, Pointer, VirtualUi};
 
 pub(super) fn panel_style() -> SurfaceStyle {
     SurfaceStyle::new(Color::new(0.07, 0.08, 0.10, 0.94))
@@ -11,10 +13,15 @@ pub(super) fn panel_style() -> SurfaceStyle {
 }
 
 pub(super) fn hud_button(rect: Rect, text: &str, enabled: bool, mouse: Vec2) -> bool {
-    let hovered = enabled && rect.contains_point(mouse);
+    let virtual_ui = VirtualUi::new(LOGICAL_WIDTH, LOGICAL_HEIGHT);
+    let pointer = Pointer::read(|position| virtual_ui.screen_to_ui(position));
+    let hit_rect = touch_area(rect);
+    note_neighbour(rect);
+    let hovered = enabled && (rect.contains_point(mouse) || pointer.hovering_over(rect));
+    let pressing = enabled && pointer.pressing(hit_rect);
     let fill = if !enabled {
         Color::new(0.10, 0.11, 0.13, 1.0)
-    } else if hovered {
+    } else if pressing || hovered {
         Color::new(0.20, 0.22, 0.28, 1.0)
     } else {
         Color::new(0.13, 0.145, 0.18, 1.0)
@@ -31,5 +38,5 @@ pub(super) fn hud_button(rect: Rect, text: &str, enabled: bool, mouse: Vec2) -> 
         rect.h,
         TextStyle::new(15.0, if enabled { dark::TEXT } else { dark::TEXT_DIM }),
     );
-    hovered && is_mouse_button_released(MouseButton::Left)
+    enabled && pointer.released_on(hit_rect)
 }
