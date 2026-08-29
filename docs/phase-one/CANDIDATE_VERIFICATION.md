@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `bc5e0cb`
+**Source revision:** `425f4a9`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -187,6 +187,10 @@ automated simulation results into first-time-player evidence.
   [ui_endless_empty.png](../verification/ui_endless_empty.png) show the
   Objective and inspection guidance changing from mixed cargo-and-crew return,
   to wait for transit, to return crew, to preparing a new payload.
+- Mixed-payload return control — an outpost carrying both goods and passengers
+  now labels the visible action with cargo, crew, and the shrine destination
+  (for example, `Send 12 cargo + 2 crew to shrine`); focused UI coverage and
+  refreshed endless-route captures verify the wording.
 - Remote cargo accounting — subsequent outpost loads now append to existing
   ore, ingot, and cooked-food stacks instead of replacing them; focused
   simulation coverage exercises the multi-run case.
