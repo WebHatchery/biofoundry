@@ -107,6 +107,7 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                 session.won = true;
                 session.victory_shown = true;
                 session.factory_complete = true;
+                session.creatures[0].job = Job::Guard;
                 session.unlocked.insert("worm_shrine".to_owned());
             }
         }
@@ -490,6 +491,7 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                 session.victory_shown = true;
                 session.factory_complete = true;
                 session.factory_shown = true;
+                session.creatures[0].job = Job::Guard;
                 session.worm_fed = 44.0;
                 session.worm_ingots_fed = 4;
                 let spawn = session.spawn_tile();
