@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `a87e53a`
+**Source revision:** `565ef45`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -25,7 +25,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 157 unit tests and 2 integration tests pass.
+- `cargo test --all-targets` — 159 unit tests and 2 integration tests pass.
 - `cargo clippy --all-targets --all-features -- -D warnings` — pass.
 - `publish.ps1` with no parameters — pass; Windows and WebGL packages
   deployed to Preview.
@@ -213,6 +213,9 @@ automated simulation results into first-time-player evidence.
 - Route load recovery — loading a save now restores stationed crew to the
   outpost tile and clears stale local tasks, while preserving in-flight
   passenger coordinates; focused state coverage exercises the repair.
+- Route ownership recovery — loading a save drops unknown or duplicate crew IDs
+  from outpost and in-flight ownership records, keeping route capacity and
+  return payloads tied to the actual creature roster.
 
 ## Still open
 
