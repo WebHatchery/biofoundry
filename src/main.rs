@@ -28,7 +28,7 @@ async fn main() {
     let mut game = Game::new().await;
 
     // Screenshot harness: when BIOFOUNDRY_CAPTURE_PATH is set, seed the named
-    // scene ("menu" or "warren"), render deterministic frames, write a PNG,
+    // scene ("menu", "warren", or a named verification scene), render deterministic frames, write a PNG,
     // and exit. Stubbed out on wasm32.
     if let Some(configs) = capture::CaptureConfig::all_from_env("BIOFOUNDRY") {
         for config in configs {

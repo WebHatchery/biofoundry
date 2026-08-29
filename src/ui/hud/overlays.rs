@@ -41,16 +41,16 @@ pub(super) fn draw_goal_overlay(
     );
 
     if hud_button(
-        Rect::new(panel.x + 70.0, panel.bottom() - 56.0, 160.0, 38.0),
-        "Keep Playing",
+        Rect::new(panel.x + 40.0, panel.bottom() - 56.0, 195.0, 38.0),
+        "Continue in Endless",
         true,
         mouse,
     ) {
         actions.push(dismiss);
     }
     if hud_button(
-        Rect::new(panel.x + 250.0, panel.bottom() - 56.0, 160.0, 38.0),
-        "Menu",
+        Rect::new(panel.x + 245.0, panel.bottom() - 56.0, 195.0, 38.0),
+        "Return to Menu",
         true,
         mouse,
     ) {

@@ -105,7 +105,7 @@ clear path forward.
 
 - [ ] Strengthen the Worm Awakened audiovisual sequence and world-state change.
 - [ ] Present elapsed time and a concise campaign summary.
-- [ ] Offer visible Continue in Endless Mode and Return to Menu actions.
+- [x] Offer visible Continue in Endless Mode and Return to Menu actions.
 - [x] Add autosaves at safe beats while retaining visible manual Save/Load.
 - [ ] Detect non-viable colonies where possible and offer restart/load guidance.
 - [ ] Verify save behavior across refresh, relaunch, and WebGL storage limits.

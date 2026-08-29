@@ -227,7 +227,7 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                 }
             }
         }
-        "worm" => {
+        "worm" | "completion" => {
             game.transition(StateTransition::StartWarren);
             if let GameState::Warren(session) = &mut game.state {
                 // Stage the awakened monument.
@@ -253,7 +253,7 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                 session.worm_fed = game.data.balance.worm_awaken_at;
                 session.worm_ingots_fed = game.data.balance.worm_awaken_ingots;
                 session.worm_awake = true;
-                session.worm_shown = true;
+                session.worm_shown = scene != "completion";
                 for _ in 0..300 {
                     simulation::tick(session, &game.data);
                 }
