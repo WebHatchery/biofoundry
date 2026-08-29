@@ -254,7 +254,7 @@ fn outpost_has_loadable_payload(
         && session
             .creatures
             .iter()
-            .any(|creature| creature.tile() == session.stockpile_pos());
+            .any(|creature| !creature.is_remote() && creature.tile() == session.stockpile_pos());
     cargo_ready || crew_ready
 }
 
