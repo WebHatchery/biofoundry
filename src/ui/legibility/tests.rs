@@ -48,6 +48,20 @@ fn full_mine_buffer_reads_backed_up() {
 }
 
 #[test]
+fn engineer_staffing_keeps_a_mine_status_nominal() {
+    let (data, mut session) = boot();
+    session.creatures.clear();
+    let mine = session.buildings_of("mine").next().unwrap().pos;
+    session.spawn_creature(&data, "engineer", Job::Engineer);
+    session.creatures.last_mut().unwrap().task = Task::WorkMine(mine);
+
+    assert_eq!(
+        building_status(&session, &data, session.building_at(mine).unwrap()),
+        None
+    );
+}
+
+#[test]
 fn starved_blacksmith_and_kiln_read_starved() {
     let (data, mut session) = boot();
     let spot = session

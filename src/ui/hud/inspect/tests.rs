@@ -250,6 +250,19 @@ fn inspection_staffing_ignores_remote_crew_and_recognizes_assigned_crew() {
 }
 
 #[test]
+fn inspection_staffing_recognizes_an_engineer_at_a_mine() {
+    let data = GameData::load().expect("embedded game data");
+    let mut session = GameSession::new(&data, 31);
+    let mine = session.buildings_of("mine").next().unwrap().pos;
+    session.creatures.clear();
+    session.spawn_creature(&data, "engineer", Job::Engineer);
+    session.creatures[0].task = Task::WorkMine(mine);
+
+    assert!(local_mine_worker_at(&session.creatures[0], mine));
+    assert!(local_mine_staffed_at(&session.creatures[0], mine));
+}
+
+#[test]
 fn outpost_return_label_names_each_payload_kind() {
     assert_eq!(
         outpost_return_label(6, 4),

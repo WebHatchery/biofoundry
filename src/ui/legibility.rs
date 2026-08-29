@@ -70,7 +70,7 @@ impl BuildingStatus {
 fn staffed_at(session: &GameSession, pos: TilePos, job: Job) -> bool {
     session.creatures.iter().any(|c| {
         !c.is_remote()
-            && c.job == job
+            && (c.job == job || (job == Job::Miner && c.job == Job::Engineer))
             && match &c.task {
                 Task::WorkMine(p) | Task::GoMine(p) => *p == pos,
                 Task::Smithing { shop, .. } | Task::Crafting { shop, .. } | Task::GoSmith(shop) => {

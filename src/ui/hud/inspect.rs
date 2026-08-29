@@ -504,7 +504,7 @@ fn local_mine_worker_at(creature: &Creature, pos: TilePos) -> bool {
 
 fn local_mine_staffed_at(creature: &Creature, pos: TilePos) -> bool {
     !creature.is_remote()
-        && creature.job == Job::Miner
+        && (creature.job == Job::Miner || creature.job == Job::Engineer)
         && match &creature.task {
             Task::WorkMine(p) | Task::GoMine(p) => *p == pos,
             _ => creature.tile() == pos,
