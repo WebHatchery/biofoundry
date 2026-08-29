@@ -702,8 +702,9 @@ pub(super) fn draw_tutorial_panel(
         TextStyle::new(15.0, dark::TEXT_BRIGHT),
     );
 
+    let body = tutorial_body(step, session, data);
     draw_text_block(
-        &step.body,
+        &body,
         panel.x + 14.0,
         panel.y + 42.0,
         panel.w - 28.0,
@@ -723,4 +724,19 @@ pub(super) fn draw_tutorial_panel(
     }
 
     Some(panel)
+}
+
+fn tutorial_body(
+    step: &crate::data::TutorialStepDef,
+    session: &GameSession,
+    data: &GameData,
+) -> String {
+    if step.id == "secure" {
+        format!(
+            "Deliver 50 ore and hold 100 food in Objective. Before a raid, {}. This secures the warren and ends onboarding; next, forge 20 ingots and raise the Shrine.",
+            super::objective::security_handoff_action_hint(session, data)
+        )
+    } else {
+        step.body.clone()
+    }
 }

@@ -42,6 +42,33 @@ fn compact_raid_hint_uses_an_available_specialist_job() {
 }
 
 #[test]
+fn secure_tutorial_names_the_available_guard_action() {
+    let data = GameData::load().expect("embedded game data");
+    let mut session = GameSession::new(&data, 7);
+    session.tutorial_step = 3;
+    let step = crate::tutorial::current_step(&session, &data).expect("secure tutorial step");
+
+    let body = tutorial_body(step, &session, &data);
+
+    assert!(body.contains("tap − beside Miner, then + beside Guard in Jobs"));
+    assert!(!body.contains("if Idle is 0"));
+}
+
+#[test]
+fn secure_tutorial_keeps_specialist_recovery_honest() {
+    let data = GameData::load().expect("embedded game data");
+    let mut session = GameSession::new(&data, 7);
+    session.tutorial_step = 3;
+    session.creatures.clear();
+    session.spawn_creature(&data, "overseer", Job::Idle);
+    let step = crate::tutorial::current_step(&session, &data).expect("secure tutorial step");
+
+    let body = tutorial_body(step, &session, &data);
+
+    assert!(body.contains("free a worker, then tap + beside Guard in Jobs"));
+}
+
+#[test]
 fn compact_food_hint_fits_the_top_bar() {
     let data = GameData::load().expect("embedded game data");
     let session = GameSession::new(&data, 7);
