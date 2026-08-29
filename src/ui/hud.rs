@@ -109,6 +109,13 @@ pub fn draw(
     let factory_up = session.factory_complete && !session.factory_shown;
     let worm_up = session.worm_awake && !session.worm_shown;
     let colony_lost = session.creatures.is_empty() && !session.worm_awake;
+    let modal_overlay = colony_lost || worm_up || factory_up || victory_up;
+    if modal_overlay {
+        // Goal and recovery overlays must own the frame's input. Without
+        // clearing the HUD intents collected above, a click on a visible
+        // overlay choice could also save, pause, or navigate underneath it.
+        actions.clear();
+    }
     if colony_lost {
         overlays::draw_colony_failure_overlay(options.save_exists, mouse, &mut actions);
     } else if worm_up {
