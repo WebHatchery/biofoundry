@@ -70,7 +70,7 @@ response.
   Smelter, and Worm Shrine.
 - [x] Surface missing labor, missing input, output blockage, invalid route, and
   reserve-policy pauses in plain language.
-- [ ] Show before/after throughput when the Iron Pickaxe is equipped.
+- [x] Show before/after throughput when the Iron Pickaxe is equipped.
 - [x] Forecast famine and raid pressure early enough for a meaningful response.
 - [ ] Audit status colors for non-color cues and text contrast.
 

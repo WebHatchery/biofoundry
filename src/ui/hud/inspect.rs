@@ -64,6 +64,15 @@ pub(super) fn draw_inspect_panel(
                 .map(|w| w.slots)
                 .unwrap_or(0);
             // Effective rate folds in each stationed miner's Iron Pickaxe.
+            let base_rate: f32 = session
+                .creatures
+                .iter()
+                .filter(|c| matches!(&c.task, Task::WorkMine(p) if *p == pos))
+                .map(|c| {
+                    data.balance.mine_ore_per_min
+                        * crate::ui::legibility::work_multiplier(c, session, data)
+                })
+                .sum();
             let rate: f32 = session
                 .creatures
                 .iter()
@@ -90,7 +99,12 @@ pub(super) fn draw_inspect_panel(
                 (format!("Miners {staffed}/{slots}"), dark::POSITIVE)
             };
             line(&worker_txt, worker_col, &mut y);
-            line(&format!("Ore  +{rate:.0}/min"), dark::TEXT, &mut y);
+            let rate_text = if rate > base_rate + 0.01 {
+                format!("Ore  +{rate:.0}/min  (base +{base_rate:.0})")
+            } else {
+                format!("Ore  +{rate:.0}/min")
+            };
+            line(&rate_text, dark::TEXT, &mut y);
             line(
                 &format!(
                     "Buffer {:.0}/{:.0}",
