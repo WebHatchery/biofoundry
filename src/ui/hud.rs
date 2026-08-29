@@ -42,6 +42,12 @@ pub struct HudOptions {
     pub save_exists: bool,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(super) enum ColonyFailure {
+    Silent,
+    GuardHandoff,
+}
+
 impl HudSprites {
     pub fn load() -> Self {
         let texture = Texture2D::from_file_with_format(JOB_ICON_ATLAS_BYTES, None);
@@ -109,16 +115,16 @@ pub fn draw(
     let victory_up = session.won && !session.victory_shown;
     let factory_up = session.factory_complete && !session.factory_shown;
     let worm_up = session.worm_awake && !session.worm_shown;
-    let colony_lost = session.creatures.is_empty() && !session.worm_awake;
-    let modal_overlay = colony_lost || worm_up || factory_up || victory_up;
+    let colony_failure = colony_failure_reason(session, data);
+    let modal_overlay = colony_failure.is_some() || worm_up || factory_up || victory_up;
     if modal_overlay {
         // Goal and recovery overlays must own the frame's input. Without
         // clearing the HUD intents collected above, a click on a visible
         // overlay choice could also save, pause, or navigate underneath it.
         actions.clear();
     }
-    if colony_lost {
-        overlays::draw_colony_failure_overlay(options.save_exists, mouse, &mut actions);
+    if let Some(failure) = colony_failure {
+        overlays::draw_colony_failure_overlay(failure, options.save_exists, mouse, &mut actions);
     } else if worm_up {
         overlays::draw_goal_overlay(
             "The Colossal Worm Awakens",
@@ -162,7 +168,7 @@ pub fn draw(
     let pointer_over_ui = victory_up
         || factory_up
         || worm_up
-        || colony_lost
+        || colony_failure.is_some()
         || options.help_open
         || tutorial_panel.is_some_and(|r| panel_input_rect(r, ui.scale).contains_point(mouse))
         || panel_input_rect(objective_panel, ui.scale).contains_point(mouse)
@@ -180,6 +186,24 @@ pub fn draw(
         actions,
         pointer_over_ui,
     }
+}
+
+fn colony_failure_reason(session: &GameSession, data: &GameData) -> Option<ColonyFailure> {
+    if session.worm_awake {
+        return None;
+    }
+    if session.creatures.is_empty() {
+        return Some(ColonyFailure::Silent);
+    }
+    let security_handoff_stuck = session.won
+        && session.job_count(Job::Guard) == 0
+        && session.creatures.iter().all(|creature| {
+            !data
+                .species
+                .get(&creature.species)
+                .is_some_and(|species| species.reassignable)
+        });
+    security_handoff_stuck.then_some(ColonyFailure::GuardHandoff)
 }
 
 fn worm_completion_body(session: &GameSession) -> String {

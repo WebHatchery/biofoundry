@@ -80,3 +80,29 @@ fn warren_victory_report_does_not_promise_a_specialist_assignment() {
     assert!(body.contains("free a worker, then tap + beside Guard in Jobs"));
     assert!(!body.contains("After closing this report, tap + beside Guard in Jobs."));
 }
+
+#[test]
+fn colony_failure_detects_a_stuck_security_handoff() {
+    let data = GameData::load().unwrap();
+    let mut session = GameSession::new(&data, 42);
+    session.won = true;
+    session.creatures.clear();
+    session.spawn_creature(&data, "overseer", Job::Idle);
+
+    assert_eq!(
+        colony_failure_reason(&session, &data),
+        Some(ColonyFailure::GuardHandoff)
+    );
+}
+
+#[test]
+fn colony_failure_does_not_interrupt_an_awakened_specialist_warren() {
+    let data = GameData::load().unwrap();
+    let mut session = GameSession::new(&data, 42);
+    session.won = true;
+    session.worm_awake = true;
+    session.creatures.clear();
+    session.spawn_creature(&data, "overseer", Job::Idle);
+
+    assert_eq!(colony_failure_reason(&session, &data), None);
+}

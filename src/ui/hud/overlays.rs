@@ -1,6 +1,7 @@
 //! Full-screen goal overlays, the revisitable field guide, and the in-world
 //! status-badge legend.
 
+use super::ColonyFailure;
 use crate::data::GameData;
 use crate::state::GameSession;
 use crate::ui::hud::widgets::{hud_button, panel_style};
@@ -64,6 +65,7 @@ pub(super) fn draw_goal_overlay(
 /// Recovery screen for the one unambiguous non-viable colony state: no
 /// creatures remain to produce food or advance the campaign.
 pub(super) fn draw_colony_failure_overlay(
+    failure: ColonyFailure,
     save_exists: bool,
     mouse: Vec2,
     actions: &mut Vec<UiAction>,
@@ -78,16 +80,12 @@ pub(super) fn draw_colony_failure_overlay(
     let panel = Rect::new(LOGICAL_WIDTH * 0.5 - 240.0, 185.0, 480.0, 280.0);
     draw_surface_with_title(
         panel,
-        Some("The Warren Falls Silent"),
+        Some(colony_failure_title(failure)),
         &panel_style(),
         TextStyle::new(20.0, dark::TEXT_BRIGHT),
     );
 
-    let body = if save_exists {
-        "No creatures remain, so this warren cannot produce food or advance the campaign.\n\nLoad the last safe warren to recover your progress, or start fresh."
-    } else {
-        "No creatures remain, so this warren cannot produce food or advance the campaign.\n\nStart a new warren to begin again."
-    };
+    let body = colony_failure_body(failure, save_exists);
     draw_text_block(
         body,
         panel.x + 20.0,
@@ -124,6 +122,30 @@ pub(super) fn draw_colony_failure_overlay(
         mouse,
     ) {
         actions.push(UiAction::BackToMenu);
+    }
+}
+
+fn colony_failure_title(failure: ColonyFailure) -> &'static str {
+    match failure {
+        ColonyFailure::Silent => "The Warren Falls Silent",
+        ColonyFailure::GuardHandoff => "Guard Handoff Blocked",
+    }
+}
+
+fn colony_failure_body(failure: ColonyFailure, save_exists: bool) -> &'static str {
+    match (failure, save_exists) {
+        (ColonyFailure::Silent, true) => {
+            "No creatures remain, so this warren cannot produce food or advance the campaign.\n\nLoad the last safe warren to recover your progress, or start fresh."
+        }
+        (ColonyFailure::Silent, false) => {
+            "No creatures remain, so this warren cannot produce food or advance the campaign.\n\nStart a new warren to begin again."
+        }
+        (ColonyFailure::GuardHandoff, true) => {
+            "No reassignable workers remain, so this warren cannot staff the Guard post or advance onboarding.\n\nLoad the last safe warren to recover your progress, or start fresh."
+        }
+        (ColonyFailure::GuardHandoff, false) => {
+            "No reassignable workers remain, so this warren cannot staff the Guard post or advance onboarding.\n\nStart a new warren to begin again."
+        }
     }
 }
 
