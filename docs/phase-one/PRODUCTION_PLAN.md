@@ -84,9 +84,9 @@ its climax before fatigue.
 
 - [x] Tune the opening so the first food pressure occurs after the player has
   seen all relevant controls and has time to respond.
-- [ ] Tune the secured-warren goal as the end of onboarding, not a surprise
+- [x] Tune the secured-warren goal as the end of onboarding, not a surprise
   accounting check.
-- [ ] Ensure the first raid arrives with a readable warning and viable defense.
+- [x] Ensure the first raid arrives with a readable warning and viable defense.
 - [ ] Remove grind or idle waiting between secured warren, factory production,
   and Worm Shrine offerings.
 - [x] Protect essential food and construction reserves from optional industry.
