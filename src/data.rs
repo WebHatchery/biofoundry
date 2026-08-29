@@ -373,6 +373,9 @@ pub enum TutorialDone {
     /// A building (or its ghost) of this kind exists — teaches a specific
     /// build like the Blacksmith.
     BuildingPlaced { building: String },
+    /// A construction site of this kind has finished delivery and is now
+    /// available as a working building.
+    BuildingCompleted { building: String },
     /// A Mine has extracted ore into its buffer — it's working.
     MineWorking,
     /// A piece of equipment (item id) has been crafted — in the stockpile

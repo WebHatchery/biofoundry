@@ -8,13 +8,13 @@
   {
     "id": "food",
     "title": "Stabilize the Food Grid",
-    "body": "Read Food Grid: keep Production above Upkeep. Tap Farm, then tap open floor to place it. If food pressure appears and Idle is 0, tap − beside Miner, then + beside Carrier or Cook in Jobs.",
-    "done": { "kind": "site_placed" }
+    "body": "Read Food Grid: keep Production above Upkeep. Tap Farm, then open floor. Wait for Farm construction. If Idle is 0 during pressure, tap − by Miner, then + by Carrier or Cook.",
+    "done": { "kind": "building_completed", "building": "farm" }
   },
   {
     "id": "factory",
     "title": "Close the Living Factory Loop",
-    "body": "Tap the existing Mine in the warren to read its rate. Place a Blacksmith. If Idle is 0, tap − beside Miner, then tap + beside Smith in Jobs. Tap the Blacksmith and tap Iron Pickaxe. The miner equips it on its own and the Mine speeds up.",
+    "body": "Tap the existing Mine to read its rate. Place a Blacksmith. If Idle is 0, tap − by Miner, then + by Smith. Tap Blacksmith, then Iron Pickaxe; the miner equips it and the Mine speeds up.",
     "done": { "kind": "gear_crafted", "item": "iron_pickaxe" }
   },
   {

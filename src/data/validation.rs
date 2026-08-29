@@ -178,7 +178,8 @@ fn validate_tutorial(data: &GameData) -> Result<(), String> {
             return Err(format!("tutorial step ids must be unique: '{}'", step.id));
         }
         match &step.done {
-            TutorialDone::BuildingPlaced { building } => {
+            TutorialDone::BuildingPlaced { building }
+            | TutorialDone::BuildingCompleted { building } => {
                 if !data.buildings.contains(building) {
                     return Err(format!(
                         "tutorial step '{}' references missing building '{building}'",

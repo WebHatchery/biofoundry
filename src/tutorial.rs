@@ -50,6 +50,9 @@ fn step_done(done: &TutorialDone, session: &GameSession, inputs: TutorialInputs)
             session.buildings_of(building).next().is_some()
                 || session.build_sites.iter().any(|s| &s.kind == building)
         }
+        TutorialDone::BuildingCompleted { building } => {
+            session.tutorial_build_completed && session.buildings_of(building).next().is_some()
+        }
         TutorialDone::MineWorking => {
             use crate::state::creatures::Good;
             session

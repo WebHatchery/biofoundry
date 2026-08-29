@@ -187,6 +187,7 @@ fn build_site_completes_from_hauled_ore() {
     );
 
     assert!(session.build_sites.is_empty(), "site should complete");
+    assert!(session.tutorial_build_completed);
     let new_farm = session.building_at(spot).expect("farm built");
     assert_eq!(new_farm.kind, "farm");
     assert_eq!(session.buildings_of("farm").count(), 2);

@@ -146,6 +146,9 @@ pub struct GameSession {
     /// Action flags the tutorial watches for.
     pub tutorial_reassigned: bool,
     pub tutorial_built: bool,
+    /// At least one player-placed construction has finished delivery.
+    #[serde(default)]
+    pub tutorial_build_completed: bool,
     #[serde(default)]
     pub outposts: Vec<Outpost>,
     #[serde(default)]
@@ -234,6 +237,7 @@ impl GameSession {
             tutorial_dismissed: false,
             tutorial_reassigned: false,
             tutorial_built: false,
+            tutorial_build_completed: false,
             outposts: Vec::new(),
             worm_transit: None,
             last_transit_failure: None,

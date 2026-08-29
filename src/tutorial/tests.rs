@@ -1,4 +1,5 @@
 use super::*;
+use crate::state::structures::Building;
 
 fn boot() -> (GameData, GameSession) {
     let data = GameData::load().unwrap();
@@ -15,6 +16,10 @@ fn tutorial_data_loads_in_teaching_order() {
         "tutorial follows the five journey beats"
     );
     assert_eq!(data.tutorial.first().unwrap().id, "enter");
+    assert!(matches!(
+        &data.tutorial[1].done,
+        TutorialDone::BuildingCompleted { building } if building == "farm"
+    ));
     assert!(matches!(
         data.tutorial.last().unwrap().done,
         TutorialDone::WormAwake
@@ -39,6 +44,15 @@ fn steps_complete_from_player_actions() {
     // 2. Place a build site.
     assert!(!advance(&mut session, &data, none));
     session.tutorial_built = true;
+    let farm_pos = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(pos, _)| session.can_place_building(*pos))
+        .map(|(pos, _)| pos)
+        .expect("a walkable farm location");
+    session.buildings.push(Building::new("farm", farm_pos));
+    session.tutorial_build_completed = true;
     assert!(advance(&mut session, &data, none));
 
     // 3. Close the living factory loop with the pickaxe.
@@ -103,12 +117,32 @@ fn factory_lesson_points_to_the_prebuilt_mine() {
         .find(|step| step.id == "factory")
         .expect("factory lesson");
 
-    assert!(factory.body.contains("existing Mine in the warren"));
+    assert!(factory.body.contains("existing Mine"));
     assert!(factory.body.contains("Blacksmith"));
-    assert!(factory
-        .body
-        .contains("− beside Miner, then tap + beside Smith"));
+    assert!(factory.body.contains("− by Miner, then + by Smith"));
     assert!(factory.body.contains("Iron Pickaxe"));
+}
+
+#[test]
+fn food_lesson_waits_for_the_placed_farm_to_finish() {
+    let (data, mut session) = boot();
+    session.tutorial_step = 1;
+    session.tutorial_built = true;
+
+    assert!(!advance(&mut session, &data, TutorialInputs::default()));
+
+    let farm_pos = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(pos, _)| session.can_place_building(*pos))
+        .map(|(pos, _)| pos)
+        .expect("a walkable farm location");
+    session.buildings.push(Building::new("farm", farm_pos));
+    session.tutorial_build_completed = true;
+
+    assert!(advance(&mut session, &data, TutorialInputs::default()));
+    assert_eq!(current_step(&session, &data).unwrap().id, "factory");
 }
 
 #[test]
@@ -125,7 +159,7 @@ fn food_and_worm_lessons_name_the_next_visible_tap() {
         .find(|step| step.id == "worm")
         .expect("worm lesson");
 
-    assert!(food.body.contains("Tap Farm, then tap open floor"));
+    assert!(food.body.contains("Tap Farm, then open floor"));
     assert!(worm.body.contains("Tap the Worm Shrine to inspect it"));
 }
 

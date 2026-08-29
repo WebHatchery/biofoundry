@@ -193,6 +193,7 @@ fn complete_finished_sites(session: &mut GameSession, data: &GameData) {
                 Building::new(&site.kind, site.pos)
             };
             session.buildings.push(building);
+            session.tutorial_build_completed = true;
             if site.kind == "outpost" {
                 session.ensure_outpost(site.pos);
             }
