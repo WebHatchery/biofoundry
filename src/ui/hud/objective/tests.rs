@@ -193,6 +193,34 @@ fn completed_objective_does_not_offer_remote_crew_as_a_new_payload() {
 }
 
 #[test]
+fn completed_objective_does_not_offer_busy_crew_as_a_new_payload() {
+    let (data, mut session) = boot();
+    session.worm_awake = true;
+    session.unlocked.insert("worm_transit".to_owned());
+    let pos = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(pos, _)| session.can_place_building(*pos))
+        .map(|(pos, _)| pos)
+        .unwrap();
+    session.buildings.push(Building::new("outpost", pos));
+    session.ensure_outpost(pos);
+    session.outposts[0].active = true;
+    session.creatures.clear();
+    session.economy.food = data.balance.worm_feed_reserve;
+    session.spawn_creature(&data, "goblin", Job::Carrier);
+    session.creatures[0].carrying = Some((Good::Ore, 1));
+
+    let objective = CampaignObjective::current(&session, &data);
+
+    assert_eq!(
+        objective.next,
+        "Next: keep cargo or crew ready at the warren, then load the active Worm Outpost."
+    );
+}
+
+#[test]
 fn completed_objective_names_the_return_step_for_a_loaded_outpost() {
     let (data, mut session) = boot();
     session.worm_awake = true;

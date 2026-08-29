@@ -251,10 +251,11 @@ fn outpost_has_loadable_payload(
     let cargo_ready = room > 0
         && (session.economy.ore_stock > 0 || session.economy.ingots_stock > 0 || food_ready);
     let crew_ready = outpost.crew.len() < data.balance.outpost_capacity as usize
-        && session
-            .creatures
-            .iter()
-            .any(|creature| !creature.is_remote() && creature.tile() == session.stockpile_pos());
+        && session.creatures.iter().any(|creature| {
+            !creature.is_remote()
+                && creature.carrying.is_none()
+                && creature.tile() == session.stockpile_pos()
+        });
     cargo_ready || crew_ready
 }
 
