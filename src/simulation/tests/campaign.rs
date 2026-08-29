@@ -138,8 +138,11 @@ fn sim_to_factory_complete_on_fixed_seed() {
     let factory_minutes = factory_at / 60.0;
     let shrine_minutes = shrine_at / 60.0;
     let minutes = done_at / 60.0;
+    let secure_to_factory = factory_minutes - victory_minutes;
+    let factory_to_shrine = shrine_minutes - factory_minutes;
+    let shrine_to_worm = minutes - shrine_minutes;
     eprintln!(
-        "[balance probe] beats: secure={victory_minutes:.1}m factory={factory_minutes:.1}m shrine={shrine_minutes:.1}m worm={minutes:.1}m ({} ingots, {} deserted, {} raids survived)",
+        "[balance probe] beats: secure={victory_minutes:.1}m factory={factory_minutes:.1}m shrine={shrine_minutes:.1}m worm={minutes:.1}m; gaps={secure_to_factory:.1}/{factory_to_shrine:.1}/{shrine_to_worm:.1}m ({} ingots, {} deserted, {} raids survived)",
         session.economy.ingots_forged,
         session.economy.deserted,
         session.progress.raids_survived
@@ -155,6 +158,18 @@ fn sim_to_factory_complete_on_fixed_seed() {
     assert!(
         shrine_minutes <= 35.0,
         "Worm Shrine landed at {shrine_minutes:.1} min; the post-factory handoff should not idle"
+    );
+    assert!(
+        secure_to_factory <= 15.0,
+        "factory handoff took {secure_to_factory:.1} min after securing the warren"
+    );
+    assert!(
+        factory_to_shrine <= 12.0,
+        "Shrine handoff took {factory_to_shrine:.1} min after factory completion"
+    );
+    assert!(
+        shrine_to_worm <= 25.0,
+        "worm awakening took {shrine_to_worm:.1} min after the shrine was raised"
     );
     assert!(
         (30.0..=60.0).contains(&minutes),
