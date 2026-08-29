@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `58b3ad7`
+**Source revision:** `a2b8fb3`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -24,7 +24,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 105 unit tests and 2 integration tests pass.
+- `cargo test --all-targets` — 107 unit tests and 2 integration tests pass.
 - `cargo clippy --all-targets --all-features -- -D warnings` — pass.
 - `publish.ps1` with no parameters — pass; Windows and WebGL packages
   deployed to Preview.
@@ -77,6 +77,10 @@ automated simulation results into first-time-player evidence.
   shows the delivered crew at the active outpost and the completed-campaign
   Objective incremented to `Cargo runs 1`; the arrival is persisted through the
   normal safe-beat autosave path.
+- Route guidance captures — [ui_endless.png](../verification/ui_endless.png),
+  [ui_endless_in_flight.png](../verification/ui_endless_in_flight.png), and
+  [ui_endless_arrived.png](../verification/ui_endless_arrived.png) show the
+  Objective changing from return cargo, to wait for transit, to return crew.
 
 ## Still open
 
