@@ -34,7 +34,7 @@ pub fn draw_world(
     draw_build_sites(session, tile_size);
     // Overseer auras: a faint ring shows the work-speed field it radiates.
     for c in &session.creatures {
-        if c.species == "overseer" {
+        if !c.is_remote() && c.species == "overseer" {
             draw_circle_lines(
                 c.x * tile_size,
                 c.y * tile_size,

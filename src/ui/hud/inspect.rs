@@ -2,7 +2,7 @@
 //! plus its per-kind verbs (blacksmith production orders, pit breeding).
 
 use crate::data::GameData;
-use crate::state::creatures::{Good, Task};
+use crate::state::creatures::{Creature, Good, Task};
 use crate::state::outposts::TransitDirection;
 use crate::state::structures::Building;
 use crate::state::GameSession;
@@ -60,7 +60,7 @@ pub(super) fn draw_inspect_panel(
             let staffed = session
                 .creatures
                 .iter()
-                .filter(|c| matches!(&c.task, Task::WorkMine(p) if *p == pos))
+                .filter(|c| local_mine_worker_at(c, pos))
                 .count();
             let slots = def
                 .and_then(|d| d.workstation.as_ref())
@@ -70,7 +70,7 @@ pub(super) fn draw_inspect_panel(
             let base_rate: f32 = session
                 .creatures
                 .iter()
-                .filter(|c| matches!(&c.task, Task::WorkMine(p) if *p == pos))
+                .filter(|c| local_mine_worker_at(c, pos))
                 .map(|c| {
                     data.balance.mine_ore_per_min
                         * crate::ui::legibility::work_multiplier(c, session, data)
@@ -79,7 +79,7 @@ pub(super) fn draw_inspect_panel(
             let rate: f32 = session
                 .creatures
                 .iter()
-                .filter(|c| matches!(&c.task, Task::WorkMine(p) if *p == pos))
+                .filter(|c| local_mine_worker_at(c, pos))
                 .map(|c| {
                     let pickaxe = c
                         .equipment
@@ -167,10 +167,7 @@ pub(super) fn draw_inspect_panel(
             );
         }
         "blacksmith" => {
-            let staffed = session.creatures.iter().any(|c| {
-                matches!(&c.task, Task::Smithing { shop, .. } if *shop == pos)
-                    || matches!(&c.task, Task::Crafting { shop, .. } if *shop == pos)
-            });
+            let staffed = session.creatures.iter().any(|c| local_smith_at(c, pos));
             line(
                 if staffed {
                     "Smith at work"
@@ -487,6 +484,16 @@ pub(super) fn draw_inspect_panel(
 
 fn blacksmith_queue_available(building: &Building, data: &GameData) -> bool {
     building.orders.len() < data.balance.order_queue_size
+}
+
+fn local_mine_worker_at(creature: &Creature, pos: TilePos) -> bool {
+    !creature.is_remote() && matches!(&creature.task, Task::WorkMine(p) if *p == pos)
+}
+
+fn local_smith_at(creature: &Creature, pos: TilePos) -> bool {
+    !creature.is_remote()
+        && (matches!(&creature.task, Task::Smithing { shop, .. } if *shop == pos)
+            || matches!(&creature.task, Task::Crafting { shop, .. } if *shop == pos))
 }
 
 fn outpost_return_label(cargo: u32, crew: usize) -> String {

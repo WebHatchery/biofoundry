@@ -1,4 +1,5 @@
 use super::*;
+use crate::state::creatures::Job;
 use crate::state::structures::Building;
 
 fn shrine_session() -> (GameData, GameSession, TilePos) {
@@ -205,6 +206,36 @@ fn blacksmith_queue_reports_when_another_order_can_be_added() {
         shop.orders.push("iron_pickaxe".to_owned());
     }
     assert!(!blacksmith_queue_available(&shop, &data));
+}
+
+#[test]
+fn inspection_staffing_ignores_remote_crew() {
+    let data = GameData::load().expect("embedded game data");
+    let mut session = GameSession::new(&data, 13);
+    let mine = session.buildings_of("mine").next().unwrap().pos;
+    let blacksmith = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(pos, _)| session.can_place_building(*pos))
+        .map(|(pos, _)| pos)
+        .expect("a walkable blacksmith location");
+    session
+        .buildings
+        .push(Building::new("blacksmith", blacksmith));
+    session.creatures.clear();
+    session.spawn_creature(&data, "goblin", Job::Miner);
+    session.creatures[0].task = Task::WorkMine(mine);
+    session.creatures[0].remote_outpost = Some(TilePos::new(4, 4));
+    session.spawn_creature(&data, "goblin", Job::Smith);
+    session.creatures[1].task = Task::Smithing {
+        shop: blacksmith,
+        remaining: 1.0,
+    };
+    session.creatures[1].remote_outpost = Some(TilePos::new(4, 4));
+
+    assert!(!local_mine_worker_at(&session.creatures[0], mine));
+    assert!(!local_smith_at(&session.creatures[1], blacksmith));
 }
 
 #[test]
