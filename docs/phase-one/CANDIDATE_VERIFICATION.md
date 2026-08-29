@@ -1,0 +1,42 @@
+# Current Candidate Verification
+
+**Date:** 2026-08-30  
+**Source revision:** `03a804f`  
+**Published target:** WebGL Preview at `/games/biofoundry/`  
+**Browser viewport:** 1280×720; game canvas 1200×675  
+**Input used:** visible pointer controls only
+
+This record supplements the historical [`P0_BASELINE_REPORT.md`](P0_BASELINE_REPORT.md).
+It records checks made against the current candidate and does not turn
+automated simulation results into first-time-player evidence.
+
+## Verified in the deployed Preview
+
+| Flow | Result | Evidence |
+| --- | --- | --- |
+| Continue from title | Pass | Visible Continue loaded the saved warren at `00:28`. |
+| Manual Save | Pass | Visible Save produced `Warren saved.` and the run reached `00:36` before the check. |
+| Refresh and Continue | Pass | Reload returned to the title screen with Continue enabled; Continue restored `00:36` and showed `Warren loaded.`. |
+| Fresh-tab relaunch and Continue | Pass | A new Preview tab restored the same `00:36` state and objective with visible controls. |
+| Minimum-layout spot check | Pass | The 1200×675 canvas and required HUD remained visible in the 1280×720 Preview viewport. |
+
+## Automated candidate checks
+
+- `cargo fmt -- --check` — pass.
+- `cargo test --all-targets` — 86 unit tests and 2 integration tests pass.
+- `cargo clippy --all-targets --all-features -- -D warnings` — pass.
+- `publish.ps1` with no parameters — pass; Windows and WebGL packages
+  deployed to Preview.
+- Fixed-seed campaign beats — secure `19.4m`, factory `24.4m`, shrine
+  `29.4m`, worm `43.4m`; handoff gaps `5.0 / 5.0 / 14.1m`.
+
+## Still open
+
+- A first-time pointer/touch-only campaign through Worm Awakened has not been
+  observed by a qualifying player.
+- Windows and WebGL completion, endless continuation, and return-to-menu flows
+  still need live packaged-build evidence rather than capture or code evidence.
+- Browser storage-quota/blocked-storage behavior has not been forced in a live
+  session; the runtime surfaces the shared storage rejection as a save or
+  autosave warning when it occurs.
+- The five-player comprehension and completion targets remain unmeasured.

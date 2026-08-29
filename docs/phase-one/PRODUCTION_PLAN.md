@@ -109,6 +109,8 @@ clear path forward.
 - [x] Add autosaves at safe beats while retaining visible manual Save/Load.
 - [x] Detect non-viable colonies where possible and offer restart/load guidance.
 - [ ] Verify save behavior across refresh, relaunch, and WebGL storage limits.
+  Preview refresh and fresh-tab relaunch pass on the current candidate;
+  storage-limit behavior remains unforced and open.
 - [x] Handle incompatible or damaged saves without overwriting them silently.
 
 **Acceptance:** completion, continuation, return, reload, and recovery flows all

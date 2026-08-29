@@ -31,6 +31,7 @@ instructions.”
 | [`PRODUCTION_PLAN.md`](PRODUCTION_PLAN.md) | Ordered work, acceptance criteria, dependencies, and exit gate |
 | [`PLAYTEST_PLAN.md`](PLAYTEST_PLAN.md) | Test cohorts, sessions, metrics, issue severity, and reporting |
 | [`P0_BASELINE_REPORT.md`](P0_BASELINE_REPORT.md) | Current-build platform checks, timing evidence, system classification, and reproducible findings |
+| [`CANDIDATE_VERIFICATION.md`](CANDIDATE_VERIFICATION.md) | Current Preview evidence and the acceptance checks that remain open |
 
 ## Source-of-truth rules
 
