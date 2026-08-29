@@ -434,11 +434,7 @@ pub(super) fn draw_inspect_panel(
                 y += 28.0;
                 if active && session.worm_awake {
                     let loadable_payload = outpost_has_loadable_payload(session, data, cargo, crew);
-                    let return_label = if cargo > 0 {
-                        format!("Send {cargo} to shrine")
-                    } else {
-                        "Send crew to shrine".to_owned()
-                    };
+                    let return_label = outpost_return_label(cargo, crew);
                     if hud_button(
                         Rect::new(x, y, panel.w - 28.0, 24.0),
                         &return_label,
@@ -491,6 +487,15 @@ pub(super) fn draw_inspect_panel(
 
 fn blacksmith_queue_available(building: &Building, data: &GameData) -> bool {
     building.orders.len() < data.balance.order_queue_size
+}
+
+fn outpost_return_label(cargo: u32, crew: usize) -> String {
+    match (cargo > 0, crew > 0) {
+        (true, true) => format!("Send {cargo} cargo + {crew} crew to shrine"),
+        (true, false) => format!("Send {cargo} cargo to shrine"),
+        (false, true) => format!("Send {crew} crew to shrine"),
+        (false, false) => "Send payload to shrine".to_owned(),
+    }
 }
 
 /// Give every inspected building the same first-read answer: is it working,
