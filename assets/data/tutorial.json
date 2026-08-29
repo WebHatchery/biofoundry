@@ -1,44 +1,32 @@
 [
   {
-    "id": "welcome",
-    "title": "Welcome to the warren",
+    "id": "enter",
+    "title": "Enter the Warren",
     "body": "Every worker is a creature, and food is the power grid. Drag the map to look around. Tap + or − to zoom.",
     "done": { "kind": "camera_moved" }
   },
   {
-    "id": "food_grid",
-    "title": "Grow the Food Grid",
-    "body": "Top-left: Production vs Upkeep — keep the net positive. Open Build & Dig, pick a Farm, and place it on open floor near your Cook Pot. Carriers haul the ore to build it.",
+    "id": "food",
+    "title": "Stabilize the Food Grid",
+    "body": "Read Food Grid: keep Production above Upkeep. Tap Farm in Build & Dig, then tap open floor. Tap + beside Carrier or Cook in Jobs when the food loop needs help.",
     "done": { "kind": "site_placed" }
   },
   {
-    "id": "mine",
-    "title": "The Mine runs itself",
-    "body": "A goblin already works the Ore Mine beside the warren, extracting ore into a buffer that carriers haul to the stockpile — the first live automation loop. Tap the Mine to watch its rate.",
-    "done": { "kind": "mine_working" }
-  },
-  {
-    "id": "blacksmith",
-    "title": "Forge the first ingots",
-    "body": "Ore becomes ingots at the Blacksmith. Place one, then set a Smith in the Jobs panel — the anvil hammers ore into the metal that crafts gear and wins the factory.",
-    "done": { "kind": "building_placed", "building": "blacksmith" }
-  },
-  {
-    "id": "famine",
-    "title": "Weather the famine",
-    "body": "The first famine hits within a few minutes. Shift Miners into Carriers in the Jobs panel and push Production above Upkeep — hungry workers slow the whole warren.",
-    "done": { "kind": "famine_recovered", "value": 30.0 }
-  },
-  {
-    "id": "pickaxe",
-    "title": "Close the loop",
-    "body": "Tap the Blacksmith, then tap Iron Pickaxe. A miner picks it up on its own and the Mine speeds up — extraction feeding processing feeding extraction. That is the factory.",
+    "id": "factory",
+    "title": "Close the Living Factory Loop",
+    "body": "Tap the Mine to read its rate. Place a Blacksmith, tap + beside Smith in Jobs, then tap the Blacksmith and tap Iron Pickaxe. The miner equips it on its own and the Mine speeds up.",
     "done": { "kind": "gear_crafted", "item": "iron_pickaxe" }
   },
   {
-    "id": "goals",
+    "id": "secure",
+    "title": "Secure the Warren",
+    "body": "Use the Objective card to deliver 50 ore and hold a 100-food surplus. Before a raid, tap + beside Guard in Jobs. When the card advances, forge 20 ingots and raise the Worm Shrine.",
+    "done": { "kind": "warren_secured" }
+  },
+  {
+    "id": "worm",
     "title": "Awaken the Worm",
-    "body": "Deliver 50 ore and hold a 100-food surplus to secure the warren. Then forge 20 ingots, raise the Worm Shrine, and feed the Colossal Worm sleeping below. This tutorial completes when the worm awakens.",
+    "body": "Keep the Worm Shrine running: its panel shows food and ingot offerings, reserves, and blockers. Feed the Colossal Worm sleeping below. This tutorial completes when the worm awakens.",
     "done": { "kind": "worm_awake" }
   }
 ]

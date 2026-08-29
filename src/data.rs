@@ -364,10 +364,6 @@ pub enum TutorialDone {
     CameraMoved,
     /// The player reassigned any worker.
     AnyReassign,
-    /// The player answered the famine: carriers above the starting crew
-    /// with a positive calorie balance, or food back above `value` after
-    /// the first-crisis window.
-    FamineRecovered { value: f32 },
     /// The player placed any build site.
     SitePlaced,
     /// A building (or its ghost) of this kind exists — teaches a specific
@@ -378,6 +374,8 @@ pub enum TutorialDone {
     /// A piece of equipment (item id) has been crafted — in the stockpile
     /// pool or already worn.
     GearCrafted { item: String },
+    /// The secured-warren objective has been completed.
+    WarrenSecured,
     /// The Colossal Worm has awakened, completing the campaign tutorial.
     WormAwake,
 }

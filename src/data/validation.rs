@@ -186,17 +186,9 @@ fn validate_tutorial(data: &GameData) -> Result<(), String> {
                     ));
                 }
             }
-            TutorialDone::GearCrafted { item } => {
-                if data.equipment_def(item).is_none() {
-                    return Err(format!(
-                        "tutorial step '{}' references missing equipment '{item}'",
-                        step.id
-                    ));
-                }
-            }
-            TutorialDone::FamineRecovered { value } if !value.is_finite() || *value < 0.0 => {
+            TutorialDone::GearCrafted { item } if data.equipment_def(item).is_none() => {
                 return Err(format!(
-                    "tutorial step '{}' has an invalid famine recovery value",
+                    "tutorial step '{}' references missing equipment '{item}'",
                     step.id
                 ));
             }
