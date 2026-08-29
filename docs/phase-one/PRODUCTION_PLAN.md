@@ -36,7 +36,7 @@ physical keyboard or right mouse button.
 - [ ] Verify all overlays, inspection actions, placement, digging, job changes,
   crafting, shrine controls, and completion choices with tap/click.
 - [ ] Test UI hit targets and overlap at the supported minimum viewport.
-- [ ] Add regression coverage for important UI intents where practical.
+- [x] Add regression coverage for important UI intents where practical.
 
 **Acceptance:** a pointer/touch-only campaign reaches Worm Awakened and returns
 to the menu or continues, with no inaccessible required action.
@@ -82,17 +82,17 @@ seeded food-chain stall and one ore-chain stall without facilitator help.
 **Outcome:** the campaign escalates predictably, teaches recovery, and reaches
 its climax before fatigue.
 
-- [ ] Tune the opening so the first food pressure occurs after the player has
+- [x] Tune the opening so the first food pressure occurs after the player has
   seen all relevant controls and has time to respond.
 - [ ] Tune the secured-warren goal as the end of onboarding, not a surprise
   accounting check.
 - [ ] Ensure the first raid arrives with a readable warning and viable defense.
 - [ ] Remove grind or idle waiting between secured warren, factory production,
   and Worm Shrine offerings.
-- [ ] Protect essential food and construction reserves from optional industry.
+- [x] Protect essential food and construction reserves from optional industry.
 - [ ] Verify optional systems improve or diversify the run rather than becoming
   mandatory hidden taxes.
-- [ ] Keep deterministic campaign tests as broad guardrails; use human sessions
+- [x] Keep deterministic campaign tests as broad guardrails; use human sessions
   for fun, comprehension, and pacing decisions.
 
 **Acceptance:** at least three of five first-time players finish in 25–55
