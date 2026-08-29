@@ -81,7 +81,7 @@ pub(super) fn draw_top_bar(
         draw_ui_text_ex(
             &format!(
                 "RAID — gnarls are after the larder! {}{}",
-                raid_defense_hint(session),
+                raid_defense_hint(session, data),
                 food_suffix
             ),
             bar.x + 380.0,
@@ -104,7 +104,7 @@ pub(super) fn draw_top_bar(
                     "FOOD IN {} · RAID IN {} · {}",
                     format_mmss(seconds),
                     format_mmss(session.raid_in.max(0.0)),
-                    compact_raid_defense_hint(session)
+                    compact_raid_defense_hint(session, data)
                 ),
                 bar.x + 380.0,
                 bar.y + 31.0,
@@ -115,7 +115,7 @@ pub(super) fn draw_top_bar(
                 &format!(
                     "FOOD IN {} · {}",
                     format_mmss(seconds),
-                    compact_food_recovery_hint(session)
+                    compact_food_recovery_hint(session, data)
                 ),
                 bar.x + 380.0,
                 bar.y + 31.0,
@@ -127,7 +127,7 @@ pub(super) fn draw_top_bar(
             &format!(
                 "RAID IN {} — {}",
                 format_mmss(session.raid_in.max(0.0)),
-                raid_defense_hint(session)
+                raid_defense_hint(session, data)
             ),
             bar.x + 380.0,
             bar.y + 31.0,
@@ -322,6 +322,7 @@ pub(super) fn draw_jobs_panel(
     );
 
     let idle = session.job_count(Job::Idle);
+    let idle_reassignable = reassignable_job_count(session, data, Job::Idle);
     let x = panel.x + 14.0;
     let mut y = panel.y + 44.0;
 
@@ -342,10 +343,21 @@ pub(super) fn draw_jobs_panel(
             y + 19.0,
             TextStyle::new(16.0, dark::TEXT).params(),
         );
-        if hud_button(Rect::new(x + 130.0, y, 34.0, 26.0), "-", count > 0, mouse) {
+        let reassignable = reassignable_job_count(session, data, job);
+        if hud_button(
+            Rect::new(x + 130.0, y, 34.0, 26.0),
+            "-",
+            reassignable > 0,
+            mouse,
+        ) {
             actions.push(UiAction::Unassign(job));
         }
-        if hud_button(Rect::new(x + 172.0, y, 34.0, 26.0), "+", idle > 0, mouse) {
+        if hud_button(
+            Rect::new(x + 172.0, y, 34.0, 26.0),
+            "+",
+            idle_reassignable > 0,
+            mouse,
+        ) {
             actions.push(UiAction::Assign(job));
         }
         if job == Job::Guard && raid_warning {
@@ -471,15 +483,15 @@ pub(super) fn draw_jobs_panel(
 
 /// Give the exact visible job controls needed to put a defender on watch.
 /// A fresh warren has no idle worker, so the first raid requires freeing one.
-fn raid_defense_hint(session: &GameSession) -> String {
-    if session.job_count(Job::Guard) > 0 {
+fn raid_defense_hint(session: &GameSession, data: &GameData) -> String {
+    if reassignable_job_count(session, data, Job::Guard) > 0 {
         "Guards are on watch.".to_owned()
-    } else if session.job_count(Job::Idle) > 0 {
+    } else if reassignable_job_count(session, data, Job::Idle) > 0 {
         "tap + beside Guard in Jobs".to_owned()
     } else {
         [Job::Miner, Job::Carrier, Job::Cook, Job::Smith]
             .into_iter()
-            .find(|job| session.job_count(*job) > 0)
+            .find(|job| reassignable_job_count(session, data, *job) > 0)
             .map(|job| format!("tap − beside {}, then + beside Guard", job.label()))
             .unwrap_or_else(|| "free a worker, then tap + beside Guard".to_owned())
     }
@@ -487,15 +499,15 @@ fn raid_defense_hint(session: &GameSession) -> String {
 
 /// Keep a combined food/raid banner short while naming the visible Guard
 /// control that resolves the incoming threat.
-fn compact_raid_defense_hint(session: &GameSession) -> String {
-    if session.job_count(Job::Guard) > 0 {
+fn compact_raid_defense_hint(session: &GameSession, data: &GameData) -> String {
+    if reassignable_job_count(session, data, Job::Guard) > 0 {
         "guards on watch".to_owned()
-    } else if session.job_count(Job::Idle) > 0 {
+    } else if reassignable_job_count(session, data, Job::Idle) > 0 {
         "tap + Guard".to_owned()
     } else {
         [Job::Miner, Job::Carrier, Job::Cook, Job::Smith]
             .into_iter()
-            .find(|job| session.job_count(*job) > 0)
+            .find(|job| reassignable_job_count(session, data, *job) > 0)
             .map(|job| format!("tap − {}, then + Guard", job.label()))
             .unwrap_or_else(|| "free a worker, then + Guard".to_owned())
     }
@@ -503,16 +515,30 @@ fn compact_raid_defense_hint(session: &GameSession) -> String {
 
 /// Shorten the opening response enough to share the top bar with its buttons.
 /// The full control names remain in the tutorial card beside the banner.
-fn compact_food_recovery_hint(session: &GameSession) -> String {
-    if session.job_count(Job::Idle) > 0 {
+fn compact_food_recovery_hint(session: &GameSession, data: &GameData) -> String {
+    if reassignable_job_count(session, data, Job::Idle) > 0 {
         "tap + Carrier or Cook".to_owned()
     } else {
         [Job::Miner, Job::Smith, Job::Guard]
             .into_iter()
-            .find(|job| session.job_count(*job) > 0)
+            .find(|job| reassignable_job_count(session, data, *job) > 0)
             .map(|job| format!("tap − {}, then + Carrier", job.label()))
             .unwrap_or_else(|| "free a worker, then + Carrier".to_owned())
     }
+}
+
+fn reassignable_job_count(session: &GameSession, data: &GameData, job: Job) -> usize {
+    session
+        .creatures
+        .iter()
+        .filter(|creature| {
+            creature.job == job
+                && data
+                    .species
+                    .get(&creature.species)
+                    .is_some_and(|species| species.reassignable)
+        })
+        .count()
 }
 
 #[cfg(test)]

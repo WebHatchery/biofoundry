@@ -7,7 +7,7 @@ fn raid_hint_names_the_controls_for_a_fresh_warren() {
 
     assert_eq!(session.job_count(Job::Idle), 0);
     assert_eq!(
-        raid_defense_hint(&session),
+        raid_defense_hint(&session, &data),
         "tap − beside Miner, then + beside Guard"
     );
 }
@@ -18,10 +18,13 @@ fn raid_hint_shortens_when_a_worker_is_idle_or_guarded() {
     let mut session = GameSession::new(&data, 7);
 
     session.creatures[0].job = Job::Idle;
-    assert_eq!(raid_defense_hint(&session), "tap + beside Guard in Jobs");
+    assert_eq!(
+        raid_defense_hint(&session, &data),
+        "tap + beside Guard in Jobs"
+    );
 
     session.creatures[1].job = Job::Guard;
-    assert_eq!(raid_defense_hint(&session), "Guards are on watch.");
+    assert_eq!(raid_defense_hint(&session, &data), "Guards are on watch.");
 }
 
 #[test]
@@ -30,7 +33,7 @@ fn compact_food_hint_fits_the_top_bar() {
     let session = GameSession::new(&data, 7);
 
     assert_eq!(
-        compact_food_recovery_hint(&session),
+        compact_food_recovery_hint(&session, &data),
         "tap − Miner, then + Carrier"
     );
 }
@@ -41,7 +44,7 @@ fn compact_raid_hint_names_the_guard_control() {
     let session = GameSession::new(&data, 7);
 
     assert_eq!(
-        compact_raid_defense_hint(&session),
+        compact_raid_defense_hint(&session, &data),
         "tap − Miner, then + Guard"
     );
 }
@@ -52,5 +55,23 @@ fn compact_raid_hint_stays_short_when_a_worker_is_free() {
     let mut session = GameSession::new(&data, 7);
     session.creatures[0].job = Job::Idle;
 
-    assert_eq!(compact_raid_defense_hint(&session), "tap + Guard");
+    assert_eq!(compact_raid_defense_hint(&session, &data), "tap + Guard");
+}
+
+#[test]
+fn hints_do_not_promise_reassignment_of_a_specialist() {
+    let data = GameData::load().expect("embedded game data");
+    let mut session = GameSession::new(&data, 7);
+    session.creatures.clear();
+    session.spawn_creature(&data, "overseer", Job::Idle);
+
+    assert_eq!(reassignable_job_count(&session, &data, Job::Idle), 0);
+    assert_eq!(
+        raid_defense_hint(&session, &data),
+        "free a worker, then tap + beside Guard"
+    );
+    assert_eq!(
+        compact_food_recovery_hint(&session, &data),
+        "free a worker, then + Carrier"
+    );
 }
