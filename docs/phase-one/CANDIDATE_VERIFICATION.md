@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `70c6d44`
+**Source revision:** `c4d0b07`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -25,7 +25,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 117 unit tests and 2 integration tests pass.
+- `cargo test --all-targets` — 118 unit tests and 2 integration tests pass.
 - `cargo clippy --all-targets --all-features -- -D warnings` — pass.
 - `publish.ps1` with no parameters — pass; Windows and WebGL packages
   deployed to Preview.
@@ -85,6 +85,10 @@ automated simulation results into first-time-player evidence.
 - Specialist job coverage — the Overseer capture shows an idle,
   non-reassignable specialist without falsely enabling worker reassignment;
   the pressure hints and visible `+`/`−` controls follow the same rule.
+- Blacksmith recovery capture — [ui_blacksmith_queue_full.png](../verification/ui_blacksmith_queue_full.png)
+  shows the `Queue 8/8` limit, an explicit `Queue full · finish orders first`
+  recovery line, and disabled craft controls; focused UI coverage verifies the
+  same capacity boundary.
 - Endless route failure capture — [ui_endless_failure.png](../verification/ui_endless_failure.png)
   shows the failed outpost's wrapped recovery message and the Objective's
   complete visible Activate route instruction, alongside the top-bar failure
