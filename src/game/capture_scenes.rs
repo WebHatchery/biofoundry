@@ -378,6 +378,22 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                 }
             }
         }
+        "endless_empty" => {
+            begin(game, "endless");
+            game.paused = true;
+            if let GameState::Warren(session) = &mut game.state {
+                // Show the route's honest empty state: no stored goods, no
+                // stockpiled crew, and no payload ready for the next run.
+                session.economy.ore_stock = 0;
+                session.economy.ingots_stock = 0;
+                session.economy.food = game.data.balance.worm_feed_reserve;
+                session.creatures.clear();
+                if let Some(route) = session.outposts.last_mut() {
+                    route.cargo.clear();
+                    route.crew.clear();
+                }
+            }
+        }
         "endless_failure" => {
             begin(game, "endless");
             if let GameState::Warren(session) = &mut game.state {

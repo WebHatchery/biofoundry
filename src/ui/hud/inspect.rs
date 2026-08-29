@@ -32,7 +32,8 @@ pub(super) fn draw_inspect_panel(
     let height = match building.kind.as_str() {
         "blacksmith" => 170.0 + data.equipment.len() as f32 * 26.0,
         "breeding_pit" => 230.0,
-        "worm_shrine" | "outpost" => 240.0,
+        "worm_shrine" => 240.0,
+        "outpost" => 270.0,
         _ => 152.0,
     };
     let panel = Rect::new(LOGICAL_WIDTH - 262.0, 210.0, 250.0, height);
@@ -426,6 +427,7 @@ pub(super) fn draw_inspect_panel(
                 }
                 y += 28.0;
                 if active && session.worm_awake {
+                    let loadable_payload = outpost_has_loadable_payload(session, data, cargo, crew);
                     let return_label = if cargo > 0 {
                         format!("Send {cargo} to shrine")
                     } else {
@@ -443,15 +445,18 @@ pub(super) fn draw_inspect_panel(
                     if hud_button(
                         Rect::new(x, y, panel.w - 28.0, 24.0),
                         "Load outpost from warren",
-                        outpost_has_loadable_cargo(session, data, cargo)
-                            || crew < data.balance.outpost_capacity as usize
-                                && session
-                                    .creatures
-                                    .iter()
-                                    .any(|c| c.tile() == session.stockpile_pos()),
+                        loadable_payload,
                         mouse,
                     ) {
                         actions.push(UiAction::TransitToOutpost(pos));
+                    }
+                    y += 28.0;
+                    if cargo == 0 && crew == 0 && !loadable_payload {
+                        line(
+                            "No cargo or crew ready at the warren",
+                            dark::WARNING,
+                            &mut y,
+                        );
                     }
                 } else if active {
                     line("Awaiting the worm's awakening", dark::TEXT_DIM, &mut y);
@@ -536,6 +541,20 @@ fn transit_destination(direction: TransitDirection) -> &'static str {
         TransitDirection::ToOutpost => "outpost",
         TransitDirection::ToShrine => "shrine",
     }
+}
+
+fn outpost_has_loadable_payload(
+    session: &GameSession,
+    data: &GameData,
+    cargo: u32,
+    crew: usize,
+) -> bool {
+    let crew_ready = crew < data.balance.outpost_capacity as usize
+        && session
+            .creatures
+            .iter()
+            .any(|c| c.tile() == session.stockpile_pos());
+    outpost_has_loadable_cargo(session, data, cargo) || crew_ready
 }
 
 fn outpost_has_loadable_cargo(session: &GameSession, data: &GameData, cargo: u32) -> bool {

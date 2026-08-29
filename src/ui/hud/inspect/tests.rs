@@ -131,3 +131,18 @@ fn in_flight_outpost_reports_directional_transit() {
     assert_eq!(transit_destination(TransitDirection::ToOutpost), "outpost");
     assert_eq!(transit_destination(TransitDirection::ToShrine), "shrine");
 }
+
+#[test]
+fn empty_outpost_reports_when_no_payload_is_ready_to_load() {
+    let data = GameData::load().expect("embedded game data");
+    let mut session = GameSession::new(&data, 10);
+    session.creatures.clear();
+    session.economy.ore_stock = 0;
+    session.economy.ingots_stock = 0;
+    session.economy.food = data.balance.worm_feed_reserve;
+
+    assert!(!outpost_has_loadable_payload(&session, &data, 0, 0));
+
+    session.economy.food += 1.0;
+    assert!(outpost_has_loadable_payload(&session, &data, 0, 0));
+}
