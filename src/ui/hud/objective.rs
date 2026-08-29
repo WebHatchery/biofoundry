@@ -40,7 +40,10 @@ impl CampaignObjective {
             };
             return Self {
                 title: "Campaign complete".to_owned(),
-                progress: "The Colossal Worm is awake".to_owned(),
+                progress: format!(
+                    "The Colossal Worm is awake · Cargo runs {}",
+                    session.progress.courier_deliveries
+                ),
                 next: next.to_owned(),
                 ratio: 1.0,
                 complete: true,
