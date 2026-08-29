@@ -5,6 +5,7 @@ use crate::audio::Sfx;
 use crate::data::GameData;
 use crate::simulation;
 use crate::state::creatures::Job;
+use crate::state::outposts::TransitDirection;
 use crate::state::{GameState, StateTransition};
 use crate::ui::{UiAction, UiMode};
 use macroquad::prelude::*;
@@ -196,15 +197,12 @@ impl Game {
                         // during the worm's journey must not erase cargo or
                         // passengers that already left the warren.
                         transit_started = true;
-                        self.notifications.info(match action {
-                            UiAction::TransitToOutpost(_) => {
-                                "The worm carries cargo to the outpost."
-                            }
-                            UiAction::TransitToShrine(_) => {
-                                "The worm carries cargo back to the shrine."
-                            }
-                            _ => "The worm carries the route's cargo.",
-                        });
+                        let direction = match action {
+                            UiAction::TransitToOutpost(_) => TransitDirection::ToOutpost,
+                            UiAction::TransitToShrine(_) => TransitDirection::ToShrine,
+                            _ => unreachable!("transit action branch only matches transit actions"),
+                        };
+                        self.notifications.info(transit_departure_notice(direction));
                     } else {
                         self.notifications
                             .warning("No valid cargo or route is ready.");
@@ -270,6 +268,13 @@ impl Game {
             }
             UiAction::ExitGame => macroquad::miniquad::window::quit(),
         }
+    }
+}
+
+fn transit_departure_notice(direction: TransitDirection) -> &'static str {
+    match direction {
+        TransitDirection::ToOutpost => "The worm begins its journey to the outpost.",
+        TransitDirection::ToShrine => "The worm begins its journey to the shrine.",
     }
 }
 
