@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `e7944f6`
+**Source revision:** `a9b2fb6`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -62,7 +62,8 @@ automated simulation results into first-time-player evidence.
   warren before placing the Blacksmith.
 - Endless route failure capture — [ui_endless_failure.png](../verification/ui_endless_failure.png)
   shows the failed outpost's wrapped recovery message and the Objective's
-  visible Activate route instruction.
+  complete visible Activate route instruction, alongside the top-bar failure
+  signal.
 
 ## Still open
 
