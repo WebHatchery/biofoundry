@@ -120,6 +120,7 @@ impl Game {
             self.update_camera_input(dt);
         }
 
+        let mut safe_beat_reached = false;
         if let GameState::Warren(session) = &mut self.state {
             self.accumulator += dt;
             let mut ticks = 0;
@@ -133,15 +134,18 @@ impl Game {
                     self.audio.play(Sfx::Deny);
                 }
                 if report.won_this_tick {
+                    safe_beat_reached = true;
                     self.notifications.success("The warren thrives — victory!");
                     self.audio.play(Sfx::Complete);
                 }
                 if report.factory_this_tick {
+                    safe_beat_reached = true;
                     self.notifications
                         .success("The Biofoundry roars — factory complete!");
                     self.audio.play(Sfx::Complete);
                 }
                 if report.worm_this_tick {
+                    safe_beat_reached = true;
                     self.notifications
                         .success("The ground heaves — the Colossal Worm awakens!");
                     self.audio.play(Sfx::Worm);
@@ -228,6 +232,10 @@ impl Game {
             }
         } else if input.escape_pressed && self.settings_open {
             self.settings_open = false;
+        }
+
+        if safe_beat_reached {
+            self.autosave_game();
         }
 
         let actions: Vec<UiAction> = self.events.drain().collect();
@@ -361,22 +369,38 @@ impl Game {
     }
 
     fn save_game(&mut self) {
-        let GameState::Warren(session) = &self.state else {
-            return;
-        };
-        let config = &self.data.config;
-        match save_to_slot_with_version(
-            &config.game_name,
-            &config.save_slot,
-            session.as_ref(),
-            &config.version,
-        ) {
+        match self.persist_current_session() {
             Ok(()) => {
                 self.save_exists = true;
                 self.notifications.success("Warren saved.");
             }
             Err(err) => self.notifications.danger(format!("Save failed: {err}")),
         }
+    }
+
+    /// Persist a campaign milestone without interrupting the player's flow.
+    fn autosave_game(&mut self) {
+        match self.persist_current_session() {
+            Ok(()) => {
+                self.save_exists = true;
+            }
+            Err(err) => self
+                .notifications
+                .warning(format!("Autosave failed — use Save manually: {err}")),
+        }
+    }
+
+    fn persist_current_session(&self) -> Result<(), String> {
+        let GameState::Warren(session) = &self.state else {
+            return Err("no active Warren".to_owned());
+        };
+        let config = &self.data.config;
+        save_to_slot_with_version(
+            &config.game_name,
+            &config.save_slot,
+            session.as_ref(),
+            &config.version,
+        )
     }
 
     fn load_game(&mut self) {
@@ -426,6 +450,7 @@ impl Game {
                 self.mode = UiMode::Inspect;
                 self.help_open = false;
                 self.state = GameState::Warren(Box::new(session));
+                self.autosave_game();
             }
             StateTransition::BackToMenu => {
                 self.mode = UiMode::Inspect;
