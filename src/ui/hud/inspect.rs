@@ -504,7 +504,7 @@ fn outpost_has_loadable_cargo(session: &GameSession, data: &GameData, cargo: u32
     }
     session.economy.ore_stock > 0
         || session.economy.ingots_stock > 0
-        || session.economy.food > data.balance.worm_feed_reserve
+        || session.economy.food - data.balance.worm_feed_reserve >= 1.0
 }
 
 fn worm_waiting_for_food(session: &GameSession, data: &GameData) -> bool {

@@ -248,3 +248,27 @@ fn worm_transit_does_not_overfill_remote_crew_capacity() {
     assert_eq!(session.outposts[0].crew.len(), capacity);
     assert_eq!(session.outposts[0].cargo.get(&Good::Ore), Some(&1));
 }
+
+#[test]
+fn worm_transit_keeps_fractional_food_at_home_until_a_whole_unit_is_ready() {
+    let (data, mut session, outpost_pos) = active_outpost(20);
+    session.creatures.clear();
+    session.economy.food = data.balance.worm_feed_reserve + 0.5;
+
+    assert!(!outposts::start_to_outpost(
+        &mut session,
+        &data,
+        outpost_pos
+    ));
+    assert!((session.economy.food - (data.balance.worm_feed_reserve + 0.5)).abs() < 1e-3);
+
+    session.economy.food += 1.0;
+    assert!(outposts::start_to_outpost(&mut session, &data, outpost_pos));
+    assert!((session.economy.food - (data.balance.worm_feed_reserve + 0.5)).abs() < 1e-3);
+    outposts::tick_transit(
+        &mut session,
+        &data,
+        data.balance.worm_transit_time_sec + 0.1,
+    );
+    assert_eq!(session.outposts[0].cargo.get(&Good::CookedFood), Some(&1));
+}

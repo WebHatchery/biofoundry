@@ -56,9 +56,12 @@ fn start_transit(
         TransitDirection::ToOutpost => {
             let used = outpost.cargo_total();
             let room = cap.saturating_sub(used);
+            // Remote cargo is stored in whole units; leave any fractional
+            // food behind instead of charging it and truncating it at arrival.
             let food = (session.economy.food - data.balance.worm_feed_reserve)
                 .max(0.0)
-                .min(room as f32);
+                .min(room as f32)
+                .floor();
             let ore = session.economy.ore_stock.min(room);
             let room_after_ore = room.saturating_sub(ore);
             let ingots = session.economy.ingots_stock.min(room_after_ore);
