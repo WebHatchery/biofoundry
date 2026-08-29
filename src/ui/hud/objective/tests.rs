@@ -116,15 +116,43 @@ fn completed_objective_names_the_return_step_for_a_loaded_outpost() {
         .unwrap();
     session.buildings.push(Building::new("outpost", pos));
     session.ensure_outpost(pos);
+    let crew_id = session.creatures.first().unwrap().id;
     let outpost = session.outposts.first_mut().unwrap();
     outpost.active = true;
     outpost.cargo.insert(Good::Ore, 4);
+    outpost.crew.push(crew_id);
 
     let objective = CampaignObjective::current(&session, &data);
 
     assert_eq!(
         objective.next,
-        "Next: tap the active Worm Outpost, then send its cargo to the shrine."
+        "Next: tap the active Worm Outpost, then send its cargo and crew to the shrine."
+    );
+}
+
+#[test]
+fn completed_objective_explains_when_an_active_outpost_has_nothing_ready() {
+    let (data, mut session) = boot();
+    session.worm_awake = true;
+    session.unlocked.insert("worm_transit".to_owned());
+    let pos = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(pos, _)| session.can_place_building(*pos))
+        .map(|(pos, _)| pos)
+        .unwrap();
+    session.buildings.push(Building::new("outpost", pos));
+    session.ensure_outpost(pos);
+    session.outposts[0].active = true;
+    session.creatures.clear();
+    session.economy.food = data.balance.worm_feed_reserve;
+
+    let objective = CampaignObjective::current(&session, &data);
+
+    assert_eq!(
+        objective.next,
+        "Next: keep cargo or crew ready at the warren, then load the active Worm Outpost."
     );
 }
 

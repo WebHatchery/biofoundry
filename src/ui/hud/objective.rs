@@ -44,14 +44,7 @@ impl CampaignObjective {
             {
                 "Next: tap the failed Worm Outpost, then try the cargo run again."
             } else if session.outposts.iter().any(|outpost| outpost.active) {
-                let outpost = session.outposts.iter().find(|outpost| outpost.active);
-                if outpost.is_some_and(|outpost| outpost.cargo_total() > 0) {
-                    "Next: tap the active Worm Outpost, then send its cargo to the shrine."
-                } else if outpost.is_some_and(|outpost| !outpost.crew.is_empty()) {
-                    "Next: tap the active Worm Outpost, then send its crew to the shrine."
-                } else {
-                    "Next: tap the active Worm Outpost, then load it from the warren."
-                }
+                active_outpost_next_step(session, data)
             } else {
                 "Next: activate the Worm Outpost, then send a cargo run."
             };
@@ -144,6 +137,47 @@ impl CampaignObjective {
             complete: false,
         }
     }
+}
+
+fn active_outpost_next_step(session: &GameSession, data: &GameData) -> &'static str {
+    let Some(outpost) = session.outposts.iter().find(|outpost| outpost.active) else {
+        return "Next: activate the Worm Outpost, then send a cargo run.";
+    };
+    let has_cargo = outpost.cargo_total() > 0;
+    let has_crew = !outpost.crew.is_empty();
+    match (has_cargo, has_crew) {
+        (true, true) => {
+            "Next: tap the active Worm Outpost, then send its cargo and crew to the shrine."
+        }
+        (true, false) => "Next: tap the active Worm Outpost, then send its cargo to the shrine.",
+        (false, true) => "Next: tap the active Worm Outpost, then send its crew to the shrine.",
+        (false, false) if outpost_has_loadable_payload(session, data, outpost) => {
+            "Next: tap the active Worm Outpost, then load it from the warren."
+        }
+        (false, false) => {
+            "Next: keep cargo or crew ready at the warren, then load the active Worm Outpost."
+        }
+    }
+}
+
+fn outpost_has_loadable_payload(
+    session: &GameSession,
+    data: &GameData,
+    outpost: &crate::state::outposts::Outpost,
+) -> bool {
+    let room = data
+        .balance
+        .outpost_storage_cap
+        .saturating_sub(outpost.cargo_total());
+    let food_ready = session.economy.food - data.balance.worm_feed_reserve >= 1.0;
+    let cargo_ready = room > 0
+        && (session.economy.ore_stock > 0 || session.economy.ingots_stock > 0 || food_ready);
+    let crew_ready = outpost.crew.len() < data.balance.outpost_capacity as usize
+        && session
+            .creatures
+            .iter()
+            .any(|creature| creature.tile() == session.stockpile_pos());
+    cargo_ready || crew_ready
 }
 
 #[cfg(test)]
