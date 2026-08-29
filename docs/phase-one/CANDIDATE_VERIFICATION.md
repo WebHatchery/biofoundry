@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `7b3c01f`
+**Source revision:** `0d200c8`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -68,6 +68,9 @@ automated simulation results into first-time-player evidence.
   departure notices name the destination without assuming the payload.
 - Menu-exit autosave — leaving through the visible Menu control preserves a
   viable Warren for Continue, while the field guide still exposes manual Save.
+- Session-boundary reset — loading or starting a Warren clears the previous
+  run's pause/help/selection state and famine-warning edge before the new HUD
+  becomes active.
 - Specialist capture — [ui_breeding.png](../verification/ui_breeding.png) shows
   the selected Breeding Pit with readable Hobgoblin, Overseer, and Engineer
   effects and available ingot costs.
