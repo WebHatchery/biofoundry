@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `02f0ee1`
+**Source revision:** `f0af4fc`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -25,7 +25,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 123 unit tests and 2 integration tests pass.
+- `cargo test --all-targets` — 124 unit tests and 2 integration tests pass.
 - `cargo clippy --all-targets --all-features -- -D warnings` — pass.
 - `publish.ps1` with no parameters — pass; Windows and WebGL packages
   deployed to Preview.
@@ -114,6 +114,10 @@ automated simulation results into first-time-player evidence.
   and names the same visible `−` then `+ Guard` sequence until the handoff is
   complete. Focused objective coverage verifies the return to the factory goal
   after a Guard is assigned.
+- Specialist-safe Objective guidance — the same handoff now checks whether an
+  idle creature is actually reassignable before promising `+ Guard`; an idle
+  non-reassignable specialist receives the safe fallback instead. Focused
+  coverage verifies that disabled job controls are not advertised as available.
 - Endless route failure capture — [ui_endless_failure.png](../verification/ui_endless_failure.png)
   shows the failed outpost's wrapped recovery message and the Objective's
   complete visible Activate route instruction, alongside the top-bar failure
