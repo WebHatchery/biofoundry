@@ -87,8 +87,9 @@ its climax before fatigue.
 - [x] Tune the secured-warren goal as the end of onboarding, not a surprise
   accounting check.
 - [x] Ensure the first raid arrives with a readable warning and viable defense.
-- [ ] Remove grind or idle waiting between secured warren, factory production,
-  and Worm Shrine offerings.
+- [x] Remove grind or idle waiting between secured warren, factory production,
+  and Worm Shrine offerings. The fixed-seed probe now keeps the final shrine
+  handoff under 12 minutes while preserving visible progress and blockers.
 - [x] Protect essential food and construction reserves from optional industry.
 - [ ] Verify optional systems improve or diversify the run rather than becoming
   mandatory hidden taxes.
@@ -123,8 +124,8 @@ developer present.
 
 - [ ] Resolve all open severity-0 and severity-1 playtest findings.
 - [ ] Meet the comprehension and completion targets in `PLAYTEST_PLAN.md`.
-- [ ] Run format, unit/integration tests, clippy with warnings denied, and the
-  required no-parameter `publish.ps1` path.
+- [x] Run format, unit/integration tests, clippy with warnings denied, and the
+  required no-parameter `publish.ps1` path on the current candidate.
 - [ ] Capture every changed canonical verification scene directly into
   `docs/verification/`, replacing equivalent older images.
 - [ ] Verify readable layout at representative desktop and browser sizes.
