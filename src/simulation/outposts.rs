@@ -145,9 +145,9 @@ pub fn tick_transit(
     match transit.direction {
         TransitDirection::ToOutpost => {
             if let Some(outpost) = session.outposts.iter_mut().find(|o| o.pos == target) {
-                outpost.cargo.insert(Good::Ore, transit.ore);
-                outpost.cargo.insert(Good::Ingot, transit.ingots);
-                outpost.cargo.insert(Good::CookedFood, transit.food as u32);
+                add_cargo(outpost, Good::Ore, transit.ore);
+                add_cargo(outpost, Good::Ingot, transit.ingots);
+                add_cargo(outpost, Good::CookedFood, transit.food as u32);
                 outpost.crew.extend(transit.passengers.iter().copied());
             }
             for creature in &mut session.creatures {
@@ -193,6 +193,12 @@ fn take_cargo(outpost: &mut Outpost, good: Good, amount: u32) {
     }
 }
 
+fn add_cargo(outpost: &mut Outpost, good: Good, amount: u32) {
+    if amount > 0 {
+        *outpost.cargo.entry(good).or_insert(0) += amount;
+    }
+}
+
 fn recover_failed_transit(session: &mut GameSession, transit: WormTransit) {
     if transit.direction == TransitDirection::ToOutpost {
         session.economy.ore_stock += transit.ore;
@@ -203,21 +209,9 @@ fn recover_failed_transit(session: &mut GameSession, transit: WormTransit) {
         .iter_mut()
         .find(|o| o.pos == transit.outpost)
     {
-        outpost
-            .cargo
-            .entry(Good::Ore)
-            .and_modify(|n| *n += transit.ore)
-            .or_insert(transit.ore);
-        outpost
-            .cargo
-            .entry(Good::Ingot)
-            .and_modify(|n| *n += transit.ingots)
-            .or_insert(transit.ingots);
-        outpost
-            .cargo
-            .entry(Good::CookedFood)
-            .and_modify(|n| *n += transit.food as u32)
-            .or_insert(transit.food as u32);
+        add_cargo(outpost, Good::Ore, transit.ore);
+        add_cargo(outpost, Good::Ingot, transit.ingots);
+        add_cargo(outpost, Good::CookedFood, transit.food as u32);
         outpost.crew.extend(transit.passengers.iter().copied());
     }
     if let Some(outpost) = session

@@ -283,6 +283,32 @@ fn worm_transit_keeps_fractional_food_at_home_until_a_whole_unit_is_ready() {
 }
 
 #[test]
+fn worm_transit_appends_new_cargo_to_existing_remote_stacks() {
+    let (data, mut session, outpost_pos) = active_outpost(23);
+    session.economy.food = data.balance.worm_feed_reserve + 2.0;
+    session.economy.ore_stock = 2;
+    session.economy.ingots_stock = 2;
+    session.outposts[0].cargo.insert(Good::Ore, 3);
+    session.outposts[0].cargo.insert(Good::Ingot, 2);
+    session.outposts[0].cargo.insert(Good::CookedFood, 1);
+
+    assert!(simulation::outposts::start_to_outpost(
+        &mut session,
+        &data,
+        outpost_pos
+    ));
+    simulation::outposts::tick_transit(
+        &mut session,
+        &data,
+        data.balance.worm_transit_time_sec + 0.1,
+    );
+
+    assert_eq!(session.outposts[0].cargo.get(&Good::Ore), Some(&5));
+    assert_eq!(session.outposts[0].cargo.get(&Good::Ingot), Some(&4));
+    assert_eq!(session.outposts[0].cargo.get(&Good::CookedFood), Some(&3));
+}
+
+#[test]
 fn simulation_reports_arrival_after_a_cargo_run_completes() {
     let (data, mut session, outpost_pos) = active_outpost(22);
     session.economy.ore_stock = 1;
