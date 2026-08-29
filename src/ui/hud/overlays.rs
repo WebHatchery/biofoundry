@@ -198,7 +198,7 @@ pub(super) fn draw_help_overlay(mouse: Vec2, actions: &mut Vec<UiAction>) {
         (
             right,
             "Save & return",
-            "Tap Pause to stop the simulation while you plan. Tap Save before leaving. Load restores the last saved Warren, and Menu returns to the title screen.",
+            "Tap Pause to stop the simulation while you plan. Tap Save for a manual checkpoint; Menu also autosaves a viable run before returning to the title. Load restores the last saved Warren.",
             478.0,
         ),
     ] {

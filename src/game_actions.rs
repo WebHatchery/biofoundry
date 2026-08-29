@@ -25,7 +25,19 @@ impl Game {
                 self.confirm_new_warren = false;
                 self.audio.play(Sfx::Select);
             }
-            UiAction::BackToMenu => self.transition(StateTransition::BackToMenu),
+            UiAction::BackToMenu => {
+                // Menu is a normal recovery boundary. Preserve a viable run
+                // before leaving so the title screen's Continue action does
+                // not lag behind the state the player was just viewing.
+                let should_autosave = matches!(
+                    &self.state,
+                    GameState::Warren(session) if !session.creatures.is_empty()
+                );
+                if should_autosave {
+                    self.autosave_game();
+                }
+                self.transition(StateTransition::BackToMenu);
+            }
             UiAction::Assign(job) => self.reassign(Job::Idle, job),
             UiAction::Unassign(job) => self.reassign(job, Job::Idle),
             UiAction::AttractBeetle => {
