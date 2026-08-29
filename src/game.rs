@@ -146,8 +146,7 @@ impl Game {
                     }
                     if report.won_this_tick {
                         safe_beat_reached = true;
-                        self.notifications
-                            .success("The warren is secure — onboarding complete.");
+                        self.notifications.success(warren_secured_notice(session));
                         self.audio.play(Sfx::Complete);
                     }
                     if report.factory_this_tick {
@@ -658,6 +657,14 @@ fn transit_completion_notice(completion: TransitCompletion) -> &'static str {
             "crew delivered" => "The worm returns to the shrine — crew delivered.",
             _ => "The worm returns to the shrine — route complete.",
         },
+    }
+}
+
+fn warren_secured_notice(session: &GameSession) -> &'static str {
+    if session.job_count(Job::Guard) > 0 {
+        "The warren is secure — onboarding complete."
+    } else {
+        "The reserve gate is secure — assign a Guard to finish onboarding."
     }
 }
 

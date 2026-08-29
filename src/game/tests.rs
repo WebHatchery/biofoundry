@@ -53,6 +53,22 @@ fn tutorial_migration_keeps_unwitnessed_guard_lesson_visible() {
 }
 
 #[test]
+fn secure_threshold_notice_waits_for_the_guard_handoff() {
+    let (_data, mut session) = session();
+
+    assert_eq!(
+        warren_secured_notice(&session),
+        "The reserve gate is secure — assign a Guard to finish onboarding."
+    );
+
+    session.creatures[0].job = Job::Guard;
+    assert_eq!(
+        warren_secured_notice(&session),
+        "The warren is secure — onboarding complete."
+    );
+}
+
+#[test]
 fn transit_completion_notice_names_a_crew_only_arrival() {
     let completion = TransitCompletion {
         direction: TransitDirection::ToOutpost,
