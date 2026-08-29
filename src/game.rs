@@ -17,7 +17,8 @@ use macroquad_toolkit::notifications::{
     NotificationAnchor, NotificationManager, NotificationRenderConfig,
 };
 use macroquad_toolkit::persistence::{
-    load_from_slot_with_migration, save_to_slot_with_version, slot_exists,
+    load_from_slot_with_migration, quarantine_slot, restore_slot_backup,
+    save_to_slot_with_version_and_backup, slot_backup_exists, slot_exists,
 };
 use macroquad_toolkit::prelude::{begin_virtual_ui_frame, dark, end_virtual_ui_frame, InputState};
 
@@ -395,7 +396,7 @@ impl Game {
             return Err("no active Warren".to_owned());
         };
         let config = &self.data.config;
-        save_to_slot_with_version(
+        save_to_slot_with_version_and_backup(
             &config.game_name,
             &config.save_slot,
             session.as_ref(),
@@ -404,27 +405,86 @@ impl Game {
     }
 
     fn load_game(&mut self) {
+        let slot = self.data.config.save_slot.clone();
+        match self.load_session_from_slot(&slot) {
+            Ok(session) => {
+                self.install_loaded_session(session);
+                self.notifications.success("Warren loaded.");
+            }
+            Err(err) => self.recover_failed_load(&slot, err),
+        }
+    }
+
+    fn load_session_from_slot(&self, slot: &str) -> Result<GameSession, String> {
         let config = &self.data.config;
-        let loaded: Result<GameSession, String> = load_from_slot_with_migration(
+        load_from_slot_with_migration(
             &config.game_name,
-            &config.save_slot,
+            slot,
             &config.version,
             |version, value| {
                 let payload = value.get("data").cloned().unwrap_or(value);
                 serde_json::from_value(payload)
                     .map_err(|err| format!("Unsupported save {version:?}: {err}"))
             },
-        );
+        )
+    }
 
-        match loaded {
-            Ok(session) => {
-                self.reset_camera_for(&session);
-                self.accumulator = 0.0;
-                self.mode = UiMode::Inspect;
-                self.state = GameState::Warren(Box::new(session));
-                self.notifications.success("Warren loaded.");
+    fn install_loaded_session(&mut self, session: GameSession) {
+        self.reset_camera_for(&session);
+        self.accumulator = 0.0;
+        self.mode = UiMode::Inspect;
+        self.state = GameState::Warren(Box::new(session));
+    }
+
+    fn recover_failed_load(&mut self, slot: &str, error: String) {
+        let config = &self.data.config;
+        if !slot_exists(&config.game_name, slot) {
+            self.notifications.warning(format!("Load failed: {error}"));
+            return;
+        }
+
+        let quarantine = match quarantine_slot(&config.game_name, slot) {
+            Ok(name) => name,
+            Err(quarantine_error) => {
+                self.notifications.danger(format!(
+                    "Save could not load ({error}). The original was left untouched; repair it or use Menu → New Warren. ({quarantine_error})"
+                ));
+                return;
             }
-            Err(err) => self.notifications.warning(format!("Load failed: {err}")),
+        };
+
+        if !slot_backup_exists(&config.game_name, slot) {
+            self.save_exists = false;
+            self.notifications.danger(format!(
+                "Save is damaged; preserved it as {quarantine}. Use Menu → New Warren or repair it before loading again."
+            ));
+            return;
+        }
+
+        let backup_slot = format!("{slot}_backup");
+        match self.load_session_from_slot(&backup_slot) {
+            Ok(session) => match restore_slot_backup(&config.game_name, slot) {
+                Ok(_) => {
+                    self.install_loaded_session(session);
+                    self.save_exists = true;
+                    self.notifications.warning(format!(
+                        "Primary save was damaged; preserved it as {quarantine} and restored the previous safe save."
+                    ));
+                }
+                Err(restore_error) => {
+                    self.install_loaded_session(session);
+                    self.save_exists = false;
+                    self.notifications.warning(format!(
+                        "Primary save was damaged; loaded the safe backup, but could not restore it ({restore_error}). Use Save now."
+                    ));
+                }
+            },
+            Err(backup_error) => {
+                self.save_exists = false;
+                self.notifications.danger(format!(
+                    "Save is damaged; preserved it as {quarantine}. The safe backup also failed ({backup_error}). Use Menu → New Warren or repair the preserved saves."
+                ));
+            }
         }
     }
 
