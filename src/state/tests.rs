@@ -1,5 +1,6 @@
 use super::*;
 use crate::data::GameData;
+use crate::state::creatures::Task;
 
 #[test]
 fn session_boots_from_config() {
@@ -155,10 +156,14 @@ fn loading_route_ownership_rebuilds_remote_crew_markers() {
     let crew_id = session.creatures[0].id;
     session.ensure_outpost(outpost_pos);
     session.outposts[0].crew.push(crew_id);
+    let mine_pos = session.buildings_of("mine").next().unwrap().pos;
+    session.creatures[0].task = Task::GoMine(mine_pos);
 
     session.sync_remote_crew_state();
 
     assert_eq!(session.creatures[0].remote_outpost, Some(outpost_pos));
+    assert_eq!(session.creatures[0].tile(), outpost_pos);
+    assert_eq!(session.creatures[0].task, Task::Idle);
     assert_eq!(session.job_count(Job::Miner), 2);
 }
 

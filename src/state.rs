@@ -354,11 +354,16 @@ impl GameSession {
     /// Rebuild the per-creature remote marker from persisted route ownership.
     /// This keeps saves written before the marker existed safe to load, and
     /// repairs the marker if a route was interrupted during serialization.
+    /// Stationed crew is also snapped to its outpost and released from any
+    /// stale local task; passengers in `worm_transit` keep their in-flight
+    /// coordinates until the route completes.
     pub fn sync_remote_crew_state(&mut self) {
         let mut remote_by_id = HashMap::new();
+        let mut stationed_by_id = HashMap::new();
         for outpost in &self.outposts {
             for id in &outpost.crew {
                 remote_by_id.entry(*id).or_insert(outpost.pos);
+                stationed_by_id.entry(*id).or_insert(outpost.pos);
             }
         }
         if let Some(transit) = &self.worm_transit {
@@ -368,6 +373,11 @@ impl GameSession {
         }
         for creature in &mut self.creatures {
             creature.remote_outpost = remote_by_id.get(&creature.id).copied();
+            if let Some(pos) = stationed_by_id.get(&creature.id) {
+                creature.x = pos.x as f32 + 0.5;
+                creature.y = pos.y as f32 + 0.5;
+                creature.clear_task();
+            }
         }
     }
 
