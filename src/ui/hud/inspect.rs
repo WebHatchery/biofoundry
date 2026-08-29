@@ -441,7 +441,16 @@ pub(super) fn draw_inspect_panel(
                 line("Awaiting the worm's awakening", dark::TEXT_DIM, &mut y);
             }
             if let Some(failure) = outpost.and_then(|o| o.last_failure.as_deref()) {
-                line(failure, dark::NEGATIVE, &mut y);
+                draw_text_block(
+                    failure,
+                    x,
+                    y,
+                    panel.w - 28.0,
+                    38.0,
+                    13.0,
+                    3.0,
+                    dark::NEGATIVE,
+                );
             }
         }
         _ => {

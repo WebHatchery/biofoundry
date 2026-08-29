@@ -95,3 +95,28 @@ fn completed_objective_names_the_next_step_for_an_active_outpost() {
         "Next: send a cargo run through the active Worm Outpost."
     );
 }
+
+#[test]
+fn completed_objective_explains_failed_route_recovery() {
+    let (data, mut session) = boot();
+    session.worm_awake = true;
+    session.unlocked.insert("worm_transit".to_owned());
+    let pos = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(pos, _)| session.can_place_building(*pos))
+        .map(|(pos, _)| pos)
+        .unwrap();
+    session.buildings.push(Building::new("outpost", pos));
+    session.ensure_outpost(pos);
+    let outpost = session.outposts.first_mut().unwrap();
+    outpost.last_failure = Some("The worm route collapsed.".to_owned());
+
+    let objective = CampaignObjective::current(&session, &data);
+
+    assert_eq!(
+        objective.next,
+        "Next: tap the failed Worm Outpost, then tap Activate route before sending cargo."
+    );
+}

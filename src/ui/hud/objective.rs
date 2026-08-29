@@ -21,6 +21,18 @@ impl CampaignObjective {
                 "Next: keep forging ingots to unlock Worm Transit."
             } else if session.buildings_of("outpost").next().is_none() {
                 "Next: build a Worm Outpost and send cargo through the awakened route."
+            } else if session
+                .outposts
+                .iter()
+                .any(|outpost| outpost.last_failure.is_some() && !outpost.active)
+            {
+                "Next: tap the failed Worm Outpost, then tap Activate route before sending cargo."
+            } else if session
+                .outposts
+                .iter()
+                .any(|outpost| outpost.last_failure.is_some())
+            {
+                "Next: tap the failed Worm Outpost, then try the cargo run again."
             } else if session.outposts.iter().any(|outpost| outpost.active) {
                 "Next: send a cargo run through the active Worm Outpost."
             } else {

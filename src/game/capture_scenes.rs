@@ -378,6 +378,16 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                 }
             }
         }
+        "endless_failure" => {
+            begin(game, "endless");
+            if let GameState::Warren(session) = &mut game.state {
+                if let Some(route) = session.outposts.last_mut() {
+                    route.active = false;
+                    route.last_failure =
+                        Some("The worm route collapsed; cargo returned to safety.".to_owned());
+                }
+            }
+        }
         "shrine" => {
             game.transition(StateTransition::StartWarren);
             if let GameState::Warren(session) = &mut game.state {

@@ -77,3 +77,24 @@ fn shrine_labels_a_manual_pause_without_misattributing_it() {
         ("Paused — reserve protected", dark::WARNING)
     );
 }
+
+#[test]
+fn failed_outpost_reports_a_route_failure() {
+    let data = GameData::load().expect("embedded game data");
+    let mut session = GameSession::new(&data, 8);
+    let pos = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(pos, _)| session.can_place_building(*pos))
+        .map(|(pos, _)| pos)
+        .expect("a walkable outpost location");
+    session.buildings.push(Building::new("outpost", pos));
+    session.ensure_outpost(pos);
+    session.outposts[0].last_failure = Some("The worm route collapsed.".to_owned());
+
+    assert_eq!(
+        inspect_status(&session, &data, session.building_at(pos).unwrap()),
+        ("Route failed", dark::NEGATIVE)
+    );
+}
