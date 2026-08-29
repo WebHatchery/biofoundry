@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `24bf6bb`
+**Source revision:** `76876f8`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -23,7 +23,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 86 unit tests and 2 integration tests pass.
+- `cargo test --all-targets` — 90 unit tests and 2 integration tests pass.
 - `cargo clippy --all-targets --all-features -- -D warnings` — pass.
 - `publish.ps1` with no parameters — pass; Windows and WebGL packages
   deployed to Preview.
@@ -32,6 +32,10 @@ automated simulation results into first-time-player evidence.
 - Worm Shrine inspection capture — [ui_shrine.png](../verification/ui_shrine.png)
   shows remaining food/ingot offerings, minimum feed time, and the automatic
   offering state in the final-demand card.
+- Optional support capture — [ui_optional.png](../verification/ui_optional.png)
+  shows recruit controls labeled with their practical roles and the Engineer
+  mine-throughput bonus at the published HUD scale. This improves discoverability
+  evidence but does not replace first-time-player testing of optional-system value.
 
 ## Still open
 
