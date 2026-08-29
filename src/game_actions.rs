@@ -13,6 +13,18 @@ impl Game {
     pub(super) fn apply_action(&mut self, action: UiAction) {
         match action {
             UiAction::StartWarren => self.transition(StateTransition::StartWarren),
+            UiAction::RequestNewWarren => {
+                if matches!(&self.state, GameState::Menu) && self.save_exists {
+                    self.confirm_new_warren = true;
+                    self.audio.play(Sfx::Select);
+                } else {
+                    self.transition(StateTransition::StartWarren);
+                }
+            }
+            UiAction::CancelNewWarren => {
+                self.confirm_new_warren = false;
+                self.audio.play(Sfx::Select);
+            }
             UiAction::BackToMenu => self.transition(StateTransition::BackToMenu),
             UiAction::Assign(job) => self.reassign(Job::Idle, job),
             UiAction::Unassign(job) => self.reassign(job, Job::Idle),

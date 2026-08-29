@@ -29,6 +29,7 @@ pub fn draw(
     sprites: &MenuSprites,
     save_exists: bool,
     settings_open: bool,
+    confirm_new_warren: bool,
     sfx_volume: f32,
 ) -> Vec<UiAction> {
     let mut actions = Vec::new();
@@ -60,8 +61,13 @@ pub fn draw(
     } else {
         let x = LOGICAL_WIDTH * 0.5 - 130.0;
         let mut y = 316.0;
+        let new_warren_action = if save_exists {
+            UiAction::RequestNewWarren
+        } else {
+            UiAction::StartWarren
+        };
         let entries: [(&str, bool, UiAction); 4] = [
-            ("New Warren", true, UiAction::StartWarren),
+            ("New Warren", true, new_warren_action),
             ("Continue", save_exists, UiAction::Load),
             ("Settings", true, UiAction::ToggleSettings),
             ("Exit Game", true, UiAction::ExitGame),
@@ -72,6 +78,11 @@ pub fn draw(
             }
             y += 58.0;
         }
+    }
+
+    if confirm_new_warren {
+        actions.clear();
+        draw_start_new_warren_confirmation(mouse, &mut actions);
     }
 
     let hint = "Feed the warren · forge with living furnaces · awaken the Colossal Worm";
@@ -93,6 +104,53 @@ pub fn draw(
     );
 
     actions
+}
+
+/// Protect the current campaign from an accidental fresh-start click. The
+/// existing autosave is intentionally named here because starting a new
+/// warren replaces that slot as soon as the new session begins.
+fn draw_start_new_warren_confirmation(mouse: Vec2, actions: &mut Vec<UiAction>) {
+    draw_rectangle(
+        0.0,
+        0.0,
+        LOGICAL_WIDTH,
+        LOGICAL_HEIGHT,
+        Color::new(0.0, 0.0, 0.0, 0.62),
+    );
+    let panel = Rect::new(LOGICAL_WIDTH * 0.5 - 260.0, 260.0, 520.0, 190.0);
+    draw_surface_with_title(
+        panel,
+        Some("Start a New Warren?"),
+        &menu_panel_style(),
+        TextStyle::new(20.0, dark::TEXT_BRIGHT),
+    );
+    draw_text_block(
+        "A saved warren already exists. Starting fresh replaces the current autosave.\n\nContinue only if you want to begin again.",
+        panel.x + 20.0,
+        panel.y + 58.0,
+        panel.w - 40.0,
+        75.0,
+        16.0,
+        4.0,
+        dark::TEXT,
+    );
+
+    if menu_button(
+        Rect::new(panel.x + 24.0, panel.bottom() - 52.0, 220.0, 36.0),
+        "Start New Warren",
+        true,
+        mouse,
+    ) {
+        actions.push(UiAction::StartWarren);
+    }
+    if menu_button(
+        Rect::new(panel.x + 276.0, panel.bottom() - 52.0, 220.0, 36.0),
+        "Keep Save",
+        true,
+        mouse,
+    ) {
+        actions.push(UiAction::CancelNewWarren);
+    }
 }
 
 /// Draw the full-screen illustrated cave, keeping its centre open for the UI.
@@ -174,6 +232,13 @@ fn draw_settings_panel(mouse: Vec2, sfx_volume: f32, actions: &mut Vec<UiAction>
     ) {
         actions.push(UiAction::ToggleSettings);
     }
+}
+
+fn menu_panel_style() -> SurfaceStyle {
+    SurfaceStyle::new(Color::new(0.07, 0.08, 0.10, 0.96))
+        .with_border(1.0, Color::new(0.38, 0.45, 0.58, 0.55))
+        .with_header(34.0, Color::new(0.09, 0.105, 0.13, 1.0))
+        .with_header_divider(1.0, Color::new(0.38, 0.45, 0.58, 0.4))
 }
 
 fn menu_button(rect: Rect, text: &str, enabled: bool, mouse: Vec2) -> bool {

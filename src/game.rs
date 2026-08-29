@@ -46,6 +46,8 @@ pub struct Game {
     last_camera: (Vec2, f32),
     /// The title menu's settings panel is showing.
     settings_open: bool,
+    /// The title menu is confirming replacement of an existing save.
+    confirm_new_warren: bool,
     /// The warren field guide is showing.
     help_open: bool,
     /// Whether the fixed-timestep simulation is paused by the player.
@@ -95,6 +97,7 @@ impl Game {
             famine_announced: false,
             last_camera: (vec2(0.0, 0.0), 1.0),
             settings_open: false,
+            confirm_new_warren: false,
             help_open: false,
             paused: false,
             save_exists,
@@ -238,8 +241,12 @@ impl Game {
             {
                 self.mode = UiMode::Inspect;
             }
-        } else if input.escape_pressed && self.settings_open {
-            self.settings_open = false;
+        } else if input.escape_pressed {
+            if self.settings_open {
+                self.settings_open = false;
+            } else if self.confirm_new_warren {
+                self.confirm_new_warren = false;
+            }
         }
 
         if safe_beat_reached {
@@ -264,6 +271,7 @@ impl Game {
                     &self.menu_sprites,
                     self.save_exists,
                     self.settings_open,
+                    self.confirm_new_warren,
                     self.audio.volume(),
                 );
                 end_virtual_ui_frame();
@@ -533,6 +541,7 @@ impl Game {
                 self.mode = UiMode::Inspect;
                 self.help_open = false;
                 self.paused = false;
+                self.confirm_new_warren = false;
                 self.state = GameState::Warren(Box::new(session));
                 self.autosave_game();
             }
@@ -540,6 +549,7 @@ impl Game {
                 self.mode = UiMode::Inspect;
                 self.help_open = false;
                 self.paused = false;
+                self.confirm_new_warren = false;
                 self.state = GameState::Menu;
             }
         }

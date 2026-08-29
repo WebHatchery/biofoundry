@@ -12,6 +12,11 @@ use macroquad_toolkit::grid::TilePos;
 pub(super) fn begin(game: &mut Game, scene: &str) {
     match scene {
         "menu" => game.transition(StateTransition::BackToMenu),
+        "new_warren_confirm" => {
+            game.transition(StateTransition::BackToMenu);
+            game.save_exists = true;
+            game.confirm_new_warren = true;
+        }
         "factory" => {
             game.transition(StateTransition::StartWarren);
             if let GameState::Warren(session) = &mut game.state {

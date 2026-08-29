@@ -26,6 +26,10 @@ pub enum UiMode {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum UiAction {
     StartWarren,
+    /// Ask for confirmation before replacing an existing campaign save.
+    RequestNewWarren,
+    /// Close the new-warren confirmation without changing the save.
+    CancelNewWarren,
     BackToMenu,
     /// Move one idle goblin into this job.
     Assign(Job),
