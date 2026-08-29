@@ -18,3 +18,12 @@ fn top_bar_does_not_grow_on_a_full_size_surface() {
     assert!((input.y - 6.0).abs() < 0.01);
     assert!((input.right() - 1274.0).abs() < 0.01);
 }
+
+#[test]
+fn panels_claim_scaled_button_margins_before_world_input() {
+    let panel = Rect::new(938.0, 72.0, 330.0, 128.0);
+    let input = panel_input_rect(panel, 0.8);
+
+    assert!(input.contains_point(vec2(panel.x + 100.0, panel.bottom() + 10.0)));
+    assert!(!input.contains_point(vec2(panel.x + 100.0, panel.bottom() + 18.0)));
+}

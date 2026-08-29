@@ -173,14 +173,14 @@ pub fn draw(
         || worm_up
         || colony_lost
         || options.help_open
-        || tutorial_panel.is_some_and(|r| r.contains_point(mouse))
-        || objective_panel.contains_point(mouse)
-        || inspect_panel.is_some_and(|r| r.contains_point(mouse))
+        || tutorial_panel.is_some_and(|r| panel_input_rect(r, ui.scale).contains_point(mouse))
+        || panel_input_rect(objective_panel, ui.scale).contains_point(mouse)
+        || inspect_panel.is_some_and(|r| panel_input_rect(r, ui.scale).contains_point(mouse))
         || [
             top_bar_input_rect(top_bar, ui.scale),
-            food_panel,
-            jobs_panel,
-            tools_panel,
+            panel_input_rect(food_panel, ui.scale),
+            panel_input_rect(jobs_panel, ui.scale),
+            panel_input_rect(tools_panel, ui.scale),
         ]
         .iter()
         .any(|r| r.contains_point(mouse));
@@ -206,6 +206,25 @@ fn top_bar_input_rect(bar: Rect, ui_scale: f32) -> Rect {
         bar.y - margin,
         bar.w + margin * 2.0,
         bar.h + margin * 2.0,
+    )
+}
+
+/// Claim the invisible margins around the smallest panel buttons as well.
+/// Tutorial, inspection, and tool controls can otherwise trigger their action
+/// while a release just outside the drawn card still falls through to a map
+/// click.
+fn panel_input_rect(panel: Rect, ui_scale: f32) -> Rect {
+    let scale = if ui_scale.is_finite() && ui_scale > 0.0 {
+        ui_scale
+    } else {
+        1.0
+    };
+    let margin = ((MIN_TARGET / scale - 22.0) * 0.5).max(0.0);
+    Rect::new(
+        panel.x - margin,
+        panel.y - margin,
+        panel.w + margin * 2.0,
+        panel.h + margin * 2.0,
     )
 }
 
