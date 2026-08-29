@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `efd7320`
+**Source revision:** `7379a4a`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -64,6 +64,9 @@ automated simulation results into first-time-player evidence.
 - Route toggle feedback — the activation toast now names the resulting active or
   inactive state, matching the selected outpost's button and persisted route.
   Focused game-action coverage exercises both toggle outcomes.
+- Station inspection feedback — Mine and Blacksmith detail cards now distinguish
+  assigned or en-route local workers from active production, while excluding
+  remote outpost crew; focused UI coverage exercises both boundaries.
 - Factory handoff capture — [ui_factory_complete.png](../verification/ui_factory_complete.png)
   shows the completion overlay with the next Worm Shrine objective visible and
   no setup unlock toast obscuring the handoff.
