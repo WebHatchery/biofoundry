@@ -76,13 +76,3 @@ fn add_waste(building: &mut crate::state::structures::Building, spoiled: f32, da
     building.waste = (building.waste + spoiled * data.balance.waste_production_per_min)
         .min(data.balance.waste_storage_cap);
 }
-
-pub fn morale_status(session: &GameSession, data: &GameData) -> &'static str {
-    if session.overcrowding_ratio(data) > 1.0 {
-        "Overcrowded"
-    } else if session.creatures.iter().any(|c| c.morale < 0.45) {
-        "Low morale"
-    } else {
-        "Stable"
-    }
-}

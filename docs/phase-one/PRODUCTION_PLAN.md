@@ -65,13 +65,13 @@ goal at each facilitator checkpoint without being told.
 **Outcome:** players can explain why production is failing and select a useful
 response.
 
-- [ ] Prioritize cooked food trend, reserve, and time-to-empty in the main HUD.
+- [x] Prioritize cooked food trend, reserve, and time-to-empty in the main HUD.
 - [ ] Standardize workstation status across Mine, Cook Pot, Blacksmith, Kiln,
   Smelter, and Worm Shrine.
 - [ ] Surface missing labor, missing input, output blockage, invalid route, and
   reserve-policy pauses in plain language.
 - [ ] Show before/after throughput when the Iron Pickaxe is equipped.
-- [ ] Forecast famine and raid pressure early enough for a meaningful response.
+- [x] Forecast famine and raid pressure early enough for a meaningful response.
 - [ ] Audit status colors for non-color cues and text contrast.
 
 **Acceptance:** at least four of five first-time players correctly diagnose one

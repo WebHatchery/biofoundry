@@ -36,6 +36,20 @@ fn idle_creatures_draw_reduced_rate() {
 }
 
 #[test]
+fn food_forecast_uses_the_current_net_rate() {
+    let (data, mut session) = boot();
+    session.economy.food = 30.0;
+    session.economy.production_ema_per_min = 0.0;
+    let expected = 30.0 / consumption_per_min(&session, &data) * 60.0;
+
+    let forecast = time_to_empty_seconds(&session, &data).unwrap();
+    assert!((forecast - expected).abs() < 1e-4);
+
+    session.economy.production_ema_per_min = consumption_per_min(&session, &data);
+    assert!(time_to_empty_seconds(&session, &data).is_none());
+}
+
+#[test]
 fn stockpile_drains_and_satiation_recovers_while_fed() {
     let (data, mut session) = boot();
     let food_before = session.economy.food;

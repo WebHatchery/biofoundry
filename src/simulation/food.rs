@@ -21,6 +21,18 @@ pub fn consumption_per_min(session: &GameSession, data: &GameData) -> f32 {
         .sum()
 }
 
+/// Estimated seconds until the shared food reserve empties at the current
+/// worker draw and smoothed cooking rate. `None` means the reserve is empty or
+/// currently stable/rising.
+pub fn time_to_empty_seconds(session: &GameSession, data: &GameData) -> Option<f32> {
+    let net = session.economy.production_ema_per_min - consumption_per_min(session, data);
+    if session.economy.food > 0.0 && net < -0.01 {
+        Some(session.economy.food / -net * 60.0)
+    } else {
+        None
+    }
+}
+
 /// Drain the stockpile by total upkeep and update every creature's
 /// satiation. Returns creatures that deserted this tick (already removed).
 ///

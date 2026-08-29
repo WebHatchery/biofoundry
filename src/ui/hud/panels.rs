@@ -73,6 +73,16 @@ pub(super) fn draw_top_bar(
             bar.y + 31.0,
             TextStyle::new(18.0, dark::NEGATIVE).params(),
         );
+    } else if session.raid_in <= 120.0 {
+        draw_ui_text_ex(
+            &format!(
+                "RAID IN {} — tap + beside Guard in Jobs",
+                format_mmss(session.raid_in.max(0.0))
+            ),
+            bar.x + 380.0,
+            bar.y + 31.0,
+            TextStyle::new(15.0, dark::WARNING).params(),
+        );
     } else {
         draw_ui_text_ex(
             "Drag map · tap +/− to zoom · Save / Load / Menu",
@@ -183,6 +193,26 @@ pub(super) fn draw_food_grid_panel(session: &GameSession, data: &GameData, panel
     );
     y += 30.0;
 
+    let (forecast, forecast_color) = match food::time_to_empty_seconds(session, data) {
+        Some(seconds) => (
+            format!("Forecast: empty in {}", format_mmss(seconds)),
+            if seconds <= 120.0 {
+                dark::WARNING
+            } else {
+                dark::NEGATIVE
+            },
+        ),
+        None if net >= 0.0 => ("Forecast: reserve rising".to_owned(), dark::POSITIVE),
+        None => ("Forecast: reserve empty".to_owned(), dark::NEGATIVE),
+    };
+    draw_ui_text_ex(
+        &forecast,
+        x,
+        y,
+        TextStyle::new(14.0, forecast_color).params(),
+    );
+    y += 20.0;
+
     // Chain throughput + haul pressure: the food grid generalised to a
     // factory dashboard (plan §Phase 9).
     let hauls = crate::ui::legibility::pending_hauls(session);
@@ -207,57 +237,6 @@ pub(super) fn draw_food_grid_panel(session: &GameSession, data: &GameData, panel
         x,
         y,
         TextStyle::new(14.0, dark::TEXT).params(),
-    );
-    y += 20.0;
-    let ingot_color = if session.economy.ingots_forged > 0 {
-        dark::TEXT
-    } else {
-        dark::TEXT_DIM
-    };
-    let shrine_built = session.buildings_of("worm_shrine").next().is_some();
-    let worm_note = if session.worm_awake {
-        " · Worm AWAKE".to_owned()
-    } else if shrine_built {
-        format!(
-            " · Worm {:.0}/{:.0} food · {}/{} ingots{}",
-            session.worm_fed,
-            data.balance.worm_awaken_at,
-            session.worm_ingots_fed,
-            data.balance.worm_awaken_ingots,
-            if session.worm_feeding_paused {
-                " PAUSED"
-            } else {
-                ""
-            }
-        )
-    } else {
-        String::new()
-    };
-    draw_ui_text_ex(
-        &format!(
-            "Ingots {}/{} (banked {}) · Captured {} · Raids {}{}",
-            session.economy.ingots_forged,
-            data.balance.win2_ingots,
-            session.economy.ingots_stock,
-            session.progress.beetles_captured,
-            session.progress.raids_survived,
-            worm_note
-        ),
-        x,
-        y,
-        TextStyle::new(14.0, ingot_color).params(),
-    );
-    draw_ui_text_ex(
-        &format!(
-            "Raw {:.0} · Cooked {:.0} · Waste {:.1} · Morale {}",
-            session.economy.raw_food,
-            session.economy.cooked_food,
-            session.economy.waste,
-            crate::simulation::colony::morale_status(session, data),
-        ),
-        x,
-        y + 20.0,
-        TextStyle::new(13.0, dark::TEXT_DIM).params(),
     );
 }
 
