@@ -109,6 +109,24 @@ fn factory_lesson_points_to_the_prebuilt_mine() {
 }
 
 #[test]
+fn food_and_worm_lessons_name_the_next_visible_tap() {
+    let (data, _) = boot();
+    let food = data
+        .tutorial
+        .iter()
+        .find(|step| step.id == "food")
+        .expect("food lesson");
+    let worm = data
+        .tutorial
+        .iter()
+        .find(|step| step.id == "worm")
+        .expect("worm lesson");
+
+    assert!(food.body.contains("Tap Farm, then tap open floor"));
+    assert!(worm.body.contains("Tap the Worm Shrine to inspect it"));
+}
+
+#[test]
 fn dismissed_tutorial_shows_nothing() {
     let (data, mut session) = boot();
     session.tutorial_dismissed = true;

@@ -8,7 +8,7 @@
   {
     "id": "food",
     "title": "Stabilize the Food Grid",
-    "body": "Read Food Grid: keep Production above Upkeep. Tap Farm, then open floor. If food pressure appears and Idle is 0, tap − beside Miner, then + beside Carrier or Cook in Jobs.",
+    "body": "Read Food Grid: keep Production above Upkeep. Tap Farm, then tap open floor to place it. If food pressure appears and Idle is 0, tap − beside Miner, then + beside Carrier or Cook in Jobs.",
     "done": { "kind": "site_placed" }
   },
   {
@@ -26,7 +26,7 @@
   {
     "id": "worm",
     "title": "Awaken the Worm",
-    "body": "Keep the Worm Shrine running: its panel shows food and ingot offerings, reserves, and blockers. Feed the Colossal Worm sleeping below. This tutorial completes when the worm awakens.",
+    "body": "Tap the Worm Shrine to inspect it. Keep its offerings running: the panel shows food and ingot progress, reserves, and blockers. Feed the Colossal Worm sleeping below. This tutorial completes when the worm awakens.",
     "done": { "kind": "worm_awake" }
   }
 ]

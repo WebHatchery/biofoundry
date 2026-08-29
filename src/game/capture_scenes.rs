@@ -53,6 +53,13 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                 }
             }
         }
+        "tutorial_food" => {
+            game.transition(StateTransition::StartWarren);
+            if let GameState::Warren(session) = &mut game.state {
+                session.tutorial_step = 1;
+                session.economy.food = 48.0;
+            }
+        }
         "tutorial_factory" => {
             game.transition(StateTransition::StartWarren);
             if let GameState::Warren(session) = &mut game.state {
@@ -62,6 +69,13 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                 session.tutorial_built = true;
                 session.economy.food = 80.0;
                 session.economy.ore_stock = 24;
+            }
+        }
+        "tutorial_worm" => {
+            begin(game, "shrine");
+            if let GameState::Warren(session) = &mut game.state {
+                session.tutorial_dismissed = false;
+                session.tutorial_step = 4;
             }
         }
         "victory" => {
