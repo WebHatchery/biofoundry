@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `f14c0ed`
+**Source revision:** `e8930a5`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -29,7 +29,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 172 unit tests and 2 integration tests pass.
+- `cargo test --all-targets` — 173 unit tests and 2 integration tests pass.
 - `cargo clippy --all-targets --all-features -- -D warnings` — pass.
 - `publish.ps1` with no parameters — pass; Windows and WebGL packages
   deployed to Preview.
@@ -126,6 +126,9 @@ automated simulation results into first-time-player evidence.
   construction is pending, and names the current pressure recovery controls;
   the completed Farm is now the handoff into the Factory lesson. The Food and
   Factory cards no longer promise a fixed Miner or Idle-based reassignment.
+- Tutorial completion guard — focused coverage confirms that completing an
+  unrelated building cannot satisfy the Farm-construction lesson; the lesson
+  now waits for the player-built second Farm.
 - Tutorial tap capture — [ui_tutorial_worm.png](../verification/ui_tutorial_worm.png)
   names the tap on the Worm Shrine before its final-demand inspection.
 - One-shot placement coverage — a successful building placement returns the
