@@ -135,7 +135,21 @@ fn draw_status_badge(pos: TilePos, ts: f32, status: crate::ui::legibility::Build
         St::AwaitingHaul => Color::new(0.40, 0.80, 0.92, 1.0),
         St::WasteOverflow => Color::new(0.65, 0.85, 0.35, 1.0),
     };
-    let s = r * 0.85;
+    draw_status_glyph(vec2(bx, by), r, status, color);
+}
+
+/// Draw the shape that distinguishes a workstation status without relying on
+/// its color. The same glyph is used on the map badge and in the legend.
+pub(super) fn draw_status_glyph(
+    center: Vec2,
+    radius: f32,
+    status: crate::ui::legibility::BuildingStatus,
+    color: Color,
+) {
+    use crate::ui::legibility::BuildingStatus as St;
+    let bx = center.x;
+    let by = center.y;
+    let s = radius * 0.85;
     match status {
         // Backed up: a full up-triangle.
         St::OutputFull => draw_triangle(

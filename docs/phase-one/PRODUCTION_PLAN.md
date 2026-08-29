@@ -72,7 +72,7 @@ response.
   reserve-policy pauses in plain language.
 - [x] Show before/after throughput when the Iron Pickaxe is equipped.
 - [x] Forecast famine and raid pressure early enough for a meaningful response.
-- [ ] Audit status colors for non-color cues and text contrast.
+- [x] Audit status colors for non-color cues and text contrast.
 
 **Acceptance:** at least four of five first-time players correctly diagnose one
 seeded food-chain stall and one ore-chain stall without facilitator help.

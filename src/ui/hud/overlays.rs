@@ -175,7 +175,8 @@ pub(super) fn draw_status_legend() {
     let mut lx = strip.x + 12.0;
     let cy = strip.y + strip.h * 0.5;
     for (status, color) in items {
-        draw_circle(lx, cy, 5.0, color);
+        draw_circle(lx, cy, 7.5, Color::new(0.08, 0.08, 0.10, 0.92));
+        crate::ui::warren::draw_status_glyph(vec2(lx, cy), 6.0, status, color);
         let label = status.label();
         draw_ui_text_ex(
             label,
