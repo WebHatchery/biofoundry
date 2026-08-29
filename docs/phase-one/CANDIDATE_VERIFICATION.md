@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `29cd544`
+**Source revision:** `a943d0c`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -134,6 +134,11 @@ automated simulation results into first-time-player evidence.
   recovery step follows the current workforce and remains aligned with the
   Objective and raid warning. The embedded tutorial source copy carries the
   same state-neutral guidance for returning or tooling contexts.
+- Factory Objective guidance — when the Blacksmith exists but no Smith is
+  staffed, the Objective now identifies an eligible Idle worker or the exact
+  reassignable role to free before adding Smith, instead of advertising a
+  disabled `+ Smith` control. Focused objective coverage exercises the no-Idle
+  handoff.
 - Endless route failure capture — [ui_endless_failure.png](../verification/ui_endless_failure.png)
   shows the failed outpost's wrapped recovery message and the Objective's
   complete visible Activate route instruction, alongside the top-bar failure
