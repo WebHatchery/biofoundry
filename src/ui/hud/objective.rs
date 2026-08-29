@@ -1,6 +1,7 @@
 //! Persistent campaign objective copy and progress for the warren HUD.
 
 use crate::data::GameData;
+use crate::state::creatures::Job;
 use crate::state::outposts::TransitDirection;
 use crate::state::GameSession;
 
@@ -80,6 +81,29 @@ impl CampaignObjective {
                 ),
                 next: next.to_owned(),
                 ratio: ((food / food_goal.max(1.0)) + (ore / ore_goal.max(1) as f32)) / 2.0,
+                complete: false,
+            };
+        }
+
+        if session.job_count(Job::Guard) == 0 {
+            let food_goal = data.balance.win_food_surplus;
+            let ore_goal = data.balance.win_ore_delivered;
+            let next = if session.job_count(Job::Idle) > 0 {
+                "Next: tap + beside Guard in Jobs."
+            } else {
+                "Next: tap − beside Miner, then + beside Guard in Jobs."
+            };
+            return Self {
+                title: "Finish the security handoff".to_owned(),
+                progress: format!(
+                    "Food {:.0}/{:.0}  ·  Ore {}/{}  ·  Guard 0/1",
+                    session.economy.food.min(food_goal),
+                    food_goal,
+                    session.economy.ore_delivered_total.min(ore_goal),
+                    ore_goal
+                ),
+                next: next.to_owned(),
+                ratio: 2.0 / 3.0,
                 complete: false,
             };
         }

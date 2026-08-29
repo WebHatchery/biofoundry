@@ -1,6 +1,7 @@
 use super::*;
 use crate::data::GameData;
 use crate::state::creatures::Good;
+use crate::state::creatures::Job;
 use crate::state::outposts::WormTransit;
 use crate::state::structures::Building;
 use crate::state::GameSession;
@@ -25,6 +26,7 @@ fn objective_starts_with_both_security_requirements() {
 #[test]
 fn objective_moves_through_factory_and_shrine() {
     let (data, mut session) = boot();
+    session.creatures[0].job = Job::Guard;
     session.won = true;
     let factory = CampaignObjective::current(&session, &data);
     assert_eq!(factory.title, "Complete the Biofoundry");
@@ -44,6 +46,29 @@ fn objective_moves_through_factory_and_shrine() {
     let offerings = CampaignObjective::current(&session, &data);
     assert_eq!(offerings.title, "Awaken the Worm");
     assert!(offerings.progress.contains("Offerings"));
+}
+
+#[test]
+fn objective_keeps_the_guard_handoff_as_the_next_requirement() {
+    let (data, mut session) = boot();
+    session.won = true;
+
+    let objective = CampaignObjective::current(&session, &data);
+
+    assert_eq!(objective.title, "Finish the security handoff");
+    assert!(objective.progress.contains("Guard 0/1"));
+    assert_eq!(
+        objective.next,
+        "Next: tap − beside Miner, then + beside Guard in Jobs."
+    );
+    assert!(!objective.complete);
+    assert!((objective.ratio - 2.0 / 3.0).abs() < f32::EPSILON);
+
+    session.creatures[0].job = Job::Guard;
+    assert_eq!(
+        CampaignObjective::current(&session, &data).title,
+        "Complete the Biofoundry"
+    );
 }
 
 #[test]
