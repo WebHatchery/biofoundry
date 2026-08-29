@@ -3,7 +3,7 @@
 
 use crate::data::GameData;
 use crate::state::creatures::{Creature, Good, Job, Task};
-use crate::state::outposts::TransitDirection;
+use crate::state::outposts::{TransitDirection, WormTransit};
 use crate::state::structures::Building;
 use crate::state::GameSession;
 use crate::ui::hud::widgets::{hud_button, panel_style};
@@ -410,6 +410,9 @@ pub(super) fn draw_inspect_panel(
                 &mut y,
             );
             if let Some(transit) = session.worm_transit.as_ref() {
+                if transit.outpost == pos {
+                    line(&transit_payload_line(transit), dark::POSITIVE, &mut y);
+                }
                 let route = if transit.outpost == pos {
                     transit_destination(transit.direction)
                 } else {
@@ -599,6 +602,17 @@ fn transit_destination(direction: TransitDirection) -> &'static str {
         TransitDirection::ToOutpost => "outpost",
         TransitDirection::ToShrine => "shrine",
     }
+}
+
+fn transit_payload_line(transit: &WormTransit) -> String {
+    let cargo = transit
+        .ore
+        .saturating_add(transit.ingots)
+        .saturating_add(transit.food.max(0.0) as u32);
+    format!(
+        "In flight · {cargo} cargo · {} crew",
+        transit.passengers.len()
+    )
 }
 
 fn outpost_has_loadable_payload(

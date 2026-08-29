@@ -259,3 +259,21 @@ fn outpost_return_label_names_each_payload_kind() {
     assert_eq!(outpost_return_label(0, 4), "Send 4 crew to shrine");
     assert_eq!(outpost_return_label(0, 0), "No cargo or crew to return");
 }
+
+#[test]
+fn in_flight_payload_summary_names_cargo_and_crew() {
+    let transit = WormTransit {
+        outpost: TilePos::new(4, 4),
+        direction: TransitDirection::ToShrine,
+        remaining: 4.0,
+        ore: 2,
+        ingots: 3,
+        food: 4.0,
+        passengers: vec![7, 8],
+    };
+
+    assert_eq!(
+        transit_payload_line(&transit),
+        "In flight · 9 cargo · 2 crew"
+    );
+}
