@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `1941648`
+**Source revision:** `939e0ab`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -155,6 +155,12 @@ automated simulation results into first-time-player evidence.
   reassignable role to free before adding Smith, instead of advertising a
   disabled `+ Smith` control. Focused objective coverage exercises the no-Idle
   handoff.
+- Progressive optional disclosure — advanced buildings and specialist
+  controls remain behind the completed `won + Guard` onboarding handoff, while
+  awakened warrens retain access for post-campaign play. Refreshed
+  [ui_optional.png](../verification/ui_optional.png) and
+  [ui_breeding.png](../verification/ui_breeding.png) captures show the
+  post-handoff state.
 - Endless route failure capture — [ui_endless_failure.png](../verification/ui_endless_failure.png)
   shows the failed outpost's wrapped recovery message and the Objective's
   complete visible Activate route instruction, alongside the top-bar failure
