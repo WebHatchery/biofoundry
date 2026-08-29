@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `dc3163f`
+**Source revision:** `7dc27bf`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -20,12 +20,12 @@ automated simulation results into first-time-player evidence.
 | Refresh and Continue | Pass | Reload returned to the title screen with Continue enabled; Continue restored `00:36` and showed `Warren loaded.`. |
 | Fresh-tab relaunch and Continue | Pass | A new Preview tab restored the same `00:36` state and objective with visible controls. |
 | Minimum-layout spot check | Pass | The 1200×675 canvas and required HUD remained visible in the 1280×720 Preview viewport. |
-| Visible-control smoke path | Pass | A fresh Preview warren advanced through visible New Warren, primary-pointer map drag, + zoom, and Farm placement without keyboard input; this is developer smoke evidence, not a qualifying first-time-player session. |
+| Visible-control smoke path | Pass | A fresh Preview warren advanced through visible New Warren, + zoom, Farm placement, and the next map tap without keyboard input; successful placement returned to Inspect instead of creating a second site. This is developer smoke evidence, not a qualifying first-time-player session. |
 
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 114 unit tests and 2 integration tests pass.
+- `cargo test --all-targets` — 116 unit tests and 2 integration tests pass.
 - `cargo clippy --all-targets --all-features -- -D warnings` — pass.
 - `publish.ps1` with no parameters — pass; Windows and WebGL packages
   deployed to Preview.
@@ -78,6 +78,10 @@ automated simulation results into first-time-player evidence.
   names the Farm-then-open-floor placement taps, while
   [ui_tutorial_worm.png](../verification/ui_tutorial_worm.png) names the tap
   on the Worm Shrine before its final-demand inspection.
+- One-shot placement coverage — a successful building placement returns the
+  pointer to Inspect mode, so the next map tap can select a building; focused
+  UI tests cover the mode transition and the live Preview smoke path confirms
+  the site count does not increase on that next tap.
 - Endless route failure capture — [ui_endless_failure.png](../verification/ui_endless_failure.png)
   shows the failed outpost's wrapped recovery message and the Objective's
   complete visible Activate route instruction, alongside the top-bar failure
