@@ -82,8 +82,12 @@ fn final_tutorial_waits_for_the_worm() {
 fn secure_step_waits_for_the_campaign_goal() {
     let (data, mut session) = boot();
     let none = TutorialInputs::default();
-    session.tutorial_step = data.tutorial.iter().position(|s| s.id == "secure").unwrap();
+    let secure_index = data.tutorial.iter().position(|s| s.id == "secure").unwrap();
+    let secure = &data.tutorial[secure_index];
+    session.tutorial_step = secure_index;
     assert_eq!(current_step(&session, &data).unwrap().id, "secure");
+    assert!(secure.body.contains("Guard in Jobs"));
+    assert!(secure.body.contains("ends onboarding"));
     assert!(!advance(&mut session, &data, none));
     session.won = true;
     assert!(advance(&mut session, &data, none));
