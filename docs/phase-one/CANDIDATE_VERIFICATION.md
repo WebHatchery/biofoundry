@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `425f4a9`
+**Source revision:** `70ef1df`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -25,7 +25,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 139 unit tests and 2 integration tests pass.
+- `cargo test --all-targets` — 149 unit tests and 2 integration tests pass.
 - `cargo clippy --all-targets --all-features -- -D warnings` — pass.
 - `publish.ps1` with no parameters — pass; Windows and WebGL packages
   deployed to Preview.
@@ -194,6 +194,10 @@ automated simulation results into first-time-player evidence.
 - Remote cargo accounting — subsequent outpost loads now append to existing
   ore, ingot, and cooked-food stacks instead of replacing them; focused
   simulation coverage exercises the multi-run case.
+- Remote crew boundary — passengers are now marked as remote while in transit
+  or stationed at an outpost, so they leave local Jobs, hunger, morale, guard
+  combat, and reassignment until the return trip; focused simulation, state,
+  and route-readiness coverage exercises arrival, return, and failed departure.
 
 ## Still open
 

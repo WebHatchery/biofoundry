@@ -137,6 +137,21 @@ fn remote_crew_is_not_a_local_worker_or_recovery_option() {
 }
 
 #[test]
+fn loading_route_ownership_rebuilds_remote_crew_markers() {
+    let data = GameData::load().unwrap();
+    let mut session = GameSession::new(&data, 6);
+    let outpost_pos = TilePos::new(4, 4);
+    let crew_id = session.creatures[0].id;
+    session.ensure_outpost(outpost_pos);
+    session.outposts[0].crew.push(crew_id);
+
+    session.sync_remote_crew_state();
+
+    assert_eq!(session.creatures[0].remote_outpost, Some(outpost_pos));
+    assert_eq!(session.job_count(Job::Miner), 2);
+}
+
+#[test]
 fn viable_workers_keep_the_security_handoff_recoverable() {
     let data = GameData::load().unwrap();
     let mut session = GameSession::new(&data, 5);

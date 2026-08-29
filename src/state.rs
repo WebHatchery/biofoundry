@@ -341,6 +341,26 @@ impl GameSession {
         }
     }
 
+    /// Rebuild the per-creature remote marker from persisted route ownership.
+    /// This keeps saves written before the marker existed safe to load, and
+    /// repairs the marker if a route was interrupted during serialization.
+    pub fn sync_remote_crew_state(&mut self) {
+        let mut remote_by_id = HashMap::new();
+        for outpost in &self.outposts {
+            for id in &outpost.crew {
+                remote_by_id.entry(*id).or_insert(outpost.pos);
+            }
+        }
+        if let Some(transit) = &self.worm_transit {
+            for id in &transit.passengers {
+                remote_by_id.entry(*id).or_insert(transit.outpost);
+            }
+        }
+        for creature in &mut self.creatures {
+            creature.remote_outpost = remote_by_id.get(&creature.id).copied();
+        }
+    }
+
     /// A 4-neighbour ore-vein tile of `pos`, if any (Mine placement).
     pub fn adjacent_ore_vein(&self, pos: TilePos) -> Option<TilePos> {
         pos.neighbors_4way()
