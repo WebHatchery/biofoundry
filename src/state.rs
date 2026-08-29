@@ -368,6 +368,23 @@ impl GameSession {
         self.creatures.iter().filter(|c| c.job == job).count()
     }
 
+    /// Whether this session cannot make further campaign progress without
+    /// loading an earlier checkpoint or starting a new warren.
+    pub fn is_non_viable(&self, data: &GameData) -> bool {
+        if self.worm_awake {
+            return false;
+        }
+        self.creatures.is_empty()
+            || (self.won
+                && self.job_count(Job::Guard) == 0
+                && self.creatures.iter().all(|creature| {
+                    !data
+                        .species
+                        .get(&creature.species)
+                        .is_some_and(|species| species.reassignable)
+                }))
+    }
+
     /// Move one reassignable creature from `from` to `to`. Returns success.
     pub fn reassign(
         &mut self,

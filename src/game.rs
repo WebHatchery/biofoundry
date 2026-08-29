@@ -404,12 +404,18 @@ impl Game {
     }
 
     fn save_game(&mut self) {
-        if matches!(&self.state, GameState::Warren(session) if session.creatures.is_empty()) {
-            self.notifications.warning(
-                "This warren has fallen silent. Load a safe save or start a new warren instead.",
-            );
+        let failure_notice = match &self.state {
+            GameState::Warren(session) => non_viable_save_notice(session, &self.data),
+            _ => None,
+        };
+        if let Some(notice) = failure_notice {
+            self.notifications.warning(notice);
             return;
         }
+        self.persist_or_report_save();
+    }
+
+    fn persist_or_report_save(&mut self) {
         match self.persist_current_session() {
             Ok(()) => {
                 self.save_exists = true;
@@ -421,6 +427,9 @@ impl Game {
 
     /// Persist a campaign milestone without interrupting the player's flow.
     fn autosave_game(&mut self) {
+        if matches!(&self.state, GameState::Warren(session) if session.is_non_viable(&self.data)) {
+            return;
+        }
         match self.persist_current_session() {
             Ok(()) => {
                 self.save_exists = true;
@@ -631,6 +640,17 @@ impl Game {
         // primary-pointer and touch gestures remain the required path.
         self.camera.update(dt, false);
     }
+}
+
+fn non_viable_save_notice(session: &GameSession, data: &GameData) -> Option<&'static str> {
+    if !session.is_non_viable(data) {
+        return None;
+    }
+    Some(if session.creatures.is_empty() {
+        "This warren has fallen silent. Load a safe save or start a new warren instead."
+    } else {
+        "This warren cannot staff the Guard post. Load a safe save or start a new warren instead."
+    })
 }
 
 fn transit_completion_notice(completion: TransitCompletion) -> &'static str {

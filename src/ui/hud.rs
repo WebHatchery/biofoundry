@@ -195,15 +195,9 @@ fn colony_failure_reason(session: &GameSession, data: &GameData) -> Option<Colon
     if session.creatures.is_empty() {
         return Some(ColonyFailure::Silent);
     }
-    let security_handoff_stuck = session.won
-        && session.job_count(Job::Guard) == 0
-        && session.creatures.iter().all(|creature| {
-            !data
-                .species
-                .get(&creature.species)
-                .is_some_and(|species| species.reassignable)
-        });
-    security_handoff_stuck.then_some(ColonyFailure::GuardHandoff)
+    session
+        .is_non_viable(data)
+        .then_some(ColonyFailure::GuardHandoff)
 }
 
 fn worm_completion_body(session: &GameSession) -> String {

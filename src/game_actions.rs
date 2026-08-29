@@ -32,7 +32,7 @@ impl Game {
                 // not lag behind the state the player was just viewing.
                 let should_autosave = matches!(
                     &self.state,
-                    GameState::Warren(session) if !session.creatures.is_empty()
+                    GameState::Warren(session) if !session.is_non_viable(&self.data)
                 );
                 if should_autosave {
                     self.autosave_game();

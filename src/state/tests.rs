@@ -106,6 +106,36 @@ fn beetles_cannot_be_reassigned() {
 }
 
 #[test]
+fn specialist_only_security_handoff_is_non_viable() {
+    let data = GameData::load().unwrap();
+    let mut session = GameSession::new(&data, 5);
+    session.won = true;
+    session.creatures.clear();
+    session.spawn_creature(&data, "overseer", Job::Idle);
+
+    assert!(session.is_non_viable(&data));
+}
+
+#[test]
+fn viable_workers_keep_the_security_handoff_recoverable() {
+    let data = GameData::load().unwrap();
+    let mut session = GameSession::new(&data, 5);
+    session.won = true;
+
+    assert!(!session.is_non_viable(&data));
+}
+
+#[test]
+fn awakened_warren_is_viable_even_without_creatures() {
+    let data = GameData::load().unwrap();
+    let mut session = GameSession::new(&data, 5);
+    session.worm_awake = true;
+    session.creatures.clear();
+
+    assert!(!session.is_non_viable(&data));
+}
+
+#[test]
 fn progression_counter_lookup_includes_study_metrics() {
     let progress = wildlife::Progress {
         specimens: 3,

@@ -53,6 +53,27 @@ fn tutorial_migration_keeps_unwitnessed_guard_lesson_visible() {
 }
 
 #[test]
+fn non_viable_save_notice_protects_the_last_checkpoint() {
+    let (data, mut session) = session();
+    session.won = true;
+    session.creatures.clear();
+    session.spawn_creature(&data, "overseer", Job::Idle);
+
+    assert_eq!(
+        non_viable_save_notice(&session, &data),
+        Some("This warren cannot staff the Guard post. Load a safe save or start a new warren instead.")
+    );
+}
+
+#[test]
+fn viable_save_notice_stays_empty_for_a_recoverable_warren() {
+    let (data, mut session) = session();
+    session.won = true;
+
+    assert_eq!(non_viable_save_notice(&session, &data), None);
+}
+
+#[test]
 fn secure_threshold_notice_waits_for_the_guard_handoff() {
     let (_data, mut session) = session();
 
