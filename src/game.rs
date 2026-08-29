@@ -482,9 +482,23 @@ impl Game {
 
     fn install_loaded_session(&mut self, session: GameSession) {
         self.reset_camera_for(&session);
-        self.accumulator = 0.0;
-        self.mode = UiMode::Inspect;
+        self.reset_session_view_state();
         self.state = GameState::Warren(Box::new(session));
+    }
+
+    /// Clear frame-local controls when a campaign crosses the title boundary.
+    /// These values belong to the previous view, not to the persisted warren.
+    fn reset_session_view_state(&mut self) {
+        self.accumulator = 0.0;
+        self.famine_announced = false;
+        self.mode = UiMode::Inspect;
+        self.help_open = false;
+        self.paused = false;
+        self.confirm_new_warren = false;
+        self.selected_building = None;
+        self.mouse_pan_start = None;
+        self.camera_input_claimed = false;
+        self.touch_camera_claimed = false;
     }
 
     fn recover_failed_load(&mut self, slot: &str, error: String) {
@@ -556,12 +570,7 @@ impl Game {
             StateTransition::StartWarren => {
                 let session = GameSession::new(&self.data, self.data.config.world_seed);
                 self.reset_camera_for(&session);
-                self.accumulator = 0.0;
-                self.famine_announced = false;
-                self.mode = UiMode::Inspect;
-                self.help_open = false;
-                self.paused = false;
-                self.confirm_new_warren = false;
+                self.reset_session_view_state();
                 self.state = GameState::Warren(Box::new(session));
                 self.autosave_game();
             }
