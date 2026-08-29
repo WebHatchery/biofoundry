@@ -27,6 +27,8 @@ const CAMERA_DRAG_THRESHOLD: f32 = 6.0;
 mod capture_scenes;
 #[path = "game_actions.rs"]
 mod game_actions;
+#[cfg(test)]
+mod tests;
 
 pub struct Game {
     data: GameData,
@@ -438,8 +440,10 @@ impl Game {
             &config.version,
             |version, value| {
                 let payload = value.get("data").cloned().unwrap_or(value);
-                serde_json::from_value(payload)
-                    .map_err(|err| format!("Unsupported save {version:?}: {err}"))
+                let mut session: GameSession = serde_json::from_value(payload)
+                    .map_err(|err| format!("Unsupported save {version:?}: {err}"))?;
+                migrate_tutorial_progress(&mut session, self.data.tutorial.len());
+                Ok(session)
             },
         )
     }
@@ -602,6 +606,44 @@ impl Game {
         // primary-pointer and touch gestures remain the required path.
         self.camera.update(dt, false);
     }
+}
+
+/// Reconcile the old seven-step tutorial index with the current five-beat
+/// sequence using facts that are actually persisted in a campaign save.
+///
+/// The old index alone is ambiguous: its Mine, Blacksmith, and famine lessons
+/// no longer have one-to-one replacements. Session milestones give a safe
+/// forward-only mapping without making a returning player repeat completed
+/// factory or campaign work.
+fn migrate_tutorial_progress(session: &mut GameSession, tutorial_count: usize) {
+    let old_step = session.tutorial_step;
+    let mut step = usize::from(old_step > 0);
+
+    if session.tutorial_built {
+        step = step.max(2);
+    }
+    if session
+        .economy
+        .gear_stock
+        .get("iron_pickaxe")
+        .copied()
+        .unwrap_or(0)
+        > 0
+        || session
+            .creatures
+            .iter()
+            .any(|creature| creature.equipment.as_deref() == Some("iron_pickaxe"))
+    {
+        step = step.max(3);
+    }
+    if session.won {
+        step = step.max(4);
+    }
+    if session.worm_awake {
+        step = tutorial_count;
+    }
+
+    session.tutorial_step = step.min(tutorial_count);
 }
 
 fn camera_config(data: &GameData, tile_size: f32) -> Camera2DConfig {
