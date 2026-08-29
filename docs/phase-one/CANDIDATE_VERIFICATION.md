@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `0d200c8`
+**Source revision:** `af93eb9`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -71,6 +71,11 @@ automated simulation results into first-time-player evidence.
 - Session-boundary reset — loading or starting a Warren clears the previous
   run's pause/help/selection state and famine-warning edge before the new HUD
   becomes active.
+- Modal reading state — goal reports, non-viable recovery, and the Field Guide
+  hold the simulation clock while the player reads them and resume only after
+  the visible modal action closes or dismisses the screen. Preview smoke check:
+  `00:06` remained unchanged during the open guide and advanced to `00:07`
+  after Close.
 - Specialist capture — [ui_breeding.png](../verification/ui_breeding.png) shows
   the selected Breeding Pit with readable Hobgoblin, Overseer, and Engineer
   effects and available ingot costs.
