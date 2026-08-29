@@ -32,6 +32,10 @@ impl CampaignObjective {
                 }
             } else if session.buildings_of("outpost").next().is_none() {
                 "Next: build a Worm Outpost and send cargo through the awakened route."
+            } else if session.outposts.iter().any(|outpost| {
+                !outpost.active && (outpost.cargo_total() > 0 || !outpost.crew.is_empty())
+            }) {
+                "Next: tap the loaded Worm Outpost, then tap Activate route to return its payload."
             } else if session
                 .outposts
                 .iter()

@@ -218,6 +218,27 @@ fn active_loaded_outpost_reports_payload_ready() {
 }
 
 #[test]
+fn inactive_loaded_outpost_reports_payload_recovery() {
+    let data = GameData::load().expect("embedded game data");
+    let mut session = GameSession::new(&data, 17);
+    let pos = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(pos, _)| session.can_place_building(*pos))
+        .map(|(pos, _)| pos)
+        .expect("a walkable outpost location");
+    session.buildings.push(Building::new("outpost", pos));
+    session.ensure_outpost(pos);
+    session.outposts[0].cargo.insert(Good::Ore, 1);
+
+    assert_eq!(
+        inspect_status(&session, &data, session.building_at(pos).unwrap()),
+        ("Payload held · route inactive", dark::WARNING)
+    );
+}
+
+#[test]
 fn active_outpost_before_awakening_reports_route_state() {
     let data = GameData::load().expect("embedded game data");
     let mut session = GameSession::new(&data, 16);

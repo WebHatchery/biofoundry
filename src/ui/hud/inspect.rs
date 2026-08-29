@@ -443,6 +443,9 @@ pub(super) fn draw_inspect_panel(
                     actions.push(UiAction::ActivateOutpost(pos));
                 }
                 y += 28.0;
+                if !active && (cargo > 0 || crew > 0) {
+                    line("Reactivate route to return payload", dark::WARNING, &mut y);
+                }
                 if active && session.worm_awake {
                     let loadable_payload = outpost_has_loadable_payload(session, data, cargo, crew);
                     let return_label = outpost_return_label(cargo, crew);
@@ -572,6 +575,9 @@ fn inspect_status(
                 return ("Route failed", dark::NEGATIVE);
             }
             if !outpost.active {
+                if outpost.cargo_total() > 0 || !outpost.crew.is_empty() {
+                    return ("Payload held · route inactive", dark::WARNING);
+                }
                 return ("Route inactive", dark::WARNING);
             }
             if !session.worm_awake {
