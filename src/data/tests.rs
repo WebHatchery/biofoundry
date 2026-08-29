@@ -72,6 +72,13 @@ fn balance_values_are_playable() {
     assert!(b.win_food_surplus > b.start_food);
     assert!(b.food_warning_sec > 0.0);
     assert!(b.raid_warning_sec > 0.0 && b.raid_warning_sec < b.raid_first_sec);
+    assert!(b.worm_food_per_min > 0.0);
+    assert!(b.worm_food_per_offering > 0.0);
+    assert!(b.worm_awaken_ingots > 0);
+    assert!(
+        b.worm_awaken_at >= b.worm_food_per_offering * b.worm_awaken_ingots as f32,
+        "the food goal must fund every required ingot offering"
+    );
     // Cooking must multiply calories, or the loop can never go positive.
     assert!(b.cook_batch_food / b.cook_batch_mushrooms as f32 > 1.0);
 }

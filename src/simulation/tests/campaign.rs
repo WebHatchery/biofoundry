@@ -7,9 +7,9 @@ use super::*;
 /// victory → the Blacksmith forges the factory goal → the Colossal Worm.
 /// The "one sitting" length probe, and the contract for the arc (plan
 /// §Phase 11): famine ~5 min, secure 12–18 min, factory 20–28 min, shrine
-/// before 35 min, and worm within the 30–60 min sitting envelope. The exact
-/// values may move with balance tuning, but each beat needs a guardrail so a
-/// new sink cannot create a silent wait.
+/// before 35 min, the shrine-to-worm handoff under 12 min, and worm within the
+/// 30–60 min sitting envelope. The exact values may move with balance tuning,
+/// but each beat needs a guardrail so a new sink cannot create a silent wait.
 ///
 /// A competent campaign leans on the automation loop: beetle haulers for
 /// capacity, a Blacksmith hammering ore into ingots, expansion (a second
@@ -168,8 +168,8 @@ fn sim_to_factory_complete_on_fixed_seed() {
         "Shrine handoff took {factory_to_shrine:.1} min after factory completion"
     );
     assert!(
-        shrine_to_worm <= 25.0,
-        "worm awakening took {shrine_to_worm:.1} min after the shrine was raised"
+        shrine_to_worm <= 12.0,
+        "worm awakening took {shrine_to_worm:.1} min after the shrine was raised; the final offering handoff should keep moving"
     );
     assert!(
         (30.0..=60.0).contains(&minutes),

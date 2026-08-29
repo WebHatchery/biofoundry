@@ -63,9 +63,9 @@
   "win_food_surplus": 100.0,
   "win_ore_delivered": 50,
   "win2_ingots": 20,
-  "worm_food_per_min": 8.0,
+  "worm_food_per_min": 10.0,
   "worm_feed_reserve": 25.0,
-  "worm_awaken_at": 110.0,
+  "worm_awaken_at": 90.0,
   "raw_food_multiplier": 1.0,
   "raw_recipe_multiplier": 1.0,
   "cooked_recipe_multiplier": 1.0,
@@ -85,7 +85,7 @@
   "outpost_storage_cap": 12,
   "worm_transit_time_sec": 18.0,
   "worm_ingot_reserve": 4,
-  "worm_food_per_offering": 11.0,
+  "worm_food_per_offering": 9.0,
   "worm_ingots_per_offering": 1,
   "worm_awaken_ingots": 10
 }
