@@ -33,11 +33,14 @@ fn worm_completion_summary_names_the_resources_consumed() {
     let data = GameData::load().unwrap();
     let mut session = GameSession::new(&data, 42);
     session.tick = 1234;
-    session.worm_fed = 110.0;
-    session.worm_ingots_fed = 10;
+    session.worm_fed = data.balance.worm_awaken_at;
+    session.worm_ingots_fed = data.balance.worm_awaken_ingots;
 
     let body = worm_completion_body(&session);
 
-    assert!(body.contains("Fed on 110 food and 10 ingots"));
-    assert!(!body.contains("110 offerings"));
+    assert!(body.contains(&format!(
+        "Fed on {:.0} food and {} ingots",
+        data.balance.worm_awaken_at, data.balance.worm_awaken_ingots
+    )));
+    assert!(!body.contains("offerings"));
 }
