@@ -49,7 +49,7 @@ systems when they become relevant.
 - [x] Add a persistent campaign objective card with current progress and the
   next unmet requirement.
 - [ ] Rework the tutorial around the five journey beats in `PLAYABLE_SLICE.md`.
-- [ ] Make every locked building or action state its exact prerequisite.
+- [x] Make every locked building or action state its exact prerequisite.
 - [ ] Delay or collapse optional systems until the critical path establishes
   food, mining, smithing, and the worm goal.
 - [ ] Ensure every tutorial instruction names the exact visible control or

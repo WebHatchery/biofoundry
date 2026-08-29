@@ -5,6 +5,7 @@ use crate::data::GameData;
 use crate::simulation::{self, food};
 use crate::state::creatures::Job;
 use crate::state::GameSession;
+use crate::ui::hud::requirements::unlock_requirement;
 use crate::ui::hud::widgets::{hud_button, panel_style};
 use crate::ui::hud::HudSprites;
 use crate::ui::{UiAction, UiMode, LOGICAL_WIDTH};
@@ -380,6 +381,34 @@ pub(super) fn draw_jobs_panel(
         y + 18.0,
         TextStyle::new(13.0, dark::TEXT_DIM).params(),
     );
+
+    let mut locked_actions = Vec::new();
+    if !has_den {
+        locked_actions.push("Salamander → build a Smelter Den".to_owned());
+    }
+    for (label, unlock_id) in [("Slime", "slime_janitor"), ("Bat", "bat_courier")] {
+        if !session.unlocked.contains(unlock_id) {
+            if let Some(requirement) = unlock_requirement(data, unlock_id) {
+                locked_actions.push(format!("{label} → {requirement}"));
+            }
+        }
+    }
+    if !locked_actions.is_empty() {
+        draw_ui_text_ex(
+            "Locked actions",
+            x,
+            y + 36.0,
+            TextStyle::new(12.0, dark::TEXT_DIM).params(),
+        );
+        for (index, requirement) in locked_actions.iter().enumerate() {
+            draw_ui_text_ex(
+                requirement,
+                x,
+                y + 52.0 + index as f32 * 16.0,
+                TextStyle::new(12.0, dark::WARNING).params(),
+            );
+        }
+    }
 }
 
 pub(super) fn draw_tools_panel(
@@ -406,6 +435,7 @@ pub(super) fn draw_tools_panel(
     // kinds stay visible but disabled (progression is discoverable).
     let mut defs: Vec<_> = data.buildings.iter().filter(|(_, d)| d.buildable).collect();
     defs.sort_by(|a, b| a.0.cmp(b.0));
+    let mut locked_requirements = Vec::new();
     for row in defs.chunks(3) {
         for (i, (id, def)) in row.iter().enumerate() {
             let active = *mode == UiMode::Build((*id).clone());
@@ -420,6 +450,13 @@ pub(super) fn draw_tools_panel(
             } else {
                 format!("{short} 🔒")
             };
+            if !unlocked {
+                if let Some(unlock_id) = def.requires_unlock.as_deref() {
+                    if let Some(requirement) = unlock_requirement(data, unlock_id) {
+                        locked_requirements.push(format!("{short} → {requirement}"));
+                    }
+                }
+            }
             let bx = x + (cell + 8.0) * i as f32;
             if hud_button(Rect::new(bx, y, cell, 22.0), &label, unlocked, mouse) {
                 actions.push(UiAction::SetMode(UiMode::Build((*id).clone())));
@@ -442,6 +479,22 @@ pub(super) fn draw_tools_panel(
             y + 16.0,
             TextStyle::new(13.0, dark::TEXT_DIM).params(),
         );
+    }
+    if !locked_requirements.is_empty() {
+        draw_ui_text_ex(
+            "Locked gates",
+            x,
+            y + 36.0,
+            TextStyle::new(12.0, dark::TEXT_DIM).params(),
+        );
+        for (index, requirement) in locked_requirements.iter().enumerate() {
+            draw_ui_text_ex(
+                requirement,
+                x,
+                y + 52.0 + index as f32 * 16.0,
+                TextStyle::new(12.0, dark::WARNING).params(),
+            );
+        }
     }
 }
 
