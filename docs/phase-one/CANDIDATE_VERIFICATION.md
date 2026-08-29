@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `cbe74f2`
+**Source revision:** `bd54481`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -25,7 +25,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 118 unit tests and 2 integration tests pass.
+- `cargo test --all-targets` — 119 unit tests and 2 integration tests pass.
 - `cargo clippy --all-targets --all-features -- -D warnings` — pass.
 - `publish.ps1` with no parameters — pass; Windows and WebGL packages
   deployed to Preview.
@@ -73,12 +73,14 @@ automated simulation results into first-time-player evidence.
   effects and available ingot costs.
 - Factory tutorial capture — [ui_tutorial_factory.png](../verification/ui_tutorial_factory.png)
   makes the intended interaction explicit: inspect the existing Mine, place the
-  Blacksmith, and when `Idle 0` is shown, tap `−` beside Miner before tapping
-  `+` beside Smith.
-- Tutorial tap captures — [ui_tutorial_food.png](../verification/ui_tutorial_food.png)
-  names the Farm-then-open-floor placement taps, while
-  [ui_tutorial_worm.png](../verification/ui_tutorial_worm.png) names the tap
-  on the Worm Shrine before its final-demand inspection.
+  Blacksmith, and when `Idle 0` is shown, tap `−` by Miner before tapping `+`
+  by Smith.
+- Tutorial construction pacing — [ui_tutorial_food.png](../verification/ui_tutorial_food.png)
+  names the Farm-then-open-floor placement taps, keeps the lesson active while
+  construction is pending, and names the pressure recovery controls; the
+  completed Farm is now the handoff into the Factory lesson.
+- Tutorial tap capture — [ui_tutorial_worm.png](../verification/ui_tutorial_worm.png)
+  names the tap on the Worm Shrine before its final-demand inspection.
 - One-shot placement coverage — a successful building placement returns the
   pointer to Inspect mode, so the next map tap can select a building; focused
   UI tests cover the mode transition and the live Preview smoke path confirms
