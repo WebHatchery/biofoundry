@@ -1,0 +1,50 @@
+use super::*;
+use crate::state::structures::Building;
+
+fn shrine_session() -> (GameData, GameSession, TilePos) {
+    let data = GameData::load().expect("embedded game data");
+    let mut session = GameSession::new(&data, 7);
+    let pos = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(pos, _)| session.can_place_building(*pos))
+        .map(|(pos, _)| pos)
+        .expect("a walkable shrine location");
+    session.buildings.push(Building::new("worm_shrine", pos));
+    (data, session, pos)
+}
+
+#[test]
+fn shrine_reports_food_reserve_blocker() {
+    let (data, mut session, pos) = shrine_session();
+    session.economy.food = data.balance.worm_feed_reserve;
+
+    assert_eq!(
+        inspect_status(&session, &data, session.building_at(pos).unwrap()),
+        ("Waiting for food reserve", dark::WARNING)
+    );
+}
+
+#[test]
+fn shrine_reports_ingot_reserve_blocker_after_an_offering() {
+    let (data, mut session, pos) = shrine_session();
+    session.economy.food = data.balance.worm_feed_reserve + 20.0;
+    session.worm_fed = data.balance.worm_food_per_offering;
+    session.economy.ingots_stock = data.balance.worm_ingot_reserve;
+
+    assert_eq!(
+        inspect_status(&session, &data, session.building_at(pos).unwrap()),
+        ("Waiting for ingot reserve", dark::WARNING)
+    );
+}
+
+#[test]
+fn shrine_is_working_when_reserves_can_fund_the_next_bite() {
+    let (data, session, pos) = shrine_session();
+
+    assert_eq!(
+        inspect_status(&session, &data, session.building_at(pos).unwrap()),
+        ("Working", dark::POSITIVE)
+    );
+}

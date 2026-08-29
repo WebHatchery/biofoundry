@@ -281,6 +281,11 @@ pub(super) fn draw_inspect_panel(
         }
         "worm_shrine" => {
             let paused = session.worm_feeding_paused;
+            let food_remaining = (data.balance.worm_awaken_at - session.worm_fed).max(0.0);
+            let ingots_remaining = data
+                .balance
+                .worm_awaken_ingots
+                .saturating_sub(session.worm_ingots_fed);
             line(
                 &format!(
                     "Food {:.0}/{:.0} · Ingots {}/{}",
@@ -293,14 +298,43 @@ pub(super) fn draw_inspect_panel(
                 &mut y,
             );
             line(
+                &format!(
+                    "Remaining {:.0} food · {} ingots",
+                    food_remaining, ingots_remaining
+                ),
+                dark::TEXT_DIM,
+                &mut y,
+            );
+            let minimum_feed_seconds = if data.balance.worm_food_per_min > 0.0 {
+                food_remaining / data.balance.worm_food_per_min * 60.0
+            } else {
+                0.0
+            };
+            line(
+                &format!(
+                    "Food draw {:.0}/min · minimum {}",
+                    data.balance.worm_food_per_min,
+                    format_mmss(minimum_feed_seconds)
+                ),
+                dark::TEXT_DIM,
+                &mut y,
+            );
+            line(
                 if session.worm_awake {
                     "The Colossal Worm is awake"
                 } else if paused {
                     "Offerings paused — reserve protected"
+                } else if worm_waiting_for_food(session, data) {
+                    "Waiting for food reserve"
+                } else if worm_waiting_for_ingots(session, data) {
+                    "Waiting for ingot reserve"
                 } else {
-                    "Offering food and ingots"
+                    "Offering automatically"
                 },
-                if paused {
+                if paused
+                    || worm_waiting_for_food(session, data)
+                    || worm_waiting_for_ingots(session, data)
+                {
                     dark::WARNING
                 } else {
                     dark::POSITIVE
@@ -391,12 +425,7 @@ fn inspect_status(
     building: &crate::state::structures::Building,
 ) -> (&'static str, Color) {
     if building.kind == "worm_shrine" {
-        if session.worm_awake {
-            return ("Awakened", dark::POSITIVE);
-        }
-        if session.worm_feeding_paused {
-            return ("Paused by reserve policy", dark::WARNING);
-        }
+        return worm_shrine_status(session, data);
     }
     if building.kind == "outpost" {
         if let Some(outpost) = session.outposts.iter().find(|o| o.pos == building.pos) {
@@ -419,3 +448,41 @@ fn inspect_status(
         None => ("Working", dark::POSITIVE),
     }
 }
+
+fn worm_shrine_status(session: &GameSession, data: &GameData) -> (&'static str, Color) {
+    if session.worm_awake {
+        ("Awakened", dark::POSITIVE)
+    } else if session.worm_feeding_paused {
+        ("Paused by reserve policy", dark::WARNING)
+    } else if worm_waiting_for_food(session, data) {
+        ("Waiting for food reserve", dark::WARNING)
+    } else if worm_waiting_for_ingots(session, data) {
+        ("Waiting for ingot reserve", dark::WARNING)
+    } else {
+        ("Working", dark::POSITIVE)
+    }
+}
+
+fn worm_waiting_for_food(session: &GameSession, data: &GameData) -> bool {
+    session.worm_fed < data.balance.worm_awaken_at
+        && session.economy.food <= data.balance.worm_feed_reserve
+}
+
+fn worm_waiting_for_ingots(session: &GameSession, data: &GameData) -> bool {
+    if session.worm_fed >= data.balance.worm_awaken_at {
+        return session.worm_ingots_fed < data.balance.worm_awaken_ingots
+            && session.economy.ingots_stock <= data.balance.worm_ingot_reserve;
+    }
+    let food_per_offering = if data.balance.worm_food_per_offering > 0.0 {
+        data.balance.worm_food_per_offering
+    } else {
+        data.balance.worm_awaken_at / data.balance.worm_awaken_ingots.max(1) as f32
+    };
+    let completed_offerings = (session.worm_fed / food_per_offering.max(1.0)).floor() as u32;
+    let desired_ingots = completed_offerings * data.balance.worm_ingots_per_offering;
+    session.worm_ingots_fed < desired_ingots
+        && session.economy.ingots_stock <= data.balance.worm_ingot_reserve
+}
+
+#[cfg(test)]
+mod tests;

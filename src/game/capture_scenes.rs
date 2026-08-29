@@ -282,6 +282,36 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                 }
             }
         }
+        "shrine" => {
+            game.transition(StateTransition::StartWarren);
+            if let GameState::Warren(session) = &mut game.state {
+                // Stage the final production demand before awakening, with
+                // the inspection card open so its estimate is reviewable.
+                session.tutorial_dismissed = true;
+                session.economy.food = 72.0;
+                session.economy.ingots_stock = 6;
+                session.won = true;
+                session.victory_shown = true;
+                session.factory_complete = true;
+                session.factory_shown = true;
+                session.worm_fed = 44.0;
+                session.worm_ingots_fed = 4;
+                let spawn = session.spawn_tile();
+                let spot = session
+                    .world
+                    .tiles
+                    .iter_with_pos()
+                    .filter(|(pos, _)| {
+                        session.can_place_building(*pos) && pos.manhattan_distance(&spawn) >= 3
+                    })
+                    .map(|(pos, _)| pos)
+                    .min_by_key(|p| (p.manhattan_distance(&spawn), p.x, p.y));
+                if let Some(spot) = spot {
+                    session.buildings.push(Building::new("worm_shrine", spot));
+                    game.selected_building = Some(spot);
+                }
+            }
+        }
         "worm" | "completion" => {
             game.transition(StateTransition::StartWarren);
             if let GameState::Warren(session) = &mut game.state {
