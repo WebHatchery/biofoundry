@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `8748b68`
+**Source revision:** `f14c0ed`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -29,7 +29,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 171 unit tests and 2 integration tests pass.
+- `cargo test --all-targets` — 172 unit tests and 2 integration tests pass.
 - `cargo clippy --all-targets --all-features -- -D warnings` — pass.
 - `publish.ps1` with no parameters — pass; Windows and WebGL packages
   deployed to Preview.
@@ -114,6 +114,9 @@ automated simulation results into first-time-player evidence.
 - Specialist capture — [ui_breeding.png](../verification/ui_breeding.png) shows
   the selected Breeding Pit with readable Hobgoblin, Overseer, and Engineer
   effects and available ingot costs.
+- Locked specialist labels — focused inspection coverage keeps unavailable
+  breeding choices readable as `[L]` instead of the bundled font's missing
+  glyph.
 - Factory tutorial capture — [ui_tutorial_factory.png](../verification/ui_tutorial_factory.png)
   makes the intended interaction explicit: inspect the existing Mine, place the
   Blacksmith, and when no eligible Idle worker is available, tap `−` by the
