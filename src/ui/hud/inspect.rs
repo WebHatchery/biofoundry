@@ -14,6 +14,8 @@ use macroquad_toolkit::grid::TilePos;
 use macroquad_toolkit::prelude::*;
 use macroquad_toolkit::ui::draw_ui_text_ex;
 
+const LOCKED_SPECIALIST_MARKER: &str = "[L]";
+
 /// First-pass building inspection (plan §Phase 6): what a clicked building
 /// is doing right now. Phase 9 grows this into the full legibility layer.
 /// Returns its rect while a building is selected.
@@ -282,7 +284,7 @@ pub(super) fn draw_inspect_panel(
                 let unlocked = session.unlocked.contains(unlock);
                 let name = data.species.get(id).map(|s| s.name.as_str()).unwrap_or(id);
                 let label = if !unlocked {
-                    format!("{name} 🔒")
+                    format!("{name} {LOCKED_SPECIALIST_MARKER}")
                 } else if blocked {
                     format!("{name} — posted")
                 } else {

@@ -69,6 +69,11 @@ fn breeding_labels_explain_specialist_roles() {
 }
 
 #[test]
+fn locked_specialist_marker_uses_font_safe_ascii() {
+    assert_eq!(LOCKED_SPECIALIST_MARKER, "[L]");
+}
+
+#[test]
 fn shrine_labels_a_manual_pause_without_misattributing_it() {
     let (data, mut session, pos) = shrine_session();
     session.worm_feeding_paused = true;
