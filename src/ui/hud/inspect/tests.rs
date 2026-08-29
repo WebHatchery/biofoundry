@@ -195,6 +195,50 @@ fn active_empty_outpost_reports_whether_payload_is_ready() {
 }
 
 #[test]
+fn active_loaded_outpost_reports_payload_ready() {
+    let data = GameData::load().expect("embedded game data");
+    let mut session = GameSession::new(&data, 15);
+    let pos = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(pos, _)| session.can_place_building(*pos))
+        .map(|(pos, _)| pos)
+        .expect("a walkable outpost location");
+    session.buildings.push(Building::new("outpost", pos));
+    session.ensure_outpost(pos);
+    session.outposts[0].active = true;
+    session.worm_awake = true;
+    session.outposts[0].cargo.insert(Good::Ore, 2);
+
+    assert_eq!(
+        inspect_status(&session, &data, session.building_at(pos).unwrap()),
+        ("Payload ready", dark::POSITIVE)
+    );
+}
+
+#[test]
+fn active_outpost_before_awakening_reports_route_state() {
+    let data = GameData::load().expect("embedded game data");
+    let mut session = GameSession::new(&data, 16);
+    let pos = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(pos, _)| session.can_place_building(*pos))
+        .map(|(pos, _)| pos)
+        .expect("a walkable outpost location");
+    session.buildings.push(Building::new("outpost", pos));
+    session.ensure_outpost(pos);
+    session.outposts[0].active = true;
+
+    assert_eq!(
+        inspect_status(&session, &data, session.building_at(pos).unwrap()),
+        ("Route active", dark::POSITIVE)
+    );
+}
+
+#[test]
 fn blacksmith_queue_reports_when_another_order_can_be_added() {
     let data = GameData::load().expect("embedded game data");
     let pos = TilePos::new(0, 0);
