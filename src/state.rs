@@ -316,23 +316,33 @@ impl GameSession {
         true
     }
 
-    /// Number of usable tiles, plus the rooms remote outposts provide.
-    pub fn usable_warren_capacity(&self, data: &GameData) -> usize {
+    /// Number of walkable tiles available to workers in the warren itself.
+    fn local_warren_capacity(&self, data: &GameData) -> usize {
         let floor_tiles = self
             .world
             .tiles
             .iter_with_pos()
             .filter(|(_, t)| t.walkable())
             .count() as f32;
-        let local = (floor_tiles / data.balance.capacity_tiles_per_creature).floor() as usize;
-        local
+        (floor_tiles / data.balance.capacity_tiles_per_creature).floor() as usize
+    }
+
+    /// Number of usable tiles, plus the rooms remote outposts provide.
+    pub fn usable_warren_capacity(&self, data: &GameData) -> usize {
+        self.local_warren_capacity(data)
             + self.outposts.iter().filter(|o| o.active).count()
                 * data.balance.outpost_capacity as usize
     }
 
     pub fn overcrowding_ratio(&self, data: &GameData) -> f32 {
-        let capacity = self.usable_warren_capacity(data).max(1) as f32;
-        self.creatures.len() as f32 / capacity
+        let remote_rooms = self.outposts.iter().filter(|o| o.active).count()
+            * data.balance.outpost_capacity as usize;
+        let local_capacity = self
+            .usable_warren_capacity(data)
+            .saturating_sub(remote_rooms)
+            .max(1);
+        let capacity = local_capacity as f32;
+        self.local_creature_count() as f32 / capacity
     }
 
     pub fn ensure_outpost(&mut self, pos: TilePos) {

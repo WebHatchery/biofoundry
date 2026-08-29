@@ -137,6 +137,17 @@ fn remote_crew_is_not_a_local_worker_or_recovery_option() {
 }
 
 #[test]
+fn remote_crew_does_not_inflate_local_crowding() {
+    let data = GameData::load().unwrap();
+    let mut session = GameSession::new(&data, 5);
+    let crowded_before = session.overcrowding_ratio(&data);
+
+    session.creatures[0].remote_outpost = Some(TilePos::new(4, 4));
+
+    assert!(session.overcrowding_ratio(&data) < crowded_before);
+}
+
+#[test]
 fn loading_route_ownership_rebuilds_remote_crew_markers() {
     let data = GameData::load().unwrap();
     let mut session = GameSession::new(&data, 6);
