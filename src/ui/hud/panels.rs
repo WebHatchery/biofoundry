@@ -380,7 +380,7 @@ pub(super) fn draw_jobs_panel(
     );
     y += 28.0;
 
-    if !session.won {
+    if !advanced_systems_unlocked(session) {
         draw_ui_text_ex(
             "Advanced systems unlock after Secure the warren.",
             x,
@@ -553,7 +553,9 @@ pub(super) fn draw_tools_panel(
     let mut defs: Vec<_> = data
         .buildings
         .iter()
-        .filter(|(id, d)| d.buildable && (session.won || is_core_building(id)))
+        .filter(|(id, d)| {
+            d.buildable && (advanced_systems_unlocked(session) || is_core_building(id))
+        })
         .collect();
     defs.sort_by(|a, b| a.0.cmp(b.0));
     let mut locked_requirements = Vec::new();
@@ -624,6 +626,10 @@ fn is_core_building(id: &str) -> bool {
         id,
         "blacksmith" | "cook_pot" | "farm" | "mine" | "worm_shrine"
     )
+}
+
+fn advanced_systems_unlocked(session: &GameSession) -> bool {
+    (session.won && session.job_count(Job::Guard) > 0) || session.worm_awake
 }
 
 /// The persistent campaign card keeps the next milestone visible even after

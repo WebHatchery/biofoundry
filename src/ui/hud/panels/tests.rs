@@ -131,3 +131,24 @@ fn hints_do_not_promise_reassignment_of_a_specialist() {
         "free a worker, then + Carrier"
     );
 }
+
+#[test]
+fn advanced_systems_wait_for_the_security_handoff() {
+    let data = GameData::load().expect("embedded game data");
+    let mut session = GameSession::new(&data, 7);
+    session.won = true;
+
+    assert!(!advanced_systems_unlocked(&session));
+
+    session.creatures[0].job = Job::Guard;
+    assert!(advanced_systems_unlocked(&session));
+}
+
+#[test]
+fn awakened_warrens_keep_advanced_systems_visible() {
+    let data = GameData::load().expect("embedded game data");
+    let mut session = GameSession::new(&data, 7);
+    session.worm_awake = true;
+
+    assert!(advanced_systems_unlocked(&session));
+}

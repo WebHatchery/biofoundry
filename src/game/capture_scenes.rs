@@ -323,6 +323,7 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                 session.economy.ingots_stock = 20;
                 session.won = true;
                 session.victory_shown = true;
+                session.creatures[0].job = Job::Guard;
                 for unlock in ["breeding_pit", "hobgoblin", "overseer", "engineer"] {
                     session.unlocked.insert(unlock.to_owned());
                 }
@@ -362,6 +363,7 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                 session.victory_shown = true;
                 session.factory_complete = true;
                 session.factory_shown = true;
+                session.creatures[0].job = Job::Guard;
                 session.unlocked.insert("slime_janitor".to_owned());
                 session.unlocked.insert("bat_courier".to_owned());
             }
