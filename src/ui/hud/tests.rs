@@ -66,3 +66,17 @@ fn warren_victory_report_keeps_the_guard_handoff_explicit() {
         "Continue to Factory"
     );
 }
+
+#[test]
+fn warren_victory_report_does_not_promise_a_specialist_assignment() {
+    let data = GameData::load().unwrap();
+    let mut session = GameSession::new(&data, 42);
+    session.won = true;
+    session.creatures.clear();
+    session.spawn_creature(&data, "overseer", Job::Idle);
+
+    let body = warren_victory_body(&session, &data);
+
+    assert!(body.contains("free a worker, then tap + beside Guard in Jobs"));
+    assert!(!body.contains("After closing this report, tap + beside Guard in Jobs."));
+}

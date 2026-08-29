@@ -8,7 +8,7 @@ fn raid_hint_names_the_controls_for_a_fresh_warren() {
     assert_eq!(session.job_count(Job::Idle), 0);
     assert_eq!(
         raid_defense_hint(&session, &data),
-        "tap − beside Miner, then + beside Guard"
+        "tap − beside Miner, then + beside Guard in Jobs"
     );
 }
 
@@ -68,7 +68,7 @@ fn hints_do_not_promise_reassignment_of_a_specialist() {
     assert_eq!(reassignable_job_count(&session, &data, Job::Idle), 0);
     assert_eq!(
         raid_defense_hint(&session, &data),
-        "free a worker, then tap + beside Guard"
+        "free a worker, then tap + beside Guard in Jobs"
     );
     assert_eq!(
         compact_food_recovery_hint(&session, &data),

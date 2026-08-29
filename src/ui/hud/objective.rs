@@ -97,7 +97,7 @@ impl CampaignObjective {
                     session.economy.ore_delivered_total.min(ore_goal),
                     ore_goal
                 ),
-                next: security_handoff_next_step(session, data),
+                next: format!("Next: {}.", security_handoff_action_hint(session, data)),
                 ratio: 2.0 / 3.0,
                 complete: false,
             };
@@ -158,20 +158,15 @@ impl CampaignObjective {
     }
 }
 
-fn security_handoff_next_step(session: &GameSession, data: &GameData) -> String {
+pub(super) fn security_handoff_action_hint(session: &GameSession, data: &GameData) -> String {
     if reassignable_job_count(session, data, Job::Idle) > 0 {
-        return "Next: tap + beside Guard in Jobs.".to_owned();
+        return "tap + beside Guard in Jobs".to_owned();
     }
     [Job::Miner, Job::Carrier, Job::Cook, Job::Smith]
         .into_iter()
         .find(|job| reassignable_job_count(session, data, *job) > 0)
-        .map(|job| {
-            format!(
-                "Next: tap − beside {}, then + beside Guard in Jobs.",
-                job.label()
-            )
-        })
-        .unwrap_or_else(|| "Next: free a worker, then tap + beside Guard in Jobs.".to_owned())
+        .map(|job| format!("tap − beside {}, then + beside Guard in Jobs", job.label()))
+        .unwrap_or_else(|| "free a worker, then tap + beside Guard in Jobs".to_owned())
 }
 
 fn reassignable_job_count(session: &GameSession, data: &GameData, job: Job) -> usize {

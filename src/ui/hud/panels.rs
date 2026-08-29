@@ -489,11 +489,7 @@ fn raid_defense_hint(session: &GameSession, data: &GameData) -> String {
     } else if reassignable_job_count(session, data, Job::Idle) > 0 {
         "tap + beside Guard in Jobs".to_owned()
     } else {
-        [Job::Miner, Job::Carrier, Job::Cook, Job::Smith]
-            .into_iter()
-            .find(|job| reassignable_job_count(session, data, *job) > 0)
-            .map(|job| format!("tap − beside {}, then + beside Guard", job.label()))
-            .unwrap_or_else(|| "free a worker, then tap + beside Guard".to_owned())
+        super::objective::security_handoff_action_hint(session, data)
     }
 }
 

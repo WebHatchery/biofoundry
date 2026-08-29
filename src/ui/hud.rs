@@ -203,13 +203,10 @@ fn warren_victory_body(session: &GameSession, data: &GameData) -> String {
             "{base}\n\nOnboarding is complete. Next: place a Blacksmith and forge {} ingots (a Smelter Den + salamander forges them in bulk).",
             data.balance.win2_ingots
         )
-    } else if session.job_count(Job::Idle) > 0 {
-        format!(
-            "{base}\n\nThe reserve gate is complete. Onboarding still needs a Guard. After closing this report, tap + beside Guard in Jobs."
-        )
     } else {
         format!(
-            "{base}\n\nThe reserve gate is complete. Onboarding still needs a Guard. After closing this report, tap − beside Miner, then + beside Guard in Jobs."
+            "{base}\n\nThe reserve gate is complete. Onboarding still needs a Guard. After closing this report, {}.",
+            objective::security_handoff_action_hint(session, data)
         )
     }
 }
