@@ -168,6 +168,7 @@ impl Game {
                 }
             }
             UiAction::TransitToOutpost(pos) | UiAction::TransitToShrine(pos) => {
+                let mut transit_started = false;
                 if let GameState::Warren(session) = &mut self.state {
                     let ok = match action {
                         UiAction::TransitToOutpost(_) => {
@@ -179,6 +180,10 @@ impl Game {
                         _ => false,
                     };
                     if ok {
+                        // A transit is a persistent state change: a refresh
+                        // during the worm's journey must not erase cargo or
+                        // passengers that already left the warren.
+                        transit_started = true;
                         self.notifications.info(match action {
                             UiAction::TransitToOutpost(_) => {
                                 "The worm carries cargo to the outpost."
@@ -192,6 +197,9 @@ impl Game {
                         self.notifications
                             .warning("No valid cargo or route is ready.");
                     }
+                }
+                if transit_started {
+                    self.autosave_game();
                 }
             }
             UiAction::WorldClick(tile) => self.world_click(tile),
