@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `45dfff6`
+**Source revision:** `f2f0754`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -23,7 +23,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 93 unit tests and 2 integration tests pass.
+- `cargo test --all-targets` — 94 unit tests and 2 integration tests pass.
 - `cargo clippy --all-targets --all-features -- -D warnings` — pass.
 - `publish.ps1` with no parameters — pass; Windows and WebGL packages
   deployed to Preview.
@@ -41,6 +41,9 @@ automated simulation results into first-time-player evidence.
   Continue in Endless and Return to Menu choices. The completed Objective also
   points toward the Worm Transit unlock. Packaged completion remains an open
   live-session check below.
+- Endless route capture — [ui_endless.png](../verification/ui_endless.png) shows
+  the completed Objective pointing to a cargo run and an active Worm Outpost
+  with capacity, crew, and directional transit controls.
 
 ## Still open
 
