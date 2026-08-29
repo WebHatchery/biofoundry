@@ -20,6 +20,7 @@ automated simulation results into first-time-player evidence.
 | Refresh and Continue | Pass | Reload returned to the title screen with Continue enabled; Continue restored `00:36` and showed `Warren loaded.`. |
 | Fresh-tab relaunch and Continue | Pass | A new Preview tab restored the same `00:36` state and objective with visible controls. |
 | Minimum-layout spot check | Pass | The 1200×675 canvas and required HUD remained visible in the 1280×720 Preview viewport. |
+| Visible-control smoke path | Pass | A fresh Preview warren advanced through visible New Warren, primary-pointer map drag, + zoom, and Farm placement without keyboard input; this is developer smoke evidence, not a qualifying first-time-player session. |
 
 ## Automated candidate checks
 
