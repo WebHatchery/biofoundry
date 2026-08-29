@@ -53,6 +53,17 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                 }
             }
         }
+        "tutorial_factory" => {
+            game.transition(StateTransition::StartWarren);
+            if let GameState::Warren(session) = &mut game.state {
+                // Hold on the factory lesson so its distinction between the
+                // prebuilt Mine and the Mine build button is reviewable.
+                session.tutorial_step = 2;
+                session.tutorial_built = true;
+                session.economy.food = 80.0;
+                session.economy.ore_stock = 24;
+            }
+        }
         "victory" => {
             game.transition(StateTransition::StartWarren);
             if let GameState::Warren(session) = &mut game.state {
