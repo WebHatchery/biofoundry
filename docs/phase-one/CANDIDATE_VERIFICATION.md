@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `f2f0754`
+**Source revision:** `5292591`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -23,7 +23,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 94 unit tests and 2 integration tests pass.
+- `cargo test --all-targets` — 95 unit tests and 2 integration tests pass.
 - `cargo clippy --all-targets --all-features -- -D warnings` — pass.
 - `publish.ps1` with no parameters — pass; Windows and WebGL packages
   deployed to Preview.
@@ -44,6 +44,9 @@ automated simulation results into first-time-player evidence.
 - Endless route capture — [ui_endless.png](../verification/ui_endless.png) shows
   the completed Objective pointing to a cargo run and an active Worm Outpost
   with capacity, crew, and directional transit controls.
+- Endless route recovery — automated coverage confirms food-only delivery and
+  crew-only return remain valid, so an outpost cannot strand its crew when its
+  cargo hold is empty.
 
 ## Still open
 
