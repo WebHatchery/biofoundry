@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `7379a4a`
+**Source revision:** `654349b`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -25,7 +25,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 156 unit tests and 2 integration tests pass.
+- `cargo test --all-targets` — 157 unit tests and 2 integration tests pass.
 - `cargo clippy --all-targets --all-features -- -D warnings` — pass.
 - `publish.ps1` with no parameters — pass; Windows and WebGL packages
   deployed to Preview.
@@ -67,6 +67,9 @@ automated simulation results into first-time-player evidence.
 - Station inspection feedback — Mine and Blacksmith detail cards now distinguish
   assigned or en-route local workers from active production, while excluding
   remote outpost crew; focused UI coverage exercises both boundaries.
+- In-flight payload feedback — the selected outpost now names the cargo and crew
+  currently carried by the worm during transit, so emptied storage counters are
+  not mistaken for lost payload; focused UI coverage exercises the summary.
 - Factory handoff capture — [ui_factory_complete.png](../verification/ui_factory_complete.png)
   shows the completion overlay with the next Worm Shrine objective visible and
   no setup unlock toast obscuring the handoff.
