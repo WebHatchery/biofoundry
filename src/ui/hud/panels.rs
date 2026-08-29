@@ -664,7 +664,7 @@ pub(super) fn draw_objective_panel(session: &GameSession, data: &GameData) -> Re
         OBJECTIVE_PANEL.x + 14.0,
         OBJECTIVE_PANEL.y + 94.0,
         OBJECTIVE_PANEL.w - 28.0,
-        26.0,
+        34.0,
         13.0,
         3.0,
         dark::TEXT_DIM,

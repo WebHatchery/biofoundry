@@ -386,6 +386,8 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                     route.last_failure =
                         Some("The worm route collapsed; cargo returned to safety.".to_owned());
                 }
+                session.last_transit_failure =
+                    Some("Transit failed because the outpost was inactive.".to_owned());
             }
         }
         "shrine" => {
