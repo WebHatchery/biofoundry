@@ -67,6 +67,63 @@ fn sim_to_win_on_fixed_seed() {
     );
 }
 
+/// Food recovery owns the carrier pool below the reserve, even when a
+/// construction site or forge is waiting for ore. Industry can resume once
+/// the larder is comfortable again.
+#[test]
+fn food_crisis_does_not_start_industry_haul() {
+    use crate::state::creatures::Task;
+    use crate::state::structures::BuildSite;
+    use crate::state::world::Tile;
+
+    let (data, mut session) = boot(18);
+    session.economy.food = data.balance.carrier_food_reserve - 1.0;
+    session.economy.ore_stock = 20;
+    for regrow in session.patch_regrow.values_mut() {
+        *regrow = 1000.0;
+    }
+    let farm = session.buildings_of("farm").next().unwrap().pos;
+    session.building_at_mut(farm).unwrap().stocks.clear();
+
+    let site = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(pos, tile)| {
+            **tile == Tile::Floor
+                && session.can_place_building(*pos)
+                && *pos != session.spawn_tile()
+        })
+        .map(|(pos, _)| pos)
+        .unwrap();
+    session.build_sites.push(BuildSite {
+        kind: "blacksmith".to_owned(),
+        pos: site,
+        ore_needed: 8,
+        ore_delivered: 0,
+    });
+
+    let stockpile = session.stockpile_pos();
+    let carrier = session
+        .creatures
+        .iter_mut()
+        .find(|c| c.job == Job::Carrier)
+        .unwrap();
+    carrier.x = stockpile.x as f32 + 0.5;
+    carrier.y = stockpile.y as f32 + 0.5;
+    carrier.task = Task::Idle;
+    carrier.path.clear();
+
+    tick(&mut session, &data);
+
+    let carrier = session
+        .creatures
+        .iter()
+        .find(|c| c.job == Job::Carrier)
+        .unwrap();
+    assert_eq!(carrier.task, Task::Idle);
+}
+
 /// Buying the beetle trades banked ore for hauling capacity.
 #[test]
 fn beetle_purchase_spends_ore_and_spawns_hauler() {

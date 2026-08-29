@@ -167,7 +167,6 @@ fn choose_carrier_work(
     if food < bal.carrier_food_reserve {
         if try_farm_haul(creature, session)
             || (species.id != "bat_courier" && try_patch_forage(creature, session))
-            || try_industry_chain(creature, session, data)
         {
             return;
         }
