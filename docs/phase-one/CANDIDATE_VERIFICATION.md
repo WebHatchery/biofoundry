@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `bd54481`
+**Source revision:** `6bc9127`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -25,7 +25,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 119 unit tests and 2 integration tests pass.
+- `cargo test --all-targets` — 120 unit tests and 2 integration tests pass.
 - `cargo clippy --all-targets --all-features -- -D warnings` — pass.
 - `publish.ps1` with no parameters — pass; Windows and WebGL packages
   deployed to Preview.
@@ -92,6 +92,14 @@ automated simulation results into first-time-player evidence.
   shows the `Queue 8/8` limit, an explicit `Queue full · finish orders first`
   recovery line, and disabled craft controls; focused UI coverage verifies the
   same capacity boundary.
+- Secure-warren raid captures — [ui_raid_warning.png](../verification/ui_raid_warning.png)
+  shows the top-bar warning naming `−` beside Miner and `+` beside Guard when
+  the warren has no idle worker; [ui_raid_food_warning.png](../verification/ui_raid_food_warning.png)
+  keeps the food and raid responses visible together; [ui_raid.png](../verification/ui_raid.png)
+  shows the active raid after Guards are assigned. The Secure the Warren lesson
+  now waits for both the campaign threshold and a Guard assignment, with save
+  migration coverage preserving the lesson when a returning save has not yet
+  witnessed that defense step.
 - Endless route failure capture — [ui_endless_failure.png](../verification/ui_endless_failure.png)
   shows the failed outpost's wrapped recovery message and the Objective's
   complete visible Activate route instruction, alongside the top-bar failure
