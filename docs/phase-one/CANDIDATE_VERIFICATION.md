@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `939e0ab`
+**Source revision:** `bc5e0cb`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -161,6 +161,13 @@ automated simulation results into first-time-player evidence.
   [ui_optional.png](../verification/ui_optional.png) and
   [ui_breeding.png](../verification/ui_breeding.png) captures show the
   post-handoff state.
+- Final-demand capture alignment — victory and blocked-handoff scenes now show
+  advanced controls hidden until onboarding is complete, while factory and
+  shrine scenes use a Guard-complete campaign fixture. Refreshed
+  [ui_victory.png](../verification/ui_victory.png),
+  [ui_security_stuck.png](../verification/ui_security_stuck.png),
+  [ui_factory_complete.png](../verification/ui_factory_complete.png), and
+  [ui_shrine.png](../verification/ui_shrine.png) captures match that rule.
 - Endless route failure capture — [ui_endless_failure.png](../verification/ui_endless_failure.png)
   shows the failed outpost's wrapped recovery message and the Objective's
   complete visible Activate route instruction, alongside the top-bar failure
