@@ -592,11 +592,7 @@ pub(super) fn draw_tools_panel(
             let unlocked = session.building_unlocked(def);
             let short = def.name.split_whitespace().last().unwrap_or(&def.name);
             let label = if unlocked {
-                format!(
-                    "{}{short} ({})",
-                    if active { "▶ " } else { "" },
-                    def.cost_ore
-                )
+                format!("{}{short} ({})", active_tool_marker(active), def.cost_ore)
             } else {
                 format!("{short} 🔒")
             };
@@ -616,8 +612,8 @@ pub(super) fn draw_tools_panel(
     }
 
     let dig_active = *mode == UiMode::Dig;
-    let dig_label = if dig_active { "▶ Dig" } else { "Dig" };
-    if hud_button(Rect::new(x, y, cell, 22.0), dig_label, true, mouse) {
+    let dig_label = format!("{}Dig", active_tool_marker(dig_active));
+    if hud_button(Rect::new(x, y, cell, 22.0), &dig_label, true, mouse) {
         actions.push(UiAction::SetMode(UiMode::Dig));
     }
     // Show pending construction so hauling progress is visible.
@@ -645,6 +641,14 @@ pub(super) fn draw_tools_panel(
                 TextStyle::new(12.0, dark::WARNING).params(),
             );
         }
+    }
+}
+
+fn active_tool_marker(active: bool) -> &'static str {
+    if active {
+        "> "
+    } else {
+        ""
     }
 }
 

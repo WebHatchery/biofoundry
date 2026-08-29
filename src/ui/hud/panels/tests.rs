@@ -176,3 +176,10 @@ fn engineer_summary_distinguishes_local_and_posted_specialists() {
     assert_eq!(engineer_status_label(0, 1), "Engineer 0 local · 1 posted");
     assert_eq!(engineer_status_label(1, 1), "Engineer 1 local · Mine +25%");
 }
+
+#[test]
+fn active_tool_marker_uses_a_font_safe_glyph() {
+    assert_eq!(active_tool_marker(false), "");
+    assert_eq!(active_tool_marker(true), "> ");
+    assert!(!active_tool_marker(true).contains('▶'));
+}
