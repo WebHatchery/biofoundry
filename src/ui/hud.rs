@@ -147,9 +147,9 @@ pub fn draw(
         );
     } else if victory_up {
         overlays::draw_goal_overlay(
-            "Victory",
+            "Warren Secured",
             &format!(
-                "The warren thrives: a 100-food surplus and {} ore delivered in {:.0} minutes.\n\nNext: place a Blacksmith and hammer ore into {} ingots (a Smelter Den + salamander forges them in bulk).",
+                "The warren thrives: the 100-food surplus and {} ore delivered in {:.0} minutes secure the colony.\n\nOnboarding is complete. Next: place a Blacksmith and forge {} ingots (a Smelter Den + salamander forges them in bulk).",
                 session.economy.ore_delivered_total,
                 simulation::sim_seconds(session) / 60.0,
                 data.balance.win2_ingots

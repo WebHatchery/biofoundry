@@ -145,7 +145,8 @@ impl Game {
                     }
                     if report.won_this_tick {
                         safe_beat_reached = true;
-                        self.notifications.success("The warren thrives — victory!");
+                        self.notifications
+                            .success("The warren is secure — onboarding complete.");
                         self.audio.play(Sfx::Complete);
                     }
                     if report.factory_this_tick {
