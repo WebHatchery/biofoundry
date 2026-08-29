@@ -139,6 +139,8 @@ pub struct Balance {
     pub wild_beetle_max: usize,
     /// First raid lands after this long; later raids grow to `raid_size_max`.
     pub raid_first_sec: f32,
+    /// Show the defense instruction this many seconds before a raid lands.
+    pub raid_warning_sec: f32,
     pub raid_interval_sec: f32,
     pub raid_size_max: usize,
     /// Raiders drain the food stockpile at this rate while feeding.

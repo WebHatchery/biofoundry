@@ -6,14 +6,14 @@
     Thin wrapper around the shared macroquad-toolkit capture script. Builds
     the debug exe and drives it through the env-var capture hook
     (BIOFOUNDRY_CAPTURE_*) provided by macroquad_toolkit::capture in
-    src/main.rs. Scenes: menu, warren, help, pause, collapse, mine, blacksmith, equipment, overseer, factory, victory, factory_complete, famine, raid, breeding, worm, completion.
+    src/main.rs. Scenes: menu, warren, help, pause, collapse, mine, blacksmith, equipment, overseer, factory, victory, factory_complete, famine, raid, raid_warning, breeding, worm, completion.
 
 .EXAMPLE
     ./scripts/capture_ui.ps1
     ./scripts/capture_ui.ps1 -Scenes warren -Frames 60 -SkipBuild
 #>
 param(
-    [string[]]$Scenes = @("menu", "warren", "help", "pause", "collapse", "mine", "blacksmith", "equipment", "overseer", "factory", "victory", "factory_complete", "famine", "raid", "breeding", "worm", "completion"),
+    [string[]]$Scenes = @("menu", "warren", "help", "pause", "collapse", "mine", "blacksmith", "equipment", "overseer", "factory", "victory", "factory_complete", "famine", "raid", "raid_warning", "breeding", "worm", "completion"),
     [int]$Frames = 150,
     [string]$OutputDir = "docs\verification",
     [switch]$SkipBuild

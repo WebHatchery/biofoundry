@@ -220,6 +220,15 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                 }
             }
         }
+        "raid_warning" => {
+            game.transition(StateTransition::StartWarren);
+            if let GameState::Warren(session) = &mut game.state {
+                session.tutorial_step = 3;
+                session.economy.food = 80.0;
+                session.economy.ore_delivered_total = 35;
+                session.raid_in = 150.0;
+            }
+        }
         "breeding" => {
             game.transition(StateTransition::StartWarren);
             if let GameState::Warren(session) = &mut game.state {

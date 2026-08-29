@@ -70,6 +70,7 @@ fn balance_values_are_playable() {
     assert!(b.outpost_capacity > 0);
     assert!(b.win_ore_delivered > 0);
     assert!(b.win_food_surplus > b.start_food);
+    assert!(b.raid_warning_sec > 0.0 && b.raid_warning_sec < b.raid_first_sec);
     // Cooking must multiply calories, or the loop can never go positive.
     assert!(b.cook_batch_food / b.cook_batch_mushrooms as f32 > 1.0);
 }

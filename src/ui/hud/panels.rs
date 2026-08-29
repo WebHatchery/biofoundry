@@ -17,6 +17,7 @@ const OBJECTIVE_PANEL: Rect = Rect::new(548.0, 72.0, 370.0, 128.0);
 
 pub(super) fn draw_top_bar(
     session: &GameSession,
+    data: &GameData,
     bar: Rect,
     mouse: Vec2,
     paused: bool,
@@ -69,10 +70,13 @@ pub(super) fn draw_top_bar(
         );
     } else if session.raid_active {
         draw_ui_text_ex(
-            "RAID — gnarls are after the larder!",
+            &format!(
+                "RAID — gnarls are after the larder! {}",
+                raid_defense_hint(session)
+            ),
             bar.x + 380.0,
             bar.y + 31.0,
-            TextStyle::new(18.0, dark::NEGATIVE).params(),
+            TextStyle::new(15.0, dark::NEGATIVE).params(),
         );
     } else if session.economy.food <= 0.0 {
         draw_ui_text_ex(
@@ -81,11 +85,12 @@ pub(super) fn draw_top_bar(
             bar.y + 31.0,
             TextStyle::new(18.0, dark::NEGATIVE).params(),
         );
-    } else if session.raid_in <= 120.0 {
+    } else if session.raid_in <= data.balance.raid_warning_sec {
         draw_ui_text_ex(
             &format!(
-                "RAID IN {} — tap + beside Guard in Jobs",
-                format_mmss(session.raid_in.max(0.0))
+                "RAID IN {} — {}",
+                format_mmss(session.raid_in.max(0.0)),
+                raid_defense_hint(session)
             ),
             bar.x + 380.0,
             bar.y + 31.0,
@@ -283,8 +288,16 @@ pub(super) fn draw_jobs_panel(
     let x = panel.x + 14.0;
     let mut y = panel.y + 44.0;
 
+    let raid_warning = session.raid_active || session.raid_in <= data.balance.raid_warning_sec;
     for job in [Job::Miner, Job::Carrier, Job::Cook, Job::Smith, Job::Guard] {
         let count = session.job_count(job);
+        if job == Job::Guard && raid_warning {
+            draw_surface(
+                Rect::new(x - 6.0, y - 3.0, panel.w - 20.0, 32.0),
+                &SurfaceStyle::new(Color::new(0.24, 0.12, 0.08, 0.32))
+                    .with_border(1.0, dark::WARNING),
+            );
+        }
         sprites.draw_job(job, vec2(x + 9.0, y + 13.0));
         draw_ui_text_ex(
             &format!("{} {count}", job.label()),
@@ -297,6 +310,14 @@ pub(super) fn draw_jobs_panel(
         }
         if hud_button(Rect::new(x + 172.0, y, 34.0, 26.0), "+", idle > 0, mouse) {
             actions.push(UiAction::Assign(job));
+        }
+        if job == Job::Guard && raid_warning {
+            draw_ui_text_ex(
+                "RAID",
+                x + 84.0,
+                y + 18.0,
+                TextStyle::new(11.0, dark::WARNING).params(),
+            );
         }
         y += 32.0;
     }
@@ -423,6 +444,25 @@ pub(super) fn draw_jobs_panel(
         }
     }
 }
+
+/// Give the exact visible job controls needed to put a defender on watch.
+/// A fresh warren has no idle worker, so the first raid requires freeing one.
+fn raid_defense_hint(session: &GameSession) -> String {
+    if session.job_count(Job::Guard) > 0 {
+        "Guards are on watch.".to_owned()
+    } else if session.job_count(Job::Idle) > 0 {
+        "tap + beside Guard in Jobs".to_owned()
+    } else {
+        [Job::Miner, Job::Carrier, Job::Cook, Job::Smith]
+            .into_iter()
+            .find(|job| session.job_count(*job) > 0)
+            .map(|job| format!("tap − beside {}, then + beside Guard", job.label()))
+            .unwrap_or_else(|| "free a worker, then tap + beside Guard".to_owned())
+    }
+}
+
+#[cfg(test)]
+mod tests;
 
 pub(super) fn draw_tools_panel(
     session: &GameSession,

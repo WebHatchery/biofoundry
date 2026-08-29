@@ -45,6 +45,7 @@
   "wild_beetle_spawn_sec": 100.0,
   "wild_beetle_max": 2,
   "raid_first_sec": 540.0,
+  "raid_warning_sec": 180.0,
   "raid_interval_sec": 380.0,
   "raid_size_max": 3,
   "raider_food_eat_per_min": 30.0,
