@@ -4,7 +4,9 @@ use crate::data::GameData;
 use crate::ui::{UiAction, LOGICAL_HEIGHT, LOGICAL_WIDTH};
 use macroquad::prelude::*;
 use macroquad_toolkit::prelude::*;
-use macroquad_toolkit::ui::draw_ui_text_ex;
+use macroquad_toolkit::ui::{
+    draw_ui_text_ex, note_neighbour, touch_area_for_scale, Pointer, VirtualUi,
+};
 
 const TITLE_TABLEAU_BYTES: &[u8] = include_bytes!("../../assets/sprites/title-tableau.png");
 
@@ -175,8 +177,12 @@ fn draw_settings_panel(mouse: Vec2, sfx_volume: f32, actions: &mut Vec<UiAction>
 }
 
 fn menu_button(rect: Rect, text: &str, enabled: bool, mouse: Vec2) -> bool {
-    let hovered = enabled && rect.contains_point(mouse);
-    let pressed = hovered && is_mouse_button_down(MouseButton::Left);
+    let virtual_ui = VirtualUi::new(LOGICAL_WIDTH, LOGICAL_HEIGHT);
+    let pointer = Pointer::read(|position| virtual_ui.screen_to_ui(position));
+    let hit_rect = touch_area_for_scale(rect, virtual_ui.scale);
+    note_neighbour(rect);
+    let hovered = enabled && (rect.contains_point(mouse) || pointer.hovering_over(rect));
+    let pressed = enabled && pointer.pressing(hit_rect);
     let fill = if !enabled {
         Color::new(0.10, 0.13, 0.11, 1.0)
     } else if pressed {
@@ -207,5 +213,5 @@ fn menu_button(rect: Rect, text: &str, enabled: bool, mouse: Vec2) -> bool {
             },
         ),
     );
-    hovered && is_mouse_button_released(MouseButton::Left)
+    enabled && pointer.released_on(hit_rect)
 }
