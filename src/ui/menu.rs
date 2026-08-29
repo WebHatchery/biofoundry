@@ -9,6 +9,8 @@ use macroquad_toolkit::ui::{
 };
 
 const TITLE_TABLEAU_BYTES: &[u8] = include_bytes!("../../assets/sprites/title-tableau.png");
+const NEW_WARREN_CONFIRMATION_TEXT: &str =
+    "Starting New Warren will replace the current autosave.\n\nChoose Start New Warren to begin again, or Keep Save to return.";
 
 /// The hand-painted cavern framing the title screen.
 pub struct MenuSprites {
@@ -125,7 +127,7 @@ fn draw_start_new_warren_confirmation(mouse: Vec2, actions: &mut Vec<UiAction>) 
         TextStyle::new(20.0, dark::TEXT_BRIGHT),
     );
     draw_text_block(
-        "A saved warren already exists. Starting fresh replaces the current autosave.\n\nContinue only if you want to begin again.",
+        NEW_WARREN_CONFIRMATION_TEXT,
         panel.x + 20.0,
         panel.y + 58.0,
         panel.w - 40.0,
@@ -152,6 +154,9 @@ fn draw_start_new_warren_confirmation(mouse: Vec2, actions: &mut Vec<UiAction>) 
         actions.push(UiAction::CancelNewWarren);
     }
 }
+
+#[cfg(test)]
+mod tests;
 
 /// Draw the full-screen illustrated cave, keeping its centre open for the UI.
 fn draw_backdrop(sprites: &MenuSprites) {
