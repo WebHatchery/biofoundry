@@ -508,6 +508,13 @@ fn inspect_status(
             if !outpost.active {
                 return ("Route inactive", dark::WARNING);
             }
+            if session.worm_awake && outpost.cargo_total() == 0 && outpost.crew.is_empty() {
+                return if outpost_has_loadable_payload(session, data, 0, 0) {
+                    ("Ready to load", dark::POSITIVE)
+                } else {
+                    ("Awaiting payload", dark::WARNING)
+                };
+            }
         }
     }
     match crate::ui::legibility::building_status(session, data, building) {

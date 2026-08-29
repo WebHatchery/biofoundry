@@ -146,3 +146,35 @@ fn empty_outpost_reports_when_no_payload_is_ready_to_load() {
     session.economy.food += 1.0;
     assert!(outpost_has_loadable_payload(&session, &data, 0, 0));
 }
+
+#[test]
+fn active_empty_outpost_reports_whether_payload_is_ready() {
+    let data = GameData::load().expect("embedded game data");
+    let mut session = GameSession::new(&data, 11);
+    let pos = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(pos, _)| session.can_place_building(*pos))
+        .map(|(pos, _)| pos)
+        .expect("a walkable outpost location");
+    session.buildings.push(Building::new("outpost", pos));
+    session.ensure_outpost(pos);
+    session.outposts[0].active = true;
+    session.worm_awake = true;
+    session.creatures.clear();
+    session.economy.ore_stock = 0;
+    session.economy.ingots_stock = 0;
+    session.economy.food = data.balance.worm_feed_reserve;
+
+    assert_eq!(
+        inspect_status(&session, &data, session.building_at(pos).unwrap()),
+        ("Awaiting payload", dark::WARNING)
+    );
+
+    session.economy.ore_stock = 1;
+    assert_eq!(
+        inspect_status(&session, &data, session.building_at(pos).unwrap()),
+        ("Ready to load", dark::POSITIVE)
+    );
+}
