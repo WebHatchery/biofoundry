@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `4b52a85`
+**Source revision:** `93ca155`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -24,7 +24,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 102 unit tests and 2 integration tests pass.
+- `cargo test --all-targets` — 103 unit tests and 2 integration tests pass.
 - `cargo clippy --all-targets --all-features -- -D warnings` — pass.
 - `publish.ps1` with no parameters — pass; Windows and WebGL packages
   deployed to Preview.
@@ -69,6 +69,9 @@ automated simulation results into first-time-player evidence.
   shows the failed outpost's wrapped recovery message and the Objective's
   complete visible Activate route instruction, alongside the top-bar failure
   signal.
+- In-flight route capture — [ui_endless_in_flight.png](../verification/ui_endless_in_flight.png)
+  shows the top-bar countdown and the selected outpost's directional transit
+  state with a clear wait instruction.
 
 ## Still open
 
