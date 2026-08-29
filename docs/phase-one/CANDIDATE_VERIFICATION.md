@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `654349b`
+**Source revision:** `a87e53a`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -210,6 +210,9 @@ automated simulation results into first-time-player evidence.
   or stationed at an outpost, so they leave local Jobs, hunger, morale, guard
   combat, and reassignment until the return trip; focused simulation, state,
   and route-readiness coverage exercises arrival, return, and failed departure.
+- Route load recovery — loading a save now restores stationed crew to the
+  outpost tile and clears stale local tasks, while preserving in-flight
+  passenger coordinates; focused state coverage exercises the repair.
 
 ## Still open
 
