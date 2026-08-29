@@ -149,6 +149,7 @@ pub fn tick(session: &mut GameSession, data: &GameData) -> TickReport {
             && session.worm_ingots_fed >= balance.worm_awaken_ingots
         {
             session.worm_awake = true;
+            session.worm_awakened_at_tick = Some(session.tick);
             worm_this_tick = true;
         }
     }

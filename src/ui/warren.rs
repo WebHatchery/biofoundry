@@ -66,7 +66,10 @@ fn draw_colossal_worm(session: &GameSession, sprites: &WorldSprites, ts: f32) {
         shrine.pos.x as f32 * ts + ts * 0.5,
         shrine.pos.y as f32 * ts + ts * 0.5,
     );
-    sprites::draw_colossal_worm(sprites, vec2(sx, sy), session.tick, ts);
+    let awakening_age = session
+        .worm_awakened_at_tick
+        .map(|tick| session.tick.saturating_sub(tick));
+    sprites::draw_colossal_worm(sprites, vec2(sx, sy), session.tick, ts, awakening_age);
 }
 
 fn draw_tiles(session: &GameSession, sprites: &WorldSprites, ts: f32) {

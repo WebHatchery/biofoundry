@@ -17,6 +17,7 @@ const COLOSSAL_WORM_BYTES: &[u8] = include_bytes!("../../../assets/sprites/colos
 const CARGO_ATLAS_BYTES: &[u8] = include_bytes!("../../../assets/sprites/cargo-atlas.png");
 const ROLE_PROP_ATLAS_BYTES: &[u8] = include_bytes!("../../../assets/sprites/role-prop-atlas.png");
 const GROUND_ATLAS_BYTES: &[u8] = include_bytes!("../../../assets/sprites/ground-atlas.png");
+const AWAKENING_EFFECT_TICKS: u64 = 48;
 
 /// Hand-painted workers and production props, packed as three-by-two atlases.
 #[derive(Debug, Clone)]
@@ -57,7 +58,34 @@ impl WorldSprites {
 
 /// Draw the awakened worm as a single monumental illustration, with only a
 /// small breathing motion so it remains a landmark rather than visual noise.
-pub fn draw_colossal_worm(sprites: &WorldSprites, center: Vec2, tick: u64, ts: f32) {
+/// The short-lived shockwave gives the awakening a visible landing even when
+/// the notification is missed or sound is muted.
+pub fn draw_colossal_worm(
+    sprites: &WorldSprites,
+    center: Vec2,
+    tick: u64,
+    ts: f32,
+    awakening_age_ticks: Option<u64>,
+) {
+    if let Some(age) = awakening_age_ticks {
+        let intensity = awakening_progress(age);
+        if intensity > 0.0 {
+            let expansion = 1.0 - intensity;
+            draw_circle(
+                center.x,
+                center.y,
+                ts * (0.9 + expansion * 2.6),
+                Color::new(0.48, 0.28, 0.70, 0.08 * intensity),
+            );
+            draw_circle_lines(
+                center.x,
+                center.y,
+                ts * (1.2 + expansion * 2.8),
+                5.0,
+                Color::new(0.78, 0.58, 0.98, 0.42 * intensity),
+            );
+        }
+    }
     let pulse = (tick as f32 * 0.028).sin();
     let size = ts * (6.35 + pulse * 0.10);
     draw_texture_ex(
@@ -70,6 +98,11 @@ pub fn draw_colossal_worm(sprites: &WorldSprites, center: Vec2, tick: u64, ts: f
             ..Default::default()
         },
     );
+}
+
+fn awakening_progress(age_ticks: u64) -> f32 {
+    (AWAKENING_EFFECT_TICKS.saturating_sub(age_ticks) as f32 / AWAKENING_EFFECT_TICKS as f32)
+        .clamp(0.0, 1.0)
 }
 
 /// Overlay hand-painted terrain over the quiet logical tile. The base fill
@@ -343,3 +376,6 @@ fn draw_cargo(sprites: &WorldSprites, x: f32, y: f32, radius: f32, good: Good, t
         WHITE,
     );
 }
+
+#[cfg(test)]
+mod tests;

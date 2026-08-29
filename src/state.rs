@@ -134,6 +134,10 @@ pub struct GameSession {
     pub worm_feeding_paused: bool,
     /// The campaign monument: the Colossal Worm has awakened.
     pub worm_awake: bool,
+    /// Simulation tick when the awakening landed, for a short world-space
+    /// shockwave that fades after the climax.
+    #[serde(default)]
+    pub worm_awakened_at_tick: Option<u64>,
     pub worm_shown: bool,
     /// Next tutorial step index (== tutorial length when finished).
     pub tutorial_step: usize,
@@ -224,6 +228,7 @@ impl GameSession {
             worm_ingots_fed: 0,
             worm_feeding_paused: false,
             worm_awake: false,
+            worm_awakened_at_tick: None,
             worm_shown: false,
             tutorial_step: 0,
             tutorial_dismissed: false,

@@ -257,6 +257,7 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                 for _ in 0..300 {
                     simulation::tick(session, &game.data);
                 }
+                session.worm_awakened_at_tick = Some(session.tick.saturating_sub(12));
             }
         }
         "help" => {

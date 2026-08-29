@@ -103,8 +103,8 @@ minutes, and at least four of five recover from the taught food crisis.
 **Outcome:** completion feels authored, and interruptions or failed runs have a
 clear path forward.
 
-- [ ] Strengthen the Worm Awakened audiovisual sequence and world-state change.
-- [ ] Present elapsed time and a concise campaign summary.
+- [x] Strengthen the Worm Awakened audiovisual sequence and world-state change.
+- [x] Present elapsed time and a concise campaign summary.
 - [x] Offer visible Continue in Endless Mode and Return to Menu actions.
 - [x] Add autosaves at safe beats while retaining visible manual Save/Load.
 - [x] Detect non-viable colonies where possible and offer restart/load guidance.
