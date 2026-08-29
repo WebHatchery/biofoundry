@@ -1,5 +1,7 @@
 use super::*;
 use crate::data::GameData;
+use crate::state::creatures::Good;
+use crate::state::outposts::WormTransit;
 use crate::state::structures::Building;
 use crate::state::GameSession;
 
@@ -77,7 +79,7 @@ fn completed_objective_points_into_an_unlocked_outpost_route() {
 }
 
 #[test]
-fn completed_objective_names_the_next_step_for_an_active_outpost() {
+fn completed_objective_names_the_load_step_for_an_empty_active_outpost() {
     let (data, mut session) = boot();
     session.worm_awake = true;
     session.unlocked.insert("worm_transit".to_owned());
@@ -96,7 +98,56 @@ fn completed_objective_names_the_next_step_for_an_active_outpost() {
 
     assert_eq!(
         objective.next,
-        "Next: send a cargo run through the active Worm Outpost."
+        "Next: tap the active Worm Outpost, then load it from the warren."
+    );
+}
+
+#[test]
+fn completed_objective_names_the_return_step_for_a_loaded_outpost() {
+    let (data, mut session) = boot();
+    session.worm_awake = true;
+    session.unlocked.insert("worm_transit".to_owned());
+    let pos = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(pos, _)| session.can_place_building(*pos))
+        .map(|(pos, _)| pos)
+        .unwrap();
+    session.buildings.push(Building::new("outpost", pos));
+    session.ensure_outpost(pos);
+    let outpost = session.outposts.first_mut().unwrap();
+    outpost.active = true;
+    outpost.cargo.insert(Good::Ore, 4);
+
+    let objective = CampaignObjective::current(&session, &data);
+
+    assert_eq!(
+        objective.next,
+        "Next: tap the active Worm Outpost, then send its cargo to the shrine."
+    );
+}
+
+#[test]
+fn completed_objective_names_the_wait_step_during_transit() {
+    let (data, mut session) = boot();
+    session.worm_awake = true;
+    session.unlocked.insert("worm_transit".to_owned());
+    session.worm_transit = Some(WormTransit {
+        outpost: session.spawn_tile(),
+        direction: TransitDirection::ToShrine,
+        remaining: 4.0,
+        ore: 2,
+        ingots: 0,
+        food: 0.0,
+        passengers: Vec::new(),
+    });
+
+    let objective = CampaignObjective::current(&session, &data);
+
+    assert_eq!(
+        objective.next,
+        "Next: wait for the worm to reach the shrine, then plan the next run."
     );
 }
 

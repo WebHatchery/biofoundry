@@ -1,6 +1,7 @@
 //! Persistent campaign objective copy and progress for the warren HUD.
 
 use crate::data::GameData;
+use crate::state::outposts::TransitDirection;
 use crate::state::GameSession;
 
 /// The single campaign milestone the player should read first.
@@ -19,6 +20,15 @@ impl CampaignObjective {
         if session.worm_awake {
             let next = if !session.unlocked.contains("worm_transit") {
                 "Next: keep forging ingots to unlock Worm Transit."
+            } else if let Some(transit) = session.worm_transit.as_ref() {
+                match transit.direction {
+                    TransitDirection::ToOutpost => {
+                        "Next: wait for the worm to reach the outpost, then inspect its cargo."
+                    }
+                    TransitDirection::ToShrine => {
+                        "Next: wait for the worm to reach the shrine, then plan the next run."
+                    }
+                }
             } else if session.buildings_of("outpost").next().is_none() {
                 "Next: build a Worm Outpost and send cargo through the awakened route."
             } else if session
@@ -34,7 +44,14 @@ impl CampaignObjective {
             {
                 "Next: tap the failed Worm Outpost, then try the cargo run again."
             } else if session.outposts.iter().any(|outpost| outpost.active) {
-                "Next: send a cargo run through the active Worm Outpost."
+                let outpost = session.outposts.iter().find(|outpost| outpost.active);
+                if outpost.is_some_and(|outpost| outpost.cargo_total() > 0) {
+                    "Next: tap the active Worm Outpost, then send its cargo to the shrine."
+                } else if outpost.is_some_and(|outpost| !outpost.crew.is_empty()) {
+                    "Next: tap the active Worm Outpost, then send its crew to the shrine."
+                } else {
+                    "Next: tap the active Worm Outpost, then load it from the warren."
+                }
             } else {
                 "Next: activate the Worm Outpost, then send a cargo run."
             };
