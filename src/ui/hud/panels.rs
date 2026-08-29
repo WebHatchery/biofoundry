@@ -421,7 +421,7 @@ pub(super) fn draw_jobs_panel(
     y += 34.0;
     if hud_button(
         Rect::new(x, y, half, 30.0),
-        "Slime · waste",
+        optional_specialist_label("slime_janitor", janitors > 0),
         session.unlocked.contains("slime_janitor") && janitors == 0,
         mouse,
     ) {
@@ -429,7 +429,7 @@ pub(super) fn draw_jobs_panel(
     }
     if hud_button(
         Rect::new(x + half + 8.0, y, half, 30.0),
-        "Bat ×8",
+        optional_specialist_label("bat_courier", couriers > 0),
         session.unlocked.contains("bat_courier") && couriers == 0,
         mouse,
     ) {
@@ -478,6 +478,16 @@ pub(super) fn draw_jobs_panel(
                 TextStyle::new(12.0, dark::WARNING).params(),
             );
         }
+    }
+}
+
+fn optional_specialist_label(species: &str, posted: bool) -> &'static str {
+    match (species, posted) {
+        ("slime_janitor", false) => "Slime · waste",
+        ("slime_janitor", true) => "Slime · posted",
+        ("bat_courier", false) => "Bat ×8",
+        ("bat_courier", true) => "Bat · posted",
+        _ => "Specialist",
     }
 }
 

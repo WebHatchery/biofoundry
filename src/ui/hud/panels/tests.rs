@@ -152,3 +152,20 @@ fn awakened_warrens_keep_advanced_systems_visible() {
 
     assert!(advanced_systems_unlocked(&session));
 }
+
+#[test]
+fn optional_specialist_buttons_explain_when_the_unique_post_is_filled() {
+    assert_eq!(
+        optional_specialist_label("slime_janitor", false),
+        "Slime · waste"
+    );
+    assert_eq!(
+        optional_specialist_label("slime_janitor", true),
+        "Slime · posted"
+    );
+    assert_eq!(optional_specialist_label("bat_courier", false), "Bat ×8");
+    assert_eq!(
+        optional_specialist_label("bat_courier", true),
+        "Bat · posted"
+    );
+}
