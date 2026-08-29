@@ -1,5 +1,6 @@
 use super::*;
 use crate::data::GameData;
+use crate::state::creatures::Job;
 use crate::state::outposts::{TransitCompletion, TransitDirection};
 use crate::state::GameSession;
 
@@ -31,6 +32,24 @@ fn tutorial_migration_uses_completed_campaign_facts() {
     migrate_tutorial_progress(&mut session, data.tutorial.len());
 
     assert_eq!(session.tutorial_step, data.tutorial.len());
+}
+
+#[test]
+fn tutorial_migration_keeps_unwitnessed_guard_lesson_visible() {
+    let (data, mut session) = session();
+    session.tutorial_built = true;
+    session
+        .economy
+        .gear_stock
+        .insert("iron_pickaxe".to_owned(), 1);
+    session.won = true;
+
+    migrate_tutorial_progress(&mut session, data.tutorial.len());
+    assert_eq!(session.tutorial_step, 3);
+
+    session.creatures[0].job = Job::Guard;
+    migrate_tutorial_progress(&mut session, data.tutorial.len());
+    assert_eq!(session.tutorial_step, 4);
 }
 
 #[test]

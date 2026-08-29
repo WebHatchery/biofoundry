@@ -689,7 +689,7 @@ fn migrate_tutorial_progress(session: &mut GameSession, tutorial_count: usize) {
     {
         step = step.max(3);
     }
-    if session.won {
+    if session.won && session.job_count(Job::Guard) > 0 {
         step = step.max(4);
     }
     if session.worm_awake {

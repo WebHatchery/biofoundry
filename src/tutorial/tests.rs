@@ -1,4 +1,5 @@
 use super::*;
+use crate::state::creatures::Job;
 use crate::state::structures::Building;
 
 fn boot() -> (GameData, GameSession) {
@@ -68,6 +69,7 @@ fn steps_complete_from_player_actions() {
     assert_eq!(current_step(&session, &data).unwrap().id, "secure");
     assert!(!advance(&mut session, &data, none));
     session.won = true;
+    session.creatures[0].job = Job::Guard;
     assert!(advance(&mut session, &data, none));
 
     // 5. The awakened worm finishes the tutorial.
@@ -93,7 +95,7 @@ fn final_tutorial_waits_for_the_worm() {
 }
 
 #[test]
-fn secure_step_waits_for_the_campaign_goal() {
+fn secure_step_waits_for_the_campaign_goal_and_a_guard() {
     let (data, mut session) = boot();
     let none = TutorialInputs::default();
     let secure_index = data.tutorial.iter().position(|s| s.id == "secure").unwrap();
@@ -104,6 +106,8 @@ fn secure_step_waits_for_the_campaign_goal() {
     assert!(secure.body.contains("ends onboarding"));
     assert!(!advance(&mut session, &data, none));
     session.won = true;
+    assert!(!advance(&mut session, &data, none));
+    session.creatures[0].job = Job::Guard;
     assert!(advance(&mut session, &data, none));
     assert_eq!(current_step(&session, &data).unwrap().id, "worm");
 }

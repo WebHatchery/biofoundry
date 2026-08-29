@@ -5,6 +5,7 @@
 //! the sim.
 
 use crate::data::{GameData, TutorialDone, TutorialStepDef};
+use crate::state::creatures::Job;
 use crate::state::GameSession;
 
 /// Frame-side signals the session can't see (camera input lives in `Game`).
@@ -44,7 +45,7 @@ fn step_done(done: &TutorialDone, session: &GameSession, inputs: TutorialInputs)
     match done {
         TutorialDone::CameraMoved => inputs.camera_moved,
         TutorialDone::AnyReassign => session.tutorial_reassigned,
-        TutorialDone::WarrenSecured => session.won,
+        TutorialDone::WarrenSecured => session.won && session.job_count(Job::Guard) > 0,
         TutorialDone::SitePlaced => session.tutorial_built,
         TutorialDone::BuildingPlaced { building } => {
             session.buildings_of(building).next().is_some()
