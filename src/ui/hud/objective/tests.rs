@@ -72,6 +72,21 @@ fn objective_keeps_the_guard_handoff_as_the_next_requirement() {
 }
 
 #[test]
+fn objective_does_not_promise_a_disabled_guard_assignment() {
+    let (data, mut session) = boot();
+    session.won = true;
+    session.creatures.clear();
+    session.spawn_creature(&data, "overseer", Job::Idle);
+
+    let objective = CampaignObjective::current(&session, &data);
+
+    assert_eq!(
+        objective.next,
+        "Next: free a worker, then tap + beside Guard in Jobs."
+    );
+}
+
+#[test]
 fn objective_marks_the_worm_awake_as_complete() {
     let (data, mut session) = boot();
     session.worm_awake = true;

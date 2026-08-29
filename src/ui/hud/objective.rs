@@ -88,11 +88,6 @@ impl CampaignObjective {
         if session.job_count(Job::Guard) == 0 {
             let food_goal = data.balance.win_food_surplus;
             let ore_goal = data.balance.win_ore_delivered;
-            let next = if session.job_count(Job::Idle) > 0 {
-                "Next: tap + beside Guard in Jobs."
-            } else {
-                "Next: tap − beside Miner, then + beside Guard in Jobs."
-            };
             return Self {
                 title: "Finish the security handoff".to_owned(),
                 progress: format!(
@@ -102,7 +97,7 @@ impl CampaignObjective {
                     session.economy.ore_delivered_total.min(ore_goal),
                     ore_goal
                 ),
-                next: next.to_owned(),
+                next: security_handoff_next_step(session, data),
                 ratio: 2.0 / 3.0,
                 complete: false,
             };
@@ -161,6 +156,36 @@ impl CampaignObjective {
             complete: false,
         }
     }
+}
+
+fn security_handoff_next_step(session: &GameSession, data: &GameData) -> String {
+    if reassignable_job_count(session, data, Job::Idle) > 0 {
+        return "Next: tap + beside Guard in Jobs.".to_owned();
+    }
+    [Job::Miner, Job::Carrier, Job::Cook, Job::Smith]
+        .into_iter()
+        .find(|job| reassignable_job_count(session, data, *job) > 0)
+        .map(|job| {
+            format!(
+                "Next: tap − beside {}, then + beside Guard in Jobs.",
+                job.label()
+            )
+        })
+        .unwrap_or_else(|| "Next: free a worker, then tap + beside Guard in Jobs.".to_owned())
+}
+
+fn reassignable_job_count(session: &GameSession, data: &GameData, job: Job) -> usize {
+    session
+        .creatures
+        .iter()
+        .filter(|creature| {
+            creature.job == job
+                && data
+                    .species
+                    .get(&creature.species)
+                    .is_some_and(|species| species.reassignable)
+        })
+        .count()
 }
 
 fn active_outpost_next_step(session: &GameSession, data: &GameData) -> &'static str {
