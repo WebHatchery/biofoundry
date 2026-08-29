@@ -5,6 +5,12 @@
 **Builds tested:** packaged Windows and WebGL artifacts from `dist/`  
 **Input protocol:** pointer only; no gameplay keyboard shortcuts used
 
+> This report preserves the 2026-08-28 P0 snapshot and its original findings.
+> The current candidate has since added primary-pointer/touch camera input,
+> visible zoom and pause controls, touch-first copy, the five-beat tutorial,
+> and progressive disclosure. Current completion and first-time-player claims
+> still belong in the phase-one production and playtest records below.
+
 ## Outcome
 
 The current game starts on Windows and WebGL, starts a fresh warren, and
@@ -149,9 +155,10 @@ or awakening the worm; observe Tutorial 7/7 complete.
 | Optional depth | Beetle Hauler, Salamander Smelter, Slime Janitor, Bat Courier, Hobgoblin, Overseer, and Engineer; Charcoal Kiln, Smelter Den, Snare Trap, Study Pen, Breeding Pit, and Feeding Trough; charcoal and equipment beyond the Iron Pickaxe; capture, specimens, study, breeding, specialist recruitment, spoilage, waste, morale, crowding, reserve policies, equipment affinity, and advanced workstation/status diagnostics. |
 | Post-campaign | Worm Outpost construction, route activation, worm cargo/crew transit, remote storage/capacity, and transit recovery after route failure. |
 
-Optional systems are currently visible in the opening Build & Dig and
-recruitment panels even when locked or unaffordable. That is classification
-evidence only; progressive disclosure belongs to P2.
+At the time of this baseline, optional systems were visible in the opening
+Build & Dig and recruitment panels even when locked or unaffordable. That is
+historical classification evidence; the current candidate progressively
+reveals those systems after the secured-warren milestone.
 
 ## Automated quality evidence
 
