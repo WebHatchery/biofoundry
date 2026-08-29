@@ -122,11 +122,7 @@ pub fn draw(
     } else if worm_up {
         overlays::draw_goal_overlay(
             "The Colossal Worm Awakens",
-            &format!(
-                "Fed on {:.0} offerings, the great worm rises from the deep and coils around the warren that raised it.\n\nThe campaign is complete in {:.0} minutes. The warren — and its worm — play on.",
-                session.worm_fed,
-                simulation::sim_seconds(session) / 60.0
-            ),
+            &worm_completion_body(session),
             UiAction::DismissWorm,
             "Continue in Endless",
             mouse,
@@ -189,6 +185,15 @@ pub fn draw(
         actions,
         pointer_over_ui,
     }
+}
+
+fn worm_completion_body(session: &GameSession) -> String {
+    format!(
+        "Fed on {:.0} food and {} ingots, the great worm rises from the deep and coils around the warren that raised it.\n\nThe campaign is complete in {:.0} minutes. The warren — and its worm — play on.",
+        session.worm_fed,
+        session.worm_ingots_fed,
+        simulation::sim_seconds(session) / 60.0
+    )
 }
 
 /// Claim the small invisible margins around top-bar buttons for the HUD too.

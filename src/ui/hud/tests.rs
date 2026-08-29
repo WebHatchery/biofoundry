@@ -27,3 +27,17 @@ fn panels_claim_scaled_button_margins_before_world_input() {
     assert!(input.contains_point(vec2(panel.x + 100.0, panel.bottom() + 10.0)));
     assert!(!input.contains_point(vec2(panel.x + 100.0, panel.bottom() + 18.0)));
 }
+
+#[test]
+fn worm_completion_summary_names_the_resources_consumed() {
+    let data = GameData::load().unwrap();
+    let mut session = GameSession::new(&data, 42);
+    session.tick = 1234;
+    session.worm_fed = 110.0;
+    session.worm_ingots_fed = 10;
+
+    let body = worm_completion_body(&session);
+
+    assert!(body.contains("Fed on 110 food and 10 ingots"));
+    assert!(!body.contains("110 offerings"));
+}

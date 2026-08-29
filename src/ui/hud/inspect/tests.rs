@@ -48,3 +48,14 @@ fn shrine_is_working_when_reserves_can_fund_the_next_bite() {
         ("Working", dark::POSITIVE)
     );
 }
+
+#[test]
+fn shrine_labels_a_manual_pause_without_misattributing_it() {
+    let (data, mut session, pos) = shrine_session();
+    session.worm_feeding_paused = true;
+
+    assert_eq!(
+        inspect_status(&session, &data, session.building_at(pos).unwrap()),
+        ("Paused — reserve protected", dark::WARNING)
+    );
+}

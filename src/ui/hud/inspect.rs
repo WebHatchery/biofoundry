@@ -453,7 +453,7 @@ fn worm_shrine_status(session: &GameSession, data: &GameData) -> (&'static str, 
     if session.worm_awake {
         ("Awakened", dark::POSITIVE)
     } else if session.worm_feeding_paused {
-        ("Paused by reserve policy", dark::WARNING)
+        ("Paused — reserve protected", dark::WARNING)
     } else if worm_waiting_for_food(session, data) {
         ("Waiting for food reserve", dark::WARNING)
     } else if worm_waiting_for_ingots(session, data) {
