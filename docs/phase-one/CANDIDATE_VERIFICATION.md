@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `af93eb9`
+**Source revision:** `1941648`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -174,6 +174,9 @@ automated simulation results into first-time-player evidence.
   [ui_endless_empty.png](../verification/ui_endless_empty.png) show the
   Objective and inspection guidance changing from mixed cargo-and-crew return,
   to wait for transit, to return crew, to preparing a new payload.
+- Remote cargo accounting — subsequent outpost loads now append to existing
+  ore, ingot, and cooked-food stacks instead of replacing them; focused
+  simulation coverage exercises the multi-run case.
 
 ## Still open
 
