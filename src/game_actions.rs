@@ -2,6 +2,7 @@
 
 use super::Game;
 use crate::audio::Sfx;
+use crate::data::GameData;
 use crate::simulation;
 use crate::state::creatures::Job;
 use crate::state::{GameState, StateTransition};
@@ -18,8 +19,11 @@ impl Game {
             UiAction::AttractBeetle => {
                 if let GameState::Warren(session) = &mut self.state {
                     if simulation::try_attract_beetle(session, &self.data) {
-                        self.notifications
-                            .success("A beetle hauler joins the warren.");
+                        self.notifications.success(recruitment_notice(
+                            &self.data,
+                            "beetle",
+                            "A beetle hauler joins the warren",
+                        ));
                         self.audio.play(Sfx::Capture);
                     } else {
                         self.notifications.warning("Not enough ore banked.");
@@ -43,8 +47,11 @@ impl Game {
             UiAction::AttractSlimeJanitor => {
                 if let GameState::Warren(session) = &mut self.state {
                     if simulation::try_attract_slime_janitor(session, &self.data) {
-                        self.notifications
-                            .success("A Slime Janitor bubbles into the warren.");
+                        self.notifications.success(recruitment_notice(
+                            &self.data,
+                            "slime_janitor",
+                            "A Slime Janitor bubbles into the warren",
+                        ));
                         self.audio.play(Sfx::Capture);
                     } else {
                         self.notifications
@@ -56,8 +63,11 @@ impl Game {
             UiAction::AttractBatCourier => {
                 if let GameState::Warren(session) = &mut self.state {
                     if simulation::try_attract_bat_courier(session, &self.data) {
-                        self.notifications
-                            .success("A Bat Courier takes to the tunnels.");
+                        self.notifications.success(recruitment_notice(
+                            &self.data,
+                            "bat_courier",
+                            "A Bat Courier takes to the tunnels",
+                        ));
                         self.audio.play(Sfx::Capture);
                     } else {
                         self.notifications
@@ -104,8 +114,11 @@ impl Game {
                         _ => false,
                     };
                     if ok {
-                        self.notifications
-                            .success(format!("A {species} emerges from the pit."));
+                        self.notifications.success(recruitment_notice(
+                            &self.data,
+                            &species,
+                            &format!("A {species} emerges from the pit"),
+                        ));
                         self.audio.play(Sfx::Capture);
                     } else {
                         self.notifications
@@ -217,3 +230,22 @@ impl Game {
         }
     }
 }
+
+/// Call out the food cost of optional recruits at the moment they join, so a
+/// successful growth choice cannot quietly turn the Food Grid negative.
+fn recruitment_notice(data: &GameData, species: &str, joined: &str) -> String {
+    let upkeep = data
+        .species
+        .get(species)
+        .map(|definition| definition.food_per_min)
+        .unwrap_or(0.0);
+    if upkeep > 0.0 {
+        format!("{joined} — Upkeep +{upkeep:.1} food/min.")
+    } else {
+        format!("{joined}.")
+    }
+}
+
+#[cfg(test)]
+#[path = "game_actions/tests.rs"]
+mod tests;
