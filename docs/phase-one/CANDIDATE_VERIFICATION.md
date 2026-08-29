@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `c863411`
+**Source revision:** `a1364ec`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -25,7 +25,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 165 unit tests and 2 integration tests pass.
+- `cargo test --all-targets` — 166 unit tests and 2 integration tests pass.
 - `cargo clippy --all-targets --all-features -- -D warnings` — pass.
 - `publish.ps1` with no parameters — pass; Windows and WebGL packages
   deployed to Preview.
@@ -73,6 +73,10 @@ automated simulation results into first-time-player evidence.
 - Unique optional posts — the Jobs panel now labels an already recruited Slime
   Janitor or Bat Courier as posted instead of presenting a disabled recruit
   control without a reason; focused UI coverage exercises both label states.
+- Local Engineer summary — the Jobs panel now distinguishes Engineers working
+  in the warren from Engineers posted remotely, so the Mine bonus is not shown
+  as locally active when the specialist is away; focused UI coverage exercises
+  the summary states.
 - In-flight payload feedback — the selected outpost now names the cargo and crew
   currently carried by the worm during transit, so emptied storage counters are
   not mistaken for lost payload; focused UI coverage exercises the summary.
