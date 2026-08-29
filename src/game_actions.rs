@@ -173,7 +173,12 @@ impl Game {
             UiAction::ActivateOutpost(pos) => {
                 if let GameState::Warren(session) = &mut self.state {
                     if simulation::outposts::activate_outpost(session, pos) {
-                        self.notifications.info("The worm route is now active.");
+                        let active = session
+                            .outposts
+                            .iter()
+                            .find(|outpost| outpost.pos == pos)
+                            .is_some_and(|outpost| outpost.active);
+                        self.notifications.info(outpost_activation_notice(active));
                     } else {
                         self.notifications
                             .warning("This outpost cannot reach the shrine yet.");
@@ -275,6 +280,14 @@ fn transit_departure_notice(direction: TransitDirection) -> &'static str {
     match direction {
         TransitDirection::ToOutpost => "The worm begins its journey to the outpost.",
         TransitDirection::ToShrine => "The worm begins its journey to the shrine.",
+    }
+}
+
+fn outpost_activation_notice(active: bool) -> &'static str {
+    if active {
+        "The worm route is now active."
+    } else {
+        "The worm route is now inactive."
     }
 }
 

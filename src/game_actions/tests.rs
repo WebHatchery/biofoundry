@@ -41,3 +41,15 @@ fn transit_departure_notice_names_each_destination_without_assuming_payload() {
         "The worm begins its journey to the shrine."
     );
 }
+
+#[test]
+fn outpost_activation_notice_names_the_resulting_route_state() {
+    assert_eq!(
+        outpost_activation_notice(true),
+        "The worm route is now active."
+    );
+    assert_eq!(
+        outpost_activation_notice(false),
+        "The worm route is now inactive."
+    );
+}
