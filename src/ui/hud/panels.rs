@@ -81,7 +81,7 @@ pub(super) fn draw_top_bar(
         draw_ui_text_ex(
             &format!(
                 "RAID — gnarls are after the larder! {}{}",
-                raid_defense_hint(session, data),
+                compact_raid_defense_hint(session, data),
                 food_suffix
             ),
             bar.x + 380.0,
@@ -127,7 +127,7 @@ pub(super) fn draw_top_bar(
             &format!(
                 "RAID IN {} — {}",
                 format_mmss(session.raid_in.max(0.0)),
-                raid_defense_hint(session, data)
+                compact_raid_defense_hint(session, data)
             ),
             bar.x + 380.0,
             bar.y + 31.0,
@@ -478,18 +478,6 @@ pub(super) fn draw_jobs_panel(
                 TextStyle::new(12.0, dark::WARNING).params(),
             );
         }
-    }
-}
-
-/// Give the exact visible job controls needed to put a defender on watch.
-/// A fresh warren has no idle worker, so the first raid requires freeing one.
-fn raid_defense_hint(session: &GameSession, data: &GameData) -> String {
-    if reassignable_job_count(session, data, Job::Guard) > 0 {
-        "Guards are on watch.".to_owned()
-    } else if reassignable_job_count(session, data, Job::Idle) > 0 {
-        "tap + beside Guard in Jobs".to_owned()
-    } else {
-        super::objective::security_handoff_action_hint(session, data)
     }
 }
 
