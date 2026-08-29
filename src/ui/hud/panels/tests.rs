@@ -23,3 +23,14 @@ fn raid_hint_shortens_when_a_worker_is_idle_or_guarded() {
     session.creatures[1].job = Job::Guard;
     assert_eq!(raid_defense_hint(&session), "Guards are on watch.");
 }
+
+#[test]
+fn compact_food_hint_fits_the_top_bar() {
+    let data = GameData::load().expect("embedded game data");
+    let session = GameSession::new(&data, 7);
+
+    assert_eq!(
+        compact_food_recovery_hint(&session),
+        "tap − Miner, then + Carrier"
+    );
+}

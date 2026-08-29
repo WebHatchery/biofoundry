@@ -94,6 +94,8 @@ pub struct Balance {
     /// Seconds for satiation to drain from 1 to 0 on an empty stockpile.
     pub satiation_drain_sec: f32,
     pub desert_after_starving_sec: f32,
+    /// Show the food-pressure instruction this many seconds before blackout.
+    pub food_warning_sec: f32,
     pub beetle_ore_cost: u32,
     pub salamander_ore_cost: u32,
     pub sporewood_regrow_sec: f32,

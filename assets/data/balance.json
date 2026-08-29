@@ -21,6 +21,7 @@
   "satiation_recover_sec": 20.0,
   "satiation_drain_sec": 60.0,
   "desert_after_starving_sec": 90.0,
+  "food_warning_sec": 60.0,
   "beetle_ore_cost": 25,
   "salamander_ore_cost": 20,
   "sporewood_regrow_sec": 45.0,

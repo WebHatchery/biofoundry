@@ -85,6 +85,19 @@ pub(super) fn draw_top_bar(
             bar.y + 31.0,
             TextStyle::new(18.0, dark::NEGATIVE).params(),
         );
+    } else if let Some(seconds) = food::time_to_empty_seconds(session, data)
+        .filter(|seconds| *seconds <= data.balance.food_warning_sec)
+    {
+        draw_ui_text_ex(
+            &format!(
+                "FOOD IN {} · {}",
+                format_mmss(seconds),
+                compact_food_recovery_hint(session)
+            ),
+            bar.x + 380.0,
+            bar.y + 31.0,
+            TextStyle::new(15.0, dark::WARNING).params(),
+        );
     } else if session.raid_in <= data.balance.raid_warning_sec {
         draw_ui_text_ex(
             &format!(
@@ -458,6 +471,20 @@ fn raid_defense_hint(session: &GameSession) -> String {
             .find(|job| session.job_count(*job) > 0)
             .map(|job| format!("tap − beside {}, then + beside Guard", job.label()))
             .unwrap_or_else(|| "free a worker, then tap + beside Guard".to_owned())
+    }
+}
+
+/// Shorten the opening response enough to share the top bar with its buttons.
+/// The full control names remain in the tutorial card beside the banner.
+fn compact_food_recovery_hint(session: &GameSession) -> String {
+    if session.job_count(Job::Idle) > 0 {
+        "tap + Carrier or Cook".to_owned()
+    } else {
+        [Job::Miner, Job::Smith, Job::Guard]
+            .into_iter()
+            .find(|job| session.job_count(*job) > 0)
+            .map(|job| format!("tap − {}, then + Carrier", job.label()))
+            .unwrap_or_else(|| "free a worker, then + Carrier".to_owned())
     }
 }
 

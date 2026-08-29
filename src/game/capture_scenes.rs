@@ -199,6 +199,15 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                 }
             }
         }
+        "food_warning" => {
+            game.transition(StateTransition::StartWarren);
+            if let GameState::Warren(session) = &mut game.state {
+                session.tutorial_step = 1;
+                session.economy.food = 10.0;
+                session.economy.production_ema_per_min = 0.0;
+                session.raid_in = game.data.balance.raid_first_sec;
+            }
+        }
         "raid" => {
             game.transition(StateTransition::StartWarren);
             if let GameState::Warren(session) = &mut game.state {

@@ -8,7 +8,7 @@
   {
     "id": "food",
     "title": "Stabilize the Food Grid",
-    "body": "Read Food Grid: keep Production above Upkeep. Tap Farm in Build & Dig, then tap open floor. Tap + beside Carrier or Cook in Jobs when the food loop needs help.",
+    "body": "Read Food Grid: keep Production above Upkeep. Tap Farm, then open floor. If food pressure appears and Idle is 0, tap − beside Miner, then + beside Carrier or Cook in Jobs.",
     "done": { "kind": "site_placed" }
   },
   {
