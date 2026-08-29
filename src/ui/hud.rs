@@ -33,6 +33,13 @@ pub struct HudSprites {
     jobs: SpriteAtlas,
 }
 
+/// Per-frame UI state owned by the game shell rather than the session.
+#[derive(Debug, Clone, Copy, Default)]
+pub struct HudOptions {
+    pub help_open: bool,
+    pub save_exists: bool,
+}
+
 impl HudSprites {
     pub fn load() -> Self {
         let texture = Texture2D::from_file_with_format(JOB_ICON_ATLAS_BYTES, None);
@@ -65,7 +72,7 @@ pub fn draw(
     sprites: &HudSprites,
     mode: &UiMode,
     selected: Option<TilePos>,
-    help_open: bool,
+    options: HudOptions,
 ) -> HudFrame {
     let mut actions = Vec::new();
     let mouse = ui.mouse_position();
@@ -100,7 +107,10 @@ pub fn draw(
     let victory_up = session.won && !session.victory_shown;
     let factory_up = session.factory_complete && !session.factory_shown;
     let worm_up = session.worm_awake && !session.worm_shown;
-    if worm_up {
+    let colony_lost = session.creatures.is_empty() && !session.worm_awake;
+    if colony_lost {
+        overlays::draw_colony_failure_overlay(options.save_exists, mouse, &mut actions);
+    } else if worm_up {
         overlays::draw_goal_overlay(
             "The Colossal Worm Awakens",
             &format!(
@@ -139,7 +149,7 @@ pub fn draw(
         );
     }
 
-    if help_open {
+    if options.help_open {
         // The field guide is modal: discard any button intents collected from
         // the HUD underneath and let its Close button be the only action.
         actions.clear();
@@ -149,7 +159,8 @@ pub fn draw(
     let pointer_over_ui = victory_up
         || factory_up
         || worm_up
-        || help_open
+        || colony_lost
+        || options.help_open
         || tutorial_panel.is_some_and(|r| r.contains_point(mouse))
         || objective_panel.contains_point(mouse)
         || inspect_panel.is_some_and(|r| r.contains_point(mouse))

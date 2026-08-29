@@ -284,7 +284,10 @@ impl Game {
                     &self.hud_sprites,
                     &self.mode,
                     self.selected_building,
-                    self.help_open,
+                    ui::hud::HudOptions {
+                        help_open: self.help_open,
+                        save_exists: self.save_exists,
+                    },
                 );
                 end_virtual_ui_frame();
 
@@ -370,6 +373,12 @@ impl Game {
     }
 
     fn save_game(&mut self) {
+        if matches!(&self.state, GameState::Warren(session) if session.creatures.is_empty()) {
+            self.notifications.warning(
+                "This warren has fallen silent. Load a safe save or start a new warren instead.",
+            );
+            return;
+        }
         match self.persist_current_session() {
             Ok(()) => {
                 self.save_exists = true;

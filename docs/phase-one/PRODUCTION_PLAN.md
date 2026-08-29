@@ -107,7 +107,7 @@ clear path forward.
 - [ ] Present elapsed time and a concise campaign summary.
 - [x] Offer visible Continue in Endless Mode and Return to Menu actions.
 - [x] Add autosaves at safe beats while retaining visible manual Save/Load.
-- [ ] Detect non-viable colonies where possible and offer restart/load guidance.
+- [x] Detect non-viable colonies where possible and offer restart/load guidance.
 - [ ] Verify save behavior across refresh, relaunch, and WebGL storage limits.
 - [x] Handle incompatible or damaged saves without overwriting them silently.
 

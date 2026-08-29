@@ -266,6 +266,13 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                 session.tutorial_dismissed = true;
             }
         }
+        "collapse" => {
+            game.transition(StateTransition::StartWarren);
+            if let GameState::Warren(session) = &mut game.state {
+                session.tutorial_dismissed = true;
+                session.creatures.clear();
+            }
+        }
         // "warren" and the harness default "gameplay" boot straight
         // into a fresh session on the config seed.
         _ => game.transition(StateTransition::StartWarren),

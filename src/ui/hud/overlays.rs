@@ -58,6 +58,72 @@ pub(super) fn draw_goal_overlay(
     }
 }
 
+/// Recovery screen for the one unambiguous non-viable colony state: no
+/// creatures remain to produce food or advance the campaign.
+pub(super) fn draw_colony_failure_overlay(
+    save_exists: bool,
+    mouse: Vec2,
+    actions: &mut Vec<UiAction>,
+) {
+    draw_rectangle(
+        0.0,
+        0.0,
+        LOGICAL_WIDTH,
+        LOGICAL_HEIGHT,
+        Color::new(0.0, 0.0, 0.0, 0.58),
+    );
+    let panel = Rect::new(LOGICAL_WIDTH * 0.5 - 240.0, 185.0, 480.0, 280.0);
+    draw_surface_with_title(
+        panel,
+        Some("The Warren Falls Silent"),
+        &panel_style(),
+        TextStyle::new(20.0, dark::TEXT_BRIGHT),
+    );
+
+    let body = if save_exists {
+        "No creatures remain, so this warren cannot produce food or advance the campaign.\n\nLoad the last safe warren to recover your progress, or start fresh."
+    } else {
+        "No creatures remain, so this warren cannot produce food or advance the campaign.\n\nStart a new warren to begin again."
+    };
+    draw_text_block(
+        body,
+        panel.x + 20.0,
+        panel.y + 60.0,
+        panel.w - 40.0,
+        125.0,
+        17.0,
+        5.0,
+        dark::TEXT,
+    );
+
+    let primary_action = if save_exists {
+        UiAction::Load
+    } else {
+        UiAction::StartWarren
+    };
+    let primary_label = if save_exists {
+        "Load Last Safe"
+    } else {
+        "Start New Warren"
+    };
+    if hud_button(
+        Rect::new(panel.x + 40.0, panel.bottom() - 56.0, 195.0, 38.0),
+        primary_label,
+        true,
+        mouse,
+    ) {
+        actions.push(primary_action);
+    }
+    if hud_button(
+        Rect::new(panel.x + 245.0, panel.bottom() - 56.0, 195.0, 38.0),
+        "Return to Menu",
+        true,
+        mouse,
+    ) {
+        actions.push(UiAction::BackToMenu);
+    }
+}
+
 /// A touch-readable guide to the controls and the short decision loop. It is
 /// deliberately independent of tutorial progress so it remains useful after
 /// the opening lesson is skipped or completed.
