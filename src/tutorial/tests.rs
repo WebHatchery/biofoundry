@@ -124,7 +124,8 @@ fn factory_lesson_points_to_the_prebuilt_mine() {
 
     assert!(factory.body.contains("existing Mine"));
     assert!(factory.body.contains("Blacksmith"));
-    assert!(factory.body.contains("− by Miner, then + by Smith"));
+    assert!(factory.body.contains("visible Jobs controls"));
+    assert!(!factory.body.contains("If Idle is 0"));
     assert!(factory.body.contains("Iron Pickaxe"));
 }
 

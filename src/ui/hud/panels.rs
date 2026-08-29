@@ -731,12 +731,29 @@ fn tutorial_body(
     session: &GameSession,
     data: &GameData,
 ) -> String {
-    if step.id == "secure" {
-        format!(
+    match step.id.as_str() {
+        "food" => format!(
+            "Read Food Grid: keep Production above Upkeep. Tap Farm, then open floor. Wait for Farm construction. If food pressure rises, {}.",
+            super::objective::job_assignment_action_hint(
+                session,
+                data,
+                Job::Carrier,
+                &[Job::Miner, Job::Smith, Job::Guard],
+            )
+        ),
+        "factory" => format!(
+            "Tap the existing Mine to read its rate. Place a Blacksmith. To staff it, {}. Tap Blacksmith, then Iron Pickaxe; the miner equips it and the Mine speeds up.",
+            super::objective::job_assignment_action_hint(
+                session,
+                data,
+                Job::Smith,
+                &[Job::Miner, Job::Carrier, Job::Cook, Job::Guard],
+            )
+        ),
+        "secure" => format!(
             "Deliver 50 ore and hold 100 food in Objective. Before a raid, {}. This secures the warren and ends onboarding; next, forge 20 ingots and raise the Shrine.",
             super::objective::security_handoff_action_hint(session, data)
-        )
-    } else {
-        step.body.clone()
+        ),
+        _ => step.body.clone(),
     }
 }

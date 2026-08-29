@@ -55,6 +55,32 @@ fn secure_tutorial_names_the_available_guard_action() {
 }
 
 #[test]
+fn food_tutorial_names_the_available_carrier_action() {
+    let data = GameData::load().expect("embedded game data");
+    let mut session = GameSession::new(&data, 7);
+    session.tutorial_step = 1;
+    let step = crate::tutorial::current_step(&session, &data).expect("food tutorial step");
+
+    let body = tutorial_body(step, &session, &data);
+
+    assert!(body.contains("tap − beside Miner, then + beside Carrier in Jobs"));
+    assert!(!body.contains("If Idle is 0"));
+}
+
+#[test]
+fn factory_tutorial_names_the_available_smith_action() {
+    let data = GameData::load().expect("embedded game data");
+    let mut session = GameSession::new(&data, 7);
+    session.tutorial_step = 2;
+    let step = crate::tutorial::current_step(&session, &data).expect("factory tutorial step");
+
+    let body = tutorial_body(step, &session, &data);
+
+    assert!(body.contains("tap − beside Miner, then + beside Smith in Jobs"));
+    assert!(!body.contains("If Idle is 0"));
+}
+
+#[test]
 fn secure_tutorial_keeps_specialist_recovery_honest() {
     let data = GameData::load().expect("embedded game data");
     let mut session = GameSession::new(&data, 7);

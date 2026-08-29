@@ -175,7 +175,7 @@ pub(super) fn security_handoff_action_hint(session: &GameSession, data: &GameDat
     )
 }
 
-fn job_assignment_action_hint(
+pub(super) fn job_assignment_action_hint(
     session: &GameSession,
     data: &GameData,
     target: Job,
