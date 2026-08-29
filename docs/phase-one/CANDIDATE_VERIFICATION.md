@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `5363f4c`
+**Source revision:** `dc3163f`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -25,7 +25,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 113 unit tests and 2 integration tests pass.
+- `cargo test --all-targets` — 115 unit tests and 2 integration tests pass.
 - `cargo clippy --all-targets --all-features -- -D warnings` — pass.
 - `publish.ps1` with no parameters — pass; Windows and WebGL packages
   deployed to Preview.
@@ -74,6 +74,10 @@ automated simulation results into first-time-player evidence.
 - Factory tutorial capture — [ui_tutorial_factory.png](../verification/ui_tutorial_factory.png)
   makes the intended interaction explicit: inspect the existing Mine in the
   warren before placing the Blacksmith.
+- Tutorial tap captures — [ui_tutorial_food.png](../verification/ui_tutorial_food.png)
+  names the Farm-then-open-floor placement taps, while
+  [ui_tutorial_worm.png](../verification/ui_tutorial_worm.png) names the tap
+  on the Worm Shrine before its final-demand inspection.
 - Endless route failure capture — [ui_endless_failure.png](../verification/ui_endless_failure.png)
   shows the failed outpost's wrapped recovery message and the Objective's
   complete visible Activate route instruction, alongside the top-bar failure
