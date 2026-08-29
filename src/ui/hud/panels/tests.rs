@@ -183,3 +183,9 @@ fn active_tool_marker_uses_a_font_safe_glyph() {
     assert_eq!(active_tool_marker(true), "> ");
     assert!(!active_tool_marker(true).contains('▶'));
 }
+
+#[test]
+fn locked_tool_marker_uses_font_safe_ascii() {
+    assert_eq!(LOCKED_TOOL_MARKER, "[L]");
+    assert!(!LOCKED_TOOL_MARKER.contains('🔒'));
+}

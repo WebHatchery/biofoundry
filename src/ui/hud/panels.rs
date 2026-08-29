@@ -14,6 +14,7 @@ use macroquad_toolkit::prelude::*;
 use macroquad_toolkit::ui::{draw_ui_text_ex, format_mmss};
 
 const OBJECTIVE_PANEL: Rect = Rect::new(548.0, 72.0, 370.0, 128.0);
+const LOCKED_TOOL_MARKER: &str = "[L]";
 
 pub(super) fn draw_top_bar(
     session: &GameSession,
@@ -594,7 +595,7 @@ pub(super) fn draw_tools_panel(
             let label = if unlocked {
                 format!("{}{short} ({})", active_tool_marker(active), def.cost_ore)
             } else {
-                format!("{short} 🔒")
+                format!("{short} {LOCKED_TOOL_MARKER}")
             };
             if !unlocked {
                 if let Some(unlock_id) = def.requires_unlock.as_deref() {
