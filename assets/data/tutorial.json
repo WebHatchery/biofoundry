@@ -20,7 +20,7 @@
   {
     "id": "secure",
     "title": "Secure the Warren",
-    "body": "Deliver 50 ore and hold 100 food in Objective. Before a raid, free a worker with − if Idle is 0, then tap + beside Guard in Jobs. This secures the warren and ends onboarding; next, forge 20 ingots and raise the Shrine.",
+    "body": "Deliver 50 ore and hold 100 food in Objective. Before a raid, use the visible − and + controls beside Guard in Jobs; the Objective names the safe worker to move first. This secures the warren and ends onboarding; next, forge 20 ingots and raise the Shrine.",
     "done": { "kind": "warren_secured" }
   },
   {

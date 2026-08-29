@@ -104,6 +104,7 @@ fn secure_step_waits_for_the_campaign_goal_and_a_guard() {
     assert_eq!(current_step(&session, &data).unwrap().id, "secure");
     assert!(secure.body.contains("Guard in Jobs"));
     assert!(secure.body.contains("ends onboarding"));
+    assert!(!secure.body.contains("if Idle is 0"));
     assert!(!advance(&mut session, &data, none));
     session.won = true;
     assert!(!advance(&mut session, &data, none));
