@@ -14,7 +14,7 @@
   {
     "id": "factory",
     "title": "Close the Living Factory Loop",
-    "body": "Tap the existing Mine in the warren to read its rate. Place a Blacksmith, tap + beside Smith in Jobs, then tap the Blacksmith and tap Iron Pickaxe. The miner equips it on its own and the Mine speeds up.",
+    "body": "Tap the existing Mine in the warren to read its rate. Place a Blacksmith. If Idle is 0, tap − beside Miner, then tap + beside Smith in Jobs. Tap the Blacksmith and tap Iron Pickaxe. The miner equips it on its own and the Mine speeds up.",
     "done": { "kind": "gear_crafted", "item": "iron_pickaxe" }
   },
   {

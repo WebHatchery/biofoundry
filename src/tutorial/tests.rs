@@ -105,6 +105,9 @@ fn factory_lesson_points_to_the_prebuilt_mine() {
 
     assert!(factory.body.contains("existing Mine in the warren"));
     assert!(factory.body.contains("Blacksmith"));
+    assert!(factory
+        .body
+        .contains("− beside Miner, then tap + beside Smith"));
     assert!(factory.body.contains("Iron Pickaxe"));
 }
 
