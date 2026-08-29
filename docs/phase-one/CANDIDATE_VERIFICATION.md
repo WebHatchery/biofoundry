@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `b503e05`
+**Source revision:** `405ed1b`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -49,6 +49,9 @@ automated simulation results into first-time-player evidence.
   cargo hold is empty; a full remote crew cannot be duplicated by another load.
 - Endless route accounting — fractional local food remains in the warren until
   a whole cargo unit is ready, preventing loss when a route is loaded.
+- Factory handoff capture — [ui_factory_complete.png](../verification/ui_factory_complete.png)
+  shows the completion overlay with the next Worm Shrine objective visible and
+  no setup unlock toast obscuring the handoff.
 - Save-state coverage — an in-flight Worm Transit survives a session roundtrip
   with its destination, payload, passengers, and active route state intact.
 - Specialist capture — [ui_breeding.png](../verification/ui_breeding.png) shows
