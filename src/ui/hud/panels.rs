@@ -12,6 +12,8 @@ use macroquad::prelude::*;
 use macroquad_toolkit::prelude::*;
 use macroquad_toolkit::ui::{draw_ui_text_ex, format_mmss};
 
+const OBJECTIVE_PANEL: Rect = Rect::new(548.0, 72.0, 370.0, 128.0);
+
 pub(super) fn draw_top_bar(
     session: &GameSession,
     bar: Rect,
@@ -441,6 +443,63 @@ pub(super) fn draw_tools_panel(
             TextStyle::new(13.0, dark::TEXT_DIM).params(),
         );
     }
+}
+
+/// The persistent campaign card keeps the next milestone visible even after
+/// the tutorial is skipped or completed.
+pub(super) fn draw_objective_panel(session: &GameSession, data: &GameData) -> Rect {
+    let objective = super::objective::CampaignObjective::current(session, data);
+    let title = format!("Objective · {}", objective.title);
+    draw_surface_with_title(
+        OBJECTIVE_PANEL,
+        Some(&title),
+        &panel_style(),
+        TextStyle::new(15.0, dark::TEXT_BRIGHT),
+    );
+
+    draw_ui_text_ex(
+        &objective.progress,
+        OBJECTIVE_PANEL.x + 14.0,
+        OBJECTIVE_PANEL.y + 57.0,
+        TextStyle::new(
+            14.0,
+            if objective.complete {
+                dark::POSITIVE
+            } else {
+                dark::TEXT
+            },
+        )
+        .params(),
+    );
+    let meter_color = if objective.complete {
+        dark::POSITIVE
+    } else {
+        dark::ACCENT
+    };
+    meter(
+        Rect::new(
+            OBJECTIVE_PANEL.x + 14.0,
+            OBJECTIVE_PANEL.y + 68.0,
+            OBJECTIVE_PANEL.w - 28.0,
+            12.0,
+        ),
+        objective.ratio.clamp(0.0, 1.0),
+        1.0,
+        meter_color,
+        None,
+    );
+    draw_text_block(
+        &objective.next,
+        OBJECTIVE_PANEL.x + 14.0,
+        OBJECTIVE_PANEL.y + 94.0,
+        OBJECTIVE_PANEL.w - 28.0,
+        26.0,
+        13.0,
+        3.0,
+        dark::TEXT_DIM,
+    );
+
+    OBJECTIVE_PANEL
 }
 
 /// The tutorial card, top-right: current step, progress chip, and a skip

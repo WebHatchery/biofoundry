@@ -46,7 +46,7 @@ to the menu or continues, with no inaccessible required action.
 **Outcome:** the player always sees one primary objective and encounters new
 systems when they become relevant.
 
-- [ ] Add a persistent campaign objective card with current progress and the
+- [x] Add a persistent campaign objective card with current progress and the
   next unmet requirement.
 - [ ] Rework the tutorial around the five journey beats in `PLAYABLE_SLICE.md`.
 - [ ] Make every locked building or action state its exact prerequisite.

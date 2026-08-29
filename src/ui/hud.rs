@@ -7,6 +7,7 @@
 //! `HudFrame`.
 
 mod inspect;
+mod objective;
 mod overlays;
 mod panels;
 mod widgets;
@@ -80,6 +81,7 @@ pub fn draw(
     panels::draw_jobs_panel(session, data, sprites, jobs_panel, mouse, &mut actions);
     panels::draw_tools_panel(session, data, tools_panel, mode, mouse, &mut actions);
     let tutorial_panel = panels::draw_tutorial_panel(session, data, mouse, &mut actions);
+    let objective_panel = panels::draw_objective_panel(session, data);
     let inspect_panel = selected
         .and_then(|pos| inspect::draw_inspect_panel(session, data, pos, mouse, &mut actions));
 
@@ -139,6 +141,7 @@ pub fn draw(
         || factory_up
         || worm_up
         || tutorial_panel.is_some_and(|r| r.contains_point(mouse))
+        || objective_panel.contains_point(mouse)
         || inspect_panel.is_some_and(|r| r.contains_point(mouse))
         || [top_bar, food_panel, jobs_panel, tools_panel]
             .iter()
