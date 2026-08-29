@@ -40,6 +40,13 @@ pub enum TransitDirection {
     ToShrine,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct TransitCompletion {
+    pub direction: TransitDirection,
+    pub cargo_units: u32,
+    pub passenger_count: usize,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct WormTransit {
     pub outpost: TilePos,

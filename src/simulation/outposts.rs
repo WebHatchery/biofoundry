@@ -2,7 +2,7 @@
 
 use crate::data::GameData;
 use crate::state::creatures::Good;
-use crate::state::outposts::{Outpost, TransitDirection, WormTransit};
+use crate::state::outposts::{Outpost, TransitCompletion, TransitDirection, WormTransit};
 use crate::state::GameSession;
 use macroquad_toolkit::grid::TilePos;
 
@@ -125,7 +125,7 @@ pub fn tick_transit(
     session: &mut GameSession,
     data: &GameData,
     dt: f32,
-) -> Option<TransitDirection> {
+) -> Option<TransitCompletion> {
     let mut transit = session.worm_transit.take()?;
     if !session
         .outposts
@@ -174,7 +174,14 @@ pub fn tick_transit(
         }
     }
     let _ = data;
-    Some(direction)
+    Some(TransitCompletion {
+        direction,
+        cargo_units: transit
+            .ore
+            .saturating_add(transit.ingots)
+            .saturating_add(transit.food.max(0.0) as u32),
+        passenger_count: transit.passengers.len(),
+    })
 }
 
 fn take_cargo(outpost: &mut Outpost, good: Good, amount: u32) {

@@ -245,7 +245,10 @@ fn worm_transit_does_not_overfill_remote_crew_capacity() {
         &data,
         data.balance.worm_transit_time_sec + 0.1,
     );
-    assert_eq!(completed, Some(TransitDirection::ToOutpost));
+    let completion = completed.expect("the worm should reach the outpost");
+    assert_eq!(completion.direction, TransitDirection::ToOutpost);
+    assert_eq!(completion.cargo_units, 6);
+    assert_eq!(completion.passenger_count, 0);
 
     assert_eq!(session.outposts[0].crew.len(), capacity);
     assert_eq!(session.outposts[0].cargo.get(&Good::Ore), Some(&1));
@@ -272,7 +275,10 @@ fn worm_transit_keeps_fractional_food_at_home_until_a_whole_unit_is_ready() {
         &data,
         data.balance.worm_transit_time_sec + 0.1,
     );
-    assert_eq!(completed, Some(TransitDirection::ToOutpost));
+    let completion = completed.expect("the worm should reach the outpost");
+    assert_eq!(completion.direction, TransitDirection::ToOutpost);
+    assert_eq!(completion.cargo_units, 1);
+    assert_eq!(completion.passenger_count, 0);
     assert_eq!(session.outposts[0].cargo.get(&Good::CookedFood), Some(&1));
 }
 
@@ -286,7 +292,12 @@ fn simulation_reports_arrival_after_a_cargo_run_completes() {
 
     let report = simulation::tick(&mut session, &data);
 
-    assert_eq!(report.transit_completed, Some(TransitDirection::ToOutpost));
+    let completion = report
+        .transit_completed
+        .expect("the tick should report the worm's arrival");
+    assert_eq!(completion.direction, TransitDirection::ToOutpost);
+    assert_eq!(completion.cargo_units, 6);
+    assert_eq!(completion.passenger_count, 4);
     assert_eq!(session.progress.courier_deliveries, 1);
     assert!(session.worm_transit.is_none());
 }

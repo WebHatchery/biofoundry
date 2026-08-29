@@ -1,5 +1,6 @@
 use super::*;
 use crate::data::GameData;
+use crate::state::outposts::{TransitCompletion, TransitDirection};
 use crate::state::GameSession;
 
 fn session() -> (GameData, GameSession) {
@@ -30,4 +31,32 @@ fn tutorial_migration_uses_completed_campaign_facts() {
     migrate_tutorial_progress(&mut session, data.tutorial.len());
 
     assert_eq!(session.tutorial_step, data.tutorial.len());
+}
+
+#[test]
+fn transit_completion_notice_names_a_crew_only_arrival() {
+    let completion = TransitCompletion {
+        direction: TransitDirection::ToOutpost,
+        cargo_units: 0,
+        passenger_count: 2,
+    };
+
+    assert_eq!(
+        transit_completion_notice(completion),
+        "The worm reaches the outpost — crew delivered."
+    );
+}
+
+#[test]
+fn transit_completion_notice_names_mixed_payloads() {
+    let completion = TransitCompletion {
+        direction: TransitDirection::ToShrine,
+        cargo_units: 3,
+        passenger_count: 1,
+    };
+
+    assert_eq!(
+        transit_completion_notice(completion),
+        "The worm returns to the shrine — cargo and crew delivered."
+    );
 }

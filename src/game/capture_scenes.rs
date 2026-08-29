@@ -404,13 +404,12 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
             if let GameState::Warren(session) = &mut game.state {
                 let outpost = session.outposts.first().map(|route| route.pos);
                 if let Some(outpost) = outpost {
-                    let _ = simulation::outposts::start_to_outpost(session, &game.data, outpost);
+                    if simulation::outposts::start_to_outpost(session, &game.data, outpost) {
+                        if let Some(transit) = session.worm_transit.as_mut() {
+                            transit.remaining = simulation::SIM_DT;
+                        }
+                    }
                 }
-                let _ = simulation::outposts::tick_transit(
-                    session,
-                    &game.data,
-                    game.data.balance.worm_transit_time_sec + 0.1,
-                );
             }
         }
         "shrine" => {

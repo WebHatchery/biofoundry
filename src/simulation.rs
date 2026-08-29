@@ -18,7 +18,7 @@ mod tests;
 
 use crate::data::GameData;
 use crate::state::creatures::Creature;
-use crate::state::outposts::TransitDirection;
+use crate::state::outposts::TransitCompletion;
 use crate::state::GameSession;
 
 pub use actions::{
@@ -39,7 +39,7 @@ pub struct TickReport {
     pub won_this_tick: bool,
     pub factory_this_tick: bool,
     pub worm_this_tick: bool,
-    pub transit_completed: Option<TransitDirection>,
+    pub transit_completed: Option<TransitCompletion>,
     pub wild: wildlife::WildReport,
 }
 

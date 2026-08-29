@@ -5,6 +5,7 @@ use crate::audio::{Audio, Sfx};
 use crate::data::GameData;
 use crate::simulation::{self, MAX_TICKS_PER_FRAME, SIM_DT};
 use crate::state::creatures::Job;
+use crate::state::outposts::{TransitCompletion, TransitDirection};
 use crate::state::{GameSession, GameState, StateTransition};
 use crate::tutorial::{self, TutorialInputs};
 use crate::ui::{self, UiAction, UiMode};
@@ -161,16 +162,10 @@ impl Game {
                             .success("The ground heaves — the Colossal Worm awakens!");
                         self.audio.play(Sfx::Worm);
                     }
-                    if let Some(direction) = report.transit_completed {
+                    if let Some(completion) = report.transit_completed {
                         safe_beat_reached = true;
-                        self.notifications.success(match direction {
-                            crate::state::outposts::TransitDirection::ToOutpost => {
-                                "The worm reaches the outpost — cargo delivered."
-                            }
-                            crate::state::outposts::TransitDirection::ToShrine => {
-                                "The worm returns to the shrine — cargo delivered."
-                            }
-                        });
+                        self.notifications
+                            .success(transit_completion_notice(completion));
                         self.audio.play(Sfx::Complete);
                     }
                     if report.wild.raid_started {
@@ -632,6 +627,33 @@ impl Game {
         // Keep optional keyboard and wheel shortcuts working while direct
         // primary-pointer and touch gestures remain the required path.
         self.camera.update(dt, false);
+    }
+}
+
+fn transit_completion_notice(completion: TransitCompletion) -> &'static str {
+    let payload = match (completion.cargo_units > 0, completion.passenger_count > 0) {
+        (true, true) => "cargo and crew delivered",
+        (true, false) => "cargo delivered",
+        (false, true) => "crew delivered",
+        (false, false) => "route complete",
+    };
+    match completion.direction {
+        TransitDirection::ToOutpost => match payload {
+            "cargo and crew delivered" => {
+                "The worm reaches the outpost — cargo and crew delivered."
+            }
+            "cargo delivered" => "The worm reaches the outpost — cargo delivered.",
+            "crew delivered" => "The worm reaches the outpost — crew delivered.",
+            _ => "The worm reaches the outpost — route complete.",
+        },
+        TransitDirection::ToShrine => match payload {
+            "cargo and crew delivered" => {
+                "The worm returns to the shrine — cargo and crew delivered."
+            }
+            "cargo delivered" => "The worm returns to the shrine — cargo delivered.",
+            "crew delivered" => "The worm returns to the shrine — crew delivered.",
+            _ => "The worm returns to the shrine — route complete.",
+        },
     }
 }
 
