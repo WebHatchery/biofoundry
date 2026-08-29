@@ -183,6 +183,30 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                 game.selected_building = session.buildings_of("mine").next().map(|b| b.pos);
             }
         }
+        "blacksmith_queue_full" => {
+            game.transition(StateTransition::StartWarren);
+            if let GameState::Warren(session) = &mut game.state {
+                session.tutorial_dismissed = true;
+                session.economy.food = 300.0;
+                let spawn = session.spawn_tile();
+                let spot = session
+                    .world
+                    .tiles
+                    .iter_with_pos()
+                    .filter(|(pos, _)| session.can_place_building(*pos))
+                    .map(|(pos, _)| pos)
+                    .min_by_key(|p| (p.manhattan_distance(&spawn), p.x, p.y));
+                if let Some(spot) = spot {
+                    let mut shop = Building::new("blacksmith", spot);
+                    for index in 0..game.data.balance.order_queue_size {
+                        let item = &game.data.equipment[index % game.data.equipment.len()];
+                        shop.orders.push(item.id.clone());
+                    }
+                    session.buildings.push(shop);
+                    game.selected_building = Some(spot);
+                }
+            }
+        }
         "overseer" => {
             game.transition(StateTransition::StartWarren);
             if let GameState::Warren(session) = &mut game.state {

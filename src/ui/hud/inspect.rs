@@ -4,6 +4,7 @@
 use crate::data::GameData;
 use crate::state::creatures::{Good, Task};
 use crate::state::outposts::TransitDirection;
+use crate::state::structures::Building;
 use crate::state::GameSession;
 use crate::ui::hud::widgets::{hud_button, panel_style};
 use crate::ui::legibility::BuildingStatus;
@@ -30,7 +31,7 @@ pub(super) fn draw_inspect_panel(
     // The blacksmith panel carries the production-order queue and craft
     // buttons, and the breeding pit its breed buttons — both taller.
     let height = match building.kind.as_str() {
-        "blacksmith" => 170.0 + data.equipment.len() as f32 * 26.0,
+        "blacksmith" => 194.0 + data.equipment.len() as f32 * 26.0,
         "breeding_pit" => 230.0,
         "worm_shrine" => 240.0,
         "outpost" => 270.0,
@@ -183,16 +184,21 @@ pub(super) fn draw_inspect_panel(
                 },
                 &mut y,
             );
+            let queue_available = blacksmith_queue_available(building, data);
             line(
                 &format!(
-                    "Ore {:.0}  Ingots {:.0}  Queue {}",
+                    "Ore {:.0}  Ingots {:.0}  Queue {}/{}",
                     building.stock(Good::Ore),
                     building.stock(Good::Ingot),
-                    building.orders.len()
+                    building.orders.len(),
+                    data.balance.order_queue_size,
                 ),
                 dark::TEXT,
                 &mut y,
             );
+            if !queue_available {
+                line("Queue full · finish orders first", dark::WARNING, &mut y);
+            }
             // Production orders: one craft button per equipment item. A
             // queued count and how many are already banked ride in the label.
             y += 2.0;
@@ -206,7 +212,7 @@ pub(super) fn draw_inspect_panel(
                 } else if banked > 0 {
                     label.push_str(&format!("  ·{banked} ready"));
                 }
-                if hud_button(Rect::new(x, y, bw, 22.0), &label, true, mouse) {
+                if hud_button(Rect::new(x, y, bw, 22.0), &label, queue_available, mouse) {
                     actions.push(UiAction::QueueOrder(pos, eq.id.clone()));
                 }
                 y += 26.0;
@@ -481,6 +487,10 @@ pub(super) fn draw_inspect_panel(
     }
 
     Some(panel)
+}
+
+fn blacksmith_queue_available(building: &Building, data: &GameData) -> bool {
+    building.orders.len() < data.balance.order_queue_size
 }
 
 /// Give every inspected building the same first-read answer: is it working,

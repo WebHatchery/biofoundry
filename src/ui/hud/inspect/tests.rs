@@ -178,3 +178,17 @@ fn active_empty_outpost_reports_whether_payload_is_ready() {
         ("Ready to load", dark::POSITIVE)
     );
 }
+
+#[test]
+fn blacksmith_queue_reports_when_another_order_can_be_added() {
+    let data = GameData::load().expect("embedded game data");
+    let pos = TilePos::new(0, 0);
+    let mut shop = Building::new("blacksmith", pos);
+
+    assert!(blacksmith_queue_available(&shop, &data));
+
+    for _ in 0..data.balance.order_queue_size {
+        shop.orders.push("iron_pickaxe".to_owned());
+    }
+    assert!(!blacksmith_queue_available(&shop, &data));
+}
