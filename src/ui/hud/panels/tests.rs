@@ -169,3 +169,10 @@ fn optional_specialist_buttons_explain_when_the_unique_post_is_filled() {
         "Bat · posted"
     );
 }
+
+#[test]
+fn engineer_summary_distinguishes_local_and_posted_specialists() {
+    assert_eq!(engineer_status_label(0, 0), "Engineer 0 · no local bonus");
+    assert_eq!(engineer_status_label(0, 1), "Engineer 0 local · 1 posted");
+    assert_eq!(engineer_status_label(1, 1), "Engineer 1 local · Mine +25%");
+}

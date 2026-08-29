@@ -436,14 +436,20 @@ pub(super) fn draw_jobs_panel(
         actions.push(UiAction::AttractBatCourier);
     }
     y += 32.0;
+    let engineers = session
+        .creatures
+        .iter()
+        .filter(|c| c.species == "engineer")
+        .count();
+    let local_engineers = session
+        .creatures
+        .iter()
+        .filter(|c| !c.is_remote() && c.species == "engineer")
+        .count();
     draw_ui_text_ex(
         &format!(
-            "Engineer {} · Mine +25% · Outposts {}/{}",
-            session
-                .creatures
-                .iter()
-                .filter(|c| c.species == "engineer")
-                .count(),
+            "{} · Outposts {}/{}",
+            engineer_status_label(local_engineers, engineers),
             session.outposts.iter().filter(|o| o.active).count(),
             session.outposts.len()
         ),
@@ -488,6 +494,16 @@ fn optional_specialist_label(species: &str, posted: bool) -> &'static str {
         ("bat_courier", false) => "Bat ×8",
         ("bat_courier", true) => "Bat · posted",
         _ => "Specialist",
+    }
+}
+
+fn engineer_status_label(local: usize, total: usize) -> String {
+    if local > 0 {
+        format!("Engineer {local} local · Mine +25%")
+    } else if total > 0 {
+        format!("Engineer 0 local · {total} posted")
+    } else {
+        "Engineer 0 · no local bonus".to_owned()
     }
 }
 
