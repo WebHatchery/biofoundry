@@ -73,8 +73,8 @@ discrepancy was reproduced.
 | Load / Continue | Pass | Pass | Saved campaign timestamp and state returned. |
 | Return to menu | Pass | Pass | Visible Menu button returned to the title screen. |
 | Campaign completion | Automated only | Automated only | Fixed-seed simulation reaches `worm_awake`; no live pointer campaign reached it. |
-| Endless continuation | UI contract only | UI contract only | Completion overlay code exposes `Keep Playing`; not exercised in a live run. |
-| Completion return to menu | UI contract only | UI contract only | Completion overlay code exposes `Menu`; not exercised in a live run. |
+| Endless continuation | UI contract only | UI contract only | Completion overlay code exposes `Continue in Endless`; not exercised in a live run. |
+| Completion return to menu | UI contract only | UI contract only | Completion overlay code exposes `Return to Menu`; not exercised in a live run. |
 
 ## Findings
 
@@ -151,7 +151,7 @@ or awakening the worm; observe Tutorial 7/7 complete.
 
 | Classification | Implemented systems |
 | --- | --- |
-| Critical path | Title menu and New Warren; tutorial and campaign goals; Food Grid and hunger/brownout; Goblin Miner, Carrier, Cook, Smith, Guard, and Idle jobs; Mushroom Farm, Cook Pot, Ore Mine, Blacksmith, Stockpile, and Worm Shrine; raw/cooked food, ore, ingots, and Iron Pickaxe; construction delivery, building placement, digging, inspection, job reassignment, crafting queue, raid pressure, manual save/load, secured-warren goal, factory goal, worm offerings/awakening, completion overlay, Keep Playing, and Menu. |
+| Critical path | Title menu and New Warren; tutorial and campaign goals; Food Grid and hunger/brownout; Goblin Miner, Carrier, Cook, Smith, Guard, and Idle jobs; Mushroom Farm, Cook Pot, Ore Mine, Blacksmith, Stockpile, and Worm Shrine; raw/cooked food, ore, ingots, and Iron Pickaxe; construction delivery, building placement, digging, inspection, job reassignment, crafting queue, raid pressure, manual save/load, secured-warren goal, factory goal, worm offerings/awakening, completion overlay, Continue in Endless, and Return to Menu. |
 | Optional depth | Beetle Hauler, Salamander Smelter, Slime Janitor, Bat Courier, Hobgoblin, Overseer, and Engineer; Charcoal Kiln, Smelter Den, Snare Trap, Study Pen, Breeding Pit, and Feeding Trough; charcoal and equipment beyond the Iron Pickaxe; capture, specimens, study, breeding, specialist recruitment, spoilage, waste, morale, crowding, reserve policies, equipment affinity, and advanced workstation/status diagnostics. |
 | Post-campaign | Worm Outpost construction, route activation, worm cargo/crew transit, remote storage/capacity, and transit recovery after route failure. |
 
