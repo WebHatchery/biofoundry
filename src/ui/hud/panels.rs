@@ -69,10 +69,20 @@ pub(super) fn draw_top_bar(
             TextStyle::new(18.0, dark::NEGATIVE).params(),
         );
     } else if session.raid_active {
+        let food_warning = food::time_to_empty_seconds(session, data)
+            .filter(|seconds| *seconds <= data.balance.food_warning_sec);
+        let food_suffix = if session.economy.food <= 0.0 {
+            " · FAMINE".to_owned()
+        } else if let Some(seconds) = food_warning {
+            format!(" · FOOD IN {}", format_mmss(seconds))
+        } else {
+            String::new()
+        };
         draw_ui_text_ex(
             &format!(
-                "RAID — gnarls are after the larder! {}",
-                raid_defense_hint(session)
+                "RAID — gnarls are after the larder! {}{}",
+                raid_defense_hint(session),
+                food_suffix
             ),
             bar.x + 380.0,
             bar.y + 31.0,
@@ -88,16 +98,30 @@ pub(super) fn draw_top_bar(
     } else if let Some(seconds) = food::time_to_empty_seconds(session, data)
         .filter(|seconds| *seconds <= data.balance.food_warning_sec)
     {
-        draw_ui_text_ex(
-            &format!(
-                "FOOD IN {} · {}",
-                format_mmss(seconds),
-                compact_food_recovery_hint(session)
-            ),
-            bar.x + 380.0,
-            bar.y + 31.0,
-            TextStyle::new(15.0, dark::WARNING).params(),
-        );
+        if session.raid_in <= data.balance.raid_warning_sec {
+            draw_ui_text_ex(
+                &format!(
+                    "FOOD IN {} · RAID IN {} · {}",
+                    format_mmss(seconds),
+                    format_mmss(session.raid_in.max(0.0)),
+                    compact_raid_defense_hint(session)
+                ),
+                bar.x + 380.0,
+                bar.y + 31.0,
+                TextStyle::new(15.0, dark::WARNING).params(),
+            );
+        } else {
+            draw_ui_text_ex(
+                &format!(
+                    "FOOD IN {} · {}",
+                    format_mmss(seconds),
+                    compact_food_recovery_hint(session)
+                ),
+                bar.x + 380.0,
+                bar.y + 31.0,
+                TextStyle::new(15.0, dark::WARNING).params(),
+            );
+        }
     } else if session.raid_in <= data.balance.raid_warning_sec {
         draw_ui_text_ex(
             &format!(
@@ -471,6 +495,22 @@ fn raid_defense_hint(session: &GameSession) -> String {
             .find(|job| session.job_count(*job) > 0)
             .map(|job| format!("tap − beside {}, then + beside Guard", job.label()))
             .unwrap_or_else(|| "free a worker, then tap + beside Guard".to_owned())
+    }
+}
+
+/// Keep a combined food/raid banner short while naming the visible Guard
+/// control that resolves the incoming threat.
+fn compact_raid_defense_hint(session: &GameSession) -> String {
+    if session.job_count(Job::Guard) > 0 {
+        "guards on watch".to_owned()
+    } else if session.job_count(Job::Idle) > 0 {
+        "tap + Guard".to_owned()
+    } else {
+        [Job::Miner, Job::Carrier, Job::Cook, Job::Smith]
+            .into_iter()
+            .find(|job| session.job_count(*job) > 0)
+            .map(|job| format!("tap − {}, then + Guard", job.label()))
+            .unwrap_or_else(|| "free a worker, then + Guard".to_owned())
     }
 }
 

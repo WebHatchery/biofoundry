@@ -213,6 +213,17 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                 session.raid_in = game.data.balance.raid_first_sec;
             }
         }
+        "raid_food_warning" => {
+            game.transition(StateTransition::StartWarren);
+            if let GameState::Warren(session) = &mut game.state {
+                // Keep both warnings visible so the shared top-bar response
+                // remains a canonical, deterministic regression scene.
+                session.tutorial_step = 3;
+                session.economy.food = 10.0;
+                session.economy.production_ema_per_min = 0.0;
+                session.raid_in = 150.0;
+            }
+        }
         "raid" => {
             game.transition(StateTransition::StartWarren);
             if let GameState::Warren(session) = &mut game.state {

@@ -34,3 +34,23 @@ fn compact_food_hint_fits_the_top_bar() {
         "tap − Miner, then + Carrier"
     );
 }
+
+#[test]
+fn compact_raid_hint_names_the_guard_control() {
+    let data = GameData::load().expect("embedded game data");
+    let session = GameSession::new(&data, 7);
+
+    assert_eq!(
+        compact_raid_defense_hint(&session),
+        "tap − Miner, then + Guard"
+    );
+}
+
+#[test]
+fn compact_raid_hint_stays_short_when_a_worker_is_free() {
+    let data = GameData::load().expect("embedded game data");
+    let mut session = GameSession::new(&data, 7);
+    session.creatures[0].job = Job::Idle;
+
+    assert_eq!(compact_raid_defense_hint(&session), "tap + Guard");
+}
