@@ -94,12 +94,14 @@ pub(super) fn draw_inspect_panel(
                         * crate::ui::legibility::work_multiplier(c, session, data)
                 })
                 .sum();
-            let (worker_txt, worker_col) = if building.reserve <= 0.0 {
-                ("Deposit exhausted".to_owned(), dark::NEGATIVE)
+            let deposit_exhausted = building.reserve <= 0.0;
+            let worker_txt = mine_staffing_label(staffed, slots, deposit_exhausted);
+            let worker_col = if deposit_exhausted {
+                dark::NEGATIVE
             } else if staffed == 0 {
-                ("No miner — stopped".to_owned(), dark::WARNING)
+                dark::WARNING
             } else {
-                (format!("Miners {staffed}/{slots}"), dark::POSITIVE)
+                dark::POSITIVE
             };
             line(&worker_txt, worker_col, &mut y);
             let rate_text = if rate > base_rate + 0.01 {
@@ -500,6 +502,16 @@ fn blacksmith_queue_available(building: &Building, data: &GameData) -> bool {
 
 fn local_mine_worker_at(creature: &Creature, pos: TilePos) -> bool {
     !creature.is_remote() && matches!(&creature.task, Task::WorkMine(p) if *p == pos)
+}
+
+fn mine_staffing_label(staffed: usize, slots: u32, deposit_exhausted: bool) -> String {
+    if deposit_exhausted {
+        "Deposit exhausted".to_owned()
+    } else if staffed == 0 {
+        "No mine worker — stopped".to_owned()
+    } else {
+        format!("Mine staff {staffed}/{slots}")
+    }
 }
 
 fn local_mine_staffed_at(creature: &Creature, pos: TilePos) -> bool {

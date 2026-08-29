@@ -263,6 +263,13 @@ fn inspection_staffing_recognizes_an_engineer_at_a_mine() {
 }
 
 #[test]
+fn mine_staffing_label_names_specialist_neutral_states() {
+    assert_eq!(mine_staffing_label(0, 2, false), "No mine worker — stopped");
+    assert_eq!(mine_staffing_label(1, 2, false), "Mine staff 1/2");
+    assert_eq!(mine_staffing_label(0, 2, true), "Deposit exhausted");
+}
+
+#[test]
 fn outpost_return_label_names_each_payload_kind() {
     assert_eq!(
         outpost_return_label(6, 4),
