@@ -6,7 +6,10 @@ use super::*;
 /// The whole campaign on the fixed seed: famine → recover → first
 /// victory → the Blacksmith forges the factory goal → the Colossal Worm.
 /// The "one sitting" length probe, and the contract for the arc (plan
-/// §Phase 11): famine ~5 min, win 1 ~12–15, win 2 ~22–26, worm ~45–50.
+/// §Phase 11): famine ~5 min, secure 12–18 min, factory 20–28 min, shrine
+/// before 35 min, and worm within the 30–60 min sitting envelope. The exact
+/// values may move with balance tuning, but each beat needs a guardrail so a
+/// new sink cannot create a silent wait.
 ///
 /// A competent campaign leans on the automation loop: beetle haulers for
 /// capacity, a Blacksmith hammering ore into ingots, expansion (a second
@@ -23,12 +26,21 @@ fn sim_to_factory_complete_on_fixed_seed() {
     let mut smith = false;
     let mut geared = false;
     let mut shrined = false;
+    let mut victory_at = None;
+    let mut factory_at = None;
+    let mut shrine_at = None;
 
     let done_at = run_until(
         &mut session,
         &data,
         80.0,
         |s, t| {
+            if victory_at.is_none() && s.won {
+                victory_at = Some(t);
+            }
+            if factory_at.is_none() && s.factory_complete {
+                factory_at = Some(t);
+            }
             if (t as u64).is_multiple_of(300) && t.fract() < 0.05 {
                 let bs: Vec<(f32, f32)> = s
                     .buildings_of("blacksmith")
@@ -103,6 +115,7 @@ fn sim_to_factory_complete_on_fixed_seed() {
                 && build_near(s, &data, "worm_shrine")
             {
                 shrined = true;
+                shrine_at = Some(t);
             }
         },
         |s| s.worm_awake,
@@ -118,10 +131,30 @@ fn sim_to_factory_complete_on_fixed_seed() {
         session.worm_awake,
         "expected the Colossal Worm within 80 sim-minutes"
     );
+    let victory_at = victory_at.expect("the fixed-seed campaign should secure the warren");
+    let factory_at = factory_at.expect("the fixed-seed campaign should complete the factory");
+    let shrine_at = shrine_at.expect("the fixed-seed campaign should raise the Worm Shrine");
+    let victory_minutes = victory_at / 60.0;
+    let factory_minutes = factory_at / 60.0;
+    let shrine_minutes = shrine_at / 60.0;
     let minutes = done_at / 60.0;
     eprintln!(
-        "[balance probe] worm awakened at {minutes:.1} sim-min ({} ingots, {} deserted, {} raids survived)",
-        session.economy.ingots_forged, session.economy.deserted, session.progress.raids_survived
+        "[balance probe] beats: secure={victory_minutes:.1}m factory={factory_minutes:.1}m shrine={shrine_minutes:.1}m worm={minutes:.1}m ({} ingots, {} deserted, {} raids survived)",
+        session.economy.ingots_forged,
+        session.economy.deserted,
+        session.progress.raids_survived
+    );
+    assert!(
+        (10.0..=25.0).contains(&victory_minutes),
+        "secure-warren beat landed at {victory_minutes:.1} min; expected a readable first arc"
+    );
+    assert!(
+        (18.0..=35.0).contains(&factory_minutes),
+        "factory beat landed at {factory_minutes:.1} min; expected progress before fatigue"
+    );
+    assert!(
+        shrine_minutes <= 35.0,
+        "Worm Shrine landed at {shrine_minutes:.1} min; the post-factory handoff should not idle"
     );
     assert!(
         (30.0..=60.0).contains(&minutes),
