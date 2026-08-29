@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `4a35562`
+**Source revision:** `3fa745b`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -15,6 +15,7 @@ automated simulation results into first-time-player evidence.
 | Flow | Result | Evidence |
 | --- | --- | --- |
 | Continue from title | Pass | Visible Continue loaded the saved warren at `00:28`. |
+| New Warren replacement warning | Pass | The visible confirmation names the autosave replacement and both choices: `Start New Warren` or `Keep Save`. |
 | Manual Save | Pass | Visible Save produced `Warren saved.` and the run reached `00:36` before the check. |
 | Menu exit without manual Save | Pass | A fresh Preview warren left through visible Menu without Save; Continue restored the run at `00:01` with the opening tutorial intact. |
 | Refresh and Continue | Pass | Reload returned to the title screen with Continue enabled; Continue restored `00:36` and showed `Warren loaded.`. |
@@ -27,7 +28,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 168 unit tests and 2 integration tests pass.
+- `cargo test --all-targets` — 170 unit tests and 2 integration tests pass.
 - `cargo clippy --all-targets --all-features -- -D warnings` — pass.
 - `publish.ps1` with no parameters — pass; Windows and WebGL packages
   deployed to Preview.
