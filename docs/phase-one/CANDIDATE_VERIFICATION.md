@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `a1ee3d2`
+**Source revision:** `5363f4c`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -25,7 +25,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 112 unit tests and 2 integration tests pass.
+- `cargo test --all-targets` — 113 unit tests and 2 integration tests pass.
 - `cargo clippy --all-targets --all-features -- -D warnings` — pass.
 - `publish.ps1` with no parameters — pass; Windows and WebGL packages
   deployed to Preview.
@@ -50,8 +50,9 @@ automated simulation results into first-time-player evidence.
   the completed Objective pointing to a cargo run and an active Worm Outpost
   with cargo mix, capacity, crew, and directional transit controls.
 - Empty route capture — [ui_endless_empty.png](../verification/ui_endless_empty.png)
-  shows an active awakened outpost with disabled route actions and the explicit
-  `No cargo or crew ready at the warren` recovery state.
+  shows an active awakened outpost with `Status · Awaiting payload`, disabled
+  route actions, and the explicit `No cargo or crew ready at the warren`
+  recovery state.
 - Endless route recovery — automated coverage confirms food-only delivery and
   crew-only return remain valid, so an outpost cannot strand its crew when its
   cargo hold is empty; a full remote crew cannot be duplicated by another load.
