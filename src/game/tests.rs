@@ -74,6 +74,43 @@ fn viable_save_notice_stays_empty_for_a_recoverable_warren() {
 }
 
 #[test]
+fn goal_modal_holds_the_simulation_until_the_report_is_dismissed() {
+    let (data, mut session) = session();
+    session.won = true;
+
+    assert!(simulation_blocked_by_modal(&session, &data, false));
+
+    session.victory_shown = true;
+    session.factory_complete = true;
+    assert!(simulation_blocked_by_modal(&session, &data, false));
+
+    session.factory_shown = true;
+    session.worm_awake = true;
+    assert!(simulation_blocked_by_modal(&session, &data, false));
+
+    session.worm_shown = true;
+    assert!(!simulation_blocked_by_modal(&session, &data, false));
+}
+
+#[test]
+fn field_guide_pauses_a_viable_warren_while_open() {
+    let (data, session) = session();
+
+    assert!(simulation_blocked_by_modal(&session, &data, true));
+    assert!(!simulation_blocked_by_modal(&session, &data, false));
+}
+
+#[test]
+fn non_viable_recovery_stops_the_remaining_specialists() {
+    let (data, mut session) = session();
+    session.won = true;
+    session.creatures.clear();
+    session.spawn_creature(&data, "overseer", Job::Idle);
+
+    assert!(simulation_blocked_by_modal(&session, &data, false));
+}
+
+#[test]
 fn secure_threshold_notice_waits_for_the_guard_handoff() {
     let (_data, mut session) = session();
 

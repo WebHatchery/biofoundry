@@ -132,7 +132,7 @@ impl Game {
 
         let mut safe_beat_reached = false;
         if let GameState::Warren(session) = &mut self.state {
-            if !self.paused {
+            if !self.paused && !simulation_blocked_by_modal(session, &self.data, self.help_open) {
                 self.accumulator += dt;
                 let mut ticks = 0;
                 while self.accumulator >= SIM_DT && ticks < MAX_TICKS_PER_FRAME {
@@ -660,6 +660,14 @@ fn non_viable_save_notice(session: &GameSession, data: &GameData) -> Option<&'st
     } else {
         "This warren cannot staff the Guard post. Load a safe save or start a new warren instead."
     })
+}
+
+fn simulation_blocked_by_modal(session: &GameSession, data: &GameData, help_open: bool) -> bool {
+    help_open
+        || (session.won && !session.victory_shown)
+        || (session.factory_complete && !session.factory_shown)
+        || (session.worm_awake && !session.worm_shown)
+        || (!session.worm_awake && session.is_non_viable(data))
 }
 
 fn transit_completion_notice(completion: TransitCompletion) -> &'static str {
