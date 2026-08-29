@@ -358,15 +358,28 @@ impl GameSession {
     /// stale local task; passengers in `worm_transit` keep their in-flight
     /// coordinates until the route completes.
     pub fn sync_remote_crew_state(&mut self) {
+        let creature_ids: HashSet<u32> =
+            self.creatures.iter().map(|creature| creature.id).collect();
         let mut remote_by_id = HashMap::new();
         let mut stationed_by_id = HashMap::new();
-        for outpost in &self.outposts {
+        let mut claimed_ids = HashSet::new();
+        for outpost in &mut self.outposts {
+            // A save can be structurally valid while referring to a removed
+            // creature, or listing one creature more than once. Keep the
+            // first real ownership record so capacity and return payloads do
+            // not drift away from the creature roster.
+            outpost
+                .crew
+                .retain(|id| creature_ids.contains(id) && claimed_ids.insert(*id));
             for id in &outpost.crew {
                 remote_by_id.entry(*id).or_insert(outpost.pos);
                 stationed_by_id.entry(*id).or_insert(outpost.pos);
             }
         }
-        if let Some(transit) = &self.worm_transit {
+        if let Some(transit) = &mut self.worm_transit {
+            transit
+                .passengers
+                .retain(|id| creature_ids.contains(id) && claimed_ids.insert(*id));
             for id in &transit.passengers {
                 remote_by_id.entry(*id).or_insert(transit.outpost);
             }

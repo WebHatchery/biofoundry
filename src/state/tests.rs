@@ -168,6 +168,50 @@ fn loading_route_ownership_rebuilds_remote_crew_markers() {
 }
 
 #[test]
+fn loading_route_ownership_discards_unknown_and_duplicate_crew_ids() {
+    let data = GameData::load().unwrap();
+    let mut session = GameSession::new(&data, 6);
+    let first = TilePos::new(4, 4);
+    let second = TilePos::new(5, 5);
+    let crew_id = session.creatures[0].id;
+    session.ensure_outpost(first);
+    session.ensure_outpost(second);
+    session.outposts[0].crew = vec![crew_id, 9999, crew_id];
+    session.outposts[1].crew = vec![crew_id, 8888];
+
+    session.sync_remote_crew_state();
+
+    assert_eq!(session.outposts[0].crew, vec![crew_id]);
+    assert!(session.outposts[1].crew.is_empty());
+    assert_eq!(session.creatures[0].remote_outpost, Some(first));
+}
+
+#[test]
+fn loading_route_ownership_discards_duplicate_in_flight_passengers() {
+    let data = GameData::load().unwrap();
+    let mut session = GameSession::new(&data, 6);
+    let outpost_pos = TilePos::new(4, 4);
+    let crew_id = session.creatures[0].id;
+    session.ensure_outpost(outpost_pos);
+    session.outposts[0].crew.push(crew_id);
+    session.worm_transit = Some(WormTransit {
+        outpost: outpost_pos,
+        direction: outposts::TransitDirection::ToShrine,
+        remaining: 3.0,
+        ore: 1,
+        ingots: 0,
+        food: 0.0,
+        passengers: vec![crew_id, 7777],
+    });
+
+    session.sync_remote_crew_state();
+
+    assert_eq!(session.outposts[0].crew, vec![crew_id]);
+    assert!(session.worm_transit.as_ref().unwrap().passengers.is_empty());
+    assert_eq!(session.creatures[0].remote_outpost, Some(outpost_pos));
+}
+
+#[test]
 fn viable_workers_keep_the_security_handoff_recoverable() {
     let data = GameData::load().unwrap();
     let mut session = GameSession::new(&data, 5);
