@@ -270,7 +270,7 @@ pub(super) fn draw_inspect_panel(
                 } else if blocked {
                     format!("{name} — posted")
                 } else {
-                    format!("Breed {name} ({cost} ingots)")
+                    breed_label(id, name, cost, data)
                 };
                 let enabled = unlocked && !blocked && session.economy.ingots_stock >= cost;
                 if hud_button(Rect::new(x, y, bw, 24.0), &label, enabled, mouse) {
@@ -505,6 +505,32 @@ fn outpost_has_loadable_cargo(session: &GameSession, data: &GameData, cargo: u32
     session.economy.ore_stock > 0
         || session.economy.ingots_stock > 0
         || session.economy.food - data.balance.worm_feed_reserve >= 1.0
+}
+
+fn breed_label(id: &str, name: &str, cost: u32, data: &GameData) -> String {
+    match id {
+        "hobgoblin" => {
+            let work = data
+                .species
+                .get(id)
+                .map(|species| species.work_mult)
+                .unwrap_or(2.0);
+            format!("{name} · ×{work:.0} work ({cost})")
+        }
+        "overseer" => {
+            let aura = ((data.balance.overseer_aura_mult - 1.0) * 100.0).round();
+            format!("{name} · aura +{aura:.0}% ({cost})")
+        }
+        "engineer" => {
+            let mine = data
+                .species
+                .get(id)
+                .map(|species| (species.work_mult - 1.0) * 100.0)
+                .unwrap_or(25.0);
+            format!("{name} · Mine +{mine:.0}% ({cost})")
+        }
+        _ => format!("{name} ({cost} ingots)"),
+    }
 }
 
 fn worm_waiting_for_food(session: &GameSession, data: &GameData) -> bool {

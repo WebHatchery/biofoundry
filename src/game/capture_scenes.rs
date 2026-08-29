@@ -259,6 +259,13 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
             if let GameState::Warren(session) = &mut game.state {
                 // Stage the capture → study → adapt chain mid-flow.
                 session.tutorial_dismissed = true;
+                session.economy.food = 260.0;
+                session.economy.ingots_stock = 20;
+                session.won = true;
+                session.victory_shown = true;
+                for unlock in ["breeding_pit", "hobgoblin", "overseer", "engineer"] {
+                    session.unlocked.insert(unlock.to_owned());
+                }
                 let spawn = session.spawn_tile();
                 let mut spots: Vec<TilePos> = session
                     .world
@@ -280,6 +287,7 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                 for _ in 0..200 {
                     simulation::tick(session, &game.data);
                 }
+                game.selected_building = session.buildings_of("breeding_pit").next().map(|b| b.pos);
             }
         }
         "optional" => {

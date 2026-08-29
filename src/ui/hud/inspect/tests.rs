@@ -50,6 +50,24 @@ fn shrine_is_working_when_reserves_can_fund_the_next_bite() {
 }
 
 #[test]
+fn breeding_labels_explain_specialist_roles() {
+    let data = GameData::load().expect("embedded game data");
+
+    assert_eq!(
+        breed_label("hobgoblin", "Hobgoblin", 4, &data),
+        "Hobgoblin · ×2 work (4)"
+    );
+    assert_eq!(
+        breed_label("overseer", "Goblin Overseer", 6, &data),
+        "Goblin Overseer · aura +35% (6)"
+    );
+    assert_eq!(
+        breed_label("engineer", "Goblin Engineer", 8, &data),
+        "Goblin Engineer · Mine +25% (8)"
+    );
+}
+
+#[test]
 fn shrine_labels_a_manual_pause_without_misattributing_it() {
     let (data, mut session, pos) = shrine_session();
     session.worm_feeding_paused = true;
