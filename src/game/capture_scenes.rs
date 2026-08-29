@@ -72,6 +72,7 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                 session.won = true;
                 session.victory_shown = true;
                 session.factory_complete = true;
+                session.unlocked.insert("worm_shrine".to_owned());
             }
         }
         "mine" => {
