@@ -298,6 +298,66 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                 session.unlocked.insert("bat_courier".to_owned());
             }
         }
+        "endless" => {
+            game.transition(StateTransition::StartWarren);
+            if let GameState::Warren(session) = &mut game.state {
+                // Stage the first useful post-awakening route: the worm is
+                // visible, transit is unlocked, and the selected outpost has
+                // cargo and crew ready for a visible return trip.
+                session.tutorial_dismissed = true;
+                session.economy.food = 240.0;
+                session.economy.ore_stock = 12;
+                session.economy.ingots_stock = 4;
+                session.economy.ore_delivered_total = 100;
+                session.economy.ingots_forged = 65;
+                session.won = true;
+                session.victory_shown = true;
+                session.factory_complete = true;
+                session.factory_shown = true;
+                session.worm_fed = game.data.balance.worm_awaken_at;
+                session.worm_ingots_fed = game.data.balance.worm_awaken_ingots;
+                session.worm_awake = true;
+                session.worm_shown = true;
+                session.worm_awakened_at_tick = Some(session.tick.saturating_sub(40));
+                for unlock in [
+                    "worm_shrine",
+                    "hobgoblin",
+                    "overseer",
+                    "bat_courier",
+                    "engineer",
+                    "worm_transit",
+                ] {
+                    session.unlocked.insert(unlock.to_owned());
+                }
+
+                let spawn = session.spawn_tile();
+                let spots: Vec<TilePos> = session
+                    .world
+                    .tiles
+                    .iter_with_pos()
+                    .filter(|(pos, _)| {
+                        session.can_place_building(*pos) && pos.manhattan_distance(&spawn) >= 3
+                    })
+                    .map(|(pos, _)| pos)
+                    .take(2)
+                    .collect();
+                if let Some(shrine) = spots.first().copied() {
+                    session.buildings.push(Building::new("worm_shrine", shrine));
+                }
+                if let Some(outpost) = spots.get(1).copied() {
+                    session.buildings.push(Building::new("outpost", outpost));
+                    session.ensure_outpost(outpost);
+                    let crew = session.creatures.iter().take(2).map(|c| c.id).collect();
+                    if let Some(route) = session.outposts.last_mut() {
+                        route.active = true;
+                        route.cargo.insert(Good::Ore, 8);
+                        route.cargo.insert(Good::Ingot, 4);
+                        route.crew = crew;
+                    }
+                    game.selected_building = Some(outpost);
+                }
+            }
+        }
         "shrine" => {
             game.transition(StateTransition::StartWarren);
             if let GameState::Warren(session) = &mut game.state {

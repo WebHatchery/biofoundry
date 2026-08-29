@@ -388,7 +388,7 @@ pub(super) fn draw_inspect_panel(
             if active && session.worm_awake {
                 if hud_button(
                     Rect::new(x, y, panel.w - 28.0, 24.0),
-                    "Send shrine cargo",
+                    &format!("Send {cargo} to shrine"),
                     session.worm_transit.is_none() && cargo > 0,
                     mouse,
                 ) {
@@ -397,13 +397,15 @@ pub(super) fn draw_inspect_panel(
                 y += 28.0;
                 if hud_button(
                     Rect::new(x, y, panel.w - 28.0, 24.0),
-                    "Send cargo to outpost",
+                    "Load outpost from warren",
                     session.worm_transit.is_none()
                         && session.economy.ore_stock + session.economy.ingots_stock > 0,
                     mouse,
                 ) {
                     actions.push(UiAction::TransitToOutpost(pos));
                 }
+            } else if active {
+                line("Awaiting the worm's awakening", dark::TEXT_DIM, &mut y);
             }
             if let Some(failure) = outpost.and_then(|o| o.last_failure.as_deref()) {
                 line(failure, dark::NEGATIVE, &mut y);

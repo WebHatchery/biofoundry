@@ -71,3 +71,27 @@ fn completed_objective_points_into_an_unlocked_outpost_route() {
         "Next: build a Worm Outpost and send cargo through the awakened route."
     );
 }
+
+#[test]
+fn completed_objective_names_the_next_step_for_an_active_outpost() {
+    let (data, mut session) = boot();
+    session.worm_awake = true;
+    session.unlocked.insert("worm_transit".to_owned());
+    let pos = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(pos, _)| session.can_place_building(*pos))
+        .map(|(pos, _)| pos)
+        .unwrap();
+    session.buildings.push(Building::new("outpost", pos));
+    session.ensure_outpost(pos);
+    session.outposts[0].active = true;
+
+    let objective = CampaignObjective::current(&session, &data);
+
+    assert_eq!(
+        objective.next,
+        "Next: send a cargo run through the active Worm Outpost."
+    );
+}

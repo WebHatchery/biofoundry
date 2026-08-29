@@ -179,8 +179,15 @@ impl Game {
                         _ => false,
                     };
                     if ok {
-                        self.notifications
-                            .info("The worm carries the route's cargo.");
+                        self.notifications.info(match action {
+                            UiAction::TransitToOutpost(_) => {
+                                "The worm carries cargo to the outpost."
+                            }
+                            UiAction::TransitToShrine(_) => {
+                                "The worm carries cargo back to the shrine."
+                            }
+                            _ => "The worm carries the route's cargo.",
+                        });
                     } else {
                         self.notifications
                             .warning("No valid cargo or route is ready.");
