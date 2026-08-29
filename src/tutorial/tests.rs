@@ -152,6 +152,28 @@ fn food_lesson_waits_for_the_placed_farm_to_finish() {
 }
 
 #[test]
+fn food_lesson_ignores_an_unrelated_completed_building() {
+    let (data, mut session) = boot();
+    session.tutorial_step = 1;
+    session.tutorial_built = true;
+    session.tutorial_build_completed = true;
+
+    let blacksmith_pos = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(pos, _)| session.can_place_building(*pos))
+        .map(|(pos, _)| pos)
+        .expect("a walkable blacksmith location");
+    session
+        .buildings
+        .push(Building::new("blacksmith", blacksmith_pos));
+
+    assert!(!advance(&mut session, &data, TutorialInputs::default()));
+    assert_eq!(current_step(&session, &data).unwrap().id, "food");
+}
+
+#[test]
 fn food_and_worm_lessons_name_the_next_visible_tap() {
     let (data, _) = boot();
     let food = data
