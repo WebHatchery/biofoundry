@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `cfa7dd5`
+**Source revision:** `b503e05`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -23,7 +23,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 98 unit tests and 2 integration tests pass.
+- `cargo test --all-targets` — 99 unit tests and 2 integration tests pass.
 - `cargo clippy --all-targets --all-features -- -D warnings` — pass.
 - `publish.ps1` with no parameters — pass; Windows and WebGL packages
   deployed to Preview.
@@ -51,6 +51,9 @@ automated simulation results into first-time-player evidence.
   a whole cargo unit is ready, preventing loss when a route is loaded.
 - Save-state coverage — an in-flight Worm Transit survives a session roundtrip
   with its destination, payload, passengers, and active route state intact.
+- Specialist capture — [ui_breeding.png](../verification/ui_breeding.png) shows
+  the selected Breeding Pit with readable Hobgoblin, Overseer, and Engineer
+  effects and available ingot costs.
 
 ## Still open
 
