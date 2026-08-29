@@ -72,20 +72,23 @@ fn start_transit(
             *outpost.cargo.get(&Good::CookedFood).unwrap_or(&0) as f32,
         ),
     };
-    if ore == 0 && ingots == 0 && food <= 0.0 {
-        return false;
-    }
-
     let passengers = match direction {
         TransitDirection::ToOutpost => session
             .creatures
             .iter()
             .filter(|c| c.tile() == session.stockpile_pos())
-            .take(data.balance.outpost_capacity as usize)
+            .take(
+                data.balance
+                    .outpost_capacity
+                    .saturating_sub(outpost.crew.len() as u32) as usize,
+            )
             .map(|c| c.id)
             .collect(),
         TransitDirection::ToShrine => outpost.crew.clone(),
     };
+    if ore == 0 && ingots == 0 && food <= 0.0 && passengers.is_empty() {
+        return false;
+    }
 
     match direction {
         TransitDirection::ToOutpost => {

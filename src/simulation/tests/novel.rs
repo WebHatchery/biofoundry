@@ -5,6 +5,32 @@ use crate::simulation::{self, outposts, SIM_DT};
 use crate::state::creatures::{Good, Job, Task};
 use crate::state::structures::Building;
 
+fn active_outpost(
+    seed: u64,
+) -> (
+    crate::data::GameData,
+    crate::state::GameSession,
+    macroquad_toolkit::grid::TilePos,
+) {
+    let (data, mut session) = boot(seed);
+    let shrine = session.spawn_tile();
+    session.buildings.push(Building::new("worm_shrine", shrine));
+    let outpost_pos = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(p, t)| t.walkable() && session.can_place_building(*p))
+        .map(|(p, _)| p)
+        .unwrap();
+    session
+        .buildings
+        .push(Building::new("outpost", outpost_pos));
+    session.ensure_outpost(outpost_pos);
+    session.outposts[0].active = true;
+    session.worm_awake = true;
+    (data, session, outpost_pos)
+}
+
 #[test]
 fn new_species_and_unlock_paths_are_data_driven() {
     let (data, mut session) = boot(11);
@@ -145,4 +171,57 @@ fn worm_transit_moves_cargo_and_recovers_when_route_fails() {
     simulation::tick(&mut session, &data);
     assert!(session.last_transit_failure.is_some());
     assert_eq!(session.outposts[0].cargo.get(&Good::Ore), Some(&5));
+}
+
+#[test]
+fn worm_transit_accepts_food_only_and_returns_crew_without_cargo() {
+    let (data, mut food_session, outpost_pos) = active_outpost(17);
+    food_session.creatures.clear();
+    food_session.economy.food = data.balance.worm_feed_reserve + 5.0;
+    assert!(outposts::start_to_outpost(
+        &mut food_session,
+        &data,
+        outpost_pos
+    ));
+    outposts::tick_transit(
+        &mut food_session,
+        &data,
+        data.balance.worm_transit_time_sec + 0.1,
+    );
+    assert_eq!(
+        food_session.outposts[0].cargo.get(&Good::CookedFood),
+        Some(&5)
+    );
+
+    let (data, mut crew_session, outpost_pos) = active_outpost(18);
+    crew_session.economy.food = 0.0;
+    crew_session.economy.ore_stock = 0;
+    crew_session.economy.ingots_stock = 0;
+    let stockpile = crew_session.stockpile_pos();
+    assert!(outposts::start_to_outpost(
+        &mut crew_session,
+        &data,
+        outpost_pos
+    ));
+    outposts::tick_transit(
+        &mut crew_session,
+        &data,
+        data.balance.worm_transit_time_sec + 0.1,
+    );
+    assert_eq!(
+        crew_session.outposts[0].crew.len(),
+        data.balance.outpost_capacity as usize
+    );
+    assert!(outposts::start_to_shrine(
+        &mut crew_session,
+        &data,
+        outpost_pos
+    ));
+    outposts::tick_transit(
+        &mut crew_session,
+        &data,
+        data.balance.worm_transit_time_sec + 0.1,
+    );
+    assert!(crew_session.outposts[0].crew.is_empty());
+    assert!(crew_session.creatures.iter().all(|c| c.tile() == stockpile));
 }

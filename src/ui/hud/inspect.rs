@@ -358,12 +358,15 @@ pub(super) fn draw_inspect_panel(
             let outpost = session.outposts.iter().find(|o| o.pos == pos);
             let active = outpost.is_some_and(|o| o.active);
             let cargo = outpost.map(|o| o.cargo_total()).unwrap_or(0);
+            let crew = outpost.map(|o| o.crew.len()).unwrap_or(0);
             line(
                 &format!(
-                    "{} · Cargo {} · Crew {}",
+                    "{} · Cargo {}/{} · Crew {}/{}",
                     if active { "Active" } else { "Inactive" },
                     cargo,
-                    outpost.map(|o| o.crew.len()).unwrap_or(0)
+                    data.balance.outpost_storage_cap,
+                    crew,
+                    data.balance.outpost_capacity
                 ),
                 if active {
                     dark::POSITIVE
@@ -386,10 +389,15 @@ pub(super) fn draw_inspect_panel(
             }
             y += 28.0;
             if active && session.worm_awake {
+                let return_label = if cargo > 0 {
+                    format!("Send {cargo} to shrine")
+                } else {
+                    "Send crew to shrine".to_owned()
+                };
                 if hud_button(
                     Rect::new(x, y, panel.w - 28.0, 24.0),
-                    &format!("Send {cargo} to shrine"),
-                    session.worm_transit.is_none() && cargo > 0,
+                    &return_label,
+                    session.worm_transit.is_none() && (cargo > 0 || crew > 0),
                     mouse,
                 ) {
                     actions.push(UiAction::TransitToShrine(pos));
@@ -399,7 +407,12 @@ pub(super) fn draw_inspect_panel(
                     Rect::new(x, y, panel.w - 28.0, 24.0),
                     "Load outpost from warren",
                     session.worm_transit.is_none()
-                        && session.economy.ore_stock + session.economy.ingots_stock > 0,
+                        && (outpost_has_loadable_cargo(session, data, cargo)
+                            || crew < data.balance.outpost_capacity as usize
+                                && session
+                                    .creatures
+                                    .iter()
+                                    .any(|c| c.tile() == session.stockpile_pos())),
                     mouse,
                 ) {
                     actions.push(UiAction::TransitToOutpost(pos));
@@ -463,6 +476,15 @@ fn worm_shrine_status(session: &GameSession, data: &GameData) -> (&'static str, 
     } else {
         ("Working", dark::POSITIVE)
     }
+}
+
+fn outpost_has_loadable_cargo(session: &GameSession, data: &GameData, cargo: u32) -> bool {
+    if cargo >= data.balance.outpost_storage_cap {
+        return false;
+    }
+    session.economy.ore_stock > 0
+        || session.economy.ingots_stock > 0
+        || session.economy.food > data.balance.worm_feed_reserve
 }
 
 fn worm_waiting_for_food(session: &GameSession, data: &GameData) -> bool {
