@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `145092d`
+**Source revision:** `efd7320`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -25,7 +25,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 155 unit tests and 2 integration tests pass.
+- `cargo test --all-targets` — 156 unit tests and 2 integration tests pass.
 - `cargo clippy --all-targets --all-features -- -D warnings` — pass.
 - `publish.ps1` with no parameters — pass; Windows and WebGL packages
   deployed to Preview.
@@ -61,6 +61,9 @@ automated simulation results into first-time-player evidence.
 - Remote crew presentation — local Mine and Blacksmith inspection counts, plus
   the map's Overseer aura ring, exclude crew posted to an outpost; focused UI
   coverage keeps these views aligned with the simulation's local-only workforce.
+- Route toggle feedback — the activation toast now names the resulting active or
+  inactive state, matching the selected outpost's button and persisted route.
+  Focused game-action coverage exercises both toggle outcomes.
 - Factory handoff capture — [ui_factory_complete.png](../verification/ui_factory_complete.png)
   shows the completion overlay with the next Worm Shrine objective visible and
   no setup unlock toast obscuring the handoff.
