@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `3fa745b`
+**Source revision:** `8748b68`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -24,11 +24,12 @@ automated simulation results into first-time-player evidence.
 | Visible-control smoke path | Pass | A fresh Preview warren advanced through visible New Warren, + zoom, and Farm placement without keyboard input. While the 10-ore construction site was pending, the tutorial correctly remained on `2/5 — Stabilize the Food Grid`; successful placement returned to Inspect instead of creating a second site. This is developer smoke evidence, not a qualifying first-time-player session. |
 | Hosted-page toast safety | Pass | The placement confirmation remained fully readable above and left of the fixed Report a Bug widget in the published Preview. |
 | Active tool marker | Pass | The published Preview renders the selected Dig tool as `> Dig`; the active-tool marker is readable instead of the bundled font's missing-glyph square. |
+| Locked tool marker | Pass | The published Preview renders the locked Shrine control as `Shrine [L]`; its exact `forge 20 ingots` prerequisite remains visible below the buttons. |
 
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 170 unit tests and 2 integration tests pass.
+- `cargo test --all-targets` — 171 unit tests and 2 integration tests pass.
 - `cargo clippy --all-targets --all-features -- -D warnings` — pass.
 - `publish.ps1` with no parameters — pass; Windows and WebGL packages
   deployed to Preview.
