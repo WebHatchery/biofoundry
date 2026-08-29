@@ -87,6 +87,28 @@ fn objective_does_not_promise_a_disabled_guard_assignment() {
 }
 
 #[test]
+fn objective_names_the_worker_to_free_before_assigning_a_smith() {
+    let (data, mut session) = boot();
+    session.won = true;
+    session.creatures[0].job = Job::Guard;
+    let pos = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(pos, _)| session.can_place_building(*pos))
+        .map(|(pos, _)| pos)
+        .unwrap();
+    session.buildings.push(Building::new("blacksmith", pos));
+
+    let objective = CampaignObjective::current(&session, &data);
+
+    assert_eq!(
+        objective.next,
+        "Next: tap − beside Miner, then + beside Smith in Jobs."
+    );
+}
+
+#[test]
 fn objective_marks_the_worm_awake_as_complete() {
     let (data, mut session) = boot();
     session.worm_awake = true;

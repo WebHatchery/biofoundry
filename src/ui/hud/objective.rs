@@ -106,17 +106,25 @@ impl CampaignObjective {
         if !session.factory_complete {
             let goal = data.balance.win2_ingots;
             let forged = session.economy.ingots_forged.min(goal);
-            let next = if session.buildings_of("blacksmith").next().is_none() {
-                "Next: tap Blacksmith in Build & Dig, then place it on open floor."
+            let next: String = if session.buildings_of("blacksmith").next().is_none() {
+                "Next: tap Blacksmith in Build & Dig, then place it on open floor.".to_owned()
             } else if session.job_count(crate::state::creatures::Job::Smith) == 0 {
-                "Next: tap + beside Smith in the Jobs panel."
+                format!(
+                    "Next: {}.",
+                    job_assignment_action_hint(
+                        session,
+                        data,
+                        Job::Smith,
+                        &[Job::Miner, Job::Carrier, Job::Cook, Job::Guard,]
+                    )
+                )
             } else {
-                "Next: keep the Blacksmith supplied while it forges ingots."
+                "Next: keep the Blacksmith supplied while it forges ingots.".to_owned()
             };
             return Self {
                 title: "Complete the Biofoundry".to_owned(),
                 progress: format!("Ingots forged {forged}/{goal}"),
-                next: next.to_owned(),
+                next,
                 ratio: forged as f32 / goal.max(1) as f32,
                 complete: false,
             };
@@ -159,14 +167,39 @@ impl CampaignObjective {
 }
 
 pub(super) fn security_handoff_action_hint(session: &GameSession, data: &GameData) -> String {
+    job_assignment_action_hint(
+        session,
+        data,
+        Job::Guard,
+        &[Job::Miner, Job::Carrier, Job::Cook, Job::Smith],
+    )
+}
+
+fn job_assignment_action_hint(
+    session: &GameSession,
+    data: &GameData,
+    target: Job,
+    sources: &[Job],
+) -> String {
     if reassignable_job_count(session, data, Job::Idle) > 0 {
-        return "tap + beside Guard in Jobs".to_owned();
+        return format!("tap + beside {} in Jobs", target.label());
     }
-    [Job::Miner, Job::Carrier, Job::Cook, Job::Smith]
-        .into_iter()
-        .find(|job| reassignable_job_count(session, data, *job) > 0)
-        .map(|job| format!("tap − beside {}, then + beside Guard in Jobs", job.label()))
-        .unwrap_or_else(|| "free a worker, then tap + beside Guard in Jobs".to_owned())
+    sources
+        .iter()
+        .find(|job| reassignable_job_count(session, data, **job) > 0)
+        .map(|job| {
+            format!(
+                "tap − beside {}, then + beside {} in Jobs",
+                job.label(),
+                target.label()
+            )
+        })
+        .unwrap_or_else(|| {
+            format!(
+                "free a worker, then tap + beside {} in Jobs",
+                target.label()
+            )
+        })
 }
 
 fn reassignable_job_count(session: &GameSession, data: &GameData, job: Job) -> usize {
