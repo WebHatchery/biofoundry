@@ -342,11 +342,16 @@ impl Game {
             self.events.push(action);
         }
 
-        self.notifications
-            .draw_with_config(&NotificationRenderConfig {
+        // The published game page reserves its lower-right corner for the
+        // Report a Bug widget. Keep the toast stack anchored to that corner
+        // while lifting it clear of the page chrome and map edge.
+        self.notifications.draw_with_config_and_offset(
+            &NotificationRenderConfig {
                 anchor: NotificationAnchor::BottomRight,
                 ..Default::default()
-            });
+            },
+            vec2(-180.0, -82.0),
+        );
     }
 
     /// World tile under the mouse cursor, if inside the map.
