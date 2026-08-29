@@ -156,7 +156,7 @@ pub fn draw(
         // The field guide is modal: discard any button intents collected from
         // the HUD underneath and let its Close button be the only action.
         actions.clear();
-        overlays::draw_help_overlay(mouse, &mut actions);
+        overlays::draw_help_overlay(session, data, mouse, &mut actions);
     }
 
     let pointer_over_ui = victory_up

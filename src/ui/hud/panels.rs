@@ -483,7 +483,7 @@ pub(super) fn draw_jobs_panel(
 
 /// Keep a combined food/raid banner short while naming the visible Guard
 /// control that resolves the incoming threat.
-fn compact_raid_defense_hint(session: &GameSession, data: &GameData) -> String {
+pub(super) fn compact_raid_defense_hint(session: &GameSession, data: &GameData) -> String {
     if reassignable_job_count(session, data, Job::Guard) > 0 {
         "guards on watch".to_owned()
     } else if reassignable_job_count(session, data, Job::Idle) > 0 {
@@ -499,7 +499,7 @@ fn compact_raid_defense_hint(session: &GameSession, data: &GameData) -> String {
 
 /// Shorten the opening response enough to share the top bar with its buttons.
 /// The full control names remain in the tutorial card beside the banner.
-fn compact_food_recovery_hint(session: &GameSession, data: &GameData) -> String {
+pub(super) fn compact_food_recovery_hint(session: &GameSession, data: &GameData) -> String {
     if reassignable_job_count(session, data, Job::Idle) > 0 {
         "tap + Carrier or Cook".to_owned()
     } else {

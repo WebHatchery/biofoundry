@@ -1,6 +1,8 @@
 //! Full-screen goal overlays, the revisitable field guide, and the in-world
 //! status-badge legend.
 
+use crate::data::GameData;
+use crate::state::GameSession;
 use crate::ui::hud::widgets::{hud_button, panel_style};
 use crate::ui::{UiAction, LOGICAL_HEIGHT, LOGICAL_WIDTH};
 use macroquad::prelude::*;
@@ -128,7 +130,12 @@ pub(super) fn draw_colony_failure_overlay(
 /// A touch-readable guide to the controls and the short decision loop. It is
 /// deliberately independent of tutorial progress so it remains useful after
 /// the opening lesson is skipped or completed.
-pub(super) fn draw_help_overlay(mouse: Vec2, actions: &mut Vec<UiAction>) {
+pub(super) fn draw_help_overlay(
+    session: &GameSession,
+    data: &GameData,
+    mouse: Vec2,
+    actions: &mut Vec<UiAction>,
+) {
     draw_rectangle(
         0.0,
         0.0,
@@ -152,6 +159,7 @@ pub(super) fn draw_help_overlay(mouse: Vec2, actions: &mut Vec<UiAction>) {
 
     let left = panel.x + 28.0;
     let right = panel.x + 550.0;
+    let recovery_body = recovery_guide_body(session, data);
     for (x, title, body, y) in [
         (
             left,
@@ -192,7 +200,7 @@ pub(super) fn draw_help_overlay(mouse: Vec2, actions: &mut Vec<UiAction>) {
         (
             right,
             "Recovery",
-            "When food falls, tap + beside Carrier in Jobs. Before a raid, tap + beside Guard. The warning bar names the response.",
+            recovery_body.as_str(),
             374.0,
         ),
         (
@@ -219,6 +227,14 @@ pub(super) fn draw_help_overlay(mouse: Vec2, actions: &mut Vec<UiAction>) {
     ) {
         actions.push(UiAction::ToggleHelp);
     }
+}
+
+fn recovery_guide_body(session: &GameSession, data: &GameData) -> String {
+    format!(
+        "When food falls, {}. Before a raid, {}. The warning bar names the response.",
+        super::panels::compact_food_recovery_hint(session, data),
+        super::panels::compact_raid_defense_hint(session, data)
+    )
 }
 
 /// A one-line legend for the in-world status badges, in a thin strip along
@@ -254,3 +270,6 @@ pub(super) fn draw_status_legend() {
         lx += 20.0 + label.len() as f32 * 8.0;
     }
 }
+
+#[cfg(test)]
+mod tests;
