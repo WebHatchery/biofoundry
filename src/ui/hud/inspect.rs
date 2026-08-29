@@ -494,7 +494,7 @@ fn outpost_return_label(cargo: u32, crew: usize) -> String {
         (true, true) => format!("Send {cargo} cargo + {crew} crew to shrine"),
         (true, false) => format!("Send {cargo} cargo to shrine"),
         (false, true) => format!("Send {crew} crew to shrine"),
-        (false, false) => "Send payload to shrine".to_owned(),
+        (false, false) => "No cargo or crew to return".to_owned(),
     }
 }
 

@@ -215,5 +215,5 @@ fn outpost_return_label_names_each_payload_kind() {
     );
     assert_eq!(outpost_return_label(6, 0), "Send 6 cargo to shrine");
     assert_eq!(outpost_return_label(0, 4), "Send 4 crew to shrine");
-    assert_eq!(outpost_return_label(0, 0), "Send payload to shrine");
+    assert_eq!(outpost_return_label(0, 0), "No cargo or crew to return");
 }
