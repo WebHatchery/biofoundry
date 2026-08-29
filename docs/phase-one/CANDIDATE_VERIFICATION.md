@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `dfac603`
+**Source revision:** `7b3c01f`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -25,7 +25,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 134 unit tests and 2 integration tests pass.
+- `cargo test --all-targets` — 139 unit tests and 2 integration tests pass.
 - `cargo clippy --all-targets --all-features -- -D warnings` — pass.
 - `publish.ps1` with no parameters — pass; Windows and WebGL packages
   deployed to Preview.
@@ -111,7 +111,9 @@ automated simulation results into first-time-player evidence.
   shows the dedicated `Guard Handoff Blocked` recovery state when only
   non-reassignable specialists remain after the reserve threshold, with
   visible Load Last Safe and Return to Menu actions. Awakened specialist
-  warrens are explicitly excluded from this failure state.
+  warrens are explicitly excluded from this failure state. Manual Save,
+  milestone autosave, and viable-run Menu exit all refuse to overwrite the
+  earlier checkpoint while this recovery state is active.
 - Security threshold notice — the live threshold toast now follows the same
   state-aware rule as the tutorial and victory report: it only says onboarding
   is complete after a Guard exists, otherwise it directs the player to assign
