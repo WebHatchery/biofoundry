@@ -22,6 +22,7 @@ use macroquad::prelude::*;
 use macroquad_toolkit::grid::TilePos;
 use macroquad_toolkit::prelude::*;
 use macroquad_toolkit::sprite::SpriteAtlas;
+use macroquad_toolkit::ui::MIN_TARGET;
 
 const JOB_ICON_ATLAS_BYTES: &[u8] = include_bytes!("../../assets/sprites/job-icon-atlas.png");
 
@@ -175,12 +176,38 @@ pub fn draw(
         || tutorial_panel.is_some_and(|r| r.contains_point(mouse))
         || objective_panel.contains_point(mouse)
         || inspect_panel.is_some_and(|r| r.contains_point(mouse))
-        || [top_bar, food_panel, jobs_panel, tools_panel]
-            .iter()
-            .any(|r| r.contains_point(mouse));
+        || [
+            top_bar_input_rect(top_bar, ui.scale),
+            food_panel,
+            jobs_panel,
+            tools_panel,
+        ]
+        .iter()
+        .any(|r| r.contains_point(mouse));
 
     HudFrame {
         actions,
         pointer_over_ui,
     }
 }
+
+/// Claim the small invisible margins around top-bar buttons for the HUD too.
+/// Otherwise a release on a scaled touch target just outside the drawn bar can
+/// activate the button and also fall through to a world tile click.
+fn top_bar_input_rect(bar: Rect, ui_scale: f32) -> Rect {
+    let scale = if ui_scale.is_finite() && ui_scale > 0.0 {
+        ui_scale
+    } else {
+        1.0
+    };
+    let margin = ((MIN_TARGET / scale - 32.0) * 0.5).max(0.0);
+    Rect::new(
+        bar.x - margin,
+        bar.y - margin,
+        bar.w + margin * 2.0,
+        bar.h + margin * 2.0,
+    )
+}
+
+#[cfg(test)]
+mod tests;
