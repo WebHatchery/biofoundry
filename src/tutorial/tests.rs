@@ -95,6 +95,20 @@ fn secure_step_waits_for_the_campaign_goal() {
 }
 
 #[test]
+fn factory_lesson_points_to_the_prebuilt_mine() {
+    let (data, _) = boot();
+    let factory = data
+        .tutorial
+        .iter()
+        .find(|step| step.id == "factory")
+        .expect("factory lesson");
+
+    assert!(factory.body.contains("existing Mine in the warren"));
+    assert!(factory.body.contains("Blacksmith"));
+    assert!(factory.body.contains("Iron Pickaxe"));
+}
+
+#[test]
 fn dismissed_tutorial_shows_nothing() {
     let (data, mut session) = boot();
     session.tutorial_dismissed = true;
