@@ -234,7 +234,7 @@ impl Game {
                 if self.help_open {
                     self.events.push(UiAction::ToggleHelp);
                 } else if self.mode != UiMode::Inspect {
-                    self.mode = UiMode::Inspect;
+                    self.mode = self.mode.clone().after_successful_placement();
                 } else {
                     self.events.push(UiAction::BackToMenu);
                 }
@@ -377,6 +377,10 @@ impl Game {
         match mode {
             UiMode::Build(kind) => {
                 if simulation::try_place_build_site(session, &self.data, &kind, tile) {
+                    // Building is a one-shot map action. Return to Inspect so
+                    // the next map tap can select a building instead of
+                    // silently placing another copy of the same site.
+                    self.mode = UiMode::Inspect;
                     let cost = self
                         .data
                         .buildings

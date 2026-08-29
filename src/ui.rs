@@ -23,6 +23,17 @@ pub enum UiMode {
     Dig,
 }
 
+impl UiMode {
+    /// Building is a one-shot map action; return to inspection after a valid
+    /// placement so the next tap can select a building.
+    pub fn after_successful_placement(self) -> Self {
+        match self {
+            Self::Build(_) => Self::Inspect,
+            mode => mode,
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum UiAction {
     StartWarren,
@@ -79,3 +90,6 @@ pub struct HudFrame {
     /// ignored while true.
     pub pointer_over_ui: bool,
 }
+
+#[cfg(test)]
+mod tests;
