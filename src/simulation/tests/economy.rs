@@ -29,6 +29,29 @@ fn default_allocation_hits_famine_around_five_minutes() {
     assert!(!session.creatures.is_empty());
 }
 
+/// The first warning leaves enough time to read the opening controls and act;
+/// the crisis should be forecast, not announced during the first lesson.
+#[test]
+fn opening_food_warning_has_a_lesson_grace_period() {
+    let (data, mut session) = boot_on_config_seed();
+
+    let warning_at = run_until(
+        &mut session,
+        &data,
+        5.0,
+        |_, _| {},
+        |s| {
+            crate::simulation::food::time_to_empty_seconds(s, &data)
+                .is_some_and(|seconds| seconds <= data.balance.food_warning_sec)
+        },
+    );
+
+    assert!(
+        warning_at >= 60.0,
+        "the opening food warning arrived at {warning_at:.1}s; allow the first lesson to land"
+    );
+}
+
 /// The famine is survivable by reassigning workers, and the game is
 /// winnable in one sitting on a fixed seed: react to the meter by
 /// moving miners onto the food economy, then win 50 ore + 100 food.
