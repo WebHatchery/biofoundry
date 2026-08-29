@@ -378,16 +378,6 @@ pub(super) fn draw_jobs_panel(
         return;
     }
 
-    let beetles = session
-        .creatures
-        .iter()
-        .filter(|c| c.species == "beetle")
-        .count();
-    let salamanders = session
-        .creatures
-        .iter()
-        .filter(|c| c.species == "salamander")
-        .count();
     let janitors = session
         .creatures
         .iter()
@@ -401,7 +391,7 @@ pub(super) fn draw_jobs_panel(
     let half = (panel.w - 36.0) / 2.0;
     if hud_button(
         Rect::new(x, y, half, 30.0),
-        &format!("Beetle {} ({})", beetles, data.balance.beetle_ore_cost),
+        &format!("Beetle ×5 ({})", data.balance.beetle_ore_cost),
         session.economy.ore_stock >= data.balance.beetle_ore_cost,
         mouse,
     ) {
@@ -410,10 +400,7 @@ pub(super) fn draw_jobs_panel(
     let has_den = session.buildings_of("smelter").next().is_some();
     if hud_button(
         Rect::new(x + half + 8.0, y, half, 30.0),
-        &format!(
-            "Salam. {} ({})",
-            salamanders, data.balance.salamander_ore_cost
-        ),
+        &format!("Salam. bulk ({})", data.balance.salamander_ore_cost),
         has_den && session.economy.ore_stock >= data.balance.salamander_ore_cost,
         mouse,
     ) {
@@ -422,7 +409,7 @@ pub(super) fn draw_jobs_panel(
     y += 34.0;
     if hud_button(
         Rect::new(x, y, half, 30.0),
-        &format!("Slime {}", janitors),
+        "Slime · waste",
         session.unlocked.contains("slime_janitor") && janitors == 0,
         mouse,
     ) {
@@ -430,7 +417,7 @@ pub(super) fn draw_jobs_panel(
     }
     if hud_button(
         Rect::new(x + half + 8.0, y, half, 30.0),
-        &format!("Bat {}", couriers),
+        "Bat ×8",
         session.unlocked.contains("bat_courier") && couriers == 0,
         mouse,
     ) {
@@ -439,7 +426,7 @@ pub(super) fn draw_jobs_panel(
     y += 32.0;
     draw_ui_text_ex(
         &format!(
-            "Engineer {} · Outposts {}/{}",
+            "Engineer {} · Mine +25% · Outposts {}/{}",
             session
                 .creatures
                 .iter()

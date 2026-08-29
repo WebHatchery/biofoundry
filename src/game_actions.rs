@@ -46,8 +46,11 @@ impl Game {
             UiAction::AttractSalamander => {
                 if let GameState::Warren(session) = &mut self.state {
                     if simulation::try_attract_salamander(session, &self.data) {
-                        self.notifications
-                            .success("A salamander curls into the smelter den.");
+                        self.notifications.success(recruitment_notice(
+                            &self.data,
+                            "salamander",
+                            "A salamander curls into the smelter den",
+                        ));
                         self.audio.play(Sfx::Capture);
                     } else {
                         self.notifications
@@ -251,10 +254,18 @@ fn recruitment_notice(data: &GameData, species: &str, joined: &str) -> String {
         .get(species)
         .map(|definition| definition.food_per_min)
         .unwrap_or(0.0);
+    let purpose = match species {
+        "beetle" => Some("carries 5× a goblin load"),
+        "salamander" => Some("feeds the Smelter Den"),
+        "slime_janitor" => Some("cleans spoiled stores"),
+        "bat_courier" => Some("carries 8 at a time"),
+        _ => None,
+    };
+    let detail = purpose.map(|text| format!(" — {text}")).unwrap_or_default();
     if upkeep > 0.0 {
-        format!("{joined} — Upkeep +{upkeep:.1} food/min.")
+        format!("{joined}{detail}; Upkeep +{upkeep:.1} food/min.")
     } else {
-        format!("{joined}.")
+        format!("{joined}{detail}.")
     }
 }
 

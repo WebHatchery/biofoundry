@@ -282,6 +282,22 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                 }
             }
         }
+        "optional" => {
+            game.transition(StateTransition::StartWarren);
+            if let GameState::Warren(session) = &mut game.state {
+                // Show post-campaign support choices without a modal so their
+                // benefits remain reviewable in the canonical HUD capture.
+                session.tutorial_dismissed = true;
+                session.economy.food = 300.0;
+                session.economy.ore_stock = 50;
+                session.won = true;
+                session.victory_shown = true;
+                session.factory_complete = true;
+                session.factory_shown = true;
+                session.unlocked.insert("slime_janitor".to_owned());
+                session.unlocked.insert("bat_courier".to_owned());
+            }
+        }
         "shrine" => {
             game.transition(StateTransition::StartWarren);
             if let GameState::Warren(session) = &mut game.state {
