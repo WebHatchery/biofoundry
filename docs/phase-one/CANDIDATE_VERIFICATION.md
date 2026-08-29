@@ -16,6 +16,7 @@ automated simulation results into first-time-player evidence.
 | --- | --- | --- |
 | Continue from title | Pass | Visible Continue loaded the saved warren at `00:28`. |
 | Manual Save | Pass | Visible Save produced `Warren saved.` and the run reached `00:36` before the check. |
+| Menu exit without manual Save | Pass | A fresh Preview warren left through visible Menu without Save; Continue restored the run at `00:01` with the opening tutorial intact. |
 | Refresh and Continue | Pass | Reload returned to the title screen with Continue enabled; Continue restored `00:36` and showed `Warren loaded.`. |
 | Fresh-tab relaunch and Continue | Pass | A new Preview tab restored the same `00:36` state and objective with visible controls. |
 | Minimum-layout spot check | Pass | The 1200×675 canvas and required HUD remained visible in the 1280×720 Preview viewport. |
