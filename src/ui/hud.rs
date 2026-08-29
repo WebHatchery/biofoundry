@@ -127,6 +127,7 @@ pub fn draw(
                 simulation::sim_seconds(session) / 60.0
             ),
             UiAction::DismissWorm,
+            "Continue in Endless",
             mouse,
             &mut actions,
         );
@@ -134,11 +135,12 @@ pub fn draw(
         overlays::draw_goal_overlay(
             "Factory Complete",
             &format!(
-                "The Biofoundry roars: {} ingots forged by hammer and living furnace in {:.0} minutes.\n\nEvery belt breathes. Keep playing, or return to the menu.",
+                "The Biofoundry roars: {} ingots forged by hammer and living furnace in {:.0} minutes.\n\nEvery belt breathes. Continue to the Worm Shrine, or return to the menu.",
                 session.economy.ingots_forged,
                 simulation::sim_seconds(session) / 60.0
             ),
             UiAction::DismissFactory,
+            "Continue to Worm",
             mouse,
             &mut actions,
         );
@@ -152,6 +154,7 @@ pub fn draw(
                 data.balance.win2_ingots
             ),
             UiAction::DismissVictory,
+            "Continue to Factory",
             mouse,
             &mut actions,
         );

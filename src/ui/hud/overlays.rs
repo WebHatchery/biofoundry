@@ -11,6 +11,7 @@ pub(super) fn draw_goal_overlay(
     title: &str,
     body: &str,
     dismiss: UiAction,
+    continue_label: &str,
     mouse: Vec2,
     actions: &mut Vec<UiAction>,
 ) {
@@ -42,7 +43,7 @@ pub(super) fn draw_goal_overlay(
 
     if hud_button(
         Rect::new(panel.x + 40.0, panel.bottom() - 56.0, 195.0, 38.0),
-        "Continue in Endless",
+        continue_label,
         true,
         mouse,
     ) {

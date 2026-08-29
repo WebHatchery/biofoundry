@@ -48,6 +48,27 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                 }
             }
         }
+        "victory" => {
+            game.transition(StateTransition::StartWarren);
+            if let GameState::Warren(session) = &mut game.state {
+                session.tutorial_dismissed = true;
+                session.economy.food = game.data.balance.win_food_surplus;
+                session.economy.ore_delivered_total = game.data.balance.win_ore_delivered;
+                session.won = true;
+            }
+        }
+        "factory_complete" => {
+            game.transition(StateTransition::StartWarren);
+            if let GameState::Warren(session) = &mut game.state {
+                session.tutorial_dismissed = true;
+                session.economy.food = 160.0;
+                session.economy.ore_delivered_total = game.data.balance.win_ore_delivered;
+                session.economy.ingots_forged = game.data.balance.win2_ingots;
+                session.won = true;
+                session.victory_shown = true;
+                session.factory_complete = true;
+            }
+        }
         "mine" => {
             game.transition(StateTransition::StartWarren);
             if let GameState::Warren(session) = &mut game.state {
