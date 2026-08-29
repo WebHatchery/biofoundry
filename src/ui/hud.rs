@@ -192,7 +192,7 @@ fn colony_failure_reason(session: &GameSession, data: &GameData) -> Option<Colon
     if session.worm_awake {
         return None;
     }
-    if session.creatures.is_empty() {
+    if session.local_creature_count() == 0 {
         return Some(ColonyFailure::Silent);
     }
     session

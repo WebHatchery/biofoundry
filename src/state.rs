@@ -365,7 +365,14 @@ impl GameSession {
     }
 
     pub fn job_count(&self, job: Job) -> usize {
-        self.creatures.iter().filter(|c| c.job == job).count()
+        self.creatures
+            .iter()
+            .filter(|c| !c.is_remote() && c.job == job)
+            .count()
+    }
+
+    pub fn local_creature_count(&self) -> usize {
+        self.creatures.iter().filter(|c| !c.is_remote()).count()
     }
 
     /// Whether this session cannot make further campaign progress without
@@ -374,14 +381,15 @@ impl GameSession {
         if self.worm_awake {
             return false;
         }
-        self.creatures.is_empty()
+        self.local_creature_count() == 0
             || (self.won
                 && self.job_count(Job::Guard) == 0
                 && self.creatures.iter().all(|creature| {
-                    !data
-                        .species
-                        .get(&creature.species)
-                        .is_some_and(|species| species.reassignable)
+                    creature.is_remote()
+                        || !data
+                            .species
+                            .get(&creature.species)
+                            .is_some_and(|species| species.reassignable)
                 }))
     }
 
@@ -398,7 +406,7 @@ impl GameSession {
         let Some(creature) = self
             .creatures
             .iter_mut()
-            .find(|c| c.job == from && species_reassignable(&c.species))
+            .find(|c| !c.is_remote() && c.job == from && species_reassignable(&c.species))
         else {
             return false;
         };

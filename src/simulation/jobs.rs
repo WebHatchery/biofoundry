@@ -42,12 +42,14 @@ pub fn tick_creatures(session: &mut GameSession, data: &GameData, dt: f32) {
     // positions before the loop (creatures are taken out of the session).
     let overseers: Vec<(f32, f32)> = creatures
         .iter()
-        .filter(|c| c.species == "overseer")
+        .filter(|c| !c.is_remote() && c.species == "overseer")
         .map(|c| (c.x, c.y))
         .collect();
 
     for creature in &mut creatures {
-        tick_creature(creature, session, data, dt, &mut claims, &overseers);
+        if !creature.is_remote() {
+            tick_creature(creature, session, data, dt, &mut claims, &overseers);
+        }
     }
     session.creatures = creatures;
 }

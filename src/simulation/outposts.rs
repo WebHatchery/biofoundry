@@ -79,7 +79,9 @@ fn start_transit(
         TransitDirection::ToOutpost => session
             .creatures
             .iter()
-            .filter(|c| c.tile() == session.stockpile_pos())
+            .filter(|c| {
+                !c.is_remote() && c.carrying.is_none() && c.tile() == session.stockpile_pos()
+            })
             .take(
                 data.balance
                     .outpost_capacity
@@ -106,6 +108,12 @@ fn start_transit(
                 take_cargo(o, Good::CookedFood, food as u32);
                 o.crew.clear();
             }
+        }
+    }
+    for creature in &mut session.creatures {
+        if passengers.contains(&creature.id) {
+            creature.remote_outpost = Some(pos);
+            creature.clear_task();
         }
     }
     session.worm_transit = Some(WormTransit {
@@ -154,6 +162,7 @@ pub fn tick_transit(
                 if transit.passengers.contains(&creature.id) {
                     creature.x = target.x as f32 + 0.5;
                     creature.y = target.y as f32 + 0.5;
+                    creature.remote_outpost = Some(target);
                     creature.clear_task();
                 }
             }
@@ -168,6 +177,7 @@ pub fn tick_transit(
                 if transit.passengers.contains(&creature.id) {
                     creature.x = stock.x as f32 + 0.5;
                     creature.y = stock.y as f32 + 0.5;
+                    creature.remote_outpost = None;
                     creature.clear_task();
                 }
             }
@@ -204,6 +214,12 @@ fn recover_failed_transit(session: &mut GameSession, transit: WormTransit) {
         session.economy.ore_stock += transit.ore;
         session.economy.ingots_stock += transit.ingots;
         session.economy.food += transit.food;
+        for creature in &mut session.creatures {
+            if transit.passengers.contains(&creature.id) {
+                creature.remote_outpost = None;
+                creature.clear_task();
+            }
+        }
     } else if let Some(outpost) = session
         .outposts
         .iter_mut()

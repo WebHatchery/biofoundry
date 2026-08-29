@@ -207,7 +207,8 @@ fn reassignable_job_count(session: &GameSession, data: &GameData, job: Job) -> u
         .creatures
         .iter()
         .filter(|creature| {
-            creature.job == job
+            !creature.is_remote()
+                && creature.job == job
                 && data
                     .species
                     .get(&creature.species)

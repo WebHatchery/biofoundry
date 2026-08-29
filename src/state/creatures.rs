@@ -163,6 +163,10 @@ pub struct Creature {
     /// Seconds spent under morale pressure before desertion becomes likely.
     #[serde(default)]
     pub morale_stress_for: f32,
+    /// Outpost that currently holds this creature, including while the worm
+    /// is carrying it. Remote crew is not available to local job systems.
+    #[serde(default)]
+    pub remote_outpost: Option<TilePos>,
 }
 
 fn default_morale() -> f32 {
@@ -186,7 +190,12 @@ impl Creature {
             equipment: None,
             morale: 1.0,
             morale_stress_for: 0.0,
+            remote_outpost: None,
         }
+    }
+
+    pub fn is_remote(&self) -> bool {
+        self.remote_outpost.is_some()
     }
 
     pub fn tile(&self) -> TilePos {

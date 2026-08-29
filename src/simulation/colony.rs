@@ -13,6 +13,9 @@ pub fn tick_colony_pressure(session: &mut GameSession, data: &GameData, dt: f32)
         1.0
     };
     for creature in &mut session.creatures {
+        if creature.is_remote() {
+            continue;
+        }
         if creature.morale < target {
             creature.morale =
                 (creature.morale + data.balance.morale_recovery_per_sec * dt).min(target);

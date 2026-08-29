@@ -10,6 +10,7 @@ pub fn consumption_per_min(session: &GameSession, data: &GameData) -> f32 {
     session
         .creatures
         .iter()
+        .filter(|c| !c.is_remote())
         .map(|c| {
             let base = data
                 .species
@@ -62,6 +63,9 @@ pub fn tick_hunger(session: &mut GameSession, data: &GameData, dt: f32) -> Vec<C
 
     let b = &data.balance;
     for creature in &mut session.creatures {
+        if creature.is_remote() {
+            continue;
+        }
         let species = data.species.get(&creature.species);
         let eats_food = species.map(|s| s.diet == "food").unwrap_or(true);
         // Fed creatures knit wounds between fights.
@@ -93,8 +97,9 @@ pub fn tick_hunger(session: &mut GameSession, data: &GameData, dt: f32) -> Vec<C
     let mut deserters = Vec::new();
     let mut i = 0;
     while i < session.creatures.len() {
-        if session.creatures[i].starving_for >= desert_after
-            || session.creatures[i].morale_stress_for >= b.morale_desertion_sec
+        if !session.creatures[i].is_remote()
+            && (session.creatures[i].starving_for >= desert_after
+                || session.creatures[i].morale_stress_for >= b.morale_desertion_sec)
         {
             deserters.push(session.creatures.remove(i));
         } else {

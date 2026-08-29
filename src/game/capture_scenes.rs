@@ -418,12 +418,20 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                 if let Some(outpost) = spots.get(1).copied() {
                     session.buildings.push(Building::new("outpost", outpost));
                     session.ensure_outpost(outpost);
-                    let crew = session.creatures.iter().take(2).map(|c| c.id).collect();
+                    let crew: Vec<u32> = session.creatures.iter().take(2).map(|c| c.id).collect();
                     if let Some(route) = session.outposts.last_mut() {
                         route.active = true;
                         route.cargo.insert(Good::Ore, 8);
                         route.cargo.insert(Good::Ingot, 4);
-                        route.crew = crew;
+                        route.crew = crew.clone();
+                    }
+                    for creature in &mut session.creatures {
+                        if crew.contains(&creature.id) {
+                            creature.remote_outpost = Some(outpost);
+                            creature.x = outpost.x as f32 + 0.5;
+                            creature.y = outpost.y as f32 + 0.5;
+                            creature.clear_task();
+                        }
                     }
                     game.selected_building = Some(outpost);
                 }

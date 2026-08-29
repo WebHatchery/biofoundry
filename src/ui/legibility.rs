@@ -20,7 +20,7 @@ pub fn work_multiplier(creature: &Creature, session: &GameSession, data: &GameDa
         .unwrap_or(1.0);
     let r2 = data.balance.overseer_aura_radius * data.balance.overseer_aura_radius;
     let in_aura = session.creatures.iter().any(|o| {
-        o.species == "overseer" && {
+        !o.is_remote() && o.species == "overseer" && {
             let dx = o.x - creature.x;
             let dy = o.y - creature.y;
             dx * dx + dy * dy <= r2
@@ -69,7 +69,8 @@ impl BuildingStatus {
 /// Is any creature of `job` currently working (or waiting) at `pos`?
 fn staffed_at(session: &GameSession, pos: TilePos, job: Job) -> bool {
     session.creatures.iter().any(|c| {
-        c.job == job
+        !c.is_remote()
+            && c.job == job
             && match &c.task {
                 Task::WorkMine(p) | Task::GoMine(p) => *p == pos,
                 Task::Smithing { shop, .. } | Task::Crafting { shop, .. } | Task::GoSmith(shop) => {

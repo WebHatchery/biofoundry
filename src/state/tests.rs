@@ -117,6 +117,26 @@ fn specialist_only_security_handoff_is_non_viable() {
 }
 
 #[test]
+fn remote_crew_is_not_a_local_worker_or_recovery_option() {
+    let data = GameData::load().unwrap();
+    let mut session = GameSession::new(&data, 5);
+    session.creatures.clear();
+    session.spawn_creature(&data, "goblin", Job::Miner);
+    session.creatures[0].remote_outpost = Some(TilePos::new(4, 4));
+    session.won = true;
+
+    assert_eq!(session.local_creature_count(), 0);
+    assert_eq!(session.job_count(Job::Miner), 0);
+    assert!(!session.reassign(Job::Miner, Job::Guard, |species| {
+        data.species
+            .get(species)
+            .map(|definition| definition.reassignable)
+            .unwrap_or(false)
+    }));
+    assert!(session.is_non_viable(&data));
+}
+
+#[test]
 fn viable_workers_keep_the_security_handoff_recoverable() {
     let data = GameData::load().unwrap();
     let mut session = GameSession::new(&data, 5);

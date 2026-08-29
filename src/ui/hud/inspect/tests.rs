@@ -148,6 +148,20 @@ fn empty_outpost_reports_when_no_payload_is_ready_to_load() {
 }
 
 #[test]
+fn empty_outpost_does_not_count_remote_crew_as_ready_to_load() {
+    let data = GameData::load().expect("embedded game data");
+    let mut session = GameSession::new(&data, 12);
+    session.economy.ore_stock = 0;
+    session.economy.ingots_stock = 0;
+    session.economy.food = data.balance.worm_feed_reserve;
+    session.creatures.clear();
+    session.spawn_creature(&data, "goblin", crate::state::creatures::Job::Carrier);
+    session.creatures[0].remote_outpost = Some(TilePos::new(4, 4));
+
+    assert!(!outpost_has_loadable_payload(&session, &data, 0, 0));
+}
+
+#[test]
 fn active_empty_outpost_reports_whether_payload_is_ready() {
     let data = GameData::load().expect("embedded game data");
     let mut session = GameSession::new(&data, 11);

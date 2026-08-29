@@ -228,6 +228,78 @@ fn worm_transit_accepts_food_only_and_returns_crew_without_cargo() {
 }
 
 #[test]
+fn remote_crew_stays_out_of_local_simulation_until_returned() {
+    let (data, mut session, outpost_pos) = active_outpost(24);
+    session.creatures.clear();
+    session.economy.food = 0.0;
+    session.economy.ore_stock = 0;
+    session.economy.ingots_stock = 0;
+    let stockpile = session.stockpile_pos();
+    session.spawn_creature(&data, "goblin", Job::Carrier);
+    let crew_id = session.creatures[0].id;
+
+    assert!(outposts::start_to_outpost(&mut session, &data, outpost_pos));
+    assert!(session.creatures[0].is_remote());
+    outposts::tick_transit(
+        &mut session,
+        &data,
+        data.balance.worm_transit_time_sec + 0.1,
+    );
+    let crew = session
+        .creatures
+        .iter()
+        .find(|creature| creature.id == crew_id)
+        .expect("remote crew remains persisted");
+    assert_eq!(crew.remote_outpost, Some(outpost_pos));
+    assert_eq!(crew.tile(), outpost_pos);
+    assert_eq!(session.job_count(Job::Carrier), 0);
+
+    for _ in 0..100 {
+        simulation::tick(&mut session, &data);
+    }
+    let crew = session
+        .creatures
+        .iter()
+        .find(|creature| creature.id == crew_id)
+        .expect("remote crew does not desert locally");
+    assert_eq!(crew.tile(), outpost_pos);
+    assert_eq!(crew.remote_outpost, Some(outpost_pos));
+    assert_eq!(session.economy.food, 0.0);
+
+    assert!(outposts::start_to_shrine(&mut session, &data, outpost_pos));
+    outposts::tick_transit(
+        &mut session,
+        &data,
+        data.balance.worm_transit_time_sec + 0.1,
+    );
+    let crew = session
+        .creatures
+        .iter()
+        .find(|creature| creature.id == crew_id)
+        .expect("returned crew remains persisted");
+    assert_eq!(crew.remote_outpost, None);
+    assert_eq!(crew.tile(), stockpile);
+    assert_eq!(session.job_count(Job::Carrier), 1);
+
+    session.outposts[0].active = true;
+    assert!(outposts::start_to_outpost(&mut session, &data, outpost_pos));
+    session.outposts[0].active = false;
+    assert!(outposts::tick_transit(
+        &mut session,
+        &data,
+        data.balance.worm_transit_time_sec + 0.1,
+    )
+    .is_none());
+    let crew = session
+        .creatures
+        .iter()
+        .find(|creature| creature.id == crew_id)
+        .expect("failed transit returns its crew");
+    assert_eq!(crew.remote_outpost, None);
+    assert_eq!(crew.tile(), stockpile);
+}
+
+#[test]
 fn worm_transit_does_not_overfill_remote_crew_capacity() {
     let (data, mut session, outpost_pos) = active_outpost(19);
     let capacity = data.balance.outpost_capacity as usize;

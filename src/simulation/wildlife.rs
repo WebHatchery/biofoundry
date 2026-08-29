@@ -186,7 +186,9 @@ fn behave(session: &mut GameSession, data: &GameData, dt: f32, report: &mut Wild
             let mut i = 0;
             while i < session.creatures.len() {
                 let guard = &mut session.creatures[i];
-                if guard.job == Job::Guard && nav::dist_sq(wild.x, wild.y, guard.x, guard.y) <= 1.7
+                if !guard.is_remote()
+                    && guard.job == Job::Guard
+                    && nav::dist_sq(wild.x, wild.y, guard.x, guard.y) <= 1.7
                 {
                     guard.hp -= dps * dt;
                     if guard.hp <= 0.0 {
@@ -275,7 +277,7 @@ fn study_and_breed(session: &mut GameSession, data: &GameData, dt: f32, report: 
 
 /// Blackout episodes count as survived once food recovers.
 fn track_famine(session: &mut GameSession, data: &GameData) {
-    if !session.famine_active && session.economy.food <= 0.0 && !session.creatures.is_empty() {
+    if !session.famine_active && session.economy.food <= 0.0 && session.local_creature_count() > 0 {
         session.famine_active = true;
     } else if session.famine_active && session.economy.food >= data.balance.famine_recover_food {
         session.famine_active = false;
