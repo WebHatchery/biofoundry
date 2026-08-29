@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `a2b8fb3`
+**Source revision:** `60d08a9`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -29,7 +29,10 @@ automated simulation results into first-time-player evidence.
 - `publish.ps1` with no parameters — pass; Windows and WebGL packages
   deployed to Preview.
 - Fixed-seed campaign beats — secure `19.4m`, factory `24.4m`, shrine
-  `29.4m`, worm `43.4m`; handoff gaps `5.0 / 5.0 / 14.1m`.
+  `29.4m`, worm `39.5m`; handoff gaps `5.0 / 5.0 / 10.1m`.
+- Shrine pacing guardrail — the final offering handoff now remains under
+  12 minutes on the fixed-seed campaign, while ten food offerings still map
+  cleanly to the ten ingots required for awakening.
 - Worm Shrine inspection capture — [ui_shrine.png](../verification/ui_shrine.png)
   shows remaining food/ingot offerings, minimum feed time, and the automatic
   offering state in the final-demand card.
