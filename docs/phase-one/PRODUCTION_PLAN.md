@@ -66,9 +66,9 @@ goal at each facilitator checkpoint without being told.
 response.
 
 - [x] Prioritize cooked food trend, reserve, and time-to-empty in the main HUD.
-- [ ] Standardize workstation status across Mine, Cook Pot, Blacksmith, Kiln,
+- [x] Standardize workstation status across Mine, Cook Pot, Blacksmith, Kiln,
   Smelter, and Worm Shrine.
-- [ ] Surface missing labor, missing input, output blockage, invalid route, and
+- [x] Surface missing labor, missing input, output blockage, invalid route, and
   reserve-policy pauses in plain language.
 - [ ] Show before/after throughput when the Iron Pickaxe is equipped.
 - [x] Forecast famine and raid pressure early enough for a meaningful response.

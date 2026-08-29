@@ -69,6 +69,26 @@ fn starved_blacksmith_and_kiln_read_starved() {
 }
 
 #[test]
+fn cook_pot_reads_missing_cook_then_missing_mushrooms() {
+    let (data, mut session) = boot();
+    let pot = session.buildings_of("cook_pot").next().unwrap().pos;
+    session.creatures.clear();
+    let building = session.building_at(pot).unwrap();
+    assert_eq!(
+        building_status(&session, &data, building),
+        Some(BuildingStatus::NoWorker)
+    );
+
+    session.spawn_creature(&data, "goblin", Job::Cook);
+    session.creatures.last_mut().unwrap().task = Task::GoCook(pot);
+    let building = session.building_at(pot).unwrap();
+    assert_eq!(
+        building_status(&session, &data, building),
+        Some(BuildingStatus::InputStarved)
+    );
+}
+
+#[test]
 fn trough_waste_and_inactive_outpost_are_visible_states() {
     let data = GameData::load().unwrap();
     let mut session = GameSession::new(&data, 44);

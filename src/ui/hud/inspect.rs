@@ -5,6 +5,7 @@ use crate::data::GameData;
 use crate::state::creatures::{Good, Task};
 use crate::state::GameSession;
 use crate::ui::hud::widgets::{hud_button, panel_style};
+use crate::ui::legibility::BuildingStatus;
 use crate::ui::{UiAction, LOGICAL_WIDTH};
 use macroquad::prelude::*;
 use macroquad_toolkit::grid::TilePos;
@@ -28,10 +29,10 @@ pub(super) fn draw_inspect_panel(
     // The blacksmith panel carries the production-order queue and craft
     // buttons, and the breeding pit its breed buttons — both taller.
     let height = match building.kind.as_str() {
-        "blacksmith" => 150.0 + data.equipment.len() as f32 * 26.0,
-        "breeding_pit" => 210.0,
-        "worm_shrine" | "outpost" => 220.0,
-        _ => 132.0,
+        "blacksmith" => 170.0 + data.equipment.len() as f32 * 26.0,
+        "breeding_pit" => 230.0,
+        "worm_shrine" | "outpost" => 240.0,
+        _ => 152.0,
     };
     let panel = Rect::new(LOGICAL_WIDTH - 262.0, 210.0, 250.0, height);
     draw_surface_with_title(
@@ -47,6 +48,9 @@ pub(super) fn draw_inspect_panel(
         draw_ui_text_ex(text, x, *y, TextStyle::new(14.0, color).params());
         *y += 20.0;
     };
+
+    let (status, status_color) = inspect_status(session, data, building);
+    line(&format!("Status · {status}"), status_color, &mut y);
 
     match building.kind.as_str() {
         "mine" => {
@@ -363,4 +367,41 @@ pub(super) fn draw_inspect_panel(
     }
 
     Some(panel)
+}
+
+/// Give every inspected building the same first-read answer: is it working,
+/// stalled, paused, or on a route that needs attention?
+fn inspect_status(
+    session: &GameSession,
+    data: &GameData,
+    building: &crate::state::structures::Building,
+) -> (&'static str, Color) {
+    if building.kind == "worm_shrine" {
+        if session.worm_awake {
+            return ("Awakened", dark::POSITIVE);
+        }
+        if session.worm_feeding_paused {
+            return ("Paused by reserve policy", dark::WARNING);
+        }
+    }
+    if building.kind == "outpost" {
+        if let Some(outpost) = session.outposts.iter().find(|o| o.pos == building.pos) {
+            if outpost.last_failure.is_some() {
+                return ("Route failed", dark::NEGATIVE);
+            }
+            if !outpost.active {
+                return ("Route inactive", dark::WARNING);
+            }
+        }
+    }
+    match crate::ui::legibility::building_status(session, data, building) {
+        Some(status) => (
+            status.label(),
+            match status {
+                BuildingStatus::Exhausted | BuildingStatus::OutputFull => dark::NEGATIVE,
+                _ => dark::WARNING,
+            },
+        ),
+        None => ("Working", dark::POSITIVE),
+    }
 }

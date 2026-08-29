@@ -76,6 +76,7 @@ fn staffed_at(session: &GameSession, pos: TilePos, job: Job) -> bool {
                     *shop == pos
                 }
                 Task::Smelting { den, .. } | Task::GoSmelt(den) => *den == pos,
+                Task::Cooking { pot, .. } | Task::GoCook(pot) => *pot == pos,
                 // A creature idling on the tile also counts as manning it.
                 _ => c.tile() == pos,
             }
@@ -133,6 +134,9 @@ pub fn building_status(
             None
         }
         "cook_pot" => {
+            if !staffed_at(session, pos, Job::Cook) {
+                return Some(BuildingStatus::NoWorker);
+            }
             if building.stock(Good::Mushroom)
                 < data.balance.cook_batch_mushrooms as f32 * data.balance.raw_recipe_multiplier
             {
