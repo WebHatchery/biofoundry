@@ -3,6 +3,7 @@
 use super::boot;
 use crate::simulation::{self, outposts, SIM_DT};
 use crate::state::creatures::{Good, Job, Task};
+use crate::state::outposts::TransitDirection;
 use crate::state::structures::Building;
 
 fn active_outpost(
@@ -271,4 +272,24 @@ fn worm_transit_keeps_fractional_food_at_home_until_a_whole_unit_is_ready() {
         data.balance.worm_transit_time_sec + 0.1,
     );
     assert_eq!(session.outposts[0].cargo.get(&Good::CookedFood), Some(&1));
+}
+
+#[test]
+fn in_flight_worm_transit_survives_a_save_roundtrip() {
+    let (data, mut session, outpost_pos) = active_outpost(21);
+    session.economy.ore_stock = 3;
+    assert!(outposts::start_to_outpost(&mut session, &data, outpost_pos));
+
+    let json = serde_json::to_string(&session).unwrap();
+    let restored: crate::state::GameSession = serde_json::from_str(&json).unwrap();
+    let transit = restored.worm_transit.as_ref().expect("transit is saved");
+
+    assert_eq!(transit.direction, TransitDirection::ToOutpost);
+    assert_eq!(transit.outpost, outpost_pos);
+    assert_eq!(transit.ore, 3);
+    assert_eq!(
+        transit.passengers.len(),
+        data.balance.outpost_capacity as usize
+    );
+    assert!(restored.outposts[0].active);
 }
