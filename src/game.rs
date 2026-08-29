@@ -161,6 +161,18 @@ impl Game {
                             .success("The ground heaves — the Colossal Worm awakens!");
                         self.audio.play(Sfx::Worm);
                     }
+                    if let Some(direction) = report.transit_completed {
+                        safe_beat_reached = true;
+                        self.notifications.success(match direction {
+                            crate::state::outposts::TransitDirection::ToOutpost => {
+                                "The worm reaches the outpost — cargo delivered."
+                            }
+                            crate::state::outposts::TransitDirection::ToShrine => {
+                                "The worm returns to the shrine — cargo delivered."
+                            }
+                        });
+                        self.audio.play(Sfx::Complete);
+                    }
                     if report.wild.raid_started {
                         self.notifications
                             .danger("Raid! Gnarls are coming for the larder.");

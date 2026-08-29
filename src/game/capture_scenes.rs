@@ -399,6 +399,20 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                 }
             }
         }
+        "endless_arrived" => {
+            begin(game, "endless");
+            if let GameState::Warren(session) = &mut game.state {
+                let outpost = session.outposts.first().map(|route| route.pos);
+                if let Some(outpost) = outpost {
+                    let _ = simulation::outposts::start_to_outpost(session, &game.data, outpost);
+                }
+                let _ = simulation::outposts::tick_transit(
+                    session,
+                    &game.data,
+                    game.data.balance.worm_transit_time_sec + 0.1,
+                );
+            }
+        }
         "shrine" => {
             game.transition(StateTransition::StartWarren);
             if let GameState::Warren(session) = &mut game.state {

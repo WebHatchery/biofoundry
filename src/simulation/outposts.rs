@@ -121,24 +121,27 @@ fn start_transit(
     true
 }
 
-pub fn tick_transit(session: &mut GameSession, data: &GameData, dt: f32) {
-    let Some(mut transit) = session.worm_transit.take() else {
-        return;
-    };
+pub fn tick_transit(
+    session: &mut GameSession,
+    data: &GameData,
+    dt: f32,
+) -> Option<TransitDirection> {
+    let mut transit = session.worm_transit.take()?;
     if !session
         .outposts
         .iter()
         .any(|o| o.pos == transit.outpost && o.active)
     {
         recover_failed_transit(session, transit);
-        return;
+        return None;
     }
     transit.remaining -= dt;
     if transit.remaining > 0.0 {
         session.worm_transit = Some(transit);
-        return;
+        return None;
     }
     let target = transit.outpost;
+    let direction = transit.direction;
     match transit.direction {
         TransitDirection::ToOutpost => {
             if let Some(outpost) = session.outposts.iter_mut().find(|o| o.pos == target) {
@@ -171,6 +174,7 @@ pub fn tick_transit(session: &mut GameSession, data: &GameData, dt: f32) {
         }
     }
     let _ = data;
+    Some(direction)
 }
 
 fn take_cargo(outpost: &mut Outpost, good: Good, amount: u32) {

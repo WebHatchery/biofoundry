@@ -240,11 +240,12 @@ fn worm_transit_does_not_overfill_remote_crew_capacity() {
     session.economy.ore_stock = 1;
 
     assert!(outposts::start_to_outpost(&mut session, &data, outpost_pos));
-    outposts::tick_transit(
+    let completed = outposts::tick_transit(
         &mut session,
         &data,
         data.balance.worm_transit_time_sec + 0.1,
     );
+    assert_eq!(completed, Some(TransitDirection::ToOutpost));
 
     assert_eq!(session.outposts[0].crew.len(), capacity);
     assert_eq!(session.outposts[0].cargo.get(&Good::Ore), Some(&1));
@@ -266,12 +267,28 @@ fn worm_transit_keeps_fractional_food_at_home_until_a_whole_unit_is_ready() {
     session.economy.food += 1.0;
     assert!(outposts::start_to_outpost(&mut session, &data, outpost_pos));
     assert!((session.economy.food - (data.balance.worm_feed_reserve + 0.5)).abs() < 1e-3);
-    outposts::tick_transit(
+    let completed = outposts::tick_transit(
         &mut session,
         &data,
         data.balance.worm_transit_time_sec + 0.1,
     );
+    assert_eq!(completed, Some(TransitDirection::ToOutpost));
     assert_eq!(session.outposts[0].cargo.get(&Good::CookedFood), Some(&1));
+}
+
+#[test]
+fn simulation_reports_arrival_after_a_cargo_run_completes() {
+    let (data, mut session, outpost_pos) = active_outpost(22);
+    session.economy.ore_stock = 1;
+
+    assert!(outposts::start_to_outpost(&mut session, &data, outpost_pos));
+    session.worm_transit.as_mut().unwrap().remaining = SIM_DT;
+
+    let report = simulation::tick(&mut session, &data);
+
+    assert_eq!(report.transit_completed, Some(TransitDirection::ToOutpost));
+    assert_eq!(session.progress.courier_deliveries, 1);
+    assert!(session.worm_transit.is_none());
 }
 
 #[test]
