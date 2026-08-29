@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `c4d0b07`
+**Source revision:** `cbe74f2`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -72,8 +72,9 @@ automated simulation results into first-time-player evidence.
   the selected Breeding Pit with readable Hobgoblin, Overseer, and Engineer
   effects and available ingot costs.
 - Factory tutorial capture — [ui_tutorial_factory.png](../verification/ui_tutorial_factory.png)
-  makes the intended interaction explicit: inspect the existing Mine in the
-  warren before placing the Blacksmith.
+  makes the intended interaction explicit: inspect the existing Mine, place the
+  Blacksmith, and when `Idle 0` is shown, tap `−` beside Miner before tapping
+  `+` beside Smith.
 - Tutorial tap captures — [ui_tutorial_food.png](../verification/ui_tutorial_food.png)
   names the Farm-then-open-floor placement taps, while
   [ui_tutorial_worm.png](../verification/ui_tutorial_worm.png) names the tap
