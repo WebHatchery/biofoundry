@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `dd858cf`
+**Source revision:** `93eb07b`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -25,7 +25,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 125 unit tests and 2 integration tests pass.
+- `cargo test --all-targets` — 127 unit tests and 2 integration tests pass.
 - `cargo clippy --all-targets --all-features -- -D warnings` — pass.
 - `publish.ps1` with no parameters — pass; Windows and WebGL packages
   deployed to Preview.
@@ -119,6 +119,11 @@ automated simulation results into first-time-player evidence.
   idle creature is actually reassignable before promising `+ Guard`; an idle
   non-reassignable specialist receives the safe fallback instead. Focused
   coverage verifies that disabled job controls are not advertised as available.
+- Field Guide recovery capture — [ui_help.png](../verification/ui_help.png)
+  keeps the revisitable guide truthful for the current workforce: a fresh
+  warren sees the enabled `− Miner, then + Carrier/Guard` recovery paths, and
+  specialist-only states receive a `free a worker` fallback instead of a
+  disabled assignment.
 - Shared security guidance — the victory report, raid banner, and persistent
   Objective now use the same eligibility-aware action hint, including the
   visible `in Jobs` destination and the specialist-only `free a worker`
