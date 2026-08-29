@@ -294,6 +294,16 @@ pub(super) fn draw_jobs_panel(
     );
     y += 28.0;
 
+    if !session.won {
+        draw_ui_text_ex(
+            "Advanced systems unlock after Secure the warren.",
+            x,
+            y + 18.0,
+            TextStyle::new(13.0, dark::TEXT_DIM).params(),
+        );
+        return;
+    }
+
     let beetles = session
         .creatures
         .iter()
@@ -420,7 +430,11 @@ pub(super) fn draw_tools_panel(
 
     // Build buttons, two per row: label is the short name + cost. Locked
     // kinds stay visible but disabled (progression is discoverable).
-    let mut defs: Vec<_> = data.buildings.iter().filter(|(_, d)| d.buildable).collect();
+    let mut defs: Vec<_> = data
+        .buildings
+        .iter()
+        .filter(|(id, d)| d.buildable && (session.won || is_core_building(id)))
+        .collect();
     defs.sort_by(|a, b| a.0.cmp(b.0));
     let mut locked_requirements = Vec::new();
     for row in defs.chunks(3) {
@@ -483,6 +497,13 @@ pub(super) fn draw_tools_panel(
             );
         }
     }
+}
+
+fn is_core_building(id: &str) -> bool {
+    matches!(
+        id,
+        "blacksmith" | "cook_pot" | "farm" | "mine" | "worm_shrine"
+    )
 }
 
 /// The persistent campaign card keeps the next milestone visible even after

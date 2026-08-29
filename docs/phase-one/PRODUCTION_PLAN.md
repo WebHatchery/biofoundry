@@ -50,11 +50,11 @@ systems when they become relevant.
   next unmet requirement.
 - [x] Rework the tutorial around the five journey beats in `PLAYABLE_SLICE.md`.
 - [x] Make every locked building or action state its exact prerequisite.
-- [ ] Delay or collapse optional systems until the critical path establishes
+- [x] Delay or collapse optional systems until the critical path establishes
   food, mining, smithing, and the worm goal.
 - [x] Ensure every tutorial instruction names the exact visible control or
   direct gesture required next.
-- [ ] Provide a visible way to revisit essential help after tutorial steps
+- [x] Provide a visible way to revisit essential help after tutorial steps
   complete or are skipped.
 
 **Acceptance:** at least four of five first-time players can state their next
