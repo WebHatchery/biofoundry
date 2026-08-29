@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `70c5e8a`
+**Source revision:** `29cd544`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -132,7 +132,8 @@ automated simulation results into first-time-player evidence.
 - Tutorial security guidance — the Secure the Warren lesson now uses that same
   action hint instead of a fixed `Idle is 0` instruction, so its visible
   recovery step follows the current workforce and remains aligned with the
-  Objective and raid warning.
+  Objective and raid warning. The embedded tutorial source copy carries the
+  same state-neutral guidance for returning or tooling contexts.
 - Endless route failure capture — [ui_endless_failure.png](../verification/ui_endless_failure.png)
   shows the failed outpost's wrapped recovery message and the Objective's
   complete visible Activate route instruction, alongside the top-bar failure
