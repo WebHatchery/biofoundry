@@ -65,6 +65,7 @@ pub fn draw(
     sprites: &HudSprites,
     mode: &UiMode,
     selected: Option<TilePos>,
+    help_open: bool,
 ) -> HudFrame {
     let mut actions = Vec::new();
     let mouse = ui.mouse_position();
@@ -138,9 +139,17 @@ pub fn draw(
         );
     }
 
+    if help_open {
+        // The field guide is modal: discard any button intents collected from
+        // the HUD underneath and let its Close button be the only action.
+        actions.clear();
+        overlays::draw_help_overlay(mouse, &mut actions);
+    }
+
     let pointer_over_ui = victory_up
         || factory_up
         || worm_up
+        || help_open
         || tutorial_panel.is_some_and(|r| r.contains_point(mouse))
         || objective_panel.contains_point(mouse)
         || inspect_panel.is_some_and(|r| r.contains_point(mouse))

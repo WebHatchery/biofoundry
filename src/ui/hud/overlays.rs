@@ -1,4 +1,4 @@
-//! Full-screen goal overlays (victory / factory / worm) and the in-world
+//! Full-screen goal overlays, the revisitable field guide, and the in-world
 //! status-badge legend.
 
 use crate::ui::hud::widgets::{hud_button, panel_style};
@@ -55,6 +55,102 @@ pub(super) fn draw_goal_overlay(
         mouse,
     ) {
         actions.push(UiAction::BackToMenu);
+    }
+}
+
+/// A touch-readable guide to the controls and the short decision loop. It is
+/// deliberately independent of tutorial progress so it remains useful after
+/// the opening lesson is skipped or completed.
+pub(super) fn draw_help_overlay(mouse: Vec2, actions: &mut Vec<UiAction>) {
+    draw_rectangle(
+        0.0,
+        0.0,
+        LOGICAL_WIDTH,
+        LOGICAL_HEIGHT,
+        Color::new(0.0, 0.0, 0.0, 0.62),
+    );
+    let panel = Rect::new(110.0, 82.0, 1060.0, 556.0);
+    draw_surface_with_title(
+        panel,
+        Some("Warren Field Guide"),
+        &panel_style(),
+        TextStyle::new(21.0, dark::TEXT_BRIGHT),
+    );
+    draw_ui_text_ex(
+        "Everything below has a visible touch or pointer control.",
+        panel.x + 26.0,
+        panel.y + 60.0,
+        TextStyle::new(15.0, dark::TEXT_DIM).params(),
+    );
+
+    let left = panel.x + 28.0;
+    let right = panel.x + 550.0;
+    for (x, title, body, y) in [
+        (
+            left,
+            "Camera",
+            "Drag the map to look around. Tap + or − in the top bar to zoom. Pinch also zooms on touch screens.",
+            166.0,
+        ),
+        (
+            left,
+            "Build & Dig",
+            "Tap a building button, then tap open floor to place it. Tap Dig, then tap rock. Tap the active button again to return to Inspect.",
+            270.0,
+        ),
+        (
+            left,
+            "Jobs",
+            "Tap + or − beside Miner, Carrier, Cook, Smith, or Guard to move goblins between jobs.",
+            374.0,
+        ),
+        (
+            left,
+            "Inspect & craft",
+            "Tap a building on the map to see its status and controls. Tap an equipment button in the Blacksmith card to queue it.",
+            478.0,
+        ),
+        (
+            right,
+            "Food Grid",
+            "Keep Production above Upkeep. The forecast says how long the cooked-food reserve lasts at the current rate.",
+            166.0,
+        ),
+        (
+            right,
+            "Objective",
+            "Read the Objective card for the current campaign milestone and its next requirement. Locked gates name their exact unlock.",
+            270.0,
+        ),
+        (
+            right,
+            "Recovery",
+            "When food falls, tap + beside Carrier in Jobs. Before a raid, tap + beside Guard. The warning bar names the response.",
+            374.0,
+        ),
+        (
+            right,
+            "Save & return",
+            "Tap Save before leaving. Load restores the last saved Warren, and Menu returns to the title screen.",
+            478.0,
+        ),
+    ] {
+        draw_ui_text_ex(title, x, y, TextStyle::new(15.0, dark::ACCENT).params());
+        draw_text_block(body, x, y + 22.0, 460.0, 62.0, 14.0, 3.0, dark::TEXT);
+    }
+
+    if hud_button(
+        Rect::new(
+            panel.x + panel.w * 0.5 - 70.0,
+            panel.bottom() - 48.0,
+            140.0,
+            32.0,
+        ),
+        "Close",
+        true,
+        mouse,
+    ) {
+        actions.push(UiAction::ToggleHelp);
     }
 }
 

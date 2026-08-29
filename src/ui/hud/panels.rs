@@ -132,6 +132,14 @@ pub(super) fn draw_top_bar(
     ) {
         actions.push(UiAction::Load);
     }
+    if hud_button(
+        Rect::new(bar.right() - 438.0, bar.y + 8.0, 74.0, 32.0),
+        "Help",
+        true,
+        mouse,
+    ) {
+        actions.push(UiAction::ToggleHelp);
+    }
 }
 
 /// The calorie balance meter — production, consumption, and stockpile,

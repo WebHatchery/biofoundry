@@ -259,6 +259,13 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                 }
             }
         }
+        "help" => {
+            game.transition(StateTransition::StartWarren);
+            game.help_open = true;
+            if let GameState::Warren(session) = &mut game.state {
+                session.tutorial_dismissed = true;
+            }
+        }
         // "warren" and the harness default "gameplay" boot straight
         // into a fresh session on the config seed.
         _ => game.transition(StateTransition::StartWarren),

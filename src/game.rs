@@ -43,6 +43,8 @@ pub struct Game {
     last_camera: (Vec2, f32),
     /// The title menu's settings panel is showing.
     settings_open: bool,
+    /// The warren field guide is showing.
+    help_open: bool,
     /// A save slot exists, so the menu can offer Continue.
     save_exists: bool,
     /// Where the right button went down, to tell a click from a camera drag.
@@ -88,6 +90,7 @@ impl Game {
             famine_announced: false,
             last_camera: (vec2(0.0, 0.0), 1.0),
             settings_open: false,
+            help_open: false,
             save_exists,
             right_press: vec2(0.0, 0.0),
             mouse_pan_start: None,
@@ -205,7 +208,9 @@ impl Game {
             }
             if input.escape_pressed {
                 // Escape backs out of a tool first, then to the menu.
-                if self.mode != UiMode::Inspect {
+                if self.help_open {
+                    self.events.push(UiAction::ToggleHelp);
+                } else if self.mode != UiMode::Inspect {
                     self.mode = UiMode::Inspect;
                 } else {
                     self.events.push(UiAction::BackToMenu);
@@ -270,6 +275,7 @@ impl Game {
                     &self.hud_sprites,
                     &self.mode,
                     self.selected_building,
+                    self.help_open,
                 );
                 end_virtual_ui_frame();
 
@@ -418,10 +424,12 @@ impl Game {
                 self.accumulator = 0.0;
                 self.famine_announced = false;
                 self.mode = UiMode::Inspect;
+                self.help_open = false;
                 self.state = GameState::Warren(Box::new(session));
             }
             StateTransition::BackToMenu => {
                 self.mode = UiMode::Inspect;
+                self.help_open = false;
                 self.state = GameState::Menu;
             }
         }

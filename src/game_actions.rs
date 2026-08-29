@@ -180,6 +180,10 @@ impl Game {
                 self.settings_open = !self.settings_open;
                 self.audio.play(Sfx::Select);
             }
+            UiAction::ToggleHelp => {
+                self.help_open = !self.help_open;
+                self.audio.play(Sfx::Select);
+            }
             UiAction::AdjustVolume(steps) => {
                 let volume = (self.audio.volume() * 10.0 + steps as f32).round() / 10.0;
                 self.audio.set_volume(volume);

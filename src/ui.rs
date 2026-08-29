@@ -56,6 +56,8 @@ pub enum UiAction {
     Load,
     /// Open/close the settings panel on the title menu.
     ToggleSettings,
+    /// Open/close the revisitable warren field guide.
+    ToggleHelp,
     /// Nudge the sound volume by this many 10% steps.
     AdjustVolume(i8),
     /// Zoom the warren camera around the screen centre.
