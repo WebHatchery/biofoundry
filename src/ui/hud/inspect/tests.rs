@@ -98,3 +98,36 @@ fn failed_outpost_reports_a_route_failure() {
         ("Route failed", dark::NEGATIVE)
     );
 }
+
+#[test]
+fn in_flight_outpost_reports_directional_transit() {
+    let data = GameData::load().expect("embedded game data");
+    let mut session = GameSession::new(&data, 9);
+    let pos = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(pos, _)| session.can_place_building(*pos))
+        .map(|(pos, _)| pos)
+        .expect("a walkable outpost location");
+    session
+        .buildings
+        .push(Building::new("worm_shrine", session.spawn_tile()));
+    session.buildings.push(Building::new("outpost", pos));
+    session.ensure_outpost(pos);
+    session.outposts[0].active = true;
+    session.worm_awake = true;
+    session.economy.ore_stock = 1;
+    assert!(crate::simulation::outposts::start_to_outpost(
+        &mut session,
+        &data,
+        pos
+    ));
+
+    assert_eq!(
+        inspect_status(&session, &data, session.building_at(pos).unwrap()),
+        ("In transit", dark::POSITIVE)
+    );
+    assert_eq!(transit_destination(TransitDirection::ToOutpost), "outpost");
+    assert_eq!(transit_destination(TransitDirection::ToShrine), "shrine");
+}

@@ -390,6 +390,15 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                     Some("Transit failed because the outpost was inactive.".to_owned());
             }
         }
+        "endless_in_flight" => {
+            begin(game, "endless");
+            if let GameState::Warren(session) = &mut game.state {
+                let outpost = session.outposts.first().map(|route| route.pos);
+                if let Some(outpost) = outpost {
+                    let _ = simulation::outposts::start_to_shrine(session, &game.data, outpost);
+                }
+            }
+        }
         "shrine" => {
             game.transition(StateTransition::StartWarren);
             if let GameState::Warren(session) = &mut game.state {

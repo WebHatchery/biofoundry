@@ -3,6 +3,7 @@
 
 use crate::data::GameData;
 use crate::state::creatures::{Good, Task};
+use crate::state::outposts::TransitDirection;
 use crate::state::GameSession;
 use crate::ui::hud::widgets::{hud_button, panel_style};
 use crate::ui::legibility::BuildingStatus;
@@ -395,50 +396,66 @@ pub(super) fn draw_inspect_panel(
                 dark::TEXT_DIM,
                 &mut y,
             );
-            if hud_button(
-                Rect::new(x, y, panel.w - 28.0, 24.0),
-                if active {
-                    "Deactivate route"
+            if let Some(transit) = session.worm_transit.as_ref() {
+                let route = if transit.outpost == pos {
+                    transit_destination(transit.direction)
                 } else {
-                    "Activate route"
-                },
-                session.worm_transit.is_none(),
-                mouse,
-            ) {
-                actions.push(UiAction::ActivateOutpost(pos));
-            }
-            y += 28.0;
-            if active && session.worm_awake {
-                let return_label = if cargo > 0 {
-                    format!("Send {cargo} to shrine")
-                } else {
-                    "Send crew to shrine".to_owned()
+                    "another outpost"
                 };
+                line(
+                    &format!(
+                        "Transit to {route} · {:.0}s remaining",
+                        transit.remaining.max(0.0)
+                    ),
+                    dark::POSITIVE,
+                    &mut y,
+                );
+                line("Wait for the worm to arrive", dark::TEXT_DIM, &mut y);
+            } else {
                 if hud_button(
                     Rect::new(x, y, panel.w - 28.0, 24.0),
-                    &return_label,
-                    session.worm_transit.is_none() && (cargo > 0 || crew > 0),
+                    if active {
+                        "Deactivate route"
+                    } else {
+                        "Activate route"
+                    },
+                    true,
                     mouse,
                 ) {
-                    actions.push(UiAction::TransitToShrine(pos));
+                    actions.push(UiAction::ActivateOutpost(pos));
                 }
                 y += 28.0;
-                if hud_button(
-                    Rect::new(x, y, panel.w - 28.0, 24.0),
-                    "Load outpost from warren",
-                    session.worm_transit.is_none()
-                        && (outpost_has_loadable_cargo(session, data, cargo)
+                if active && session.worm_awake {
+                    let return_label = if cargo > 0 {
+                        format!("Send {cargo} to shrine")
+                    } else {
+                        "Send crew to shrine".to_owned()
+                    };
+                    if hud_button(
+                        Rect::new(x, y, panel.w - 28.0, 24.0),
+                        &return_label,
+                        cargo > 0 || crew > 0,
+                        mouse,
+                    ) {
+                        actions.push(UiAction::TransitToShrine(pos));
+                    }
+                    y += 28.0;
+                    if hud_button(
+                        Rect::new(x, y, panel.w - 28.0, 24.0),
+                        "Load outpost from warren",
+                        outpost_has_loadable_cargo(session, data, cargo)
                             || crew < data.balance.outpost_capacity as usize
                                 && session
                                     .creatures
                                     .iter()
-                                    .any(|c| c.tile() == session.stockpile_pos())),
-                    mouse,
-                ) {
-                    actions.push(UiAction::TransitToOutpost(pos));
+                                    .any(|c| c.tile() == session.stockpile_pos()),
+                        mouse,
+                    ) {
+                        actions.push(UiAction::TransitToOutpost(pos));
+                    }
+                } else if active {
+                    line("Awaiting the worm's awakening", dark::TEXT_DIM, &mut y);
                 }
-            } else if active {
-                line("Awaiting the worm's awakening", dark::TEXT_DIM, &mut y);
             }
             if let Some(failure) = outpost.and_then(|o| o.last_failure.as_deref()) {
                 draw_text_block(
@@ -473,6 +490,13 @@ fn inspect_status(
     }
     if building.kind == "outpost" {
         if let Some(outpost) = session.outposts.iter().find(|o| o.pos == building.pos) {
+            if session
+                .worm_transit
+                .as_ref()
+                .is_some_and(|transit| transit.outpost == building.pos)
+            {
+                return ("In transit", dark::POSITIVE);
+            }
             if outpost.last_failure.is_some() {
                 return ("Route failed", dark::NEGATIVE);
             }
@@ -504,6 +528,13 @@ fn worm_shrine_status(session: &GameSession, data: &GameData) -> (&'static str, 
         ("Waiting for ingot reserve", dark::WARNING)
     } else {
         ("Working", dark::POSITIVE)
+    }
+}
+
+fn transit_destination(direction: TransitDirection) -> &'static str {
+    match direction {
+        TransitDirection::ToOutpost => "outpost",
+        TransitDirection::ToShrine => "shrine",
     }
 }
 
