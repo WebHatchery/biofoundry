@@ -225,3 +225,26 @@ fn worm_transit_accepts_food_only_and_returns_crew_without_cargo() {
     assert!(crew_session.outposts[0].crew.is_empty());
     assert!(crew_session.creatures.iter().all(|c| c.tile() == stockpile));
 }
+
+#[test]
+fn worm_transit_does_not_overfill_remote_crew_capacity() {
+    let (data, mut session, outpost_pos) = active_outpost(19);
+    let capacity = data.balance.outpost_capacity as usize;
+    session.outposts[0].crew = session
+        .creatures
+        .iter()
+        .take(capacity)
+        .map(|creature| creature.id)
+        .collect();
+    session.economy.ore_stock = 1;
+
+    assert!(outposts::start_to_outpost(&mut session, &data, outpost_pos));
+    outposts::tick_transit(
+        &mut session,
+        &data,
+        data.balance.worm_transit_time_sec + 0.1,
+    );
+
+    assert_eq!(session.outposts[0].crew.len(), capacity);
+    assert_eq!(session.outposts[0].cargo.get(&Good::Ore), Some(&1));
+}

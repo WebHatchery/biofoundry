@@ -359,6 +359,18 @@ pub(super) fn draw_inspect_panel(
             let active = outpost.is_some_and(|o| o.active);
             let cargo = outpost.map(|o| o.cargo_total()).unwrap_or(0);
             let crew = outpost.map(|o| o.crew.len()).unwrap_or(0);
+            let cargo_ore = outpost
+                .and_then(|o| o.cargo.get(&Good::Ore))
+                .copied()
+                .unwrap_or(0);
+            let cargo_ingots = outpost
+                .and_then(|o| o.cargo.get(&Good::Ingot))
+                .copied()
+                .unwrap_or(0);
+            let cargo_food = outpost
+                .and_then(|o| o.cargo.get(&Good::CookedFood))
+                .copied()
+                .unwrap_or(0);
             line(
                 &format!(
                     "{} · Cargo {}/{} · Crew {}/{}",
@@ -373,6 +385,14 @@ pub(super) fn draw_inspect_panel(
                 } else {
                     dark::WARNING
                 },
+                &mut y,
+            );
+            line(
+                &format!(
+                    "Ore {} · Ingots {} · Food {}",
+                    cargo_ore, cargo_ingots, cargo_food
+                ),
+                dark::TEXT_DIM,
                 &mut y,
             );
             if hud_button(
