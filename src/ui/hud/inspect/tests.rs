@@ -209,7 +209,7 @@ fn blacksmith_queue_reports_when_another_order_can_be_added() {
 }
 
 #[test]
-fn inspection_staffing_ignores_remote_crew() {
+fn inspection_staffing_ignores_remote_crew_and_recognizes_assigned_crew() {
     let data = GameData::load().expect("embedded game data");
     let mut session = GameSession::new(&data, 13);
     let mine = session.buildings_of("mine").next().unwrap().pos;
@@ -235,7 +235,18 @@ fn inspection_staffing_ignores_remote_crew() {
     session.creatures[1].remote_outpost = Some(TilePos::new(4, 4));
 
     assert!(!local_mine_worker_at(&session.creatures[0], mine));
-    assert!(!local_smith_at(&session.creatures[1], blacksmith));
+    assert!(!local_mine_staffed_at(&session.creatures[0], mine));
+    assert!(!local_smith_worker_at(&session.creatures[1], blacksmith));
+    assert!(!local_smith_staffed_at(&session.creatures[1], blacksmith));
+
+    session.creatures[0].remote_outpost = None;
+    session.creatures[0].task = Task::GoMine(mine);
+    session.creatures[1].remote_outpost = None;
+    session.creatures[1].task = Task::GoSmith(blacksmith);
+
+    assert!(!local_mine_worker_at(&session.creatures[0], mine));
+    assert!(local_mine_staffed_at(&session.creatures[0], mine));
+    assert!(local_smith_staffed_at(&session.creatures[1], blacksmith));
 }
 
 #[test]

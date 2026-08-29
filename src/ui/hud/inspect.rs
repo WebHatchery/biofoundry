@@ -2,7 +2,7 @@
 //! plus its per-kind verbs (blacksmith production orders, pit breeding).
 
 use crate::data::GameData;
-use crate::state::creatures::{Creature, Good, Task};
+use crate::state::creatures::{Creature, Good, Job, Task};
 use crate::state::outposts::TransitDirection;
 use crate::state::structures::Building;
 use crate::state::GameSession;
@@ -60,7 +60,7 @@ pub(super) fn draw_inspect_panel(
             let staffed = session
                 .creatures
                 .iter()
-                .filter(|c| local_mine_worker_at(c, pos))
+                .filter(|c| local_mine_staffed_at(c, pos))
                 .count();
             let slots = def
                 .and_then(|d| d.workstation.as_ref())
@@ -167,10 +167,19 @@ pub(super) fn draw_inspect_panel(
             );
         }
         "blacksmith" => {
-            let staffed = session.creatures.iter().any(|c| local_smith_at(c, pos));
+            let working = session
+                .creatures
+                .iter()
+                .any(|c| local_smith_worker_at(c, pos));
+            let staffed = session
+                .creatures
+                .iter()
+                .any(|c| local_smith_staffed_at(c, pos));
             line(
-                if staffed {
+                if working {
                     "Smith at work"
+                } else if staffed {
+                    "Smith stationed"
                 } else {
                     "No smith — idle"
                 },
@@ -490,10 +499,30 @@ fn local_mine_worker_at(creature: &Creature, pos: TilePos) -> bool {
     !creature.is_remote() && matches!(&creature.task, Task::WorkMine(p) if *p == pos)
 }
 
-fn local_smith_at(creature: &Creature, pos: TilePos) -> bool {
+fn local_mine_staffed_at(creature: &Creature, pos: TilePos) -> bool {
+    !creature.is_remote()
+        && creature.job == Job::Miner
+        && match &creature.task {
+            Task::WorkMine(p) | Task::GoMine(p) => *p == pos,
+            _ => creature.tile() == pos,
+        }
+}
+
+fn local_smith_worker_at(creature: &Creature, pos: TilePos) -> bool {
     !creature.is_remote()
         && (matches!(&creature.task, Task::Smithing { shop, .. } if *shop == pos)
             || matches!(&creature.task, Task::Crafting { shop, .. } if *shop == pos))
+}
+
+fn local_smith_staffed_at(creature: &Creature, pos: TilePos) -> bool {
+    !creature.is_remote()
+        && creature.job == Job::Smith
+        && match &creature.task {
+            Task::Smithing { shop, .. } | Task::Crafting { shop, .. } | Task::GoSmith(shop) => {
+                *shop == pos
+            }
+            _ => creature.tile() == pos,
+        }
 }
 
 fn outpost_return_label(cargo: u32, crew: usize) -> String {
