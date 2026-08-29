@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `f0af4fc`
+**Source revision:** `8fbcd59`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -25,7 +25,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 124 unit tests and 2 integration tests pass.
+- `cargo test --all-targets` — 125 unit tests and 2 integration tests pass.
 - `cargo clippy --all-targets --all-features -- -D warnings` — pass.
 - `publish.ps1` with no parameters — pass; Windows and WebGL packages
   deployed to Preview.
@@ -118,6 +118,11 @@ automated simulation results into first-time-player evidence.
   idle creature is actually reassignable before promising `+ Guard`; an idle
   non-reassignable specialist receives the safe fallback instead. Focused
   coverage verifies that disabled job controls are not advertised as available.
+- Shared security guidance — the victory report, raid banner, and persistent
+  Objective now use the same eligibility-aware action hint, including the
+  visible `in Jobs` destination and the specialist-only `free a worker`
+  recovery. Focused HUD coverage keeps the victory report from promising a
+  disabled Guard assignment.
 - Endless route failure capture — [ui_endless_failure.png](../verification/ui_endless_failure.png)
   shows the failed outpost's wrapped recovery message and the Objective's
   complete visible Activate route instruction, alongside the top-bar failure
