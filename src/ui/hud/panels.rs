@@ -19,6 +19,7 @@ pub(super) fn draw_top_bar(
     session: &GameSession,
     bar: Rect,
     mouse: Vec2,
+    paused: bool,
     actions: &mut Vec<UiAction>,
 ) {
     draw_surface(
@@ -42,7 +43,14 @@ pub(super) fn draw_top_bar(
         TextStyle::new(18.0, dark::TEXT).params(),
     );
 
-    if let Some(transit) = &session.worm_transit {
+    if paused {
+        draw_ui_text_ex(
+            "PAUSED — tap Resume to continue",
+            bar.x + 380.0,
+            bar.y + 31.0,
+            TextStyle::new(15.0, dark::WARNING).params(),
+        );
+    } else if let Some(transit) = &session.worm_transit {
         draw_ui_text_ex(
             &format!(
                 "WORM TRANSIT — {:.0}s remaining",
@@ -99,6 +107,14 @@ pub(super) fn draw_top_bar(
         mouse,
     ) {
         actions.push(UiAction::BackToMenu);
+    }
+    if hud_button(
+        Rect::new(bar.right() - 512.0, bar.y + 8.0, 74.0, 32.0),
+        if paused { "Resume" } else { "Pause" },
+        true,
+        mouse,
+    ) {
+        actions.push(UiAction::TogglePause);
     }
     if hud_button(
         Rect::new(bar.right() - 354.0, bar.y + 4.0, 40.0, 40.0),

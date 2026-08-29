@@ -58,6 +58,9 @@ pub enum UiAction {
     ToggleSettings,
     /// Open/close the revisitable warren field guide.
     ToggleHelp,
+    /// Pause or resume the fixed-timestep simulation while leaving the HUD
+    /// and camera interactive.
+    TogglePause,
     /// Nudge the sound volume by this many 10% steps.
     AdjustVolume(i8),
     /// Zoom the warren camera around the screen centre.

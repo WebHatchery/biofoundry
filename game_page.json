@@ -19,6 +19,10 @@
       "desc": "Tap to zoom the camera"
     },
     {
+      "key": "Pause / Resume",
+      "desc": "Tap Pause to stop the simulation while keeping the Warren controls available"
+    },
+    {
       "key": "Visible buttons",
       "desc": "Tap New Warren, Save, Load, Continue, and Menu"
     },

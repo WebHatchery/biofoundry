@@ -46,6 +46,8 @@ pub struct Game {
     settings_open: bool,
     /// The warren field guide is showing.
     help_open: bool,
+    /// Whether the fixed-timestep simulation is paused by the player.
+    paused: bool,
     /// A save slot exists, so the menu can offer Continue.
     save_exists: bool,
     /// Where the right button went down, to tell a click from a camera drag.
@@ -92,6 +94,7 @@ impl Game {
             last_camera: (vec2(0.0, 0.0), 1.0),
             settings_open: false,
             help_open: false,
+            paused: false,
             save_exists,
             right_press: vec2(0.0, 0.0),
             mouse_pan_start: None,
@@ -123,68 +126,70 @@ impl Game {
 
         let mut safe_beat_reached = false;
         if let GameState::Warren(session) = &mut self.state {
-            self.accumulator += dt;
-            let mut ticks = 0;
-            while self.accumulator >= SIM_DT && ticks < MAX_TICKS_PER_FRAME {
-                let report = simulation::tick(session, &self.data);
-                for deserter in &report.deserters {
-                    self.notifications.danger(format!(
-                        "A starving {} deserted the warren!",
-                        deserter.job.label().to_lowercase()
-                    ));
-                    self.audio.play(Sfx::Deny);
+            if !self.paused {
+                self.accumulator += dt;
+                let mut ticks = 0;
+                while self.accumulator >= SIM_DT && ticks < MAX_TICKS_PER_FRAME {
+                    let report = simulation::tick(session, &self.data);
+                    for deserter in &report.deserters {
+                        self.notifications.danger(format!(
+                            "A starving {} deserted the warren!",
+                            deserter.job.label().to_lowercase()
+                        ));
+                        self.audio.play(Sfx::Deny);
+                    }
+                    if report.won_this_tick {
+                        safe_beat_reached = true;
+                        self.notifications.success("The warren thrives — victory!");
+                        self.audio.play(Sfx::Complete);
+                    }
+                    if report.factory_this_tick {
+                        safe_beat_reached = true;
+                        self.notifications
+                            .success("The Biofoundry roars — factory complete!");
+                        self.audio.play(Sfx::Complete);
+                    }
+                    if report.worm_this_tick {
+                        safe_beat_reached = true;
+                        self.notifications
+                            .success("The ground heaves — the Colossal Worm awakens!");
+                        self.audio.play(Sfx::Worm);
+                    }
+                    if report.wild.raid_started {
+                        self.notifications
+                            .danger("Raid! Gnarls are coming for the larder.");
+                        self.audio.play(Sfx::Alarm);
+                    }
+                    if report.wild.raid_survived {
+                        self.notifications.success("The raid is over — we held.");
+                        self.audio.play(Sfx::Complete);
+                    }
+                    for _ in 0..report.wild.captured {
+                        self.notifications
+                            .success("A wild beetle was snared — specimen housed.");
+                        self.audio.play(Sfx::Capture);
+                    }
+                    for _ in 0..report.wild.guards_killed {
+                        self.notifications
+                            .danger("A guard fell defending the warren.");
+                        self.audio.play(Sfx::Deny);
+                    }
+                    for name in &report.wild.unlocked {
+                        self.notifications.success(format!("Unlocked: {name}"));
+                        self.audio.play(Sfx::Complete);
+                    }
+                    if report.wild.bred_beetle {
+                        self.notifications
+                            .info("The breeding pit hatched a new beetle hauler.");
+                        self.audio.play(Sfx::Capture);
+                    }
+                    self.accumulator -= SIM_DT;
+                    ticks += 1;
                 }
-                if report.won_this_tick {
-                    safe_beat_reached = true;
-                    self.notifications.success("The warren thrives — victory!");
-                    self.audio.play(Sfx::Complete);
+                // Drop backlog beyond the cap instead of spiraling.
+                if self.accumulator >= SIM_DT {
+                    self.accumulator = 0.0;
                 }
-                if report.factory_this_tick {
-                    safe_beat_reached = true;
-                    self.notifications
-                        .success("The Biofoundry roars — factory complete!");
-                    self.audio.play(Sfx::Complete);
-                }
-                if report.worm_this_tick {
-                    safe_beat_reached = true;
-                    self.notifications
-                        .success("The ground heaves — the Colossal Worm awakens!");
-                    self.audio.play(Sfx::Worm);
-                }
-                if report.wild.raid_started {
-                    self.notifications
-                        .danger("Raid! Gnarls are coming for the larder.");
-                    self.audio.play(Sfx::Alarm);
-                }
-                if report.wild.raid_survived {
-                    self.notifications.success("The raid is over — we held.");
-                    self.audio.play(Sfx::Complete);
-                }
-                for _ in 0..report.wild.captured {
-                    self.notifications
-                        .success("A wild beetle was snared — specimen housed.");
-                    self.audio.play(Sfx::Capture);
-                }
-                for _ in 0..report.wild.guards_killed {
-                    self.notifications
-                        .danger("A guard fell defending the warren.");
-                    self.audio.play(Sfx::Deny);
-                }
-                for name in &report.wild.unlocked {
-                    self.notifications.success(format!("Unlocked: {name}"));
-                    self.audio.play(Sfx::Complete);
-                }
-                if report.wild.bred_beetle {
-                    self.notifications
-                        .info("The breeding pit hatched a new beetle hauler.");
-                    self.audio.play(Sfx::Capture);
-                }
-                self.accumulator -= SIM_DT;
-                ticks += 1;
-            }
-            // Drop backlog beyond the cap instead of spiraling.
-            if self.accumulator >= SIM_DT {
-                self.accumulator = 0.0;
             }
 
             if session.economy.food <= 0.0 && !self.famine_announced {
@@ -286,6 +291,7 @@ impl Game {
                     self.selected_building,
                     ui::hud::HudOptions {
                         help_open: self.help_open,
+                        paused: self.paused,
                         save_exists: self.save_exists,
                     },
                 );
@@ -518,12 +524,14 @@ impl Game {
                 self.famine_announced = false;
                 self.mode = UiMode::Inspect;
                 self.help_open = false;
+                self.paused = false;
                 self.state = GameState::Warren(Box::new(session));
                 self.autosave_game();
             }
             StateTransition::BackToMenu => {
                 self.mode = UiMode::Inspect;
                 self.help_open = false;
+                self.paused = false;
                 self.state = GameState::Menu;
             }
         }

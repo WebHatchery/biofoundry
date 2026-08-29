@@ -184,6 +184,20 @@ impl Game {
                 self.help_open = !self.help_open;
                 self.audio.play(Sfx::Select);
             }
+            UiAction::TogglePause => {
+                if matches!(&self.state, GameState::Warren(_)) {
+                    self.paused = !self.paused;
+                    // A partial frame should not be carried across a pause;
+                    // resuming starts cleanly on the next fixed timestep.
+                    self.accumulator = 0.0;
+                    self.notifications.info(if self.paused {
+                        "Simulation paused — tap Resume to continue."
+                    } else {
+                        "Simulation resumed."
+                    });
+                    self.audio.play(Sfx::Select);
+                }
+            }
             UiAction::AdjustVolume(steps) => {
                 let volume = (self.audio.volume() * 10.0 + steps as f32).round() / 10.0;
                 self.audio.set_volume(volume);

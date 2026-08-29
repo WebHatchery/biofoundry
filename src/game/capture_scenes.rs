@@ -267,6 +267,14 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                 session.tutorial_dismissed = true;
             }
         }
+        "pause" => {
+            game.transition(StateTransition::StartWarren);
+            game.paused = true;
+            if let GameState::Warren(session) = &mut game.state {
+                session.tutorial_dismissed = true;
+                session.economy.food = 72.0;
+            }
+        }
         "collapse" => {
             game.transition(StateTransition::StartWarren);
             if let GameState::Warren(session) = &mut game.state {

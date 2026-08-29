@@ -30,9 +30,9 @@ blockers, confusion points, viewport, input method, and build revision.
 **Outcome:** every required campaign and recovery action works without a
 physical keyboard or right mouse button.
 
-- [ ] Add or verify direct drag camera movement and touch-compatible zoom.
-- [ ] Remove keyboard-only wording from tutorial and player-facing HUD copy.
-- [ ] Keep visible Save and Load controls; make shortcut text secondary.
+- [x] Add or verify direct drag camera movement and touch-compatible zoom.
+- [x] Remove keyboard-only wording from tutorial and player-facing HUD copy.
+- [x] Keep visible Save and Load controls; make shortcut text secondary.
 - [ ] Verify all overlays, inspection actions, placement, digging, job changes,
   crafting, shrine controls, and completion choices with tap/click.
 - [ ] Test UI hit targets and overlap at the supported minimum viewport.
