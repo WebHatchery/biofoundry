@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `6bc9127`
+**Source revision:** `788ac08`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -25,7 +25,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 120 unit tests and 2 integration tests pass.
+- `cargo test --all-targets` — 121 unit tests and 2 integration tests pass.
 - `cargo clippy --all-targets --all-features -- -D warnings` — pass.
 - `publish.ps1` with no parameters — pass; Windows and WebGL packages
   deployed to Preview.
@@ -100,6 +100,11 @@ automated simulation results into first-time-player evidence.
   now waits for both the campaign threshold and a Guard assignment, with save
   migration coverage preserving the lesson when a returning save has not yet
   witnessed that defense step.
+- Victory handoff capture — [ui_victory.png](../verification/ui_victory.png)
+  keeps the threshold report honest when no Guard has been assigned: it says
+  onboarding still needs a Guard, names the visible `−` then `+ Guard` sequence,
+  and labels the primary choice `Return to Warren`. A guarded warren retains the
+  `Continue to Factory` handoff; focused HUD coverage exercises both branches.
 - Endless route failure capture — [ui_endless_failure.png](../verification/ui_endless_failure.png)
   shows the failed outpost's wrapped recovery message and the Objective's
   complete visible Activate route instruction, alongside the top-bar failure
