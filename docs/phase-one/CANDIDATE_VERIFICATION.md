@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `03a804f`  
+**Source revision:** `24bf6bb`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -29,6 +29,9 @@ automated simulation results into first-time-player evidence.
   deployed to Preview.
 - Fixed-seed campaign beats — secure `19.4m`, factory `24.4m`, shrine
   `29.4m`, worm `43.4m`; handoff gaps `5.0 / 5.0 / 14.1m`.
+- Worm Shrine inspection capture — [ui_shrine.png](../verification/ui_shrine.png)
+  shows remaining food/ingot offerings, minimum feed time, and the automatic
+  offering state in the final-demand card.
 
 ## Still open
 
