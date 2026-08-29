@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `856cee5`
+**Source revision:** `2dfcc42`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -21,6 +21,7 @@ automated simulation results into first-time-player evidence.
 | Fresh-tab relaunch and Continue | Pass | A new Preview tab restored the same `00:36` state and objective with visible controls. |
 | Minimum-layout spot check | Pass | The 1200×675 canvas and required HUD remained visible in the 1280×720 Preview viewport. |
 | Visible-control smoke path | Pass | A fresh Preview warren advanced through visible New Warren, + zoom, and Farm placement without keyboard input. While the 10-ore construction site was pending, the tutorial correctly remained on `2/5 — Stabilize the Food Grid`; successful placement returned to Inspect instead of creating a second site. This is developer smoke evidence, not a qualifying first-time-player session. |
+| Hosted-page toast safety | Pass | The placement confirmation remained fully readable above and left of the fixed Report a Bug widget in the published Preview. |
 
 ## Automated candidate checks
 
@@ -29,6 +30,8 @@ automated simulation results into first-time-player evidence.
 - `cargo clippy --all-targets --all-features -- -D warnings` — pass.
 - `publish.ps1` with no parameters — pass; Windows and WebGL packages
   deployed to Preview.
+- Shared toolkit notification-offset tests — 360 tests pass; the hosted-page
+  toast offset is opt-in, so existing notification anchors remain unchanged.
 - Fixed-seed campaign beats — secure `19.4m`, factory `24.4m`, shrine
   `29.4m`, worm `39.5m`; handoff gaps `5.0 / 5.0 / 10.1m`.
 - Shrine pacing guardrail — the final offering handoff now remains under
