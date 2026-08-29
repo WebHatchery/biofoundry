@@ -33,8 +33,10 @@ pub fn tick_creatures(session: &mut GameSession, data: &GameData, dt: f32) {
     // tick read and update it so they spread across open slots.
     let mut claims: MineClaims = MineClaims::new();
     for c in &creatures {
-        if let Task::GoMine(p) | Task::WorkMine(p) = &c.task {
-            *claims.entry(*p).or_insert(0) += 1;
+        if !c.is_remote() {
+            if let Task::GoMine(p) | Task::WorkMine(p) = &c.task {
+                *claims.entry(*p).or_insert(0) += 1;
+            }
         }
     }
 

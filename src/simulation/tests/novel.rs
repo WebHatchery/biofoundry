@@ -5,6 +5,7 @@ use crate::simulation::{self, outposts, SIM_DT};
 use crate::state::creatures::{Good, Job, Task};
 use crate::state::outposts::TransitDirection;
 use crate::state::structures::Building;
+use macroquad_toolkit::grid::TilePos;
 
 fn active_outpost(
     seed: u64,
@@ -297,6 +298,31 @@ fn remote_crew_stays_out_of_local_simulation_until_returned() {
         .expect("failed transit returns its crew");
     assert_eq!(crew.remote_outpost, None);
     assert_eq!(crew.tile(), stockpile);
+}
+
+#[test]
+fn remote_mine_tasks_do_not_block_a_local_miner() {
+    let (data, mut session) = boot(25);
+    let mine = session.buildings_of("mine").next().unwrap().pos;
+    session.creatures.clear();
+
+    for _ in 0..3 {
+        session.spawn_creature(&data, "goblin", Job::Miner);
+        let remote = session.creatures.last_mut().unwrap();
+        remote.remote_outpost = Some(TilePos::new(4, 4));
+        remote.task = Task::WorkMine(mine);
+    }
+    session.spawn_creature(&data, "goblin", Job::Miner);
+    let local_id = session.creatures.last().unwrap().id;
+
+    simulation::tick(&mut session, &data);
+
+    let local = session
+        .creatures
+        .iter()
+        .find(|creature| creature.id == local_id)
+        .expect("local miner remains in the warren");
+    assert!(matches!(local.task, Task::GoMine(_) | Task::WorkMine(_)));
 }
 
 #[test]
