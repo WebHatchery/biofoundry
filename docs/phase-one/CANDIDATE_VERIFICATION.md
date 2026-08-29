@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `8fbcd59`
+**Source revision:** `dd858cf`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -93,8 +93,9 @@ automated simulation results into first-time-player evidence.
   recovery line, and disabled craft controls; focused UI coverage verifies the
   same capacity boundary.
 - Secure-warren raid captures — [ui_raid_warning.png](../verification/ui_raid_warning.png)
-  shows the top-bar warning naming `−` beside Miner and `+` beside Guard when
-  the warren has no idle worker; [ui_raid_food_warning.png](../verification/ui_raid_food_warning.png)
+  shows the compact top-bar warning naming `− Miner` and `+ Guard` when the
+  warren has no idle worker without colliding with the fixed Pause control;
+  [ui_raid_food_warning.png](../verification/ui_raid_food_warning.png)
   keeps the food and raid responses visible together; [ui_raid.png](../verification/ui_raid.png)
   shows the active raid after Guards are assigned. The Secure the Warren lesson
   now waits for both the campaign threshold and a Guard assignment, with save
