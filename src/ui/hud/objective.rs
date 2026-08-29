@@ -17,10 +17,17 @@ impl CampaignObjective {
     /// Derive the current milestone without mutating the simulation.
     pub fn current(session: &GameSession, data: &GameData) -> Self {
         if session.worm_awake {
+            let next = if !session.unlocked.contains("worm_transit") {
+                "Next: keep forging ingots to unlock Worm Transit."
+            } else if session.buildings_of("outpost").next().is_none() {
+                "Next: build a Worm Outpost and send cargo through the awakened route."
+            } else {
+                "Next: activate the Worm Outpost and send a cargo run."
+            };
             return Self {
                 title: "Campaign complete".to_owned(),
                 progress: "The Colossal Worm is awake".to_owned(),
-                next: "Next: keep playing in the awakened warren.".to_owned(),
+                next: next.to_owned(),
                 ratio: 1.0,
                 complete: true,
             };

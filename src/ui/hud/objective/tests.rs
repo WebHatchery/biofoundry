@@ -52,4 +52,22 @@ fn objective_marks_the_worm_awake_as_complete() {
 
     assert!(objective.complete);
     assert_eq!(objective.ratio, 1.0);
+    assert_eq!(
+        objective.next,
+        "Next: keep forging ingots to unlock Worm Transit."
+    );
+}
+
+#[test]
+fn completed_objective_points_into_an_unlocked_outpost_route() {
+    let (data, mut session) = boot();
+    session.worm_awake = true;
+    session.unlocked.insert("worm_transit".to_owned());
+
+    let objective = CampaignObjective::current(&session, &data);
+
+    assert_eq!(
+        objective.next,
+        "Next: build a Worm Outpost and send cargo through the awakened route."
+    );
 }
