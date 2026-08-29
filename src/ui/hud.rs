@@ -144,14 +144,9 @@ pub fn draw(
     } else if victory_up {
         overlays::draw_goal_overlay(
             "Warren Secured",
-            &format!(
-                "The warren thrives: the 100-food surplus and {} ore delivered in {:.0} minutes secure the colony.\n\nOnboarding is complete. Next: place a Blacksmith and forge {} ingots (a Smelter Den + salamander forges them in bulk).",
-                session.economy.ore_delivered_total,
-                simulation::sim_seconds(session) / 60.0,
-                data.balance.win2_ingots
-            ),
+            &warren_victory_body(session, data),
             UiAction::DismissVictory,
-            "Continue to Factory",
+            warren_victory_continue_label(session),
             mouse,
             &mut actions,
         );
@@ -194,6 +189,37 @@ fn worm_completion_body(session: &GameSession) -> String {
         session.worm_ingots_fed,
         simulation::sim_seconds(session) / 60.0
     )
+}
+
+fn warren_victory_body(session: &GameSession, data: &GameData) -> String {
+    let base = format!(
+        "The warren thrives: the {:.0}-food surplus and {} ore delivered in {:.0} minutes secure the colony.",
+        data.balance.win_food_surplus,
+        session.economy.ore_delivered_total,
+        simulation::sim_seconds(session) / 60.0
+    );
+    if session.job_count(Job::Guard) > 0 {
+        format!(
+            "{base}\n\nOnboarding is complete. Next: place a Blacksmith and forge {} ingots (a Smelter Den + salamander forges them in bulk).",
+            data.balance.win2_ingots
+        )
+    } else if session.job_count(Job::Idle) > 0 {
+        format!(
+            "{base}\n\nThe reserve gate is complete. Onboarding still needs a Guard. After closing this report, tap + beside Guard in Jobs."
+        )
+    } else {
+        format!(
+            "{base}\n\nThe reserve gate is complete. Onboarding still needs a Guard. After closing this report, tap − beside Miner, then + beside Guard in Jobs."
+        )
+    }
+}
+
+fn warren_victory_continue_label(session: &GameSession) -> &'static str {
+    if session.job_count(Job::Guard) > 0 {
+        "Continue to Factory"
+    } else {
+        "Return to Warren"
+    }
 }
 
 /// Claim the small invisible margins around top-bar buttons for the HUD too.

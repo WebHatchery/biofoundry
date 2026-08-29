@@ -1,4 +1,5 @@
 use super::*;
+use crate::state::creatures::Job;
 
 #[test]
 fn top_bar_claims_scaled_button_margin_before_world_input() {
@@ -43,4 +44,25 @@ fn worm_completion_summary_names_the_resources_consumed() {
         data.balance.worm_awaken_at, data.balance.worm_awaken_ingots
     )));
     assert!(!body.contains("offerings"));
+}
+
+#[test]
+fn warren_victory_report_keeps_the_guard_handoff_explicit() {
+    let data = GameData::load().unwrap();
+    let mut session = GameSession::new(&data, 42);
+    session.won = true;
+
+    let body = warren_victory_body(&session, &data);
+    assert!(body.contains("Onboarding still needs a Guard"));
+    assert!(body.contains("tap − beside Miner, then + beside Guard"));
+    assert_eq!(warren_victory_continue_label(&session), "Return to Warren");
+
+    session.creatures[0].job = Job::Guard;
+    let body = warren_victory_body(&session, &data);
+    assert!(body.contains("Onboarding is complete"));
+    assert!(!body.contains("still needs a Guard"));
+    assert_eq!(
+        warren_victory_continue_label(&session),
+        "Continue to Factory"
+    );
 }
