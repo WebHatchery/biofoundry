@@ -135,10 +135,11 @@ impl CampaignObjective {
         }
 
         if session.buildings_of("worm_shrine").next().is_none() {
+            let (progress, next) = shrine_build_requirement(session, data);
             return Self {
                 title: "Awaken the Worm".to_owned(),
-                progress: "Worm Shrine · ready to build".to_owned(),
-                next: "Next: tap Shrine in Build & Dig, then place it on open floor.".to_owned(),
+                progress,
+                next,
                 ratio: 0.0,
                 complete: false,
             };
@@ -168,6 +169,36 @@ impl CampaignObjective {
             complete: false,
         }
     }
+}
+
+fn shrine_build_requirement(session: &GameSession, data: &GameData) -> (String, String) {
+    if session.unlocked.contains("worm_shrine") {
+        return (
+            "Worm Shrine · ready to build".to_owned(),
+            "Next: tap Shrine in Build & Dig, then place it on open floor.".to_owned(),
+        );
+    }
+
+    let Some(unlock) = data
+        .unlocks
+        .iter()
+        .find(|unlock| unlock.id == "worm_shrine")
+    else {
+        return (
+            "Worm Shrine · locked".to_owned(),
+            "Next: meet the Worm Shrine prerequisite.".to_owned(),
+        );
+    };
+    let current = crate::simulation::wildlife::counter_value(session, &unlock.counter);
+    let requirement = super::requirements::unlock_requirement(data, "worm_shrine")
+        .unwrap_or_else(|| "meet the prerequisite".to_owned());
+    (
+        format!(
+            "Worm Shrine · {requirement} ({current}/{})",
+            unlock.threshold
+        ),
+        format!("Next: {requirement} to unlock the Worm Shrine."),
+    )
 }
 
 pub(super) fn security_handoff_action_hint(session: &GameSession, data: &GameData) -> String {

@@ -32,6 +32,7 @@ fn objective_moves_through_factory_and_shrine() {
     assert_eq!(factory.title, "Complete the Biofoundry");
 
     session.factory_complete = true;
+    session.unlocked.insert("worm_shrine".to_owned());
     let shrine = CampaignObjective::current(&session, &data);
     assert_eq!(shrine.progress, "Worm Shrine · ready to build");
 
@@ -46,6 +47,22 @@ fn objective_moves_through_factory_and_shrine() {
     let offerings = CampaignObjective::current(&session, &data);
     assert_eq!(offerings.title, "Awaken the Worm");
     assert!(offerings.progress.contains("Offerings"));
+}
+
+#[test]
+fn objective_keeps_the_shrine_lock_consistent_with_build_controls() {
+    let (data, mut session) = boot();
+    session.creatures[0].job = Job::Guard;
+    session.won = true;
+    session.factory_complete = true;
+
+    let objective = CampaignObjective::current(&session, &data);
+
+    assert_eq!(objective.progress, "Worm Shrine · forge 20 ingots (0/20)");
+    assert_eq!(
+        objective.next,
+        "Next: forge 20 ingots to unlock the Worm Shrine."
+    );
 }
 
 #[test]
