@@ -77,6 +77,10 @@ impl Game {
         match self.load_session_from_slot(&slot) {
             Ok(session) => {
                 self.install_loaded_session(session);
+                // The slot may have become available after startup (or after
+                // a prior failed recovery), so a successful load must restore
+                // the title screen's Continue affordance as well.
+                self.save_exists = true;
                 self.notifications.success("Warren loaded.");
             }
             Err(err) => self.recover_failed_load(&slot, err),
