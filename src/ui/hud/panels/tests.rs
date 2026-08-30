@@ -198,10 +198,19 @@ fn optional_specialist_buttons_explain_when_the_unique_post_is_filled() {
 
 #[test]
 fn optional_support_buttons_name_their_practical_roles() {
-    assert_eq!(optional_support_label("beetle", 25), "Beetle haul (25)");
+    assert_eq!(optional_support_label("beetle", 25, 0), "Beetle haul (25)");
     assert_eq!(
-        optional_support_label("salamander", 20),
+        optional_support_label("salamander", 20, 0),
         "Salam. forge (20)"
+    );
+}
+
+#[test]
+fn active_support_buttons_keep_their_local_benefit_visible() {
+    assert_eq!(optional_support_label("beetle", 25, 2), "Beetle x2 haul");
+    assert_eq!(
+        optional_support_label("salamander", 20, 1),
+        "Salam x1 forge"
     );
 }
 

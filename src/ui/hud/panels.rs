@@ -2,9 +2,11 @@
 //! job assignment panel, the build/dig tools, and the tutorial card.
 
 mod food;
+mod specialists;
 mod top_bar;
 
 pub(super) use food::draw_food_grid_panel;
+use specialists::{optional_specialist_label, optional_support_label};
 pub(super) use top_bar::{
     compact_food_recovery_hint, compact_raid_defense_hint, compact_top_bar,
     condensed_food_recovery_hint, condensed_raid_defense_hint, reassignable_job_count,
@@ -383,12 +385,22 @@ pub(super) fn draw_jobs_panel(
         .iter()
         .filter(|c| c.species == "bat_courier")
         .count();
+    let local_beetles = session
+        .creatures
+        .iter()
+        .filter(|c| !c.is_remote() && c.species == "beetle")
+        .count();
+    let local_salamanders = session
+        .creatures
+        .iter()
+        .filter(|c| !c.is_remote() && c.species == "salamander")
+        .count();
     let half = (panel.w - 36.0) / 2.0;
     let specialist_height = if compact { 34.0 } else { 30.0 };
     let specialist_step = if compact { 38.0 } else { 34.0 };
     if hud_button(
         Rect::new(x, y, half, specialist_height),
-        &optional_support_label("beetle", data.balance.beetle_ore_cost),
+        &optional_support_label("beetle", data.balance.beetle_ore_cost, local_beetles),
         session.economy.ore_stock >= data.balance.beetle_ore_cost,
         mouse,
     ) {
@@ -397,7 +409,11 @@ pub(super) fn draw_jobs_panel(
     let has_den = session.buildings_of("smelter").next().is_some();
     if hud_button(
         Rect::new(x + half + 8.0, y, half, specialist_height),
-        &format!("Salam. forge ({})", data.balance.salamander_ore_cost),
+        &optional_support_label(
+            "salamander",
+            data.balance.salamander_ore_cost,
+            local_salamanders,
+        ),
         has_den && session.economy.ore_stock >= data.balance.salamander_ore_cost,
         mouse,
     ) {
@@ -469,24 +485,6 @@ pub(super) fn draw_jobs_panel(
                 TextStyle::new(12.0, dark::WARNING).params(),
             );
         }
-    }
-}
-
-fn optional_specialist_label(species: &str, posted: bool) -> &'static str {
-    match (species, posted) {
-        ("slime_janitor", false) => "Slime · clean",
-        ("slime_janitor", true) => "Slime · posted",
-        ("bat_courier", false) => "Bat · 8 cargo",
-        ("bat_courier", true) => "Bat · posted",
-        _ => "Specialist",
-    }
-}
-
-fn optional_support_label(species: &str, cost: u32) -> String {
-    match species {
-        "beetle" => format!("Beetle haul ({cost})"),
-        "salamander" => format!("Salam. forge ({cost})"),
-        _ => format!("{species} ({cost})"),
     }
 }
 
