@@ -51,6 +51,11 @@ automated simulation results into first-time-player evidence.
   Completion choices and outpost actions stayed visible, while the Shrine and
   Blacksmith panels remained readable without clipping or overlap. This is
   packaged-native evidence; WebGL completion/endless evidence remains open.
+- Native release recovery capture — pass; rebuilt release capture now accepts
+  the documented `route_failure` alias and shows the red route alert, inactive
+  outpost action, recovery instruction, and returned cargo at 800×450. The
+  refreshed [ui_compact_route_failure.png](../verification/ui_compact_route_failure.png)
+  is the matching optimized-binary evidence.
 - Camera drag release guard — focused input coverage keeps a claimed mouse
   drag from selecting a map tile or activating a HUD control on release.
 - Touch map taps — focused input coverage and the explicit gesture path keep a

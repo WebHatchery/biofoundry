@@ -571,7 +571,7 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                 }
             }
         }
-        "endless_failure" => {
+        "endless_failure" | "route_failure" => {
             begin(game, "endless");
             if let GameState::Warren(session) = &mut game.state {
                 if let Some(route) = session.outposts.last_mut() {
