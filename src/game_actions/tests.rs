@@ -31,6 +31,18 @@ fn recruitment_notice_explains_optional_cleaners_and_couriers() {
 }
 
 #[test]
+fn recruitment_notice_explains_bred_specialist_benefits() {
+    let data = GameData::load().expect("embedded game data");
+
+    assert!(
+        recruitment_notice(&data, "hobgoblin", "A Hobgoblin emerges").contains("works at 2× speed")
+    );
+    assert!(recruitment_notice(&data, "overseer", "An Overseer emerges")
+        .contains("boosts nearby workers +35%"));
+    assert!(recruitment_notice(&data, "engineer", "An Engineer emerges").contains("mines +25%"));
+}
+
+#[test]
 fn transit_departure_notice_names_each_destination_without_assuming_payload() {
     assert_eq!(
         transit_departure_notice(TransitDirection::ToOutpost),

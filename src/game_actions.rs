@@ -291,8 +291,9 @@ fn outpost_activation_notice(active: bool) -> &'static str {
     }
 }
 
-/// Call out the food cost of optional recruits at the moment they join, so a
-/// successful growth choice cannot quietly turn the Food Grid negative.
+/// Call out the food cost and practical benefit of optional recruits at the
+/// moment they join, so a successful growth choice cannot quietly turn the
+/// Food Grid negative or leave its purpose unexplained.
 fn recruitment_notice(data: &GameData, species: &str, joined: &str) -> String {
     let upkeep = data
         .species
@@ -300,10 +301,22 @@ fn recruitment_notice(data: &GameData, species: &str, joined: &str) -> String {
         .map(|definition| definition.food_per_min)
         .unwrap_or(0.0);
     let purpose = match species {
-        "beetle" => Some("carries 5× a goblin load"),
-        "salamander" => Some("feeds the Smelter Den"),
-        "slime_janitor" => Some("cleans spoiled stores"),
-        "bat_courier" => Some("carries 8 at a time"),
+        "beetle" => Some("carries 5× a goblin load".to_owned()),
+        "salamander" => Some("feeds the Smelter Den".to_owned()),
+        "slime_janitor" => Some("cleans spoiled stores".to_owned()),
+        "bat_courier" => Some("carries 8 at a time".to_owned()),
+        "hobgoblin" => data
+            .species
+            .get(species)
+            .map(|definition| format!("works at {:.0}× speed", definition.work_mult)),
+        "overseer" => Some(format!(
+            "boosts nearby workers +{:.0}%",
+            (data.balance.overseer_aura_mult - 1.0) * 100.0
+        )),
+        "engineer" => data
+            .species
+            .get(species)
+            .map(|definition| format!("mines +{:.0}%", (definition.work_mult - 1.0) * 100.0)),
         _ => None,
     };
     let detail = purpose.map(|text| format!(" — {text}")).unwrap_or_default();
