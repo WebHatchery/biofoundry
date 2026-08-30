@@ -37,9 +37,9 @@ physical keyboard or right mouse button.
   crafting, shrine controls, and completion choices with tap/click.
 - [x] Test UI hit targets and overlap at the supported minimum viewport. The
   settled 800×450 audit sweep reports no grown-target ambiguity, and the
-  compact branch gives the high-frequency top-bar, Jobs, and Build & Dig
-  controls larger visual affordances; inspection-card density remains a
-  human-readability follow-up.
+  compact branch gives the high-frequency top-bar, Jobs, Build & Dig, and
+  inspection-card controls larger visual affordances; remaining text density
+  and first-time-player comprehension stay human-readability follow-ups.
 - [x] Add regression coverage for important UI intents where practical.
 
 **Acceptance:** a pointer/touch-only campaign reaches Worm Awakened and returns

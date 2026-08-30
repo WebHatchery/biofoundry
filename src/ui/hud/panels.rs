@@ -699,6 +699,7 @@ pub(super) fn draw_tutorial_panel(
     session: &GameSession,
     data: &GameData,
     mouse: Vec2,
+    ui_scale: f32,
     actions: &mut Vec<UiAction>,
 ) -> Option<Rect> {
     let step = crate::tutorial::current_step(session, data)?;
@@ -724,8 +725,18 @@ pub(super) fn draw_tutorial_panel(
         dark::TEXT,
     );
 
+    let skip_height = if compact_top_bar(ui_scale) {
+        30.0
+    } else {
+        22.0
+    };
     if hud_button(
-        Rect::new(panel.right() - 78.0, panel.bottom() - 30.0, 64.0, 22.0),
+        Rect::new(
+            panel.right() - 78.0,
+            panel.bottom() - 30.0,
+            64.0,
+            skip_height,
+        ),
         "Skip",
         true,
         mouse,

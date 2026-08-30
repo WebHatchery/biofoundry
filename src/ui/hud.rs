@@ -141,7 +141,7 @@ pub fn draw(
         ui.scale,
         &mut actions,
     );
-    let tutorial_panel = panels::draw_tutorial_panel(session, data, mouse, &mut actions);
+    let tutorial_panel = panels::draw_tutorial_panel(session, data, mouse, ui.scale, &mut actions);
     let objective_panel = panels::draw_objective_panel(session, data);
     let inspect_top = inspect_panel_top(tutorial_panel);
     let inspect_panel = selected.and_then(|pos| {

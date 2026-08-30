@@ -54,12 +54,28 @@ pub(super) fn draw_inspect_panel(
     let def = data.buildings.get(&building.kind);
     let name = def.map(|d| d.name.as_str()).unwrap_or(&building.kind);
 
+    let compact = super::panels::compact_top_bar(ui_scale);
+    let inspect_button_height = if compact { 30.0 } else { 24.0 };
+    let inspect_button_step = if compact { 34.0 } else { 26.0 };
+
     // The blacksmith panel carries the production-order queue and craft
     // buttons, and the breeding pit its breed buttons — both taller.
     let height = match building.kind.as_str() {
-        "blacksmith" => 194.0 + data.equipment.len() as f32 * 26.0,
-        "breeding_pit" => 280.0,
-        "worm_shrine" => 240.0,
+        "blacksmith" => 194.0 + data.equipment.len() as f32 * inspect_button_step,
+        "breeding_pit" => {
+            if compact {
+                320.0
+            } else {
+                280.0
+            }
+        }
+        "worm_shrine" => {
+            if compact {
+                250.0
+            } else {
+                240.0
+            }
+        }
         "outpost" => 510.0,
         _ => 152.0,
     };
@@ -73,9 +89,8 @@ pub(super) fn draw_inspect_panel(
 
     let x = panel.x + 14.0;
     let mut y = panel.y + 50.0;
-    let compact = super::panels::compact_top_bar(ui_scale);
-    let outpost_button_height = if compact { 30.0 } else { 24.0 };
-    let outpost_button_step = if compact { 34.0 } else { 26.0 };
+    let outpost_button_height = inspect_button_height;
+    let outpost_button_step = inspect_button_step;
     let line = |text: &str, color: Color, y: &mut f32| {
         draw_ui_text_ex(text, x, *y, TextStyle::new(14.0, color).params());
         *y += 20.0;
@@ -271,10 +286,15 @@ pub(super) fn draw_inspect_panel(
                 } else if banked > 0 {
                     label.push_str(&format!("  ·{banked} ready"));
                 }
-                if hud_button(Rect::new(x, y, bw, 22.0), &label, queue_available, mouse) {
+                if hud_button(
+                    Rect::new(x, y, bw, inspect_button_height),
+                    &label,
+                    queue_available,
+                    mouse,
+                ) {
                     actions.push(UiAction::QueueOrder(pos, eq.id.clone()));
                 }
-                y += 26.0;
+                y += inspect_button_step;
             }
         }
         "kiln" => {
@@ -360,10 +380,15 @@ pub(super) fn draw_inspect_panel(
                     breed_label(id, name, cost, data)
                 };
                 let enabled = unlocked && !blocked && session.economy.ingots_stock >= cost;
-                if hud_button(Rect::new(x, y, bw, 24.0), &label, enabled, mouse) {
+                if hud_button(
+                    Rect::new(x, y, bw, inspect_button_height),
+                    &label,
+                    enabled,
+                    mouse,
+                ) {
                     actions.push(UiAction::Breed(id.to_owned()));
                 }
-                y += 28.0;
+                y += if compact { inspect_button_step } else { 28.0 };
                 if !unlocked {
                     if let Some(hint) = breeding_unlock_hint(session, data, unlock) {
                         line(&hint, dark::WARNING, &mut y);
@@ -434,7 +459,7 @@ pub(super) fn draw_inspect_panel(
                 &mut y,
             );
             if hud_button(
-                Rect::new(x, y, panel.w - 28.0, 24.0),
+                Rect::new(x, y, panel.w - 28.0, inspect_button_height),
                 if paused {
                     "Resume offerings"
                 } else {
