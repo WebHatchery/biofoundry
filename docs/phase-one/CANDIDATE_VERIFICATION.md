@@ -60,10 +60,10 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 283 unit tests and 2 integration tests pass,
+- `cargo test --all-targets` — 286 unit tests and 2 integration tests pass,
   including fresh/simulated/remote-transit valid sessions, modal route
   planning, rejected malformed save shapes, and event-history save/load
-  coverage.
+  compatibility coverage.
 - `cargo clippy --all-targets --all-features -- -D warnings` — pass.
 - `publish.ps1` with no parameters — pass; Windows and WebGL packages
   deployed to Preview.
@@ -513,7 +513,8 @@ automated simulation results into first-time-player evidence.
   event log with a serde default for older saves, save/autosave checkpoints
   copy the live history, and load rehydrates review history without replaying
   old toasts while normalizing oversized loaded histories back to the toolkit
-  limit. Starting a genuinely new Warren clears the previous run's log.
+  limit. A pre-history save with the field absent loads with an empty log, and
+  starting a genuinely new Warren clears the previous run's log.
 - Reviewable notification history — pass; the Recent Events modal pages the
   full bounded history in ten-entry slices, keeps the first page newest-first,
   and exposes visible Older/Newer controls only when another page exists.

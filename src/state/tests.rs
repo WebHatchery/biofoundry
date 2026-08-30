@@ -35,6 +35,18 @@ fn event_history_survives_session_serialization() {
 }
 
 #[test]
+fn saves_from_before_event_history_load_with_an_empty_history() {
+    let data = GameData::load().unwrap();
+    let session = GameSession::new(&data, 42);
+    let mut encoded = serde_json::to_value(&session).unwrap();
+    encoded.as_object_mut().unwrap().remove("event_history");
+
+    let restored: GameSession = serde_json::from_value(encoded).unwrap();
+
+    assert!(restored.event_history.is_empty());
+}
+
+#[test]
 fn starting_buildings_land_on_walkable_floor() {
     let data = GameData::load().unwrap();
     let session = GameSession::new(&data, data.config.world_seed);
