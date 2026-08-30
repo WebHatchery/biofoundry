@@ -2,6 +2,7 @@
 //! a save/load roundtrip must not perturb it.
 
 use super::*;
+use crate::state::outposts::CargoPriority;
 
 #[test]
 fn ticks_accumulate_deterministically() {
@@ -61,6 +62,8 @@ fn save_roundtrip_preserves_outpost_dispatch_settings() {
     session.ensure_outpost(pos);
     session.outposts[0].crew_dispatch_limit = Some(2);
     session.outposts[0].storage_upgraded = true;
+    session.outposts[0].cargo_priority = CargoPriority::Food;
+    session.outposts[0].expedition_paused = true;
     session.outposts[0].auto_return_cargo = true;
     session.outposts[0].auto_resupply_food = true;
     session.auto_route_cursor = 1;
@@ -70,6 +73,8 @@ fn save_roundtrip_preserves_outpost_dispatch_settings() {
 
     assert_eq!(restored.outposts[0].crew_dispatch_limit, Some(2));
     assert!(restored.outposts[0].storage_upgraded);
+    assert_eq!(restored.outposts[0].cargo_priority, CargoPriority::Food);
+    assert!(restored.outposts[0].expedition_paused);
     assert!(restored.outposts[0].auto_return_cargo);
     assert!(restored.outposts[0].auto_resupply_food);
     assert_eq!(restored.auto_route_cursor, 1);

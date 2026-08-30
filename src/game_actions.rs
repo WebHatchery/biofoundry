@@ -171,8 +171,10 @@ impl Game {
                 }
             }
             UiAction::ActivateOutpost(pos) => {
+                let mut route_changed = false;
                 if let GameState::Warren(session) = &mut self.state {
                     if simulation::outposts::activate_outpost(session, pos) {
+                        route_changed = true;
                         let active = session
                             .outposts
                             .iter()
@@ -184,8 +186,12 @@ impl Game {
                             .warning("This outpost cannot reach the shrine yet.");
                     }
                 }
+                if route_changed {
+                    self.autosave_game();
+                }
             }
             UiAction::CycleOutpostCargo(pos) => {
+                let mut route_changed = false;
                 if let GameState::Warren(session) = &mut self.state {
                     if session
                         .building_at(pos)
@@ -194,6 +200,7 @@ impl Game {
                         session.ensure_outpost(pos);
                         if let Some(outpost) = session.outposts.iter_mut().find(|o| o.pos == pos) {
                             outpost.cycle_cargo_priority();
+                            route_changed = true;
                             self.notifications.info(format!(
                                 "Outbound cargo order: {}.",
                                 outpost.cargo_priority.label()
@@ -201,6 +208,9 @@ impl Game {
                             self.audio.play(Sfx::Select);
                         }
                     }
+                }
+                if route_changed {
+                    self.autosave_game();
                 }
             }
             UiAction::UpgradeOutpost(pos) => {
@@ -232,6 +242,7 @@ impl Game {
                 }
             }
             UiAction::CycleOutpostCrew(pos) => {
+                let mut route_changed = false;
                 if let GameState::Warren(session) = &mut self.state {
                     if session.worm_awake
                         && session.worm_transit.is_none()
@@ -243,6 +254,7 @@ impl Game {
                         if let Some(outpost) = session.outposts.iter_mut().find(|o| o.pos == pos) {
                             if outpost.active {
                                 outpost.cycle_crew_dispatch(self.data.balance.outpost_capacity);
+                                route_changed = true;
                                 self.notifications.info(format!(
                                     "Next outpost run: {}.",
                                     outpost.crew_dispatch_label(self.data.balance.outpost_capacity)
@@ -252,8 +264,12 @@ impl Game {
                         }
                     }
                 }
+                if route_changed {
+                    self.autosave_game();
+                }
             }
             UiAction::ToggleOutpostExpedition(pos) => {
+                let mut route_changed = false;
                 if let GameState::Warren(session) = &mut self.state {
                     if session.worm_awake
                         && session.worm_transit.is_none()
@@ -265,6 +281,7 @@ impl Game {
                         if let Some(outpost) = session.outposts.iter_mut().find(|o| o.pos == pos) {
                             if outpost.active && !outpost.crew.is_empty() {
                                 outpost.toggle_expedition();
+                                route_changed = true;
                                 self.notifications
                                     .info(outpost_expedition_notice(outpost.expedition_paused));
                                 self.audio.play(Sfx::Select);
@@ -272,8 +289,12 @@ impl Game {
                         }
                     }
                 }
+                if route_changed {
+                    self.autosave_game();
+                }
             }
             UiAction::ToggleOutpostAutoReturn(pos) => {
+                let mut route_changed = false;
                 if let GameState::Warren(session) = &mut self.state {
                     if session.worm_awake
                         && session.worm_transit.is_none()
@@ -285,6 +306,7 @@ impl Game {
                         if let Some(outpost) = session.outposts.iter_mut().find(|o| o.pos == pos) {
                             if outpost.active {
                                 outpost.toggle_auto_return();
+                                route_changed = true;
                                 self.notifications.info(format!(
                                     "Outpost policy: {}.",
                                     outpost.auto_return_label()
@@ -294,8 +316,12 @@ impl Game {
                         }
                     }
                 }
+                if route_changed {
+                    self.autosave_game();
+                }
             }
             UiAction::ToggleOutpostAutoResupply(pos) => {
+                let mut route_changed = false;
                 if let GameState::Warren(session) = &mut self.state {
                     if session.worm_awake
                         && session.worm_transit.is_none()
@@ -307,6 +333,7 @@ impl Game {
                         if let Some(outpost) = session.outposts.iter_mut().find(|o| o.pos == pos) {
                             if outpost.active {
                                 outpost.toggle_auto_resupply();
+                                route_changed = true;
                                 self.notifications.info(format!(
                                     "Outpost policy: {}.",
                                     outpost.auto_resupply_label()
@@ -315,6 +342,9 @@ impl Game {
                             }
                         }
                     }
+                }
+                if route_changed {
+                    self.autosave_game();
                 }
             }
             UiAction::TransitToOutpost(pos)
