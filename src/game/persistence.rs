@@ -2,13 +2,14 @@
 
 use super::Game;
 use crate::data::GameData;
-use crate::state::creatures::Job;
+use crate::state::creatures::{Job, Task};
 use crate::state::{GameSession, GameState};
 use crate::ui::UiMode;
 use macroquad_toolkit::persistence::{
     load_from_slot_with_migration, quarantine_slot, restore_slot_backup,
     save_to_slot_with_version_and_backup, slot_backup_exists, slot_exists,
 };
+use std::collections::HashSet;
 
 impl Game {
     pub(super) fn save_game(&mut self) {
@@ -84,6 +85,7 @@ impl Game {
                 let mut session: GameSession = serde_json::from_value(payload)
                     .map_err(|err| format!("Unsupported save {version:?}: {err}"))?;
                 migrate_tutorial_progress(&mut session, self.data.tutorial.len());
+                validate_loaded_session(&session, &self.data)?;
                 Ok(session)
             },
         )
@@ -166,6 +168,382 @@ impl Game {
             }
         }
     }
+}
+
+/// Reject saves that deserialize into a shape the simulation cannot safely
+/// operate on. Serde checks the field types, but it cannot know that a map
+/// position must be unique, a content id must exist in the embedded registry,
+/// or a timer must be finite. Keeping this check at the load boundary means a
+/// damaged primary can take the normal quarantine/backup path instead of
+/// poisoning the live session.
+pub(super) fn validate_loaded_session(
+    session: &GameSession,
+    data: &GameData,
+) -> Result<(), String> {
+    let tiles = &session.world.tiles;
+    let expected_cells = tiles
+        .width
+        .checked_mul(tiles.height)
+        .ok_or_else(|| "world dimensions overflowed".to_owned())?;
+    if tiles.width == 0 || tiles.height == 0 || tiles.data().len() != expected_cells {
+        return Err("world grid dimensions do not match its stored tiles".to_owned());
+    }
+    if !session.world.spawn.in_bounds(tiles.width, tiles.height) {
+        return Err("world spawn is outside the stored map".to_owned());
+    }
+
+    let mut occupied = HashSet::new();
+    for building in &session.buildings {
+        if data.buildings.get(&building.kind).is_none() {
+            return Err(format!("unknown building id {:?}", building.kind));
+        }
+        validate_walkable_position(
+            session,
+            building.pos,
+            &format!("building {:?}", building.kind),
+        )?;
+        if !occupied.insert(building.pos) {
+            return Err(format!("multiple buildings occupy {:?}", building.pos));
+        }
+        validate_nonnegative_finite(building.reserve, "building reserve")?;
+        validate_nonnegative_finite(building.waste, "building waste")?;
+        for (good, amount) in &building.stocks {
+            validate_nonnegative_finite(*amount, &format!("building stock {good:?}"))?;
+        }
+        for order in &building.orders {
+            if data.equipment_def(order).is_none() {
+                return Err(format!("unknown equipment order id {order:?}"));
+            }
+        }
+    }
+    for equipment in session.economy.gear_stock.keys() {
+        if data.equipment_def(equipment).is_none() {
+            return Err(format!("unknown stored equipment id {equipment:?}"));
+        }
+    }
+
+    for site in &session.build_sites {
+        if data.buildings.get(&site.kind).is_none() {
+            return Err(format!("unknown construction id {:?}", site.kind));
+        }
+        validate_walkable_position(session, site.pos, "construction site")?;
+        if !occupied.insert(site.pos) {
+            return Err(format!(
+                "construction overlaps an occupied tile {:?}",
+                site.pos
+            ));
+        }
+        if site.ore_needed == 0 || site.ore_delivered > site.ore_needed {
+            return Err(format!("invalid construction progress at {:?}", site.pos));
+        }
+    }
+
+    for pos in &session.dig_marks {
+        if !pos.in_bounds(tiles.width, tiles.height)
+            || !session.world.tiles.get(*pos).is_some_and(|tile| {
+                matches!(
+                    tile,
+                    crate::state::world::Tile::Rock | crate::state::world::Tile::OreVein
+                )
+            })
+        {
+            return Err(format!("invalid dig designation at {pos:?}"));
+        }
+    }
+    for (pos, remaining) in &session.patch_regrow {
+        validate_map_timer(
+            *pos,
+            *remaining,
+            tiles.width,
+            tiles.height,
+            "mushroom regrow",
+        )?;
+    }
+    for (pos, remaining) in &session.sporewood_regrow {
+        validate_map_timer(
+            *pos,
+            *remaining,
+            tiles.width,
+            tiles.height,
+            "sporewood regrow",
+        )?;
+    }
+    for pos in session.vein_ore.keys() {
+        if !pos.in_bounds(tiles.width, tiles.height) {
+            return Err(format!("ore vein state is outside the map at {pos:?}"));
+        }
+    }
+
+    validate_unique_ids(
+        session.creatures.iter().map(|creature| creature.id),
+        session.next_creature_id,
+        "creature",
+    )?;
+    for creature in &session.creatures {
+        if data.species.get(&creature.species).is_none() {
+            return Err(format!("unknown creature species {:?}", creature.species));
+        }
+        validate_actor_position(session, creature.x, creature.y, "creature")?;
+        validate_nonnegative_finite(creature.starving_for, "creature starvation timer")?;
+        validate_nonnegative_finite(creature.hp, "creature health")?;
+        validate_nonnegative_finite(creature.morale_stress_for, "creature morale timer")?;
+        if !creature.satiation.is_finite() || !creature.morale.is_finite() {
+            return Err("creature wellbeing contains a non-finite value".to_owned());
+        }
+        if let Some(equipment) = &creature.equipment {
+            if data.equipment_def(equipment).is_none() {
+                return Err(format!("unknown equipped item id {equipment:?}"));
+            }
+        }
+        validate_task_positions(session, &creature.task, &creature.path)?;
+        if let Some((_, amount)) = creature.carrying {
+            if amount == 0 {
+                return Err(format!("creature {} carries an empty load", creature.id));
+            }
+        }
+    }
+
+    validate_unique_ids(
+        session.wilds.iter().map(|wild| wild.id),
+        session.next_wild_id,
+        "wild creature",
+    )?;
+    for wild in &session.wilds {
+        if data.species.get(&wild.species).is_none() {
+            return Err(format!("unknown wild species {:?}", wild.species));
+        }
+        validate_actor_position(session, wild.x, wild.y, "wild creature")?;
+        validate_nonnegative_finite(wild.hp, "wild creature health")?;
+        validate_wild_behavior(session, &wild.behavior)?;
+        for path_pos in &wild.path {
+            validate_map_position(*path_pos, tiles.width, tiles.height, "wild creature path")?;
+        }
+    }
+
+    for outpost in &session.outposts {
+        validate_walkable_position(session, outpost.pos, "outpost")?;
+        if session
+            .outposts
+            .iter()
+            .filter(|other| other.pos == outpost.pos)
+            .count()
+            > 1
+        {
+            return Err(format!("multiple outpost records occupy {:?}", outpost.pos));
+        }
+        if !session
+            .buildings
+            .iter()
+            .any(|building| building.pos == outpost.pos && building.kind == "outpost")
+        {
+            return Err(format!(
+                "outpost record has no matching building at {:?}",
+                outpost.pos
+            ));
+        }
+        validate_nonnegative_finite(outpost.expedition_progress, "outpost expedition progress")?;
+    }
+    if let Some(transit) = &session.worm_transit {
+        if !session
+            .outposts
+            .iter()
+            .any(|outpost| outpost.pos == transit.outpost)
+        {
+            return Err(format!(
+                "transit targets an unknown outpost {:?}",
+                transit.outpost
+            ));
+        }
+        validate_nonnegative_finite(transit.remaining, "worm transit timer")?;
+        validate_nonnegative_finite(transit.food, "worm transit food")?;
+    }
+
+    for (name, value) in [
+        ("food", session.economy.food),
+        ("raw food", session.economy.raw_food),
+        ("cooked food", session.economy.cooked_food),
+        ("waste", session.economy.waste),
+        ("processed waste", session.economy.waste_processed),
+        (
+            "food production rate",
+            session.economy.production_ema_per_min,
+        ),
+        ("ore production rate", session.economy.ore_ema_per_min),
+        ("ingot production rate", session.economy.ingot_ema_per_min),
+        ("worm fed food", session.worm_fed),
+    ] {
+        validate_nonnegative_finite(value, name)?;
+    }
+    for (name, value) in [
+        ("wild spawn timer", session.wild_spawn_in),
+        ("raid timer", session.raid_in),
+        ("breeding timer", session.breed_in),
+        ("progress knowledge", session.progress.knowledge),
+        ("progress waste generated", session.progress.waste_generated),
+    ] {
+        validate_nonnegative_finite(value, name)?;
+    }
+    Ok(())
+}
+
+fn validate_nonnegative_finite(value: f32, field: &str) -> Result<(), String> {
+    if !value.is_finite() || value < 0.0 {
+        return Err(format!("{field} is not a finite non-negative value"));
+    }
+    Ok(())
+}
+
+fn validate_map_position(
+    pos: macroquad_toolkit::grid::TilePos,
+    width: usize,
+    height: usize,
+    field: &str,
+) -> Result<(), String> {
+    if !pos.in_bounds(width, height) {
+        return Err(format!("{field} is outside the map at {pos:?}"));
+    }
+    Ok(())
+}
+
+fn validate_walkable_position(
+    session: &GameSession,
+    pos: macroquad_toolkit::grid::TilePos,
+    field: &str,
+) -> Result<(), String> {
+    validate_map_position(
+        pos,
+        session.world.tiles.width,
+        session.world.tiles.height,
+        field,
+    )?;
+    if !session
+        .world
+        .tiles
+        .get(pos)
+        .is_some_and(|tile| tile.walkable())
+    {
+        return Err(format!("{field} is not on walkable floor at {pos:?}"));
+    }
+    Ok(())
+}
+
+fn validate_map_timer(
+    pos: macroquad_toolkit::grid::TilePos,
+    remaining: f32,
+    width: usize,
+    height: usize,
+    field: &str,
+) -> Result<(), String> {
+    validate_map_position(pos, width, height, field)?;
+    validate_nonnegative_finite(remaining, field)
+}
+
+fn validate_actor_position(
+    session: &GameSession,
+    x: f32,
+    y: f32,
+    field: &str,
+) -> Result<(), String> {
+    if !x.is_finite()
+        || !y.is_finite()
+        || x < 0.0
+        || y < 0.0
+        || x >= session.world.tiles.width as f32
+        || y >= session.world.tiles.height as f32
+    {
+        return Err(format!("{field} position is outside the map"));
+    }
+    Ok(())
+}
+
+fn validate_unique_ids(
+    ids: impl IntoIterator<Item = u32>,
+    next_id: u32,
+    kind: &str,
+) -> Result<(), String> {
+    let mut seen = HashSet::new();
+    let mut max_id = 0;
+    for id in ids {
+        if id == 0 || !seen.insert(id) {
+            return Err(format!("{kind} ids are missing or duplicated"));
+        }
+        max_id = max_id.max(id);
+    }
+    if next_id == 0 || next_id <= max_id {
+        return Err(format!("next {kind} id does not follow the roster"));
+    }
+    Ok(())
+}
+
+fn validate_task_positions(
+    session: &GameSession,
+    task: &Task,
+    path: &[macroquad_toolkit::grid::TilePos],
+) -> Result<(), String> {
+    for path_pos in path {
+        validate_map_position(
+            *path_pos,
+            session.world.tiles.width,
+            session.world.tiles.height,
+            "creature path",
+        )?;
+    }
+    let task_pos = match task {
+        Task::GoMine(pos)
+        | Task::WorkMine(pos)
+        | Task::GoFetch(pos)
+        | Task::GoDig(pos)
+        | Task::DeliverTo(pos)
+        | Task::GoCook(pos)
+        | Task::GoSmelt(pos)
+        | Task::GoSmith(pos)
+        | Task::GoClean(pos) => Some(*pos),
+        Task::Cooking { pot, .. } => Some(*pot),
+        Task::Smelting { den, .. } => Some(*den),
+        Task::Smithing { shop, .. } => Some(*shop),
+        Task::Cleaning { building, .. } => Some(*building),
+        Task::Digging { mark, .. } => Some(*mark),
+        Task::Fetching { source, .. } => Some(*source),
+        Task::Feeding { trough, .. } => Some(*trough),
+        Task::Crafting { shop, .. } => Some(*shop),
+        Task::Hunt { .. }
+        | Task::Idle
+        | Task::DeliverOre
+        | Task::DeliverIngot
+        | Task::GoPickupOre
+        | Task::PickingUpOre { .. }
+        | Task::GoEquip => None,
+    };
+    if let Some(pos) = task_pos {
+        validate_map_position(
+            pos,
+            session.world.tiles.width,
+            session.world.tiles.height,
+            "creature task",
+        )?;
+    }
+    Ok(())
+}
+
+fn validate_wild_behavior(
+    session: &GameSession,
+    behavior: &crate::state::wildlife::WildBehavior,
+) -> Result<(), String> {
+    match behavior {
+        crate::state::wildlife::WildBehavior::Wander { next_move_in } => {
+            validate_nonnegative_finite(*next_move_in, "wild movement timer")?;
+        }
+        crate::state::wildlife::WildBehavior::Raid { origin, eaten, .. } => {
+            validate_map_position(
+                *origin,
+                session.world.tiles.width,
+                session.world.tiles.height,
+                "raid origin",
+            )?;
+            validate_nonnegative_finite(*eaten, "raid food eaten")?;
+        }
+    }
+    Ok(())
 }
 
 pub(super) fn non_viable_save_notice(

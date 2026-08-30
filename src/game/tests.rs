@@ -1,8 +1,9 @@
+use super::persistence::validate_loaded_session;
 use super::*;
 use crate::data::GameData;
 use crate::state::creatures::Job;
 use crate::state::outposts::{ExpeditionCompletion, TransitCompletion, TransitDirection};
-use crate::state::structures::BuildSite;
+use crate::state::structures::{BuildSite, Building};
 use crate::state::GameSession;
 
 fn session() -> (GameData, GameSession) {
@@ -89,6 +90,58 @@ fn viable_save_notice_stays_empty_for_a_recoverable_warren() {
     session.won = true;
 
     assert_eq!(non_viable_save_notice(&session, &data), None);
+}
+
+#[test]
+fn loaded_session_validation_accepts_a_fresh_warren() {
+    let (data, session) = session();
+
+    validate_loaded_session(&session, &data).expect("fresh session should be loadable");
+}
+
+#[test]
+fn loaded_session_validation_accepts_a_simulated_warren() {
+    let (data, mut session) = session();
+    for _ in 0..600 {
+        crate::simulation::tick(&mut session, &data);
+    }
+
+    validate_loaded_session(&session, &data).expect("simulated session should remain loadable");
+}
+
+#[test]
+fn loaded_session_validation_rejects_broken_grid_storage() {
+    let (data, mut session) = session();
+    session.world.tiles.width -= 1;
+
+    let error = validate_loaded_session(&session, &data).expect_err("broken grid must be rejected");
+
+    assert!(error.contains("world grid dimensions"));
+}
+
+#[test]
+fn loaded_session_validation_rejects_overlapping_known_buildings() {
+    let (data, mut session) = session();
+    let existing = session.buildings[0].clone();
+    session
+        .buildings
+        .push(Building::new(&existing.kind, existing.pos));
+
+    let error = validate_loaded_session(&session, &data)
+        .expect_err("overlapping buildings must be rejected");
+
+    assert!(error.contains("multiple buildings"));
+}
+
+#[test]
+fn loaded_session_validation_rejects_unknown_content_ids() {
+    let (data, mut session) = session();
+    session.buildings[0].kind = "unknown_building".to_owned();
+
+    let error =
+        validate_loaded_session(&session, &data).expect_err("unknown content must be rejected");
+
+    assert!(error.contains("unknown building id"));
 }
 
 #[test]
