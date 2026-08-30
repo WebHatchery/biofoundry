@@ -12,6 +12,7 @@ use macroquad_toolkit::grid::TilePos;
 mod endless;
 mod optional;
 mod overlays;
+mod recovery;
 
 /// Seed a named scene for the headless screenshot harness.
 pub(super) fn begin(game: &mut Game, scene: &str) {
@@ -747,6 +748,7 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                 session.economy.food = game.data.balance.worm_feed_reserve;
             }
         }
+        "unreachable_workstation" => recovery::unreachable_workstation(game),
         "worm" | "completion" => {
             game.transition(StateTransition::StartWarren);
             if let GameState::Warren(session) = &mut game.state {

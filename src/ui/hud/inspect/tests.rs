@@ -130,6 +130,37 @@ fn failed_outpost_reports_a_route_failure() {
 }
 
 #[test]
+fn unreachable_workstation_inspection_names_the_tunnel_recovery_status() {
+    let data = GameData::load().expect("embedded game data");
+    let mut session = GameSession::new(&data, 8);
+    let stockpile = session.stockpile_pos();
+    let pos = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(pos, tile)| {
+            **tile == crate::state::world::Tile::Floor
+                && *pos != stockpile
+                && pos.manhattan_distance(&stockpile) >= 3
+                && session.building_at(*pos).is_none()
+        })
+        .map(|(pos, _)| pos)
+        .expect("a free workstation location");
+    for neighbor in pos.neighbors_4way() {
+        session
+            .world
+            .tiles
+            .set(neighbor, crate::state::world::Tile::Rock);
+    }
+    session.buildings.push(Building::new("cook_pot", pos));
+
+    assert_eq!(
+        inspect_status(&session, &data, session.building_at(pos).unwrap()),
+        ("No valid route", dark::WARNING)
+    );
+}
+
+#[test]
 fn in_flight_outpost_reports_directional_transit() {
     let data = GameData::load().expect("embedded game data");
     let mut session = GameSession::new(&data, 9);

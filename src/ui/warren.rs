@@ -132,6 +132,7 @@ fn draw_status_badge(pos: TilePos, ts: f32, status: crate::ui::legibility::Build
 
     let color = match status {
         St::NoWorker => Color::new(0.95, 0.85, 0.30, 1.0),
+        St::NoValidRoute => Color::new(0.70, 0.62, 0.85, 1.0),
         St::InputStarved => Color::new(0.95, 0.55, 0.20, 1.0),
         St::OutputFull => Color::new(0.92, 0.32, 0.26, 1.0),
         St::Exhausted => Color::new(0.60, 0.60, 0.66, 1.0),
@@ -178,6 +179,9 @@ pub(super) fn draw_status_glyph(
         ),
         // No worker: an empty ring (a vacant post).
         St::NoWorker => draw_circle_lines(bx, by, s, 2.0, color),
+        // No valid route: a boxed path needs reconnection before workers can
+        // service the legacy node.
+        St::NoValidRoute => draw_rectangle_lines(bx - s, by - s, s * 2.0, s * 2.0, 2.0, color),
         // Exhausted: a cross.
         St::Exhausted => {
             draw_line(bx - s, by - s, bx + s, by + s, 2.0, color);

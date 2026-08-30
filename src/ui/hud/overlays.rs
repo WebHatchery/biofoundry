@@ -396,6 +396,7 @@ pub(super) fn draw_status_legend(session: &GameSession, data: &GameData) {
     );
     let items = [
         (St::NoWorker, Color::new(0.95, 0.85, 0.30, 1.0)),
+        (St::NoValidRoute, Color::new(0.70, 0.62, 0.85, 1.0)),
         (St::InputStarved, Color::new(0.95, 0.55, 0.20, 1.0)),
         (St::OutputFull, Color::new(0.92, 0.32, 0.26, 1.0)),
         (St::AwaitingHaul, Color::new(0.40, 0.80, 0.92, 1.0)),

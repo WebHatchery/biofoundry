@@ -101,6 +101,9 @@ pub(super) fn draw_inspect_panel(
 
     let (status, status_color) = inspect_status(session, data, building);
     line(&format!("Status · {status}"), status_color, &mut y);
+    if status == "No valid route" {
+        line("Dig a tunnel to reconnect this node", dark::WARNING, &mut y);
+    }
     if matches!(
         crate::ui::legibility::building_status(session, data, building),
         Some(BuildingStatus::InputStarved)

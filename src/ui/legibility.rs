@@ -3,6 +3,7 @@
 //! diagnosable without clicking anything (plan §Phase 9).
 
 use crate::data::GameData;
+use crate::simulation::nav;
 use crate::simulation::wildlife;
 use crate::state::creatures::{Creature, Good, Job, Task};
 use crate::state::structures::Building;
@@ -40,6 +41,8 @@ pub fn work_multiplier(creature: &Creature, session: &GameSession, data: &GameDa
 pub enum BuildingStatus {
     /// A workstation with no creature working it (stopped node).
     NoWorker,
+    /// A legacy node whose floor is no longer connected to the stockpile.
+    NoValidRoute,
     /// Waiting on input goods it can't get (starved).
     InputStarved,
     /// Output buffer is full and backing up — needs a carrier.
@@ -79,6 +82,7 @@ impl BuildingStatus {
     pub fn label(self) -> &'static str {
         match self {
             BuildingStatus::NoWorker => "No worker",
+            BuildingStatus::NoValidRoute => "No valid route",
             BuildingStatus::InputStarved => "Starved",
             BuildingStatus::OutputFull => "Backed up",
             BuildingStatus::Exhausted => "Exhausted",
@@ -123,6 +127,11 @@ pub fn building_status(
     let pos = building.pos;
     if building.waste > 0.0 {
         return Some(BuildingStatus::WasteOverflow);
+    }
+    if requires_local_route(&building.kind)
+        && nav::find_path(session, session.stockpile_pos(), building.pos).is_none()
+    {
+        return Some(BuildingStatus::NoValidRoute);
     }
     match building.kind.as_str() {
         "mine" => {
@@ -227,6 +236,13 @@ pub fn building_status(
         }
         _ => None,
     }
+}
+
+fn requires_local_route(kind: &str) -> bool {
+    matches!(
+        kind,
+        "farm" | "mine" | "cook_pot" | "blacksmith" | "kiln" | "smelter" | "feeding_trough"
+    )
 }
 
 /// Whether the Shrine is below the food reserve needed to keep its offerings

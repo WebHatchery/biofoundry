@@ -1,5 +1,6 @@
 use super::*;
 use crate::state::structures::Building;
+use crate::state::world::Tile;
 
 fn boot() -> (GameData, GameSession) {
     let data = GameData::load().unwrap();
@@ -27,6 +28,34 @@ fn unstaffed_mine_reads_no_worker_then_exhausted() {
         building_status(&session, &data, b),
         Some(BuildingStatus::Exhausted)
     );
+}
+
+#[test]
+fn unreachable_workstation_exposes_a_repairable_route_status() {
+    let (data, mut session) = boot();
+    let stockpile = session.stockpile_pos();
+    let pos = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(pos, tile)| {
+            **tile == Tile::Floor
+                && *pos != stockpile
+                && pos.manhattan_distance(&stockpile) >= 3
+                && session.building_at(*pos).is_none()
+        })
+        .map(|(pos, _)| pos)
+        .expect("a free workstation location");
+    for neighbor in pos.neighbors_4way() {
+        session.world.tiles.set(neighbor, Tile::Rock);
+    }
+    session.buildings.push(Building::new("cook_pot", pos));
+
+    assert_eq!(
+        building_status(&session, &data, session.building_at(pos).unwrap()),
+        Some(BuildingStatus::NoValidRoute)
+    );
+    assert_eq!(BuildingStatus::NoValidRoute.label(), "No valid route");
 }
 
 #[test]
