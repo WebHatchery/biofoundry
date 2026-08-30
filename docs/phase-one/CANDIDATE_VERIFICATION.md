@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `23c7462`
+**Source revision:** `9ad9418`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -38,6 +38,7 @@ automated simulation results into first-time-player evidence.
 | Outpost route setting persistence | Pass (focused and published build evidence) | Successful route activation, cargo-order changes, crew quotas, scouting pause/resume, and automatic return/resupply policy changes now write an autosave immediately. A refresh after changing a route control therefore preserves the player's recovery or logistics decision instead of waiting for a later transit or expedition beat. |
 | Worm Shrine offering policy persistence | Pass (focused and published build evidence) | The visible Pause/Resume offerings control now autosaves immediately after a successful toggle, so protecting the reserve remains in force across refreshes instead of silently restarting the Shrine draw. Invalid targets do not write a checkpoint. |
 | Direct player decision persistence | Pass (focused and published build evidence) | Successful job reassignment, specialist recruitment, breeding, Blacksmith queueing, tutorial skip, milestone-report dismissal, building placement, and dig designation now write an immediate autosave. Failed or duplicate actions do not write, and the refreshed save roundtrip covers the persisted job, queue, map, and decision flags. |
+| Progression checkpoint persistence | Pass (focused and published build evidence) | Capture unlocks, newly granted systems, breeding-pit hatches, survived raids, and tutorial-step advancement now enter the safe-beat autosave path. The next refresh therefore retains earned progression without turning ordinary simulation ticks into constant storage writes. |
 | Multi-Outpost automatic scheduling | Pass (focused evidence) | Automatic returns and food-only resupplies share a persisted round-robin cursor, so a continuously needy first route cannot monopolize the single worm transit. The cursor advances only after a successful automatic departure and defaults safely for older saves; focused multi-route simulation and save-roundtrip coverage verifies that later eligible Outposts receive their turn. |
 | State-aware awakened objective recovery | Pass (focused and capture evidence) | After the worm wakes, the Objective now names the visible recovery action when the forge chain is incomplete: place a Blacksmith, replace an exhausted Mine, staff a Smith, or staff a Carrier. The refreshed worm and completion captures show the first of these prompts, and focused coverage keeps the guidance honest for each recovery state. |
 | Multi-route objective ordering | Pass (focused evidence) | If several active Worm Outposts are present, the completed-campaign Objective prioritizes a route with cargo or crew ready, then a route that can be loaded, before an empty active route. This keeps the next visible instruction actionable as the existing outpost activity scales. |
@@ -53,7 +54,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 264 unit tests and 2 integration tests pass.
+- `cargo test --all-targets` — 265 unit tests and 2 integration tests pass.
 - `cargo clippy --all-targets --all-features -- -D warnings` — pass.
 - `publish.ps1` with no parameters — pass; Windows and WebGL packages
   deployed to Preview.
@@ -165,6 +166,11 @@ automated simulation results into first-time-player evidence.
   save-roundtrip coverage preserves the resulting job, queue, map, and
   decision flags. The published Preview build includes the updated action
   path.
+- Progression checkpoint persistence — pass; captures, unlock grants,
+  breeding-pit hatches, survived raids, and tutorial advancement now mark the
+  existing safe-beat autosave boundary. Focused coverage verifies the
+  progression report classification, and the published Preview includes the
+  updated path.
 - Multi-Outpost automatic scheduling — pass; automatic cargo returns and
   food-only resupplies use the same save-compatible round-robin cursor. A
   successful service advances the next starting route, an in-flight worm keeps
