@@ -35,7 +35,9 @@ physical keyboard or right mouse button.
 - [x] Keep visible Save and Load controls; make shortcut text secondary.
 - [ ] Verify all overlays, inspection actions, placement, digging, job changes,
   crafting, shrine controls, and completion choices with tap/click.
-- [ ] Test UI hit targets and overlap at the supported minimum viewport.
+- [x] Test UI hit targets and overlap at the supported minimum viewport. The
+  settled 800×450 audit sweep reports no grown-target ambiguity; compact visual
+  density remains a human-readability follow-up.
 - [x] Add regression coverage for important UI intents where practical.
 
 **Acceptance:** a pointer/touch-only campaign reaches Worm Awakened and returns

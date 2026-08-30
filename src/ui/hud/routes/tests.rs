@@ -48,6 +48,25 @@ fn route_metrics_reports_remote_hold_capacity() {
 }
 
 #[test]
+fn route_metrics_reports_live_scouting_progress() {
+    let data = GameData::load().expect("embedded game data");
+    let session = GameSession::new(&data, 42);
+    let mut route = Outpost::new(TilePos::new(4, 4));
+    route.active = true;
+    route.crew.push(1);
+    route.cargo.insert(Good::CookedFood, 1);
+    route.expedition_progress = data.balance.outpost_expedition_cycle_sec * 0.4;
+
+    assert_eq!(
+        route_metrics(&session, &data, &route),
+        format!(
+            "Cargo 1/{} · Crew 1/{} · Scout 40%",
+            data.balance.outpost_storage_cap, data.balance.outpost_capacity
+        )
+    );
+}
+
+#[test]
 fn route_status_reuses_the_inspection_vocabulary() {
     let data = GameData::load().expect("embedded game data");
     let mut session = GameSession::new(&data, 43);

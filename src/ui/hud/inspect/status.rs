@@ -167,9 +167,11 @@ pub(in crate::ui::hud) fn inspect_status(
                     crate::simulation::outposts::ExpeditionState::HoldFull => {
                         return ("Outpost hold full", dark::NEGATIVE);
                     }
+                    crate::simulation::outposts::ExpeditionState::Scouting { .. } => {
+                        return ("Scouting", dark::POSITIVE);
+                    }
                     crate::simulation::outposts::ExpeditionState::Inactive
-                    | crate::simulation::outposts::ExpeditionState::NoCrew
-                    | crate::simulation::outposts::ExpeditionState::Scouting { .. } => {}
+                    | crate::simulation::outposts::ExpeditionState::NoCrew => {}
                 }
             }
             if !session.worm_awake {

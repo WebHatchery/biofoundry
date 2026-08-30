@@ -279,6 +279,30 @@ fn active_loaded_outpost_reports_payload_ready() {
 }
 
 #[test]
+fn scouting_outpost_reports_that_the_remote_team_is_working() {
+    let data = GameData::load().expect("embedded game data");
+    let mut session = GameSession::new(&data, 151);
+    let pos = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(pos, _)| session.can_place_building(*pos))
+        .map(|(pos, _)| pos)
+        .expect("a walkable outpost location");
+    session.buildings.push(Building::new("outpost", pos));
+    session.ensure_outpost(pos);
+    session.worm_awake = true;
+    session.outposts[0].active = true;
+    session.outposts[0].crew.push(session.creatures[0].id);
+    session.outposts[0].cargo.insert(Good::CookedFood, 1);
+
+    assert_eq!(
+        inspect_status(&session, &data, session.building_at(pos).unwrap()),
+        ("Scouting", dark::POSITIVE)
+    );
+}
+
+#[test]
 fn inactive_loaded_outpost_reports_payload_recovery() {
     let data = GameData::load().expect("embedded game data");
     let mut session = GameSession::new(&data, 17);

@@ -179,13 +179,19 @@ fn route_metrics(session: &GameSession, data: &GameData, outpost: &Outpost) -> S
         );
     }
 
-    format!(
+    let cargo_summary = format!(
         "Cargo {}/{} · Crew {}/{}",
         outpost.cargo_total(),
         crate::simulation::outposts::storage_capacity(outpost, data),
         outpost.crew.len(),
         data.balance.outpost_capacity
-    )
+    );
+    match crate::simulation::outposts::expedition_state(outpost, data) {
+        crate::simulation::outposts::ExpeditionState::Scouting {
+            progress_percent, ..
+        } => format!("{cargo_summary} · Scout {progress_percent}%"),
+        _ => cargo_summary,
+    }
 }
 
 fn route_policy_label(outpost: &Outpost) -> &'static str {
