@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `fe6c2b7`
+**Source revision:** `48d159c`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -105,7 +105,8 @@ automated simulation results into first-time-player evidence.
 - Empty route capture — [ui_endless_empty.png](../verification/ui_endless_empty.png)
   shows an active awakened outpost with `Status · Awaiting payload`, disabled
   route actions, and the explicit `No cargo or crew ready at the warren`
-  recovery state.
+  recovery state, with a readable gap separating the recovery note from the
+  action button.
 - Endless route recovery — automated coverage confirms food-only delivery and
   crew-only return remain valid, so an outpost cannot strand its crew when its
   cargo hold is empty; a full remote crew cannot be duplicated by another load.
@@ -280,7 +281,7 @@ automated simulation results into first-time-player evidence.
 - Endless route failure capture — [ui_endless_failure.png](../verification/ui_endless_failure.png)
   shows the failed outpost's wrapped recovery message and the Objective's
   complete visible Activate route instruction, alongside the top-bar failure
-  signal.
+  signal; the inactive-route recovery note is spaced below its action button.
 - In-flight route capture — [ui_endless_in_flight.png](../verification/ui_endless_in_flight.png)
   shows the top-bar countdown and the selected outpost's directional transit
   state with a clear wait instruction. The completed-campaign Objective also
