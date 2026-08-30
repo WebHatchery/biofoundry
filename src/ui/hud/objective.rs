@@ -309,7 +309,20 @@ fn reassignable_job_count(session: &GameSession, data: &GameData, job: Job) -> u
 }
 
 fn active_outpost_next_step(session: &GameSession, data: &GameData) -> &'static str {
-    let Some(outpost) = session.outposts.iter().find(|outpost| outpost.active) else {
+    let Some(outpost) = session
+        .outposts
+        .iter()
+        .filter(|outpost| outpost.active)
+        .find(|outpost| outpost.cargo_total() > 0 || !outpost.crew.is_empty())
+        .or_else(|| {
+            session
+                .outposts
+                .iter()
+                .filter(|outpost| outpost.active)
+                .find(|outpost| outpost_has_loadable_payload(session, data, outpost))
+        })
+        .or_else(|| session.outposts.iter().find(|outpost| outpost.active))
+    else {
         return "Next: activate the Worm Outpost, then send a cargo run.";
     };
     let has_cargo = outpost.cargo_total() > 0;

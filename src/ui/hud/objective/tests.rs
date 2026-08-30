@@ -351,6 +351,41 @@ fn completed_objective_names_the_load_step_for_an_empty_active_outpost() {
 }
 
 #[test]
+fn completed_objective_prioritizes_a_ready_outpost_over_an_empty_active_one() {
+    let (data, mut session) = boot();
+    session.worm_awake = true;
+    session.unlocked.insert("worm_transit".to_owned());
+    let first = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(pos, _)| session.can_place_building(*pos))
+        .map(|(pos, _)| pos)
+        .unwrap();
+    session.buildings.push(Building::new("outpost", first));
+    session.ensure_outpost(first);
+    session.outposts[0].active = true;
+    let second = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(pos, _)| session.can_place_building(*pos))
+        .map(|(pos, _)| pos)
+        .unwrap();
+    session.buildings.push(Building::new("outpost", second));
+    session.ensure_outpost(second);
+    session.outposts[1].active = true;
+    session.outposts[1].cargo.insert(Good::Ore, 4);
+
+    let objective = CampaignObjective::current(&session, &data);
+
+    assert_eq!(
+        objective.next,
+        "Next: tap the active Worm Outpost, then send its cargo to the shrine."
+    );
+}
+
+#[test]
 fn completed_objective_does_not_offer_remote_crew_as_a_new_payload() {
     let (data, mut session) = boot();
     session.worm_awake = true;
