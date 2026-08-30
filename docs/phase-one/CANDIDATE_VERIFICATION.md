@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-31
-**Source revision:** `057c8d2`
+**Source revision:** `41ea365`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
