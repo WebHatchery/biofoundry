@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `4b21163`
+**Source revision:** `ef1d765`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -29,7 +29,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 187 unit tests and 2 integration tests pass.
+- `cargo test --all-targets` — 188 unit tests and 2 integration tests pass.
 - `cargo clippy --all-targets --all-features -- -D warnings` — pass.
 - `publish.ps1` with no parameters — pass; Windows and WebGL packages
   deployed to Preview.
@@ -69,6 +69,9 @@ automated simulation results into first-time-player evidence.
   visible `Status · Starved` plus `Needs 2 ore · next Iron Pickaxe` recovery
   line; focused UI coverage keeps a paid order nominal while exposing the
   missing-ore stall.
+- Smelter input stall — [ui_smelter.png](../verification/ui_smelter.png)
+  shows a staffed Salamander with both batch inputs withheld, and the
+  inspection card names the exact recovery need: `Needs 1 ore + 1 charcoal`.
 - Completion capture — [ui_completion.png](../verification/ui_completion.png)
   shows the Worm Awakened summary naming the food and ingot totals, with visible
   Continue in Endless and Return to Menu choices. The completed Objective also
