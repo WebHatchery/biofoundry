@@ -43,7 +43,7 @@ pub(super) fn draw_inspect_panel(
     // buttons, and the breeding pit its breed buttons — both taller.
     let height = match building.kind.as_str() {
         "blacksmith" => 194.0 + data.equipment.len() as f32 * 26.0,
-        "breeding_pit" => 252.0,
+        "breeding_pit" => 280.0,
         "worm_shrine" => 240.0,
         "outpost" => 270.0,
         _ => 152.0,
@@ -305,11 +305,8 @@ pub(super) fn draw_inspect_panel(
             );
         }
         "breeding_pit" => {
-            line(
-                "Hatches beetles from studied stock.",
-                dark::TEXT_DIM,
-                &mut y,
-            );
+            line("Beetles hatch here", dark::TEXT_DIM, &mut y);
+            line("Specialists cost banked ingots", dark::TEXT_DIM, &mut y);
             // Evolution line: breed heavyweight workers once forged ingots
             // unlock them. Buttons stay visible, disabled until then.
             let bw = panel.w - 28.0;
