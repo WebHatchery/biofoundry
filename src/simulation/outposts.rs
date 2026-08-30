@@ -24,10 +24,26 @@ pub fn activate_outpost(session: &mut GameSession, pos: TilePos) -> bool {
     if was_inactive {
         // The player has acknowledged the failed route and reopened it.
         // Clear the global banner too, otherwise the top bar reports a stale
-        // failure until a new transit happens to launch.
-        session.last_transit_failure = None;
+        // failure until a new transit happens to launch. Keep it when another
+        // Outpost still carries an unresolved failure, though.
+        refresh_transit_failure_banner(session);
     }
     true
+}
+
+fn refresh_transit_failure_banner(session: &mut GameSession) {
+    if session
+        .outposts
+        .iter()
+        .any(|outpost| outpost.last_failure.is_some())
+    {
+        if session.last_transit_failure.is_none() {
+            session.last_transit_failure =
+                Some("Transit failed because an outpost was inactive.".to_owned());
+        }
+    } else {
+        session.last_transit_failure = None;
+    }
 }
 
 pub fn start_to_outpost(session: &mut GameSession, data: &GameData, pos: TilePos) -> bool {

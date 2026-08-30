@@ -3,6 +3,7 @@
 use super::active_outpost;
 use crate::simulation;
 use crate::simulation::outposts;
+use crate::state::structures::Building;
 
 #[test]
 fn failed_transit_is_reported_once_after_payload_recovery() {
@@ -27,4 +28,31 @@ fn failed_transit_is_reported_once_after_payload_recovery() {
 
     let next_report = simulation::tick(&mut session, &data);
     assert_eq!(next_report.transit_failed, None);
+}
+
+#[test]
+fn reopening_one_failed_route_keeps_another_route_failure_visible() {
+    let (_data, mut session, first_pos) = active_outpost(48);
+    let second_pos = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(pos, tile)| tile.walkable() && session.can_place_building(*pos))
+        .map(|(pos, _)| pos)
+        .expect("a second walkable outpost location");
+    session.buildings.push(Building::new("outpost", second_pos));
+    session.ensure_outpost(second_pos);
+
+    session.outposts[0].active = false;
+    session.outposts[0].last_failure = Some("First route failed.".to_owned());
+    session.outposts[1].active = false;
+    session.outposts[1].last_failure = Some("Second route failed.".to_owned());
+    session.last_transit_failure =
+        Some("Transit failed because an outpost was inactive.".to_owned());
+
+    assert!(outposts::activate_outpost(&mut session, first_pos));
+    assert!(session.outposts[0].active);
+    assert!(session.outposts[0].last_failure.is_none());
+    assert!(session.outposts[1].last_failure.is_some());
+    assert!(session.last_transit_failure.is_some());
 }
