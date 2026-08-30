@@ -3,7 +3,7 @@ use crate::data::GameData;
 use crate::state::creatures::Good;
 use crate::state::creatures::Job;
 use crate::state::outposts::WormTransit;
-use crate::state::structures::Building;
+use crate::state::structures::{BuildSite, Building};
 use crate::state::GameSession;
 
 fn boot() -> (GameData, GameSession) {
@@ -172,6 +172,70 @@ fn awakened_objective_recovers_an_exhausted_mine_before_promising_more_ingots() 
     assert_eq!(
         objective.next,
         "Next: tap Mine in Build & Dig, then place a new Mine on open floor."
+    );
+}
+
+#[test]
+fn awakened_objective_waits_for_a_blacksmith_build_site_already_in_progress() {
+    let (data, mut session) = boot();
+    session.worm_awake = true;
+    let site = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(pos, _)| session.can_place_building(*pos))
+        .map(|(pos, _)| pos)
+        .unwrap();
+    session.build_sites.push(BuildSite {
+        kind: "blacksmith".to_owned(),
+        pos: site,
+        ore_needed: 10,
+        ore_delivered: 3,
+    });
+
+    let objective = CampaignObjective::current(&session, &data);
+
+    assert_eq!(
+        objective.next,
+        "Next: keep carriers delivering ore to the Blacksmith site."
+    );
+}
+
+#[test]
+fn awakened_objective_waits_for_a_replacement_mine_build_site() {
+    let (data, mut session) = boot();
+    session.worm_awake = true;
+    let existing_mine = session.buildings_of("mine").next().unwrap().pos;
+    session.building_at_mut(existing_mine).unwrap().reserve = 0.0;
+    let blacksmith = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(pos, _)| session.can_place_building(*pos))
+        .map(|(pos, _)| pos)
+        .unwrap();
+    session
+        .buildings
+        .push(Building::new("blacksmith", blacksmith));
+    let site = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(pos, _)| session.can_place_building(*pos))
+        .map(|(pos, _)| pos)
+        .unwrap();
+    session.build_sites.push(BuildSite {
+        kind: "mine".to_owned(),
+        pos: site,
+        ore_needed: 12,
+        ore_delivered: 4,
+    });
+
+    let objective = CampaignObjective::current(&session, &data);
+
+    assert_eq!(
+        objective.next,
+        "Next: keep carriers delivering ore to the new Mine site."
     );
 }
 

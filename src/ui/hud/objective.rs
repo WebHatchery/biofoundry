@@ -177,9 +177,15 @@ impl CampaignObjective {
 
 fn endless_forge_next_step(session: &GameSession, data: &GameData) -> String {
     if session.buildings_of("blacksmith").next().is_none() {
+        if pending_build_site(session, "blacksmith") {
+            return "Next: keep carriers delivering ore to the Blacksmith site.".to_owned();
+        }
         return "Next: tap Blacksmith in Build & Dig, then place it on open floor.".to_owned();
     }
     if !session.buildings_of("mine").any(|mine| mine.reserve > 0.0) {
+        if pending_build_site(session, "mine") {
+            return "Next: keep carriers delivering ore to the new Mine site.".to_owned();
+        }
         return "Next: tap Mine in Build & Dig, then place a new Mine on open floor.".to_owned();
     }
     if session.job_count(Job::Smith) == 0 {
@@ -212,6 +218,13 @@ fn endless_forge_next_step(session: &GameSession, data: &GameData) -> String {
         .unwrap_or(60);
     let forged = session.economy.ingots_forged.min(transit_goal);
     format!("Next: forge ingots to unlock Worm Transit ({forged}/{transit_goal}).")
+}
+
+fn pending_build_site(session: &GameSession, kind: &str) -> bool {
+    session
+        .build_sites
+        .iter()
+        .any(|site| site.kind == kind && site.remaining() > 0)
 }
 
 fn shrine_build_requirement(session: &GameSession, data: &GameData) -> (String, String) {
