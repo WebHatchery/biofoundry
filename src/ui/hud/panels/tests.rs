@@ -197,6 +197,15 @@ fn optional_specialist_buttons_explain_when_the_unique_post_is_filled() {
 }
 
 #[test]
+fn optional_support_buttons_name_their_practical_roles() {
+    assert_eq!(optional_support_label("beetle", 25), "Beetle haul (25)");
+    assert_eq!(
+        optional_support_label("salamander", 20),
+        "Salam. forge (20)"
+    );
+}
+
+#[test]
 fn jobs_panel_capacity_uses_local_workers_and_floor_space() {
     let data = GameData::load().expect("embedded game data");
     let session = GameSession::new(&data, 7);

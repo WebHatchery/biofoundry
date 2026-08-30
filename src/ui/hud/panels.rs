@@ -367,7 +367,7 @@ pub(super) fn draw_jobs_panel(
     let half = (panel.w - 36.0) / 2.0;
     if hud_button(
         Rect::new(x, y, half, 30.0),
-        &format!("Beetle ×5 ({})", data.balance.beetle_ore_cost),
+        &optional_support_label("beetle", data.balance.beetle_ore_cost),
         session.economy.ore_stock >= data.balance.beetle_ore_cost,
         mouse,
     ) {
@@ -458,6 +458,14 @@ fn optional_specialist_label(species: &str, posted: bool) -> &'static str {
         ("bat_courier", false) => "Bat · 8 cargo",
         ("bat_courier", true) => "Bat · posted",
         _ => "Specialist",
+    }
+}
+
+fn optional_support_label(species: &str, cost: u32) -> String {
+    match species {
+        "beetle" => format!("Beetle haul ({cost})"),
+        "salamander" => format!("Salam. forge ({cost})"),
+        _ => format!("{species} ({cost})"),
     }
 }
 
