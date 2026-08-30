@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `5c34eb8`
+**Source revision:** `6999315`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -37,7 +37,8 @@ automated simulation results into first-time-player evidence.
   drag from selecting a map tile or activating a HUD control on release.
 - Touch map taps — focused input coverage and the explicit gesture path keep a
   short touch on open floor available to world tools and building inspection,
-  even when the browser does not synthesize a mouse release.
+  even when the browser does not synthesize a mouse release; touch releases
+  now pass through the live camera pan/zoom before world-tile resolution.
 - Touch HUD ownership — focused HUD coverage maps a letterboxed touch release
   into UI coordinates, so a button tap cannot also fall through to the map
   when the mouse cursor is elsewhere.
