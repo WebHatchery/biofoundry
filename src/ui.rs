@@ -63,6 +63,8 @@ pub enum UiAction {
     CycleOutpostCrew(TilePos),
     /// Pause or resume remote scouting without closing the worm route.
     ToggleOutpostExpedition(TilePos),
+    /// Toggle automatic cargo-only returns when an awakened hold is full.
+    ToggleOutpostAutoReturn(TilePos),
     TransitToOutpost(TilePos),
     TransitToShrine(TilePos),
     /// Return an outpost's cargo while leaving its remote crew in place.

@@ -273,6 +273,28 @@ impl Game {
                     }
                 }
             }
+            UiAction::ToggleOutpostAutoReturn(pos) => {
+                if let GameState::Warren(session) = &mut self.state {
+                    if session.worm_awake
+                        && session.worm_transit.is_none()
+                        && session
+                            .building_at(pos)
+                            .is_some_and(|building| building.kind == "outpost")
+                    {
+                        session.ensure_outpost(pos);
+                        if let Some(outpost) = session.outposts.iter_mut().find(|o| o.pos == pos) {
+                            if outpost.active {
+                                outpost.toggle_auto_return();
+                                self.notifications.info(format!(
+                                    "Outpost policy: {}.",
+                                    outpost.auto_return_label()
+                                ));
+                                self.audio.play(Sfx::Select);
+                            }
+                        }
+                    }
+                }
+            }
             UiAction::TransitToOutpost(pos)
             | UiAction::TransitToShrine(pos)
             | UiAction::TransitCargoToShrine(pos) => {

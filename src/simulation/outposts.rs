@@ -226,6 +226,25 @@ pub fn tick_expeditions(
     completed
 }
 
+/// Start one opt-in cargo-only return when an active route has filled its
+/// remote hold. The global worm can carry one transit at a time, so routes are
+/// considered in their persisted order and the next full route waits its turn.
+pub fn start_auto_return_if_full(session: &mut GameSession, data: &GameData) -> Option<TilePos> {
+    if session.worm_transit.is_some() {
+        return None;
+    }
+    let pos = session
+        .outposts
+        .iter()
+        .find(|outpost| {
+            outpost.active
+                && outpost.auto_return_cargo
+                && outpost.cargo_total() >= storage_capacity(outpost, data)
+        })
+        .map(|outpost| outpost.pos)?;
+    start_cargo_to_shrine(session, data, pos).then_some(pos)
+}
+
 fn start_transit(
     session: &mut GameSession,
     data: &GameData,

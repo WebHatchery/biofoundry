@@ -20,6 +20,7 @@ use crate::data::GameData;
 use crate::state::creatures::Creature;
 use crate::state::outposts::{ExpeditionCompletion, TransitCompletion};
 use crate::state::GameSession;
+use macroquad_toolkit::grid::TilePos;
 
 pub use actions::{
     try_attract_bat_courier, try_attract_beetle, try_attract_salamander, try_attract_slime_janitor,
@@ -40,6 +41,8 @@ pub struct TickReport {
     pub factory_this_tick: bool,
     pub worm_this_tick: bool,
     pub expedition_completed: Vec<ExpeditionCompletion>,
+    /// Outpost that automatically started a cargo-only return this tick.
+    pub auto_return_started: Option<TilePos>,
     pub transit_completed: Option<TransitCompletion>,
     pub wild: wildlife::WildReport,
 }
@@ -102,6 +105,7 @@ pub fn tick(session: &mut GameSession, data: &GameData) -> TickReport {
     let wild = wildlife::tick_wildlife(session, data, dt);
     let deserters = food::tick_hunger(session, data, dt);
     let expedition_completed = outposts::tick_expeditions(session, data, dt);
+    let auto_return_started = outposts::start_auto_return_if_full(session, data);
     let transit_completed = outposts::tick_transit(session, data, dt);
 
     let mut won_this_tick = false;
@@ -165,6 +169,7 @@ pub fn tick(session: &mut GameSession, data: &GameData) -> TickReport {
         factory_this_tick,
         worm_this_tick,
         expedition_completed,
+        auto_return_started,
         transit_completed,
         wild,
     }

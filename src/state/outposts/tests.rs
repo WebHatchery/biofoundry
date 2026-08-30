@@ -10,6 +10,8 @@ fn new_outpost_defaults_to_ore_first_loading() {
     assert!(!outpost.expedition_paused);
     assert_eq!(outpost.crew_dispatch_limit, None);
     assert!(!outpost.storage_upgraded);
+    assert!(!outpost.auto_return_cargo);
+    assert_eq!(outpost.auto_return_label(), "Auto-return · Off");
     assert_eq!(outpost.crew_dispatch_label(4), "Crew per run · Auto");
 }
 
@@ -44,4 +46,17 @@ fn crew_dispatch_cycles_from_cargo_only_to_auto() {
     outpost.cycle_crew_dispatch(4);
     assert_eq!(outpost.crew_dispatch_limit, None);
     assert_eq!(outpost.crew_dispatch_count(3), 3);
+}
+
+#[test]
+fn auto_return_toggle_names_the_cargo_only_policy() {
+    let mut outpost = Outpost::new(TilePos::new(4, 4));
+
+    outpost.toggle_auto_return();
+    assert!(outpost.auto_return_cargo);
+    assert_eq!(outpost.auto_return_label(), "Auto-return · Cargo only");
+
+    outpost.toggle_auto_return();
+    assert!(!outpost.auto_return_cargo);
+    assert_eq!(outpost.auto_return_label(), "Auto-return · Off");
 }

@@ -171,6 +171,14 @@ fn expedition_completion_notice_names_the_remote_yield_and_upkeep() {
 }
 
 #[test]
+fn auto_return_notice_names_the_remote_team_outcome() {
+    assert_eq!(
+        auto_return_notice(),
+        "Outpost hold full — cargo returning while scouts remain remote."
+    );
+}
+
+#[test]
 fn transit_completion_notice_names_mixed_payloads() {
     let completion = TransitCompletion {
         direction: TransitDirection::ToShrine,

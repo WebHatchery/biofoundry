@@ -61,12 +61,14 @@ fn save_roundtrip_preserves_outpost_dispatch_settings() {
     session.ensure_outpost(pos);
     session.outposts[0].crew_dispatch_limit = Some(2);
     session.outposts[0].storage_upgraded = true;
+    session.outposts[0].auto_return_cargo = true;
 
     let json = serde_json::to_string(&session).expect("serialize");
     let restored: GameSession = serde_json::from_str(&json).expect("deserialize");
 
     assert_eq!(restored.outposts[0].crew_dispatch_limit, Some(2));
     assert!(restored.outposts[0].storage_upgraded);
+    assert!(restored.outposts[0].auto_return_cargo);
     assert_eq!(
         crate::simulation::outposts::storage_capacity(&restored.outposts[0], &data),
         data.balance.outpost_upgraded_storage_cap

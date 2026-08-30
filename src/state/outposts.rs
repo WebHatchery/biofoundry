@@ -65,6 +65,10 @@ pub struct Outpost {
     /// Whether this route has purchased its expanded remote cargo hold.
     #[serde(default)]
     pub storage_upgraded: bool,
+    /// Automatically return a full hold as cargo-only, keeping remote crew
+    /// stationed for the next expedition.
+    #[serde(default)]
+    pub auto_return_cargo: bool,
     #[serde(default)]
     pub last_failure: Option<String>,
 }
@@ -83,6 +87,7 @@ impl Outpost {
             ore_scouted: 0,
             crew_dispatch_limit: None,
             storage_upgraded: false,
+            auto_return_cargo: false,
             last_failure: None,
         }
     }
@@ -125,6 +130,18 @@ impl Outpost {
 
     pub fn upgrade_storage(&mut self) {
         self.storage_upgraded = true;
+    }
+
+    pub fn toggle_auto_return(&mut self) {
+        self.auto_return_cargo = !self.auto_return_cargo;
+    }
+
+    pub fn auto_return_label(&self) -> &'static str {
+        if self.auto_return_cargo {
+            "Auto-return · Cargo only"
+        } else {
+            "Auto-return · Off"
+        }
     }
 }
 
