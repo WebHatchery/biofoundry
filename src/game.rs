@@ -678,7 +678,14 @@ fn migrate_tutorial_progress(session: &mut GameSession, tutorial_count: usize) {
     let old_step = session.tutorial_step;
     let mut step = usize::from(old_step > 0);
 
-    if session.tutorial_built {
+    // Current saves set `tutorial_built` as soon as a site is placed. Do not
+    // skip the Food lesson on a reload while that site is still waiting for
+    // ore; completion needs both the migration marker and the second Farm.
+    if session.tutorial_build_completed && session.buildings_of("farm").nth(1).is_some() {
+        step = step.max(2);
+    } else if old_step >= 4 && session.tutorial_built {
+        // Older saves had no completion marker, but their later tutorial
+        // index is enough evidence that the early construction beat passed.
         step = step.max(2);
     }
     if session

@@ -2,6 +2,7 @@ use super::*;
 use crate::data::GameData;
 use crate::state::creatures::Job;
 use crate::state::outposts::{TransitCompletion, TransitDirection};
+use crate::state::structures::BuildSite;
 use crate::state::GameSession;
 
 fn session() -> (GameData, GameSession) {
@@ -19,6 +20,23 @@ fn old_tutorial_index_does_not_skip_the_new_factory_lesson() {
     migrate_tutorial_progress(&mut session, data.tutorial.len());
 
     assert_eq!(session.tutorial_step, 2);
+}
+
+#[test]
+fn tutorial_migration_keeps_a_pending_farm_lesson_visible() {
+    let (data, mut session) = session();
+    session.tutorial_step = 1;
+    session.tutorial_built = true;
+    session.build_sites.push(BuildSite {
+        kind: "farm".to_owned(),
+        pos: session.spawn_tile(),
+        ore_needed: data.buildings.get("farm").unwrap().cost_ore,
+        ore_delivered: 0,
+    });
+
+    migrate_tutorial_progress(&mut session, data.tutorial.len());
+
+    assert_eq!(session.tutorial_step, 1);
 }
 
 #[test]
