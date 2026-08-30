@@ -274,6 +274,15 @@ impl Game {
     pub fn draw(&mut self) {
         clear_background(dark::BACKGROUND);
 
+        // Preserve readable text when the fixed 1280x720 layout is letterboxed
+        // into a smaller browser canvas. The toolkit keeps this bounded so the
+        // established candidate scale remains unchanged at the design size.
+        macroquad_toolkit::ui::set_ui_text_scale_for_screen(
+            ui::LOGICAL_WIDTH,
+            ui::LOGICAL_HEIGHT,
+            1.25,
+        );
+
         let actions = match &self.state {
             GameState::Menu => {
                 let virtual_ui = begin_virtual_ui_frame(ui::LOGICAL_WIDTH, ui::LOGICAL_HEIGHT);

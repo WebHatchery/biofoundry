@@ -141,7 +141,7 @@ pub(super) fn draw_top_bar(
         );
     } else {
         draw_ui_text_ex(
-            "Drag map · tap +/− to zoom · Save / Load / Menu",
+            "Drag map · +/− zoom · tap Help",
             bar.x + 380.0,
             bar.y + 31.0,
             TextStyle::new(15.0, dark::TEXT_DIM).params(),

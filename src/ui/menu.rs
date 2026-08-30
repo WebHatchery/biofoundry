@@ -41,7 +41,7 @@ pub fn draw(
 
     let title = &data.config.display_name;
     let title_size = 72.0;
-    let title_w = measure_text(title, None, title_size as u16, 1.0).width;
+    let title_w = measure_text_size(title, TextStyle::new(title_size, dark::TEXT_BRIGHT)).width;
     draw_ui_text_ex(
         title,
         (LOGICAL_WIDTH - title_w) * 0.5,
@@ -50,7 +50,7 @@ pub fn draw(
     );
 
     let tagline = "Every conveyor belt is a creature with needs.";
-    let tagline_w = measure_text(tagline, None, 22, 1.0).width;
+    let tagline_w = measure_text_size(tagline, TextStyle::new(22.0, dark::TEXT_DIM)).width;
     draw_ui_text_ex(
         tagline,
         (LOGICAL_WIDTH - tagline_w) * 0.5,
@@ -88,7 +88,7 @@ pub fn draw(
     }
 
     let hint = "Feed the warren · forge with living furnaces · awaken the Colossal Worm";
-    let hint_w = measure_text(hint, None, 17, 1.0).width;
+    let hint_w = measure_text_size(hint, TextStyle::new(17.0, dark::TEXT_DIM)).width;
     draw_ui_text_ex(
         hint,
         (LOGICAL_WIDTH - hint_w) * 0.5,
@@ -97,7 +97,7 @@ pub fn draw(
     );
 
     let footer = format!("v{} — a WebHatchery game", data.config.version);
-    let footer_w = measure_text(&footer, None, 16, 1.0).width;
+    let footer_w = measure_text_size(&footer, TextStyle::new(16.0, dark::TEXT_DIM)).width;
     draw_ui_text_ex(
         &footer,
         (LOGICAL_WIDTH - footer_w) * 0.5,
