@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `6999315`
+**Source revision:** `011b4f6`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -53,9 +53,10 @@ automated simulation results into first-time-player evidence.
   shows remaining food/ingot offerings, minimum feed time, and the automatic
   offering state in the final-demand card.
 - Optional support capture — [ui_optional.png](../verification/ui_optional.png)
-  shows recruit controls labeled with their practical roles and the Engineer
-  mine-throughput bonus at the published HUD scale. This improves discoverability
-  evidence but does not replace first-time-player testing of optional-system value.
+  shows recruit controls labeled with their practical actions (`Salam. forge`,
+  `Slime · clean`, and `Bat · 8 cargo`) plus the Engineer mine-throughput bonus
+  at the published HUD scale. This improves discoverability evidence but does
+  not replace first-time-player testing of optional-system value.
 - Locked-gate progress capture — the refreshed [ui_optional.png](../verification/ui_optional.png)
   shows current/threshold values for the remaining Build & Dig unlocks, so a
   locked action communicates both its requirement and how close the warren is.
