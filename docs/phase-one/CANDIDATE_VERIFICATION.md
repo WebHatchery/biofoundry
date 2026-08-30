@@ -42,6 +42,7 @@ automated simulation results into first-time-player evidence.
 | Progression checkpoint persistence | Pass (focused and published build evidence) | Capture unlocks, newly granted systems, breeding-pit hatches, survived raids, and tutorial-step advancement now enter the safe-beat autosave path. The next refresh therefore retains earned progression without turning ordinary simulation ticks into constant storage writes. |
 | Multi-Outpost automatic scheduling | Pass (focused evidence) | Automatic returns and food-only resupplies share a persisted round-robin cursor, so a continuously needy first route cannot monopolize the single worm transit. The cursor advances only after a successful automatic departure and defaults safely for older saves; focused multi-route simulation and save-roundtrip coverage verifies that later eligible Outposts receive their turn. |
 | Multi-route ledger | Pass (published capture evidence) | The awakened HUD now exposes a visible Routes control that opens a modal Worm Route Ledger. Each route shows the same inspection status vocabulary, cargo/hold and crew counts, policy state, and a touch-sized Inspect action into the existing Outpost card; selecting a route also centers the bounds-clamped map camera on it. The release [ui_endless_routes.png](../verification/ui_endless_routes.png) capture shows two routes together; the ledger pauses planning and keeps the Close action visible in the compact probe. |
+| Settled touch-target audit | Pass (focused evidence) | Every enabled menu/HUD button now registers with the shared touch audit. The opt-in `scripts/audit_touch_targets.ps1` sweep settles each screen for neighbor-aware hit growth, reports the smallest target and drawn density, and fails on actual grown-target overlap. The 800×450 sweep passed for the title, settings, confirmation, core HUD, crafting, shrine, completion, Outpost, and multi-route ledger screens; modal occlusion keeps covered controls out of the report. |
 | State-aware awakened objective recovery | Pass (focused and capture evidence) | After the worm wakes, the Objective now names the visible recovery action when the forge chain is incomplete: place a Blacksmith, replace an exhausted Mine, staff a Smith, or staff a Carrier. The refreshed worm and completion captures show the first of these prompts, and focused coverage keeps the guidance honest for each recovery state. |
 | Multi-route objective ordering | Pass (focused evidence) | If several active Worm Outposts are present, the completed-campaign Objective prioritizes a route with cargo or crew ready, then a route that can be loaded, before an empty active route. This keeps the next visible instruction actionable as the existing outpost activity scales. |
 | Minimum-layout spot check | Pass | The 1200×675 canvas and required HUD remained visible in the 1280×720 Preview viewport. |
@@ -196,6 +197,13 @@ automated simulation results into first-time-player evidence.
 - Project-local capture wrapper — pass; `scripts/capture_ui.ps1` now forwards
   viewport sizing and release/visible capture options to the shared toolkit,
   and its 800×450 completion/Endless path was exercised successfully.
+- Settled touch-target audit — pass; `scripts/audit_touch_targets.ps1` walks
+  the title, settings, confirmation, core HUD, crafting, shrine, completion,
+  Outpost, and multi-route ledger scenes at 800×450 after the neighbor map is
+  warm. Enabled controls are measured, modal occlusion removes covered HUD
+  controls, and the sweep reports no grown-target overlap. The fixed layout
+  still reports compact visual controls below the 44px guideline, which keeps
+  first-time-player readability as a human follow-up rather than hiding it.
 - Native release critical-scene capture — pass; the optimized project binary
   captured completion, Endless outpost, Shrine, and Blacksmith at 800×450.
   Completion choices and outpost actions stayed visible, while the Shrine and

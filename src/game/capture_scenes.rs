@@ -14,11 +14,24 @@ mod endless;
 /// Seed a named scene for the headless screenshot harness.
 pub(super) fn begin(game: &mut Game, scene: &str) {
     match scene {
+        "touch_audit" => {
+            begin(game, "warren");
+            game.arm_touch_target_audit();
+        }
+        scene if scene.starts_with("touch_audit_") => {
+            let base_scene = &scene["touch_audit_".len()..];
+            begin(game, base_scene);
+            game.arm_touch_target_audit();
+        }
         "menu" => game.transition(StateTransition::BackToMenu),
         "new_warren_confirm" => {
             game.transition(StateTransition::BackToMenu);
             game.save_exists = true;
             game.confirm_new_warren = true;
+        }
+        "settings" => {
+            game.transition(StateTransition::BackToMenu);
+            game.settings_open = true;
         }
         "factory" => {
             game.transition(StateTransition::StartWarren);

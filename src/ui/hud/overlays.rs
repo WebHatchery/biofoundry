@@ -30,6 +30,7 @@ pub(super) fn draw_goal_overlay(
         LOGICAL_HEIGHT,
         Color::new(0.0, 0.0, 0.0, 0.55),
     );
+    macroquad_toolkit::ui::occlude(Rect::new(0.0, 0.0, LOGICAL_WIDTH, LOGICAL_HEIGHT));
     let panel = Rect::new(LOGICAL_WIDTH * 0.5 - 240.0, 200.0, 480.0, 250.0);
     draw_surface_with_title(
         panel,
@@ -82,6 +83,7 @@ pub(super) fn draw_colony_failure_overlay(
         LOGICAL_HEIGHT,
         Color::new(0.0, 0.0, 0.0, 0.58),
     );
+    macroquad_toolkit::ui::occlude(Rect::new(0.0, 0.0, LOGICAL_WIDTH, LOGICAL_HEIGHT));
     let panel = Rect::new(LOGICAL_WIDTH * 0.5 - 240.0, 185.0, 480.0, 280.0);
     draw_surface_with_title(
         panel,
@@ -170,6 +172,7 @@ pub(super) fn draw_help_overlay(
         LOGICAL_HEIGHT,
         Color::new(0.0, 0.0, 0.0, 0.62),
     );
+    macroquad_toolkit::ui::occlude(Rect::new(0.0, 0.0, LOGICAL_WIDTH, LOGICAL_HEIGHT));
     let panel = Rect::new(110.0, 82.0, 1060.0, 556.0);
     draw_surface_with_title(
         panel,

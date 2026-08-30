@@ -47,6 +47,11 @@ pub(super) fn draw_route_overview(
         &panel_style(),
         TextStyle::new(21.0, dark::TEXT_BRIGHT),
     );
+    // The ledger owns the dimmed route-planning screen. Remove all covered HUD
+    // controls from the touch audit before the card buttons register their own
+    // hit areas, otherwise a route tap can be reported as ambiguous with a
+    // control painted underneath the modal.
+    macroquad_toolkit::ui::occlude(Rect::new(0.0, 0.0, LOGICAL_WIDTH, LOGICAL_HEIGHT));
     draw_ui_text_ex(
         &format!(
             "{} awakened route{} · tap Inspect to open its existing Outpost card",

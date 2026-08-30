@@ -73,6 +73,8 @@ pub struct Game {
     selected_building: Option<TilePos>,
     /// Whether the post-awakening route ledger is showing.
     routes_open: bool,
+    /// Remaining frames for an opt-in capture-time touch-target audit.
+    touch_audit_frames: u8,
     /// Embedded storybook creature atlas used by the warren renderer.
     world_sprites: ui::warren::WorldSprites,
     /// Hand-painted cavern tableau used by the title menu.
@@ -117,6 +119,7 @@ impl Game {
             touch_tap: None,
             selected_building: None,
             routes_open: false,
+            touch_audit_frames: 0,
             world_sprites: ui::warren::WorldSprites::load(),
             menu_sprites: ui::menu::MenuSprites::load(),
             hud_sprites: ui::hud::HudSprites::load(),
@@ -126,6 +129,15 @@ impl Game {
     /// Seed a named scene for the headless screenshot harness.
     pub fn begin_capture_scene(&mut self, scene: &str) {
         capture_scenes::begin(self, scene);
+    }
+
+    /// Arm the shared touch-target audit for a capture scene. Two frames are
+    /// needed because safe hit-area growth uses the previous frame's control
+    /// neighbours; reporting the first frame would measure a state the player
+    /// never actually receives after the UI has settled.
+    pub(super) fn arm_touch_target_audit(&mut self) {
+        self.touch_audit_frames = 2;
+        macroquad_toolkit::ui::begin_target_audit();
     }
 
     pub fn update(&mut self, dt: f32) {
@@ -309,6 +321,10 @@ impl Game {
     pub fn draw(&mut self) {
         clear_background(dark::BACKGROUND);
 
+        if self.touch_audit_frames > 0 {
+            macroquad_toolkit::ui::begin_target_frame();
+        }
+
         // Preserve readable text when the fixed 1280x720 layout is letterboxed
         // into a smaller browser canvas. The toolkit keeps this bounded so the
         // established candidate scale remains unchanged at the design size.
@@ -393,6 +409,14 @@ impl Game {
         // Roll the HUD's visible controls into the next frame's neighbor map
         // so the shared toolkit can grow their touch hit areas safely.
         macroquad_toolkit::ui::end_frame_neighbours();
+
+        if self.touch_audit_frames > 0 {
+            self.touch_audit_frames -= 1;
+            if self.touch_audit_frames == 0 {
+                report_touch_target_audit();
+                macroquad_toolkit::ui::end_target_audit();
+            }
+        }
 
         for action in actions {
             self.events.push(action);
@@ -522,6 +546,42 @@ impl Game {
     pub(super) fn focus_camera_on_tile(&mut self, tile: TilePos) {
         if let Some(center) = tile_world_center(tile, self.data.config.tile_size) {
             self.camera.pan(center - self.camera.target);
+        }
+    }
+}
+
+fn report_touch_target_audit() {
+    let mut report = String::new();
+    if !macroquad_toolkit::ui::neighbours_warm() {
+        report.push_str("touch targets: no settled controls were recorded\n");
+        emit_touch_target_audit_report(&report);
+        return;
+    }
+
+    if let Some((width, worst)) = macroquad_toolkit::ui::smallest_touchable_width(ui::LOGICAL_WIDTH)
+    {
+        report.push_str(&format!(
+            "touch targets: need a {:.0}px-wide window; worst is {}\n",
+            width, worst
+        ));
+    }
+    for (side, label) in macroquad_toolkit::ui::undersized_targets() {
+        report.push_str(&format!("touch targets: drawn {:.0}px — {}\n", side, label));
+    }
+    for (a, b, area) in macroquad_toolkit::ui::overlapping_targets() {
+        report.push_str(&format!(
+            "touch targets: {} and {} overlap by {:.0}px² once grown\n",
+            a, b, area
+        ));
+    }
+    emit_touch_target_audit_report(&report);
+}
+
+fn emit_touch_target_audit_report(report: &str) {
+    print!("{report}");
+    if let Ok(path) = std::env::var("BIOFOUNDRY_TOUCH_AUDIT_REPORT") {
+        if let Err(error) = std::fs::write(&path, report) {
+            eprintln!("touch targets: could not write {path}: {error}");
         }
     }
 }

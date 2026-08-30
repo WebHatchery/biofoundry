@@ -6,7 +6,7 @@
     Thin wrapper around the shared macroquad-toolkit capture script. Builds
     the debug exe and drives it through the env-var capture hook
     (BIOFOUNDRY_CAPTURE_*) provided by macroquad_toolkit::capture in
-    src/main.rs. Scenes: menu, new_warren_confirm, warren, tutorial_food, tutorial_factory, tutorial_worm, help, pause, collapse, mine, blacksmith, smelter, cook_pot, kiln, waste, blacksmith_queue_full, equipment, overseer, factory, victory, security_stuck, factory_complete, optional, endless, endless_load_preview, endless_routes, endless_auto_return, endless_auto_resupply, endless_upgrade, endless_upgraded, endless_expedition_paused, endless_expedition_report, endless_forge, endless_empty, endless_failure, route_failure, endless_in_flight, endless_arrived, famine, food_warning, raid_food_warning, raid, raid_warning, breeding, breeding_locked, shrine, worm, completion.
+    src/main.rs. Scenes: menu, settings, new_warren_confirm, warren, tutorial_food, tutorial_factory, tutorial_worm, help, pause, collapse, mine, blacksmith, smelter, cook_pot, kiln, waste, blacksmith_queue_full, equipment, overseer, factory, victory, security_stuck, factory_complete, optional, endless, endless_load_preview, endless_routes, endless_auto_return, endless_auto_resupply, endless_upgrade, endless_upgraded, endless_expedition_paused, endless_expedition_report, endless_forge, endless_empty, endless_failure, route_failure, endless_in_flight, endless_arrived, famine, food_warning, raid_food_warning, raid, raid_warning, breeding, breeding_locked, shrine, worm, completion. Prefix any scene with touch_audit_ (for example touch_audit_endless_routes) to print settled hit-target size and overlap diagnostics.
 
 .EXAMPLE
     ./scripts/capture_ui.ps1

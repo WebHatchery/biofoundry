@@ -5,7 +5,7 @@ use crate::ui::{UiAction, LOGICAL_HEIGHT, LOGICAL_WIDTH};
 use macroquad::prelude::*;
 use macroquad_toolkit::prelude::*;
 use macroquad_toolkit::ui::{
-    draw_ui_text_ex, note_neighbour, touch_area_for_scale, Pointer, VirtualUi,
+    draw_ui_text_ex, note_neighbour, note_target, touch_area_for_scale, Pointer, VirtualUi,
 };
 
 const TITLE_TABLEAU_BYTES: &[u8] = include_bytes!("../../assets/sprites/title-tableau.png");
@@ -119,6 +119,7 @@ fn draw_start_new_warren_confirmation(mouse: Vec2, actions: &mut Vec<UiAction>) 
         LOGICAL_HEIGHT,
         Color::new(0.0, 0.0, 0.0, 0.62),
     );
+    macroquad_toolkit::ui::occlude(Rect::new(0.0, 0.0, LOGICAL_WIDTH, LOGICAL_HEIGHT));
     let panel = Rect::new(LOGICAL_WIDTH * 0.5 - 260.0, 260.0, 520.0, 190.0);
     draw_surface_with_title(
         panel,
@@ -251,6 +252,9 @@ fn menu_button(rect: Rect, text: &str, enabled: bool, mouse: Vec2) -> bool {
     let pointer = Pointer::read(|position| virtual_ui.screen_to_ui(position));
     let hit_rect = touch_area_for_scale(rect, virtual_ui.scale);
     note_neighbour(rect);
+    if enabled {
+        note_target(text, rect);
+    }
     let hovered = enabled && (rect.contains_point(mouse) || pointer.hovering_over(rect));
     let pressed = enabled && pointer.pressing(hit_rect);
     let fill = if !enabled {
