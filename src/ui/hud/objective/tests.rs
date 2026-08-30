@@ -465,7 +465,64 @@ fn completed_objective_names_the_return_step_for_a_loaded_outpost() {
 
     assert_eq!(
         objective.next,
-        "Next: tap the active Worm Outpost, then send its cargo and crew to the shrine."
+        "Next: tap the active Worm Outpost, then load food for its expedition."
+    );
+}
+
+#[test]
+fn completed_objective_names_the_wait_step_for_a_scouting_outpost() {
+    let (data, mut session) = boot();
+    session.worm_awake = true;
+    session.unlocked.insert("worm_transit".to_owned());
+    let pos = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(pos, _)| session.can_place_building(*pos))
+        .map(|(pos, _)| pos)
+        .unwrap();
+    session.buildings.push(Building::new("outpost", pos));
+    session.ensure_outpost(pos);
+    let crew_id = session.creatures.first().unwrap().id;
+    let outpost = session.outposts.first_mut().unwrap();
+    outpost.active = true;
+    outpost.crew.push(crew_id);
+    outpost.cargo.insert(Good::CookedFood, 2);
+    outpost.expedition_progress = 10.0;
+
+    let objective = CampaignObjective::current(&session, &data);
+
+    assert_eq!(
+        objective.next,
+        "Next: let the Outpost expedition finish, then return its ore to the shrine."
+    );
+}
+
+#[test]
+fn completed_objective_names_the_food_grid_when_an_expedition_is_unprovisioned() {
+    let (data, mut session) = boot();
+    session.worm_awake = true;
+    session.unlocked.insert("worm_transit".to_owned());
+    session.economy.food = data.balance.worm_feed_reserve;
+    let pos = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(pos, _)| session.can_place_building(*pos))
+        .map(|(pos, _)| pos)
+        .unwrap();
+    session.buildings.push(Building::new("outpost", pos));
+    session.ensure_outpost(pos);
+    let crew_id = session.creatures.first().unwrap().id;
+    let outpost = session.outposts.first_mut().unwrap();
+    outpost.active = true;
+    outpost.crew.push(crew_id);
+
+    let objective = CampaignObjective::current(&session, &data);
+
+    assert_eq!(
+        objective.next,
+        "Next: keep cooked Food above reserve, then load the Outpost expedition."
     );
 }
 

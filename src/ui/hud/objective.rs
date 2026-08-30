@@ -313,7 +313,19 @@ fn active_outpost_next_step(session: &GameSession, data: &GameData) -> &'static 
         .outposts
         .iter()
         .filter(|outpost| outpost.active)
-        .find(|outpost| outpost.cargo_total() > 0 || !outpost.crew.is_empty())
+        .find(|outpost| outpost.cargo_total() > 0 && outpost.crew.is_empty())
+        .or_else(|| {
+            session
+                .outposts
+                .iter()
+                .filter(|outpost| outpost.active)
+                .find(|outpost| {
+                    matches!(
+                        crate::simulation::outposts::expedition_state(outpost, data),
+                        crate::simulation::outposts::ExpeditionState::NeedsFood { .. }
+                    )
+                })
+        })
         .or_else(|| {
             session
                 .outposts
@@ -327,6 +339,24 @@ fn active_outpost_next_step(session: &GameSession, data: &GameData) -> &'static 
     };
     let has_cargo = outpost.cargo_total() > 0;
     let has_crew = !outpost.crew.is_empty();
+    if has_crew {
+        match crate::simulation::outposts::expedition_state(outpost, data) {
+            crate::simulation::outposts::ExpeditionState::NeedsFood { .. } => {
+                if session.economy.food - data.balance.worm_feed_reserve >= 1.0 {
+                    return "Next: tap the active Worm Outpost, then load food for its expedition.";
+                }
+                return "Next: keep cooked Food above reserve, then load the Outpost expedition.";
+            }
+            crate::simulation::outposts::ExpeditionState::Scouting { .. } => {
+                return "Next: let the Outpost expedition finish, then return its ore to the shrine."
+            }
+            crate::simulation::outposts::ExpeditionState::HoldFull => {
+                return "Next: tap the active Worm Outpost, then send its cargo and crew to the shrine."
+            }
+            crate::simulation::outposts::ExpeditionState::Inactive
+            | crate::simulation::outposts::ExpeditionState::NoCrew => {}
+        }
+    }
     match (has_cargo, has_crew) {
         (true, true) => {
             "Next: tap the active Worm Outpost, then send its cargo and crew to the shrine."
