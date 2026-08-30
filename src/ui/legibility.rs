@@ -91,6 +91,9 @@ pub fn building_status(
     building: &Building,
 ) -> Option<BuildingStatus> {
     let pos = building.pos;
+    if building.waste > 0.0 {
+        return Some(BuildingStatus::WasteOverflow);
+    }
     match building.kind.as_str() {
         "mine" => {
             if building.reserve <= 0.0 {
@@ -151,7 +154,6 @@ pub fn building_status(
             }
             None
         }
-        "feeding_trough" if building.waste > 0.0 => Some(BuildingStatus::WasteOverflow),
         "outpost"
             if session
                 .outposts

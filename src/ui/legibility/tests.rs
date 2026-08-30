@@ -139,6 +139,18 @@ fn trough_waste_and_inactive_outpost_are_visible_states() {
 }
 
 #[test]
+fn farm_waste_is_visible_before_a_janitor_is_recruited() {
+    let (data, mut session) = boot();
+    let farm = session.buildings_of("farm").next().unwrap().pos;
+    session.building_at_mut(farm).unwrap().waste = 1.0;
+
+    assert_eq!(
+        building_status(&session, &data, session.building_at(farm).unwrap()),
+        Some(BuildingStatus::WasteOverflow)
+    );
+}
+
+#[test]
 fn pending_hauls_counts_waiting_goods() {
     let (_data, mut session) = boot();
     let mine = session.buildings_of("mine").next().unwrap().pos;
