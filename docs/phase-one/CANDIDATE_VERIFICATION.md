@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `390919d`
+**Source revision:** `5c34eb8`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -29,7 +29,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 191 unit tests and 2 integration tests pass.
+- `cargo test --all-targets` — 192 unit tests and 2 integration tests pass.
 - `cargo clippy --all-targets --all-features -- -D warnings` — pass.
 - `publish.ps1` with no parameters — pass; Windows and WebGL packages
   deployed to Preview.
@@ -85,6 +85,11 @@ automated simulation results into first-time-player evidence.
   identifies the local Salamander as `Salamander stationed` while the den is
   starved; focused inspection coverage excludes remote Salamanders from that
   local staffing read.
+- Waste recovery capture — [ui_waste.png](../verification/ui_waste.png) shows
+  an early food node with `Waste accumulating`, the current `Waste 2.5`, and
+  the truthful `Secure warren first` recovery hint before specialist controls
+  are available; focused inspection coverage also exercises the unlocked and
+  staffed Slime paths.
 - Completion capture — [ui_completion.png](../verification/ui_completion.png)
   shows the Worm Awakened summary naming the food and ingot totals, with visible
   Continue in Endless and Return to Menu choices. The completed Objective also
