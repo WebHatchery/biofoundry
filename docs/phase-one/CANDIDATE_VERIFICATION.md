@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-31
-**Source revision:** `ff592ec`
+**Source revision:** `bf99f4d`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -35,7 +35,7 @@ automated simulation results into first-time-player evidence.
 | Endless automatic cargo returns | Pass (focused and capture evidence) | An awakened Outpost exposes the persisted `Auto-return · Off` / `Auto-return · Cargo only` policy. When an opted-in hold reaches capacity, the fixed-step simulation starts one cargo-only return, preserves the remote scouts and one configured expedition's food, emits a departure notice, and autosaves the safe beat; later routes wait for the global worm transit. Refreshed [ui_endless_auto_return.png](../verification/ui_endless_auto_return.png) shows the enabled policy beside the manual return and scouting controls. Live Preview route interaction remains unclaimed because the resumed developer save has not yet reached the Outpost unlock. |
 | Endless automatic Outpost resupply | Pass (focused and capture evidence) | An awakened Outpost exposes the persisted `Auto-resupply · Off` / `Auto-resupply · Food only` policy. When staffed remote scouts need provisions, the fixed-step simulation starts a food-only transit from the home reserve without dispatching more crew; a manually paused expedition is left untouched. The departure notice, Objective, and field guide name the automatic behavior. Refreshed [ui_endless_auto_resupply.png](../verification/ui_endless_auto_resupply.png) shows the shortage state, enabled policy, and visible recovery controls. Live Preview route interaction remains unclaimed because the resumed developer save has not yet reached the Outpost unlock. |
 | Endless transit failure recovery | Pass (focused and published build evidence) | If an in-flight worm route is deactivated, the simulation restores its payload, records the failed Outpost, and emits a one-shot transit-failure event. The game turns that event into a visible danger notification with the exact recovery action and treats it as a safe-beat autosave, so a refresh cannot erase the route's recovered state. |
-| Multi-route failure visibility | Pass (focused evidence) | Reopening one failed Outpost now clears only that route's failure; the global route warning remains visible while any other Outpost still needs recovery. This keeps the top-bar warning consistent with the per-route inspection state as remote routes multiply. |
+| Multi-route failure visibility | Pass (focused evidence) | Reopening one failed Outpost now clears only that route's failure; the global route warning remains visible while any other Outpost still needs recovery, including when a healthy second route starts a transit. This keeps the top-bar warning consistent with the per-route inspection state as remote routes multiply. |
 | Loaded route failure visibility | Pass (focused and published build evidence) | Installing a save now reconciles each persisted Outpost failure with the global top-bar warning, repairing a missing banner and clearing a stale one. The route records remain authoritative across refresh and load boundaries. |
 | Loaded session integrity validation | Pass (focused and published build evidence) | Migrated primary and backup saves are checked before installation for valid map storage, non-overlapping world objects, known content IDs, safe actor/task positions, unique roster IDs, and finite simulation values. Invalid shapes enter the existing quarantine/backup recovery flow instead of poisoning the live Warren. |
 | Backup-only load recovery | Pass (focused and published build evidence) | If a primary slot is missing while its conventional `_backup` survives, `Load` now validates the backup, restores the primary slot, and installs the recovered Warren; if the restore write is rejected, the valid backup remains playable and the player is told to use Save. The focused recovery-path coverage and published candidate include this branch, while ordinary Preview Continue remains verified separately. |
@@ -68,7 +68,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 302 unit tests and 2 integration/code-standard
+- `cargo test --all-targets` — 303 unit tests and 2 integration/code-standard
   targets pass,
   including fresh/simulated/remote-transit valid sessions, modal route
   planning, rejected malformed save shapes, and event-history save/load
@@ -167,8 +167,10 @@ automated simulation results into first-time-player evidence.
   and game-notice coverage pass, and the published Preview build includes the
   event path.
 - Multi-route failure visibility — pass; reopening one failed Outpost no
-  longer hides an unresolved failure on another route. Focused coverage keeps
-  the global banner and per-route failure records aligned.
+  longer hides an unresolved failure on another route, and starting a healthy
+  route does not clear that remaining warning. Focused coverage keeps the
+  global banner and per-route failure records aligned across both recovery
+  paths.
 - Loaded route failure visibility — pass; loading a session now derives the
   global route warning from persisted per-Outpost failure records, repairing a
   missing banner and clearing a stale one. Focused recovery coverage verifies
