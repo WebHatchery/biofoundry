@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `1827d8f`
+**Source revision:** `b4c2866`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -22,6 +22,7 @@ automated simulation results into first-time-player evidence.
 | Fresh-tab relaunch and Continue | Pass | A new Preview tab restored the same `00:36` state and objective with visible controls. |
 | Current WebGL refresh recovery | Pass | On the published `1827d8f` Preview, a fresh Warren was saved through the visible controls, returned to the title with Menu, and restored after page refresh through Continue; the run retained tutorial `2/5 — Stabilize the Food Grid` and showed `Warren loaded.`. |
 | Fresh WebGL campaign completion and Endless continuation | Pass (developer evidence) | A fresh Preview run used pointer controls through New Warren, zoom, map placement, Jobs reassignment, raid recovery, Blacksmith production, Shrine offerings, and the authored `The Colossal Worm Awakens` completion dialog. `Continue in Endless` opened the awakened-worm loop with the visible `forge 60 ingots` objective and locked Pit/Outpost gates. This is repeatable developer evidence, not a qualifying first-time-player session. |
+| Packaged Windows launch and save recovery | Pass | The optimized `biofoundry.exe` launched from the published Windows package. Visible Continue restored the saved warren, Skip dismissed the tutorial, zoom changed the camera, Save produced `Warren saved.`, and Load restored the run with `Warren loaded.`. This covers the shipped recovery loop; full packaged campaign completion and Endless continuation remain open below. |
 | Minimum-layout spot check | Pass | The 1200×675 canvas and required HUD remained visible in the 1280×720 Preview viewport. |
 | Public metadata alignment | Pass | The published game page now names the visible touch actions for panning, inspection, tools, Jobs controls, optional specialist recruitment, awakened Outpost cargo runs, and the post-awakening Endless/Menu choices. |
 | Compact viewport exploration | Pass with follow-up | The hosted Preview smoke path at 800×450 keeps the title, field guide, and Warren HUD on-canvas; capture probes at 800×450, 1024×576, 1280×720, and 1440×900 keep the Food/Factory/Worm tutorial cards, Blacksmith queue controls, Shrine pause control, completion choices, and Endless outpost actions visible without clipping or overlap. Additional 800×450 probes keep specialist actions, Breeding Pit choices, locked-progress lines, and compact Outpost return/load actions visible. The release capture set verifies that pause, famine, food, raid, transit, and route-failure alerts stay clear of the fixed controls. The 800×450 and 1024×576 layouts remain dense, so first-time-player readability and comprehension still require human validation. |
@@ -383,10 +384,11 @@ automated simulation results into first-time-player evidence.
 
 - A first-time pointer/touch-only campaign through Worm Awakened has not been
   observed by a qualifying player.
-- Windows packaged completion/continuation still needs live packaged-build
-  evidence rather than capture or code evidence. The current WebGL Preview now
-  has live developer evidence for both authored completion and `Continue in
-  Endless`; neither result counts toward the first-time-player gate.
+- Windows packaged campaign completion/Endless continuation still needs live
+  packaged-build evidence rather than capture or code evidence. Packaged launch,
+  Continue, Save, and Load now pass; the current WebGL Preview has live developer
+  evidence for both authored completion and `Continue in Endless`; neither result
+  counts toward the first-time-player gate.
 - Browser storage-quota/blocked-storage behavior has not been forced in a live
   session; the runtime surfaces the shared storage rejection as a save or
   autosave warning when it occurs.
