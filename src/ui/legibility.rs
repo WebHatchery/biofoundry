@@ -54,6 +54,12 @@ pub enum BuildingStatus {
     WasteOverflow,
 }
 
+/// Whether the post-campaign specialist and advanced-building controls are
+/// available in the Jobs and Build panels.
+pub fn advanced_systems_unlocked(session: &GameSession) -> bool {
+    (session.won && session.job_count(Job::Guard) > 0) || session.worm_awake
+}
+
 impl BuildingStatus {
     /// A short human label (also the legend text).
     pub fn label(self) -> &'static str {

@@ -322,6 +322,33 @@ fn kitchen_input_hints_name_the_missing_material() {
 }
 
 #[test]
+fn waste_hint_explains_the_available_recovery_path() {
+    let data = GameData::load().expect("embedded game data");
+    let mut session = GameSession::new(&data, 33);
+    let farm = session.buildings_of("farm").next().unwrap().pos;
+    session.building_at_mut(farm).unwrap().waste = 2.5;
+
+    assert_eq!(
+        waste_inspection_hint(&session, &data, session.building_at(farm).unwrap()),
+        "Waste 2.5 · Secure warren first"
+    );
+
+    session.won = true;
+    session.spawn_creature(&data, "goblin", Job::Guard);
+    session.unlocked.insert("slime_janitor".to_owned());
+    assert_eq!(
+        waste_inspection_hint(&session, &data, session.building_at(farm).unwrap()),
+        "Waste 2.5 · Attract Slime"
+    );
+
+    session.spawn_creature(&data, "slime_janitor", Job::Janitor);
+    assert_eq!(
+        waste_inspection_hint(&session, &data, session.building_at(farm).unwrap()),
+        "Waste 2.5 · Slime Janitor cleans it"
+    );
+}
+
+#[test]
 fn inspection_staffing_ignores_remote_crew_and_recognizes_assigned_crew() {
     let data = GameData::load().expect("embedded game data");
     let mut session = GameSession::new(&data, 13);

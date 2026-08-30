@@ -12,6 +12,7 @@ use crate::state::GameSession;
 use crate::ui::hud::requirements::unlock_requirement_progress;
 use crate::ui::hud::widgets::{hud_button, panel_style};
 use crate::ui::hud::HudSprites;
+use crate::ui::legibility::advanced_systems_unlocked;
 use crate::ui::{UiAction, UiMode, LOGICAL_WIDTH};
 use macroquad::prelude::*;
 use macroquad_toolkit::prelude::*;
@@ -565,10 +566,6 @@ fn is_core_building(id: &str) -> bool {
         id,
         "blacksmith" | "cook_pot" | "farm" | "mine" | "worm_shrine"
     )
-}
-
-fn advanced_systems_unlocked(session: &GameSession) -> bool {
-    (session.won && session.job_count(Job::Guard) > 0) || session.worm_awake
 }
 
 /// The persistent campaign card keeps the next milestone visible even after

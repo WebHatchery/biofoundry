@@ -6,7 +6,7 @@ use crate::state::creatures::{Creature, Good, Job, Task};
 use crate::state::outposts::{TransitDirection, WormTransit};
 use crate::state::GameSession;
 use crate::ui::hud::widgets::{hud_button, panel_style};
-use crate::ui::legibility::BuildingStatus;
+use crate::ui::legibility::{advanced_systems_unlocked, BuildingStatus};
 use crate::ui::{UiAction, LOGICAL_WIDTH};
 use macroquad::prelude::*;
 use macroquad_toolkit::grid::TilePos;
@@ -77,6 +77,13 @@ pub(super) fn draw_inspect_panel(
         if let Some(input_hint) = input_hint {
             line(&input_hint, dark::WARNING, &mut y);
         }
+    }
+    if building.waste > 0.0 && building.kind != "feeding_trough" {
+        line(
+            &waste_inspection_hint(session, data, building),
+            dark::WARNING,
+            &mut y,
+        );
     }
 
     match building.kind.as_str() {
@@ -558,6 +565,33 @@ fn mine_staffing_label(staffed: usize, slots: u32, deposit_exhausted: bool) -> S
     } else {
         format!("Mine staff {staffed}/{slots}")
     }
+}
+
+fn waste_inspection_hint(
+    session: &GameSession,
+    data: &GameData,
+    building: &crate::state::structures::Building,
+) -> String {
+    let janitor_present = session
+        .creatures
+        .iter()
+        .any(|c| !c.is_remote() && c.species == "slime_janitor");
+    let action = if janitor_present {
+        "Slime Janitor cleans it".to_owned()
+    } else if !advanced_systems_unlocked(session) {
+        "Secure warren first".to_owned()
+    } else if session.unlocked.contains("slime_janitor") {
+        "Attract Slime".to_owned()
+    } else if let Some(unlock) = data
+        .unlocks
+        .iter()
+        .find(|candidate| candidate.id == "slime_janitor")
+    {
+        format!("Spoil {} food to unlock Slime", unlock.threshold)
+    } else {
+        "Unlock Slime Janitor".to_owned()
+    };
+    format!("Waste {:.1} · {action}", building.waste)
 }
 
 fn local_mine_staffed_at(creature: &Creature, pos: TilePos) -> bool {

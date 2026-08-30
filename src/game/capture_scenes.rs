@@ -232,6 +232,23 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                 }
             }
         }
+        "waste" => {
+            game.transition(StateTransition::StartWarren);
+            if let GameState::Warren(session) = &mut game.state {
+                // Keep the early waste state visible before specialist
+                // controls unlock, so the inspection card explains the next
+                // campaign gate instead of offering an unavailable action.
+                session.tutorial_dismissed = true;
+                session.economy.food = 80.0;
+                let farm = session.buildings_of("farm").next().map(|b| b.pos);
+                if let Some(farm) = farm {
+                    if let Some(building) = session.building_at_mut(farm) {
+                        building.waste = 2.5;
+                    }
+                    game.selected_building = Some(farm);
+                }
+            }
+        }
         "equipment" => {
             game.transition(StateTransition::StartWarren);
             if let GameState::Warren(session) = &mut game.state {
