@@ -9,7 +9,7 @@ use crate::state::creatures::Task;
 use crate::state::outposts::{TransitDirection, WormTransit};
 use crate::state::GameSession;
 use crate::ui::hud::widgets::{hud_button, panel_style};
-use crate::ui::legibility::BuildingStatus;
+use crate::ui::legibility::{shrine_waiting_for_food, shrine_waiting_for_ingots, BuildingStatus};
 use crate::ui::{UiAction, LOGICAL_WIDTH};
 use macroquad::prelude::*;
 use macroquad_toolkit::grid::TilePos;
@@ -28,7 +28,7 @@ use status::{
     local_mine_staffed_at, local_mine_worker_at, mine_staffing_label,
     outpost_cargo_only_return_label, outpost_expedition_hint, outpost_has_loadable_payload,
     outpost_load_hint, outpost_return_label, transit_destination, transit_payload_line,
-    waste_inspection_hint, worm_waiting_for_food, worm_waiting_for_ingots,
+    waste_inspection_hint,
 };
 use workstations::{
     blacksmith_input_hint, blacksmith_queue_available, cook_pot_input_hint, kiln_input_hint,
@@ -444,16 +444,16 @@ pub(super) fn draw_inspect_panel(
                     "The Colossal Worm is awake"
                 } else if paused {
                     "Offerings paused — reserve protected"
-                } else if worm_waiting_for_food(session, data) {
+                } else if shrine_waiting_for_food(session, data) {
                     "Waiting for food reserve"
-                } else if worm_waiting_for_ingots(session, data) {
+                } else if shrine_waiting_for_ingots(session, data) {
                     "Waiting for ingot reserve"
                 } else {
                     "Offering automatically"
                 },
                 if paused
-                    || worm_waiting_for_food(session, data)
-                    || worm_waiting_for_ingots(session, data)
+                    || shrine_waiting_for_food(session, data)
+                    || shrine_waiting_for_ingots(session, data)
                 {
                     dark::WARNING
                 } else {

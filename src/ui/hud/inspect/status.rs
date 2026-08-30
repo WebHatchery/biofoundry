@@ -5,7 +5,9 @@ use crate::state::creatures::{Creature, Job, Task};
 use crate::state::outposts::{Outpost, TransitDirection, WormTransit};
 use crate::state::structures::Building;
 use crate::state::GameSession;
-use crate::ui::legibility::{advanced_systems_unlocked, BuildingStatus};
+use crate::ui::legibility::{
+    advanced_systems_unlocked, shrine_waiting_for_food, shrine_waiting_for_ingots, BuildingStatus,
+};
 use macroquad::prelude::*;
 use macroquad_toolkit::grid::TilePos;
 use macroquad_toolkit::prelude::*;
@@ -211,9 +213,9 @@ fn worm_shrine_status(session: &GameSession, data: &GameData) -> (&'static str, 
         ("Awakened", dark::POSITIVE)
     } else if session.worm_feeding_paused {
         ("Paused — reserve protected", dark::WARNING)
-    } else if worm_waiting_for_food(session, data) {
+    } else if shrine_waiting_for_food(session, data) {
         ("Waiting for food reserve", dark::WARNING)
-    } else if worm_waiting_for_ingots(session, data) {
+    } else if shrine_waiting_for_ingots(session, data) {
         ("Waiting for ingot reserve", dark::WARNING)
     } else {
         ("Working", dark::POSITIVE)
@@ -267,25 +269,4 @@ fn outpost_has_loadable_cargo(
     session.economy.ore_stock > 0
         || session.economy.ingots_stock > 0
         || session.economy.food - data.balance.worm_feed_reserve >= 1.0
-}
-
-pub(super) fn worm_waiting_for_food(session: &GameSession, data: &GameData) -> bool {
-    session.worm_fed < data.balance.worm_awaken_at
-        && session.economy.food <= data.balance.worm_feed_reserve
-}
-
-pub(super) fn worm_waiting_for_ingots(session: &GameSession, data: &GameData) -> bool {
-    if session.worm_fed >= data.balance.worm_awaken_at {
-        return session.worm_ingots_fed < data.balance.worm_awaken_ingots
-            && session.economy.ingots_stock <= data.balance.worm_ingot_reserve;
-    }
-    let food_per_offering = if data.balance.worm_food_per_offering > 0.0 {
-        data.balance.worm_food_per_offering
-    } else {
-        data.balance.worm_awaken_at / data.balance.worm_awaken_ingots.max(1) as f32
-    };
-    let completed_offerings = (session.worm_fed / food_per_offering.max(1.0)).floor() as u32;
-    let desired_ingots = completed_offerings * data.balance.worm_ingots_per_offering;
-    session.worm_ingots_fed < desired_ingots
-        && session.economy.ingots_stock <= data.balance.worm_ingot_reserve
 }

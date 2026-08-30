@@ -141,6 +141,9 @@ fn draw_status_badge(pos: TilePos, ts: f32, status: crate::ui::legibility::Build
         St::ExpeditionPaused => Color::new(0.95, 0.72, 0.35, 1.0),
         St::ExpeditionNeedsFood => Color::new(0.95, 0.55, 0.20, 1.0),
         St::ExpeditionHoldFull => Color::new(0.92, 0.32, 0.26, 1.0),
+        St::ShrineOfferingsPaused => Color::new(0.95, 0.72, 0.35, 1.0),
+        St::ShrineNeedsFood => Color::new(0.95, 0.55, 0.20, 1.0),
+        St::ShrineNeedsIngots => Color::new(0.95, 0.85, 0.30, 1.0),
         St::WasteOverflow => Color::new(0.65, 0.85, 0.35, 1.0),
     };
     draw_status_glyph(vec2(bx, by), r, status, color);
@@ -219,6 +222,24 @@ pub(super) fn draw_status_glyph(
             vec2(bx + s, by + s * 0.7),
             color,
         ),
+        // Shrine pause: the same two bars as a paused expedition, with
+        // wording that identifies offerings rather than scouting.
+        St::ShrineOfferingsPaused => {
+            draw_line(bx - s * 0.35, by - s, bx - s * 0.35, by + s, 2.0, color);
+            draw_line(bx + s * 0.35, by - s, bx + s * 0.35, by + s, 2.0, color);
+        }
+        // Shrine food reserve: a down-triangle marks a missing consumable.
+        St::ShrineNeedsFood => draw_triangle(
+            vec2(bx, by + s),
+            vec2(bx - s, by - s * 0.7),
+            vec2(bx + s, by - s * 0.7),
+            color,
+        ),
+        // Shrine ingot reserve: a small outlined bar distinguishes the
+        // discrete metal offering from its food reserve.
+        St::ShrineNeedsIngots => {
+            draw_rectangle_lines(bx - s, by - s * 0.55, s * 2.0, s * 1.1, 2.0, color)
+        }
         St::WasteOverflow => {
             draw_circle(bx, by, s, color);
             draw_circle(bx, by, s * 0.35, Color::new(0.12, 0.18, 0.08, 1.0));

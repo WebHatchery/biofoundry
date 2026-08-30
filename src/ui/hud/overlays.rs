@@ -405,6 +405,9 @@ pub(super) fn draw_status_legend(session: &GameSession, data: &GameData) {
         (St::ExpeditionPaused, Color::new(0.95, 0.72, 0.35, 1.0)),
         (St::ExpeditionNeedsFood, Color::new(0.95, 0.55, 0.20, 1.0)),
         (St::ExpeditionHoldFull, Color::new(0.92, 0.32, 0.26, 1.0)),
+        (St::ShrineOfferingsPaused, Color::new(0.95, 0.72, 0.35, 1.0)),
+        (St::ShrineNeedsFood, Color::new(0.95, 0.55, 0.20, 1.0)),
+        (St::ShrineNeedsIngots, Color::new(0.95, 0.85, 0.30, 1.0)),
         (St::WasteOverflow, Color::new(0.65, 0.85, 0.35, 1.0)),
     ];
     let mut lx = strip.x + 12.0;

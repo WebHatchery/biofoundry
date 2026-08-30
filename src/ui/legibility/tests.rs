@@ -304,6 +304,45 @@ fn farm_waste_is_visible_before_a_janitor_is_recruited() {
 }
 
 #[test]
+fn shrine_reserve_blockers_are_visible_on_the_map() {
+    let (data, mut session) = boot();
+    let pos = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(p, t)| t.walkable() && session.can_place_building(*p))
+        .map(|(p, _)| p)
+        .unwrap();
+    session.buildings.push(Building::new("worm_shrine", pos));
+
+    session.economy.food = data.balance.worm_feed_reserve;
+    assert_eq!(
+        building_status(&session, &data, session.building_at(pos).unwrap()),
+        Some(BuildingStatus::ShrineNeedsFood)
+    );
+
+    session.economy.food = data.balance.worm_feed_reserve + 10.0;
+    session.worm_fed = data.balance.worm_awaken_at;
+    session.economy.ingots_stock = data.balance.worm_ingot_reserve;
+    assert_eq!(
+        building_status(&session, &data, session.building_at(pos).unwrap()),
+        Some(BuildingStatus::ShrineNeedsIngots)
+    );
+
+    session.worm_feeding_paused = true;
+    assert_eq!(
+        building_status(&session, &data, session.building_at(pos).unwrap()),
+        Some(BuildingStatus::ShrineOfferingsPaused)
+    );
+
+    session.worm_awake = true;
+    assert_eq!(
+        building_status(&session, &data, session.building_at(pos).unwrap()),
+        None
+    );
+}
+
+#[test]
 fn pending_hauls_counts_waiting_goods() {
     let (_data, mut session) = boot();
     let mine = session.buildings_of("mine").next().unwrap().pos;

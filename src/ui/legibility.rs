@@ -58,6 +58,12 @@ pub enum BuildingStatus {
     ExpeditionNeedsFood,
     /// A remote cargo hold that needs a return trip before scouting can continue.
     ExpeditionHoldFull,
+    /// Worm Shrine offerings were paused by the player.
+    ShrineOfferingsPaused,
+    /// Worm Shrine offerings are waiting for the food reserve.
+    ShrineNeedsFood,
+    /// Worm Shrine offerings are waiting for the ingot reserve.
+    ShrineNeedsIngots,
     /// Spoiled stores are accumulating faster than they are cleaned.
     WasteOverflow,
 }
@@ -82,6 +88,9 @@ impl BuildingStatus {
             BuildingStatus::ExpeditionPaused => "Scouting paused",
             BuildingStatus::ExpeditionNeedsFood => "Scout food low",
             BuildingStatus::ExpeditionHoldFull => "Outpost full",
+            BuildingStatus::ShrineOfferingsPaused => "Offerings paused",
+            BuildingStatus::ShrineNeedsFood => "Food reserve low",
+            BuildingStatus::ShrineNeedsIngots => "Ingot reserve low",
             BuildingStatus::WasteOverflow => "Waste accumulating",
         }
     }
@@ -208,8 +217,42 @@ pub fn building_status(
                 | crate::simulation::outposts::ExpeditionState::Scouting { .. } => None,
             }
         }
+        "worm_shrine" if session.worm_awake => None,
+        "worm_shrine" if session.worm_feeding_paused => Some(BuildingStatus::ShrineOfferingsPaused),
+        "worm_shrine" if shrine_waiting_for_food(session, data) => {
+            Some(BuildingStatus::ShrineNeedsFood)
+        }
+        "worm_shrine" if shrine_waiting_for_ingots(session, data) => {
+            Some(BuildingStatus::ShrineNeedsIngots)
+        }
         _ => None,
     }
+}
+
+/// Whether the Shrine is below the food reserve needed to keep its offerings
+/// running. Kept beside the map status so the map badge and inspection card
+/// can share the same blocker definition.
+pub(crate) fn shrine_waiting_for_food(session: &GameSession, data: &GameData) -> bool {
+    session.worm_fed < data.balance.worm_awaken_at
+        && session.economy.food <= data.balance.worm_feed_reserve
+}
+
+/// Whether the Shrine has earned another food offering but cannot spend the
+/// next ingot without dipping below the protected bank reserve.
+pub(crate) fn shrine_waiting_for_ingots(session: &GameSession, data: &GameData) -> bool {
+    if session.worm_fed >= data.balance.worm_awaken_at {
+        return session.worm_ingots_fed < data.balance.worm_awaken_ingots
+            && session.economy.ingots_stock <= data.balance.worm_ingot_reserve;
+    }
+    let food_per_offering = if data.balance.worm_food_per_offering > 0.0 {
+        data.balance.worm_food_per_offering
+    } else {
+        data.balance.worm_awaken_at / data.balance.worm_awaken_ingots.max(1) as f32
+    };
+    let completed_offerings = (session.worm_fed / food_per_offering.max(1.0)).floor() as u32;
+    let desired_ingots = completed_offerings * data.balance.worm_ingots_per_offering;
+    session.worm_ingots_fed < desired_ingots
+        && session.economy.ingots_stock <= data.balance.worm_ingot_reserve
 }
 
 fn blacksmith_needs_ore(building: &Building, data: &GameData) -> bool {

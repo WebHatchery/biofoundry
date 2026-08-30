@@ -738,6 +738,15 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                 }
             }
         }
+        "shrine_waiting" => {
+            begin(game, "shrine");
+            if let GameState::Warren(session) = &mut game.state {
+                // Keep the final-demand Shrine below its protected food
+                // reserve so the map badge and inspection wording can be
+                // reviewed together in the published capture set.
+                session.economy.food = game.data.balance.worm_feed_reserve;
+            }
+        }
         "worm" | "completion" => {
             game.transition(StateTransition::StartWarren);
             if let GameState::Warren(session) = &mut game.state {
