@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-31
-**Source revision:** `25ee890`
+**Source revision:** `704293d`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -47,6 +47,7 @@ automated simulation results into first-time-player evidence.
 | Direct player decision persistence | Pass (focused and published build evidence) | Successful job reassignment, specialist recruitment, breeding, Blacksmith queueing, tutorial skip, milestone-report dismissal, building placement, and dig designation now write an immediate autosave. Failed or duplicate actions do not write, and the refreshed save roundtrip covers the persisted job, queue, map, and decision flags. |
 | Progression checkpoint persistence | Pass (focused and published build evidence) | Capture unlocks, newly granted systems, breeding-pit hatches, survived raids, and tutorial-step advancement now enter the safe-beat autosave path. The next refresh therefore retains earned progression without turning ordinary simulation ticks into constant storage writes. |
 | Food-crisis Farm recovery | Pass (focused and published Preview) | Below the normal Carrier food reserve, a pending Farm now still receives construction ore from the stockpile or a backed-up Mine buffer; unrelated Blacksmith construction remains shed. The Objective names that Farm handoff and the visible Jobs response when Food is falling. After reloading the published Preview save with Food `24` and a Farm site needing `10` ore, the site advanced to `9` ore remaining and the objective reached `2/50` delivered ore during the food crisis; the refreshed [ui_tutorial_food.png](../verification/ui_tutorial_food.png) capture preserves the same handoff. |
+| Reachable construction placement | Pass (focused evidence) | Building ghosts now require a walkable path from the stockpile, so a player cannot create a worker-delivered construction site in an isolated floor pocket. The generated spawn chamber also restores its center exits after procedural water placement; focused coverage checks the placement rejection and 128 deterministic world seeds. |
 | Engineer Mine slot accounting | Pass (focused and published build evidence) | The optional Engineer now uses the same live Mine-claim accounting as ordinary Miners, so it waits when every post is occupied and reserves a free slot before walking toward it. A stale over-capacity arrival is rejected instead of overbooking the Mine; focused simulation coverage verifies both branches. |
 | Multi-Outpost automatic scheduling | Pass (focused evidence) | Automatic returns and food-only resupplies share a persisted round-robin cursor, so a continuously needy first route cannot monopolize the single worm transit. The cursor advances only after a successful automatic departure and defaults safely for older saves; focused multi-route simulation and save-roundtrip coverage verifies that later eligible Outposts receive their turn. |
 | Multi-route ledger | Pass (published capture evidence) | The awakened HUD now exposes a visible Routes control that opens a modal Worm Route Ledger. Each route shows the same inspection status vocabulary, live `Scouting` state and percentage when active, cargo/hold and crew counts, policy state, and a touch-sized Inspect action into the existing Outpost card; selecting a route also centers the bounds-clamped map camera on it. The release [ui_endless_routes.png](../verification/ui_endless_routes.png) capture shows two routes together; the ledger pauses planning and keeps the Close action visible in the compact probe. |
@@ -67,7 +68,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 298 unit tests and 2 integration/code-standard
+- `cargo test --all-targets` — 300 unit tests and 2 integration/code-standard
   targets pass,
   including fresh/simulated/remote-transit valid sessions, modal route
   planning, rejected malformed save shapes, and event-history save/load
@@ -451,6 +452,11 @@ automated simulation results into first-time-player evidence.
   labels pending work as `Build 1 site · 4 ore left`, making the amount still
   owed to the construction site explicit instead of presenting an unlabeled
   ore counter.
+- Reachable construction placement — focused state coverage keeps the
+  stockpile's worker path as part of the placement predicate, rejects an
+  isolated floor pocket, and checks the restored spawn exits across 128
+  deterministic seeds. The existing touch build ghost uses the same predicate,
+  so unreachable floor reads as invalid before the player taps it.
 - Tutorial construction pacing — [ui_tutorial_food.png](../verification/ui_tutorial_food.png)
   names the Farm-then-open-floor placement taps, keeps the lesson active while
   construction is pending, and names the current pressure recovery controls;
