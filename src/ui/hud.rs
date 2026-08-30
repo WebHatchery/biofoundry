@@ -145,7 +145,15 @@ pub fn draw(
     let objective_panel = panels::draw_objective_panel(session, data);
     let inspect_top = inspect_panel_top(tutorial_panel);
     let inspect_panel = selected.and_then(|pos| {
-        inspect::draw_inspect_panel(session, data, pos, inspect_top, mouse, &mut actions)
+        inspect::draw_inspect_panel(
+            session,
+            data,
+            pos,
+            inspect_top,
+            mouse,
+            ui.scale,
+            &mut actions,
+        )
     });
 
     // A status-icon legend, shown only while some node is stalled — it
