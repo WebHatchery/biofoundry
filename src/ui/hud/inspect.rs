@@ -2,11 +2,14 @@
 //! plus its per-kind verbs (blacksmith production orders, pit breeding).
 
 use crate::data::GameData;
-use crate::state::creatures::{Creature, Good, Job, Task};
+use crate::state::creatures::Good;
+#[cfg(test)]
+use crate::state::creatures::Task;
+#[cfg(test)]
 use crate::state::outposts::{TransitDirection, WormTransit};
 use crate::state::GameSession;
 use crate::ui::hud::widgets::{hud_button, panel_style};
-use crate::ui::legibility::{advanced_systems_unlocked, BuildingStatus};
+use crate::ui::legibility::BuildingStatus;
 use crate::ui::{UiAction, LOGICAL_WIDTH};
 use macroquad::prelude::*;
 use macroquad_toolkit::grid::TilePos;
@@ -14,9 +17,15 @@ use macroquad_toolkit::prelude::*;
 use macroquad_toolkit::ui::draw_ui_text_ex;
 
 mod breeding;
+mod status;
 mod workstations;
 
 use breeding::{breed_label, breeding_unlock_hint};
+use status::{
+    inspect_status, local_mine_staffed_at, local_mine_worker_at, mine_staffing_label,
+    outpost_has_loadable_payload, outpost_return_label, transit_destination, transit_payload_line,
+    waste_inspection_hint, worm_waiting_for_food, worm_waiting_for_ingots,
+};
 use workstations::{
     blacksmith_input_hint, blacksmith_queue_available, cook_pot_input_hint, kiln_input_hint,
     local_smelter_staffed_at, local_smelter_worker_at, local_smith_staffed_at,
@@ -558,194 +567,6 @@ pub(super) fn draw_inspect_panel(
     }
 
     Some(panel)
-}
-
-fn local_mine_worker_at(creature: &Creature, pos: TilePos) -> bool {
-    !creature.is_remote() && matches!(&creature.task, Task::WorkMine(p) if *p == pos)
-}
-
-fn mine_staffing_label(staffed: usize, slots: u32, deposit_exhausted: bool) -> String {
-    if deposit_exhausted {
-        "Deposit exhausted".to_owned()
-    } else if staffed == 0 {
-        "No mine worker — stopped".to_owned()
-    } else {
-        format!("Mine staff {staffed}/{slots}")
-    }
-}
-
-fn waste_inspection_hint(
-    session: &GameSession,
-    data: &GameData,
-    building: &crate::state::structures::Building,
-) -> String {
-    let janitor_present = session
-        .creatures
-        .iter()
-        .any(|c| !c.is_remote() && c.species == "slime_janitor");
-    let action = if janitor_present {
-        "Slime Janitor cleans it".to_owned()
-    } else if !advanced_systems_unlocked(session) {
-        "Secure warren first".to_owned()
-    } else if session.unlocked.contains("slime_janitor") {
-        "Attract Slime".to_owned()
-    } else if let Some(unlock) = data
-        .unlocks
-        .iter()
-        .find(|candidate| candidate.id == "slime_janitor")
-    {
-        format!("Spoil {} food to unlock Slime", unlock.threshold)
-    } else {
-        "Unlock Slime Janitor".to_owned()
-    };
-    format!("Waste {:.1} · {action}", building.waste)
-}
-
-fn local_mine_staffed_at(creature: &Creature, pos: TilePos) -> bool {
-    !creature.is_remote()
-        && (creature.job == Job::Miner || creature.job == Job::Engineer)
-        && match &creature.task {
-            Task::WorkMine(p) | Task::GoMine(p) => *p == pos,
-            _ => creature.tile() == pos,
-        }
-}
-
-fn outpost_return_label(cargo: u32, crew: usize) -> String {
-    match (cargo > 0, crew > 0) {
-        (true, true) => format!("Send {cargo} cargo + {crew} crew to shrine"),
-        (true, false) => format!("Send {cargo} cargo to shrine"),
-        (false, true) => format!("Send {crew} crew to shrine"),
-        (false, false) => "No cargo or crew to return".to_owned(),
-    }
-}
-
-/// Give every inspected building the same first-read answer: is it working,
-/// stalled, paused, or on a route that needs attention?
-fn inspect_status(
-    session: &GameSession,
-    data: &GameData,
-    building: &crate::state::structures::Building,
-) -> (&'static str, Color) {
-    if building.kind == "worm_shrine" {
-        return worm_shrine_status(session, data);
-    }
-    if building.kind == "outpost" {
-        if let Some(outpost) = session.outposts.iter().find(|o| o.pos == building.pos) {
-            if session
-                .worm_transit
-                .as_ref()
-                .is_some_and(|transit| transit.outpost == building.pos)
-            {
-                return ("In transit", dark::POSITIVE);
-            }
-            if outpost.last_failure.is_some() {
-                return ("Route failed", dark::NEGATIVE);
-            }
-            if !outpost.active {
-                if outpost.cargo_total() > 0 || !outpost.crew.is_empty() {
-                    return ("Payload held · route inactive", dark::WARNING);
-                }
-                return ("Route inactive", dark::WARNING);
-            }
-            if !session.worm_awake {
-                return ("Route active", dark::POSITIVE);
-            }
-            if outpost.cargo_total() > 0 || !outpost.crew.is_empty() {
-                return ("Payload ready", dark::POSITIVE);
-            }
-            if outpost_has_loadable_payload(session, data, 0, 0) {
-                return ("Ready to load", dark::POSITIVE);
-            } else {
-                return ("Awaiting payload", dark::WARNING);
-            }
-        }
-    }
-    match crate::ui::legibility::building_status(session, data, building) {
-        Some(status) => (
-            status.label(),
-            match status {
-                BuildingStatus::Exhausted | BuildingStatus::OutputFull => dark::NEGATIVE,
-                _ => dark::WARNING,
-            },
-        ),
-        None => ("Working", dark::POSITIVE),
-    }
-}
-
-fn worm_shrine_status(session: &GameSession, data: &GameData) -> (&'static str, Color) {
-    if session.worm_awake {
-        ("Awakened", dark::POSITIVE)
-    } else if session.worm_feeding_paused {
-        ("Paused — reserve protected", dark::WARNING)
-    } else if worm_waiting_for_food(session, data) {
-        ("Waiting for food reserve", dark::WARNING)
-    } else if worm_waiting_for_ingots(session, data) {
-        ("Waiting for ingot reserve", dark::WARNING)
-    } else {
-        ("Working", dark::POSITIVE)
-    }
-}
-
-fn transit_destination(direction: TransitDirection) -> &'static str {
-    match direction {
-        TransitDirection::ToOutpost => "outpost",
-        TransitDirection::ToShrine => "shrine",
-    }
-}
-
-fn transit_payload_line(transit: &WormTransit) -> String {
-    let cargo = transit
-        .ore
-        .saturating_add(transit.ingots)
-        .saturating_add(transit.food.max(0.0) as u32);
-    format!(
-        "In flight · {cargo} cargo · {} crew",
-        transit.passengers.len()
-    )
-}
-
-fn outpost_has_loadable_payload(
-    session: &GameSession,
-    data: &GameData,
-    cargo: u32,
-    crew: usize,
-) -> bool {
-    let crew_ready = crew < data.balance.outpost_capacity as usize
-        && session
-            .creatures
-            .iter()
-            .any(|c| !c.is_remote() && c.carrying.is_none() && c.tile() == session.stockpile_pos());
-    outpost_has_loadable_cargo(session, data, cargo) || crew_ready
-}
-
-fn outpost_has_loadable_cargo(session: &GameSession, data: &GameData, cargo: u32) -> bool {
-    if cargo >= data.balance.outpost_storage_cap {
-        return false;
-    }
-    session.economy.ore_stock > 0
-        || session.economy.ingots_stock > 0
-        || session.economy.food - data.balance.worm_feed_reserve >= 1.0
-}
-
-fn worm_waiting_for_food(session: &GameSession, data: &GameData) -> bool {
-    session.worm_fed < data.balance.worm_awaken_at
-        && session.economy.food <= data.balance.worm_feed_reserve
-}
-
-fn worm_waiting_for_ingots(session: &GameSession, data: &GameData) -> bool {
-    if session.worm_fed >= data.balance.worm_awaken_at {
-        return session.worm_ingots_fed < data.balance.worm_awaken_ingots
-            && session.economy.ingots_stock <= data.balance.worm_ingot_reserve;
-    }
-    let food_per_offering = if data.balance.worm_food_per_offering > 0.0 {
-        data.balance.worm_food_per_offering
-    } else {
-        data.balance.worm_awaken_at / data.balance.worm_awaken_ingots.max(1) as f32
-    };
-    let completed_offerings = (session.worm_fed / food_per_offering.max(1.0)).floor() as u32;
-    let desired_ingots = completed_offerings * data.balance.worm_ingots_per_offering;
-    session.worm_ingots_fed < desired_ingots
-        && session.economy.ingots_stock <= data.balance.worm_ingot_reserve
 }
 
 #[cfg(test)]
