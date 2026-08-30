@@ -348,6 +348,33 @@ fn completed_objective_names_the_load_step_for_an_empty_active_outpost() {
 }
 
 #[test]
+fn completed_objective_explains_a_cargo_only_crew_setting() {
+    let (data, mut session) = boot();
+    session.worm_awake = true;
+    session.unlocked.insert("worm_transit".to_owned());
+    let pos = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(pos, _)| session.can_place_building(*pos))
+        .map(|(pos, _)| pos)
+        .unwrap();
+    session.buildings.push(Building::new("outpost", pos));
+    session.ensure_outpost(pos);
+    session.outposts[0].active = true;
+    session.outposts[0].crew_dispatch_limit = Some(0);
+    session.creatures.clear();
+    session.spawn_creature(&data, "goblin", Job::Carrier);
+
+    let objective = CampaignObjective::current(&session, &data);
+
+    assert_eq!(
+        objective.next,
+        "Next: tap Crew per run on the Outpost, then load scouts from the warren."
+    );
+}
+
+#[test]
 fn completed_objective_prioritizes_a_ready_outpost_over_an_empty_active_one() {
     let (data, mut session) = boot();
     session.worm_awake = true;

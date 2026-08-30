@@ -522,6 +522,30 @@ fn upgraded_outpost_transit_uses_the_larger_remote_hold() {
 }
 
 #[test]
+fn outpost_crew_dispatch_quota_can_send_cargo_without_crew() {
+    let (data, mut session, outpost_pos) = active_outpost(39);
+    session.creatures.clear();
+    session.economy.ore_stock = 1;
+    session.outposts[0].crew_dispatch_limit = Some(0);
+
+    assert!(outposts::start_to_outpost(&mut session, &data, outpost_pos));
+    let transit = session.worm_transit.as_ref().expect("cargo is in transit");
+    assert_eq!(transit.ore, 1);
+    assert!(transit.passengers.is_empty());
+}
+
+#[test]
+fn outpost_crew_dispatch_quota_limits_new_scouts_per_run() {
+    let (data, mut session, outpost_pos) = active_outpost(40);
+    session.economy.ore_stock = 1;
+    session.outposts[0].crew_dispatch_limit = Some(1);
+
+    assert!(outposts::start_to_outpost(&mut session, &data, outpost_pos));
+    let transit = session.worm_transit.as_ref().expect("crew is in transit");
+    assert_eq!(transit.passengers.len(), 1);
+}
+
+#[test]
 fn cargo_preview_matches_the_next_transit_and_respects_existing_cargo() {
     let (data, mut session, outpost_pos) = active_outpost(27);
     session.creatures.clear();

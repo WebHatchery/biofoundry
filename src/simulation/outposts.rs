@@ -269,9 +269,11 @@ fn start_transit(
                 !c.is_remote() && c.carrying.is_none() && c.tile() == session.stockpile_pos()
             })
             .take(
-                data.balance
-                    .outpost_capacity
-                    .saturating_sub(outpost.crew.len() as u32) as usize,
+                outpost.crew_dispatch_count(
+                    data.balance
+                        .outpost_capacity
+                        .saturating_sub(outpost.crew.len() as u32),
+                ) as usize,
             )
             .map(|c| c.id)
             .collect(),

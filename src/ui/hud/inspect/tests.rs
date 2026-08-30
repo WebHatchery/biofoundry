@@ -166,6 +166,7 @@ fn empty_outpost_reports_when_no_payload_is_ready_to_load() {
         0,
         0,
         data.balance.outpost_storage_cap,
+        None,
     ));
 
     session.economy.food += 1.0;
@@ -175,6 +176,7 @@ fn empty_outpost_reports_when_no_payload_is_ready_to_load() {
         0,
         0,
         data.balance.outpost_storage_cap,
+        None,
     ));
 }
 
@@ -195,6 +197,7 @@ fn empty_outpost_does_not_count_remote_crew_as_ready_to_load() {
         0,
         0,
         data.balance.outpost_storage_cap,
+        None,
     ));
 }
 
@@ -573,13 +576,13 @@ fn outpost_load_hint_previews_the_selected_priority_and_reserve() {
 
     assert_eq!(
         outpost_load_hint(&session, &data, &outpost).as_deref(),
-        Some("Ore 2 · Ingots 10 · Food 0")
+        Some("Load · Ore 2 · Ingots 10 · Food 0")
     );
 
     outpost.cargo_priority = CargoPriority::Food;
     assert_eq!(
         outpost_load_hint(&session, &data, &outpost).as_deref(),
-        Some("Ore 2 · Ingots 0 · Food 10")
+        Some("Load · Ore 2 · Ingots 0 · Food 10")
     );
 }
 
@@ -596,7 +599,7 @@ fn full_outpost_load_hint_explains_the_disabled_load_action() {
 
     assert_eq!(
         outpost_load_hint(&session, &data, &outpost).as_deref(),
-        Some("Cargo hold full · return to shrine")
+        Some("Hold full · return to shrine")
     );
 }
 
@@ -612,8 +615,26 @@ fn upgraded_outpost_load_hint_uses_the_expanded_hold() {
 
     assert_eq!(
         outpost_load_hint(&session, &data, &outpost).as_deref(),
-        Some("Ore 10 · Ingots 10 · Food 0")
+        Some("Load · Ore 10 · Ingots 10 · Food 0")
     );
+}
+
+#[test]
+fn cargo_only_outpost_does_not_count_local_crew_as_loadable() {
+    let data = GameData::load().expect("embedded game data");
+    let mut session = GameSession::new(&data, 41);
+    session.economy.ore_stock = 0;
+    session.economy.ingots_stock = 0;
+    session.economy.food = data.balance.worm_feed_reserve;
+
+    assert!(!outpost_has_loadable_payload(
+        &session,
+        &data,
+        0,
+        0,
+        data.balance.outpost_storage_cap,
+        Some(0),
+    ));
 }
 
 #[test]

@@ -231,6 +231,28 @@ impl Game {
                     self.autosave_game();
                 }
             }
+            UiAction::CycleOutpostCrew(pos) => {
+                if let GameState::Warren(session) = &mut self.state {
+                    if session.worm_awake
+                        && session.worm_transit.is_none()
+                        && session
+                            .building_at(pos)
+                            .is_some_and(|building| building.kind == "outpost")
+                    {
+                        session.ensure_outpost(pos);
+                        if let Some(outpost) = session.outposts.iter_mut().find(|o| o.pos == pos) {
+                            if outpost.active {
+                                outpost.cycle_crew_dispatch(self.data.balance.outpost_capacity);
+                                self.notifications.info(format!(
+                                    "Next outpost run: {}.",
+                                    outpost.crew_dispatch_label(self.data.balance.outpost_capacity)
+                                ));
+                                self.audio.play(Sfx::Select);
+                            }
+                        }
+                    }
+                }
+            }
             UiAction::ToggleOutpostExpedition(pos) => {
                 if let GameState::Warren(session) = &mut self.state {
                     if session.worm_awake

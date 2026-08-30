@@ -56,7 +56,7 @@ pub(super) fn draw_inspect_panel(
         "blacksmith" => 194.0 + data.equipment.len() as f32 * 26.0,
         "breeding_pit" => 280.0,
         "worm_shrine" => 240.0,
-        "outpost" => 420.0,
+        "outpost" => 450.0,
         _ => 152.0,
     };
     let panel = Rect::new(LOGICAL_WIDTH - 262.0, top, 250.0, height);
@@ -444,6 +444,7 @@ pub(super) fn draw_inspect_panel(
             let active = outpost.is_some_and(|o| o.active);
             let cargo = outpost.map(|o| o.cargo_total()).unwrap_or(0);
             let crew = outpost.map(|o| o.crew.len()).unwrap_or(0);
+            let crew_dispatch_limit = outpost.and_then(|route| route.crew_dispatch_limit);
             let storage_cap = outpost
                 .map(|route| crate::simulation::outposts::storage_capacity(route, data))
                 .unwrap_or(data.balance.outpost_storage_cap);
@@ -539,13 +540,19 @@ pub(super) fn draw_inspect_panel(
                 }
                 // Leave a full text-line gap before recovery copy so the
                 // baseline cannot crowd the button's lower border.
-                y += 36.0;
+                y += 32.0;
                 if !active && (cargo > 0 || crew > 0) {
                     line("Reactivate route to return payload", dark::WARNING, &mut y);
                 }
                 if active && session.worm_awake {
-                    let loadable_payload =
-                        outpost_has_loadable_payload(session, data, cargo, crew, storage_cap);
+                    let loadable_payload = outpost_has_loadable_payload(
+                        session,
+                        data,
+                        cargo,
+                        crew,
+                        storage_cap,
+                        crew_dispatch_limit,
+                    );
                     let return_label = outpost_return_label(cargo, crew);
                     if hud_button(
                         Rect::new(x, y, panel.w - 28.0, 24.0),
@@ -555,7 +562,7 @@ pub(super) fn draw_inspect_panel(
                     ) {
                         actions.push(UiAction::TransitToShrine(pos));
                     }
-                    y += 28.0;
+                    y += 24.0;
                     let priority = outpost
                         .map(|route| route.cargo_priority.label())
                         .unwrap_or("Ore first");
@@ -567,7 +574,19 @@ pub(super) fn draw_inspect_panel(
                     ) {
                         actions.push(UiAction::CycleOutpostCargo(pos));
                     }
-                    y += 28.0;
+                    y += 26.0;
+                    let crew_label = outpost
+                        .map(|route| route.crew_dispatch_label(data.balance.outpost_capacity))
+                        .unwrap_or_else(|| "Crew per run · Auto".to_owned());
+                    if hud_button(
+                        Rect::new(x, y, panel.w - 28.0, 24.0),
+                        &crew_label,
+                        session.worm_transit.is_none(),
+                        mouse,
+                    ) {
+                        actions.push(UiAction::CycleOutpostCrew(pos));
+                    }
+                    y += 26.0;
                     if outpost.is_some_and(|route| !route.storage_upgraded) {
                         let upgrade_cost = data.balance.outpost_upgrade_ingots;
                         if hud_button(
@@ -578,7 +597,7 @@ pub(super) fn draw_inspect_panel(
                         ) {
                             actions.push(UiAction::UpgradeOutpost(pos));
                         }
-                        y += 28.0;
+                        y += 26.0;
                     }
                     if crew > 0
                         && hud_button(
@@ -594,14 +613,10 @@ pub(super) fn draw_inspect_panel(
                     {
                         actions.push(UiAction::ToggleOutpostExpedition(pos));
                     }
-                    if crew > 0 {
-                        y += 28.0;
-                    }
+                    y += 38.0;
                     if let Some(load_hint) =
                         outpost.and_then(|route| outpost_load_hint(session, data, route))
                     {
-                        y += 20.0;
-                        line("Load preview", dark::TEXT_DIM, &mut y);
                         line(&load_hint, dark::TEXT_DIM, &mut y);
                     }
                     if hud_button(

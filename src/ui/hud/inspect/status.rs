@@ -86,12 +86,12 @@ pub(super) fn outpost_load_hint(
     );
     if load.total() > 0 {
         Some(format!(
-            "Ore {} · Ingots {} · Food {}",
+            "Load · Ore {} · Ingots {} · Food {}",
             load.ore, load.ingots, load.food
         ))
     } else if outpost.cargo_total() >= crate::simulation::outposts::storage_capacity(outpost, data)
     {
-        Some("Cargo hold full · return to shrine".to_owned())
+        Some("Hold full · return to shrine".to_owned())
     } else {
         None
     }
@@ -180,6 +180,7 @@ pub(super) fn inspect_status(
                 0,
                 0,
                 crate::simulation::outposts::storage_capacity(outpost, data),
+                outpost.crew_dispatch_limit,
             ) {
                 return ("Ready to load", dark::POSITIVE);
             } else {
@@ -237,8 +238,10 @@ pub(super) fn outpost_has_loadable_payload(
     cargo: u32,
     crew: usize,
     capacity: u32,
+    crew_dispatch_limit: Option<u32>,
 ) -> bool {
     let crew_ready = crew < data.balance.outpost_capacity as usize
+        && crew_dispatch_limit != Some(0)
         && session
             .creatures
             .iter()

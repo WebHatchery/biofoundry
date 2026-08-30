@@ -356,6 +356,14 @@ fn active_outpost_next_step(session: &GameSession, data: &GameData) -> &'static 
     };
     let has_cargo = outpost.cargo_total() > 0;
     let has_crew = !outpost.crew.is_empty();
+    let local_crew_ready = session.creatures.iter().any(|creature| {
+        !creature.is_remote()
+            && creature.carrying.is_none()
+            && creature.tile() == session.stockpile_pos()
+    });
+    if !has_cargo && !has_crew && outpost.crew_dispatch_limit == Some(0) && local_crew_ready {
+        return "Next: tap Crew per run on the Outpost, then load scouts from the warren.";
+    }
     if has_crew {
         match crate::simulation::outposts::expedition_state(outpost, data) {
             crate::simulation::outposts::ExpeditionState::NeedsFood { .. } => {

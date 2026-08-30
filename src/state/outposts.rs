@@ -57,6 +57,11 @@ pub struct Outpost {
     /// Lifetime ore returned by this route's scouting expeditions.
     #[serde(default)]
     pub ore_scouted: u32,
+    /// Maximum number of new scouts sent on the next outbound run. `None`
+    /// preserves the legacy automatic behavior and fills the remaining crew
+    /// capacity.
+    #[serde(default)]
+    pub crew_dispatch_limit: Option<u32>,
     /// Whether this route has purchased its expanded remote cargo hold.
     #[serde(default)]
     pub storage_upgraded: bool,
@@ -76,6 +81,7 @@ impl Outpost {
             expedition_progress: 0.0,
             expeditions_completed: 0,
             ore_scouted: 0,
+            crew_dispatch_limit: None,
             storage_upgraded: false,
             last_failure: None,
         }
@@ -91,6 +97,30 @@ impl Outpost {
 
     pub fn toggle_expedition(&mut self) {
         self.expedition_paused = !self.expedition_paused;
+    }
+
+    /// Cycle the number of new scouts on the next outbound run. Automatic
+    /// loading is followed by cargo-only, explicit crew counts, then Auto.
+    pub fn cycle_crew_dispatch(&mut self, capacity: u32) {
+        self.crew_dispatch_limit = match self.crew_dispatch_limit {
+            None => Some(0),
+            Some(limit) if limit >= capacity => None,
+            Some(limit) => Some(limit + 1),
+        };
+    }
+
+    pub fn crew_dispatch_label(&self, capacity: u32) -> String {
+        match self.crew_dispatch_limit {
+            None => "Crew per run · Auto".to_owned(),
+            Some(0) => "Crew per run · Cargo only".to_owned(),
+            Some(limit) => format!("Crew per run · {}/{}", limit.min(capacity), capacity),
+        }
+    }
+
+    pub fn crew_dispatch_count(&self, remaining_capacity: u32) -> u32 {
+        self.crew_dispatch_limit
+            .unwrap_or(remaining_capacity)
+            .min(remaining_capacity)
     }
 
     pub fn upgrade_storage(&mut self) {
