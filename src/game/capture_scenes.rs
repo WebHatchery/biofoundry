@@ -203,6 +203,10 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                 if let Some(spot) = spot {
                     session.buildings.push(Building::new("cook_pot", spot));
                     session.spawn_creature(&game.data, "goblin", Job::Cook);
+                    if let Some(cook) = session.creatures.last_mut() {
+                        cook.x = spot.x as f32 + 0.5;
+                        cook.y = spot.y as f32 + 0.5;
+                    }
                     game.selected_building = Some(spot);
                 }
             }
