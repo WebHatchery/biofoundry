@@ -100,6 +100,7 @@ pub fn tick(session: &mut GameSession, data: &GameData) -> TickReport {
         (ingot_per_min - session.economy.ingot_ema_per_min) * smoothing;
     let wild = wildlife::tick_wildlife(session, data, dt);
     let deserters = food::tick_hunger(session, data, dt);
+    outposts::tick_expeditions(session, data, dt);
     let transit_completed = outposts::tick_transit(session, data, dt);
 
     let mut won_this_tick = false;

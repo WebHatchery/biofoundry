@@ -521,6 +521,75 @@ fn cargo_preview_matches_the_next_transit_and_respects_existing_cargo() {
 }
 
 #[test]
+fn staffed_outpost_scouting_consumes_food_and_stores_remote_ore() {
+    let (data, mut session, _outpost_pos) = active_outpost(28);
+    let crew: Vec<u32> = session
+        .creatures
+        .iter()
+        .take(2)
+        .map(|creature| creature.id)
+        .collect();
+    session.outposts[0].crew = crew;
+    session.outposts[0].cargo.insert(Good::CookedFood, 4);
+
+    assert_eq!(
+        outposts::expedition_state(&session.outposts[0], &data),
+        outposts::ExpeditionState::Scouting {
+            progress_percent: 0,
+            ore_yield: 6,
+            food_cost: 2,
+        }
+    );
+
+    outposts::tick_expeditions(
+        &mut session,
+        &data,
+        data.balance.outpost_expedition_cycle_sec,
+    );
+
+    assert_eq!(session.outposts[0].cargo.get(&Good::CookedFood), Some(&2));
+    assert_eq!(session.outposts[0].cargo.get(&Good::Ore), Some(&6));
+    assert_eq!(session.outposts[0].expedition_progress, 0.0);
+}
+
+#[test]
+fn outpost_scouting_pauses_without_provisions_or_hold_room() {
+    let (data, mut session, _outpost_pos) = active_outpost(29);
+    let crew: Vec<u32> = session
+        .creatures
+        .iter()
+        .take(2)
+        .map(|creature| creature.id)
+        .collect();
+    session.outposts[0].crew = crew;
+    session.outposts[0].cargo.insert(Good::CookedFood, 1);
+
+    assert_eq!(
+        outposts::expedition_state(&session.outposts[0], &data),
+        outposts::ExpeditionState::NeedsFood {
+            required: 2,
+            available: 1,
+        }
+    );
+    outposts::tick_expeditions(
+        &mut session,
+        &data,
+        data.balance.outpost_expedition_cycle_sec,
+    );
+    assert_eq!(session.outposts[0].cargo.get(&Good::Ore), None);
+
+    session.outposts[0].cargo.insert(Good::CookedFood, 2);
+    session.outposts[0].cargo.insert(
+        Good::Ore,
+        data.balance.outpost_storage_cap.saturating_sub(2),
+    );
+    assert_eq!(
+        outposts::expedition_state(&session.outposts[0], &data),
+        outposts::ExpeditionState::HoldFull
+    );
+}
+
+#[test]
 fn simulation_reports_arrival_after_a_cargo_run_completes() {
     let (data, mut session, outpost_pos) = active_outpost(22);
     session.economy.ore_stock = 1;

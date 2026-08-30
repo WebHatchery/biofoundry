@@ -504,6 +504,27 @@ fn full_outpost_load_hint_explains_the_disabled_load_action() {
 }
 
 #[test]
+fn outpost_expedition_hint_names_remote_progress_and_blockers() {
+    let data = GameData::load().expect("embedded game data");
+    let mut outpost = crate::state::outposts::Outpost::new(TilePos::new(4, 4));
+    outpost.active = true;
+    outpost.crew = vec![1, 2];
+    outpost.cargo.insert(Good::CookedFood, 4);
+    outpost.expedition_progress = 15.0;
+
+    assert_eq!(
+        outpost_expedition_hint(&data, &outpost).as_deref(),
+        Some("Expedition 50% · +6 ore / -2 food")
+    );
+
+    outpost.cargo.insert(Good::CookedFood, 1);
+    assert_eq!(
+        outpost_expedition_hint(&data, &outpost).as_deref(),
+        Some("Expedition paused · need 1 food")
+    );
+}
+
+#[test]
 fn in_flight_payload_summary_names_cargo_and_crew() {
     let transit = WormTransit {
         outpost: TilePos::new(4, 4),

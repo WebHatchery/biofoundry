@@ -50,6 +50,22 @@ pub struct CargoLoad {
     pub food: u32,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ExpeditionState {
+    Inactive,
+    NoCrew,
+    HoldFull,
+    NeedsFood {
+        required: u32,
+        available: u32,
+    },
+    Scouting {
+        progress_percent: u32,
+        ore_yield: u32,
+        food_cost: u32,
+    },
+}
+
 impl CargoLoad {
     pub fn total(self) -> u32 {
         self.ore
@@ -86,6 +102,71 @@ pub fn preview_outbound_cargo(
         room -= take;
     }
     load
+}
+
+pub fn expedition_state(outpost: &Outpost, data: &GameData) -> ExpeditionState {
+    if !outpost.active {
+        return ExpeditionState::Inactive;
+    }
+    let crew = outpost.crew.len() as u32;
+    if crew == 0 {
+        return ExpeditionState::NoCrew;
+    }
+    if outpost.cargo_total() >= data.balance.outpost_storage_cap {
+        return ExpeditionState::HoldFull;
+    }
+    let food_required = crew.saturating_mul(data.balance.outpost_expedition_food_per_crew);
+    let food_available = outpost.cargo.get(&Good::CookedFood).copied().unwrap_or(0);
+    if food_available < food_required {
+        return ExpeditionState::NeedsFood {
+            required: food_required,
+            available: food_available,
+        };
+    }
+    let cycle = data.balance.outpost_expedition_cycle_sec.max(0.1);
+    let progress_percent = (outpost.expedition_progress.max(0.0) / cycle * 100.0)
+        .floor()
+        .clamp(0.0, 100.0) as u32;
+    ExpeditionState::Scouting {
+        progress_percent,
+        ore_yield: crew.saturating_mul(data.balance.outpost_expedition_ore_per_crew),
+        food_cost: food_required,
+    }
+}
+
+pub fn tick_expeditions(session: &mut GameSession, data: &GameData, dt: f32) {
+    if !session.worm_awake {
+        return;
+    }
+    let cycle = data.balance.outpost_expedition_cycle_sec.max(0.1);
+    let food_per_crew = data.balance.outpost_expedition_food_per_crew;
+    let ore_per_crew = data.balance.outpost_expedition_ore_per_crew;
+    for outpost in &mut session.outposts {
+        if !outpost.active || outpost.crew.is_empty() {
+            continue;
+        }
+        let crew = outpost.crew.len() as u32;
+        let room = data
+            .balance
+            .outpost_storage_cap
+            .saturating_sub(outpost.cargo_total());
+        let food_cost = crew.saturating_mul(food_per_crew);
+        let food_available = outpost.cargo.get(&Good::CookedFood).copied().unwrap_or(0);
+        if room == 0 || food_available < food_cost {
+            continue;
+        }
+        outpost.expedition_progress = (outpost.expedition_progress.max(0.0) + dt).min(cycle);
+        if outpost.expedition_progress < cycle {
+            continue;
+        }
+        take_cargo(outpost, Good::CookedFood, food_cost);
+        add_cargo(
+            outpost,
+            Good::Ore,
+            crew.saturating_mul(ore_per_crew).min(room),
+        );
+        outpost.expedition_progress -= cycle;
+    }
 }
 
 fn start_transit(

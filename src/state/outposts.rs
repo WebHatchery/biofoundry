@@ -45,6 +45,9 @@ pub struct Outpost {
     pub cargo: HashMap<Good, u32>,
     #[serde(default)]
     pub crew: Vec<u32>,
+    /// Seconds accumulated toward the next remote scouting haul.
+    #[serde(default)]
+    pub expedition_progress: f32,
     #[serde(default)]
     pub last_failure: Option<String>,
 }
@@ -57,6 +60,7 @@ impl Outpost {
             cargo_priority: CargoPriority::default(),
             cargo: HashMap::new(),
             crew: Vec::new(),
+            expedition_progress: 0.0,
             last_failure: None,
         }
     }

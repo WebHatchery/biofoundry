@@ -96,6 +96,30 @@ pub(super) fn outpost_load_hint(
     }
 }
 
+pub(super) fn outpost_expedition_hint(data: &GameData, outpost: &Outpost) -> Option<String> {
+    match crate::simulation::outposts::expedition_state(outpost, data) {
+        crate::simulation::outposts::ExpeditionState::Inactive
+        | crate::simulation::outposts::ExpeditionState::NoCrew => None,
+        crate::simulation::outposts::ExpeditionState::HoldFull => {
+            Some("Expedition paused · hold full".to_owned())
+        }
+        crate::simulation::outposts::ExpeditionState::NeedsFood {
+            required,
+            available,
+        } => Some(format!(
+            "Expedition paused · need {} food",
+            required.saturating_sub(available)
+        )),
+        crate::simulation::outposts::ExpeditionState::Scouting {
+            progress_percent,
+            ore_yield,
+            food_cost,
+        } => Some(format!(
+            "Expedition {progress_percent}% · +{ore_yield} ore / -{food_cost} food"
+        )),
+    }
+}
+
 /// Give every inspected building the same first-read answer: is it working,
 /// stalled, paused, or on a route that needs attention?
 pub(super) fn inspect_status(

@@ -566,7 +566,9 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                 if let Some(route) = session.outposts.last_mut() {
                     route.cargo.clear();
                     route.cargo.insert(Good::Ore, 2);
+                    route.cargo.insert(Good::CookedFood, 4);
                     route.cargo_priority = CargoPriority::Ingots;
+                    route.expedition_progress = 12.0;
                 }
             }
         }

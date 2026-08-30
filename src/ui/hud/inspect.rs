@@ -23,8 +23,9 @@ mod workstations;
 use breeding::{breed_label, breeding_unlock_hint};
 use status::{
     inspect_status, local_mine_staffed_at, local_mine_worker_at, mine_staffing_label,
-    outpost_has_loadable_payload, outpost_load_hint, outpost_return_label, transit_destination,
-    transit_payload_line, waste_inspection_hint, worm_waiting_for_food, worm_waiting_for_ingots,
+    outpost_expedition_hint, outpost_has_loadable_payload, outpost_load_hint, outpost_return_label,
+    transit_destination, transit_payload_line, waste_inspection_hint, worm_waiting_for_food,
+    worm_waiting_for_ingots,
 };
 use workstations::{
     blacksmith_input_hint, blacksmith_queue_available, cook_pot_input_hint, kiln_input_hint,
@@ -55,7 +56,7 @@ pub(super) fn draw_inspect_panel(
         "blacksmith" => 194.0 + data.equipment.len() as f32 * 26.0,
         "breeding_pit" => 280.0,
         "worm_shrine" => 240.0,
-        "outpost" => 310.0,
+        "outpost" => 350.0,
         _ => 152.0,
     };
     let panel = Rect::new(LOGICAL_WIDTH - 262.0, top, 250.0, height);
@@ -479,6 +480,13 @@ pub(super) fn draw_inspect_panel(
                 dark::TEXT_DIM,
                 &mut y,
             );
+            if active && session.worm_awake {
+                if let Some(expedition_hint) =
+                    outpost.and_then(|route| outpost_expedition_hint(data, route))
+                {
+                    line(&expedition_hint, dark::TEXT_DIM, &mut y);
+                }
+            }
             if let Some(transit) = session.worm_transit.as_ref() {
                 if transit.outpost == pos {
                     line(&transit_payload_line(transit), dark::POSITIVE, &mut y);

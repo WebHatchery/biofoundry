@@ -219,6 +219,15 @@ pub struct Balance {
     pub outpost_storage_cap: u32,
     #[serde(default = "default_worm_transit_time")]
     pub worm_transit_time_sec: f32,
+    /// Time for a staffed remote outpost to complete one scouting haul.
+    #[serde(default = "default_outpost_expedition_cycle")]
+    pub outpost_expedition_cycle_sec: f32,
+    /// Cooked food consumed by each remote crew member per scouting haul.
+    #[serde(default = "default_outpost_expedition_food")]
+    pub outpost_expedition_food_per_crew: u32,
+    /// Ore discovered by each remote crew member per scouting haul.
+    #[serde(default = "default_outpost_expedition_ore")]
+    pub outpost_expedition_ore_per_crew: u32,
     /// Ingot offerings are reserved above this banked amount.
     #[serde(default = "default_worm_ingot_reserve")]
     pub worm_ingot_reserve: u32,
@@ -285,6 +294,15 @@ fn default_outpost_storage() -> u32 {
 }
 fn default_worm_transit_time() -> f32 {
     18.0
+}
+fn default_outpost_expedition_cycle() -> f32 {
+    30.0
+}
+fn default_outpost_expedition_food() -> u32 {
+    1
+}
+fn default_outpost_expedition_ore() -> u32 {
+    3
 }
 fn default_worm_ingot_reserve() -> u32 {
     4

@@ -75,6 +75,9 @@ fn balance_values_are_playable() {
     assert!(b.worm_food_per_min > 0.0);
     assert!(b.worm_food_per_offering > 0.0);
     assert!(b.worm_awaken_ingots > 0);
+    assert!(b.outpost_expedition_cycle_sec > 0.0);
+    assert!(b.outpost_expedition_food_per_crew > 0);
+    assert!(b.outpost_expedition_ore_per_crew > 0);
     assert!(
         b.worm_awaken_at >= b.worm_food_per_offering * b.worm_awaken_ingots as f32,
         "the food goal must fund every required ingot offering"

@@ -11,7 +11,7 @@ use macroquad_toolkit::prelude::*;
 use macroquad_toolkit::ui::draw_ui_text_ex;
 
 const INSPECT_HELP_BODY: &str =
-    "Tap a building on the map to see its status and controls. Tap an equipment button in the Blacksmith card to queue it; after onboarding, Breeding Pit buttons show specialist benefits. At an awakened Outpost, tap Load order to rotate cargo priority.";
+    "Tap a building on the map to see its status and controls. Tap an equipment button in the Blacksmith card to queue it; after onboarding, Breeding Pit buttons show specialist benefits. At an awakened Outpost, tap Load order to rotate cargo priority, send food and crew to scout for ore, then return the loaded hold to the shrine.";
 const OBJECTIVE_HELP_BODY: &str =
     "Read the Objective card for the current campaign milestone and its next requirement. Locked gates name their exact unlock; after the worm wakes, inspect the Outpost to prepare cargo runs.";
 
