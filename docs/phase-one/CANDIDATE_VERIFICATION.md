@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `88895e4`
+**Source revision:** `ebc18de`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -21,7 +21,7 @@ automated simulation results into first-time-player evidence.
 | Refresh and Continue | Pass | Reload returned to the title screen with Continue enabled; Continue restored `00:36` and showed `Warren loaded.`. |
 | Fresh-tab relaunch and Continue | Pass | A new Preview tab restored the same `00:36` state and objective with visible controls. |
 | Minimum-layout spot check | Pass | The 1200×675 canvas and required HUD remained visible in the 1280×720 Preview viewport. |
-| Public metadata alignment | Pass | The published game page now names the visible touch actions for panning, inspection, tools, Jobs controls, and the post-awakening Endless/Menu choices. |
+| Public metadata alignment | Pass | The published game page now names the visible touch actions for panning, inspection, tools, Jobs controls, optional specialist recruitment, awakened Outpost cargo runs, and the post-awakening Endless/Menu choices. |
 | Compact viewport exploration | Follow-up required | The hosted Preview smoke path at 800×450 keeps the title, field guide, and Warren HUD on-canvas; the release capture set also verifies that pause, famine, food, raid, transit, and route-failure alerts stay clear of the fixed controls. The fixed 1280×720 layout is still dense enough that no release-quality layout pass is claimed below the current target. |
 | Visible-control smoke path | Pass | A fresh Preview warren advanced through visible New Warren, + zoom, and Farm placement without keyboard input. While the 10-ore construction site was pending, the tutorial correctly remained on `2/5 — Stabilize the Food Grid`; successful placement returned to Inspect instead of creating a second site. This is developer smoke evidence, not a qualifying first-time-player session. |
 | Hosted-page toast safety | Pass | The placement confirmation remained fully readable above and left of the fixed Report a Bug widget in the published Preview. |
