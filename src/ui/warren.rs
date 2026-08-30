@@ -137,6 +137,7 @@ fn draw_status_badge(pos: TilePos, ts: f32, status: crate::ui::legibility::Build
         St::Exhausted => Color::new(0.60, 0.60, 0.66, 1.0),
         St::AwaitingHaul => Color::new(0.40, 0.80, 0.92, 1.0),
         St::RouteInactive => Color::new(0.70, 0.62, 0.85, 1.0),
+        St::ExpeditionNoCrew => Color::new(0.95, 0.85, 0.30, 1.0),
         St::ExpeditionPaused => Color::new(0.95, 0.72, 0.35, 1.0),
         St::ExpeditionNeedsFood => Color::new(0.95, 0.55, 0.20, 1.0),
         St::ExpeditionHoldFull => Color::new(0.92, 0.32, 0.26, 1.0),
@@ -196,6 +197,9 @@ pub(super) fn draw_status_glyph(
             draw_circle_lines(bx, by, s, 2.0, color);
             draw_line(bx - s, by + s, bx + s, by - s, 2.0, color);
         }
+        // No scout crew: an empty ring, with route-specific wording in the
+        // legend and inspection card.
+        St::ExpeditionNoCrew => draw_circle_lines(bx, by, s, 2.0, color),
         // Expedition paused: two vertical bars, matching the touch control.
         St::ExpeditionPaused => {
             draw_line(bx - s * 0.35, by - s, bx - s * 0.35, by + s, 2.0, color);

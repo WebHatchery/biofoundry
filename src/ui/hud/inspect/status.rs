@@ -98,8 +98,8 @@ pub(super) fn outpost_load_hint(
 
 pub(super) fn outpost_expedition_hint(data: &GameData, outpost: &Outpost) -> Option<String> {
     match crate::simulation::outposts::expedition_state(outpost, data) {
-        crate::simulation::outposts::ExpeditionState::Inactive
-        | crate::simulation::outposts::ExpeditionState::NoCrew => None,
+        crate::simulation::outposts::ExpeditionState::Inactive => None,
+        crate::simulation::outposts::ExpeditionState::NoCrew => Some("Need scout crew".to_owned()),
         crate::simulation::outposts::ExpeditionState::Paused => {
             Some("Expedition paused · player paused".to_owned())
         }

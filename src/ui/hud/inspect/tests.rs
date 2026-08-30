@@ -213,6 +213,28 @@ fn active_empty_outpost_reports_whether_payload_is_ready() {
 }
 
 #[test]
+fn empty_awakened_outpost_explains_the_missing_scout_crew() {
+    let data = GameData::load().expect("embedded game data");
+    let mut session = GameSession::new(&data, 13);
+    let pos = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(pos, _)| session.can_place_building(*pos))
+        .map(|(pos, _)| pos)
+        .expect("a walkable outpost location");
+    session.buildings.push(Building::new("outpost", pos));
+    session.ensure_outpost(pos);
+    session.outposts[0].active = true;
+    session.worm_awake = true;
+
+    assert_eq!(
+        outpost_expedition_hint(&data, &session.outposts[0]).as_deref(),
+        Some("Need scout crew")
+    );
+}
+
+#[test]
 fn active_loaded_outpost_reports_payload_ready() {
     let data = GameData::load().expect("embedded game data");
     let mut session = GameSession::new(&data, 15);

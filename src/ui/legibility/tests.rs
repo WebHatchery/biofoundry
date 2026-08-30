@@ -237,6 +237,28 @@ fn paused_outpost_keeps_a_distinct_map_status() {
 }
 
 #[test]
+fn empty_awakened_outpost_exposes_missing_scout_crew_on_the_map() {
+    let (data, mut session) = boot();
+    session.worm_awake = true;
+    let pos = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(p, t)| t.walkable() && session.can_place_building(*p))
+        .map(|(p, _)| p)
+        .unwrap();
+    session.buildings.push(Building::new("outpost", pos));
+    session.ensure_outpost(pos);
+    session.outposts[0].active = true;
+
+    assert_eq!(
+        building_status(&session, &data, session.building_at(pos).unwrap()),
+        Some(BuildingStatus::ExpeditionNoCrew)
+    );
+    assert_eq!(BuildingStatus::ExpeditionNoCrew.label(), "No scout crew");
+}
+
+#[test]
 fn staffed_outpost_exposes_food_and_hold_blockers_on_the_map() {
     let (data, mut session) = boot();
     session.worm_awake = true;

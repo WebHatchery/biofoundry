@@ -281,6 +281,7 @@ pub(super) fn draw_status_legend(session: &GameSession, data: &GameData) {
         (St::AwaitingHaul, Color::new(0.40, 0.80, 0.92, 1.0)),
         (St::Exhausted, Color::new(0.60, 0.60, 0.66, 1.0)),
         (St::RouteInactive, Color::new(0.70, 0.62, 0.85, 1.0)),
+        (St::ExpeditionNoCrew, Color::new(0.95, 0.85, 0.30, 1.0)),
         (St::ExpeditionPaused, Color::new(0.95, 0.72, 0.35, 1.0)),
         (St::ExpeditionNeedsFood, Color::new(0.95, 0.55, 0.20, 1.0)),
         (St::ExpeditionHoldFull, Color::new(0.92, 0.32, 0.26, 1.0)),

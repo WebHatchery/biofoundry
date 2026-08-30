@@ -50,6 +50,8 @@ pub enum BuildingStatus {
     AwaitingHaul,
     /// A remote route that is turned off and needs activation before use.
     RouteInactive,
+    /// An awakened remote route with no crew stationed to scout.
+    ExpeditionNoCrew,
     /// An awakened remote route whose scouting has been paused by the player.
     ExpeditionPaused,
     /// A staffed remote route that needs more cooked food before scouting.
@@ -76,6 +78,7 @@ impl BuildingStatus {
             BuildingStatus::Exhausted => "Exhausted",
             BuildingStatus::AwaitingHaul => "Awaiting haul",
             BuildingStatus::RouteInactive => "Route inactive",
+            BuildingStatus::ExpeditionNoCrew => "No scout crew",
             BuildingStatus::ExpeditionPaused => "Scouting paused",
             BuildingStatus::ExpeditionNeedsFood => "Scout food low",
             BuildingStatus::ExpeditionHoldFull => "Outpost full",
@@ -192,6 +195,9 @@ pub fn building_status(
                 crate::simulation::outposts::ExpeditionState::Paused => {
                     Some(BuildingStatus::ExpeditionPaused)
                 }
+                crate::simulation::outposts::ExpeditionState::NoCrew => {
+                    Some(BuildingStatus::ExpeditionNoCrew)
+                }
                 crate::simulation::outposts::ExpeditionState::NeedsFood { .. } => {
                     Some(BuildingStatus::ExpeditionNeedsFood)
                 }
@@ -199,7 +205,6 @@ pub fn building_status(
                     Some(BuildingStatus::ExpeditionHoldFull)
                 }
                 crate::simulation::outposts::ExpeditionState::Inactive
-                | crate::simulation::outposts::ExpeditionState::NoCrew
                 | crate::simulation::outposts::ExpeditionState::Scouting { .. } => None,
             }
         }
