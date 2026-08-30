@@ -213,6 +213,28 @@ fn loaded_inactive_outpost_keeps_a_route_status_on_the_map() {
 }
 
 #[test]
+fn paused_outpost_keeps_a_distinct_map_status() {
+    let (data, mut session) = boot();
+    let pos = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(p, t)| t.walkable() && session.can_place_building(*p))
+        .map(|(p, _)| p)
+        .unwrap();
+    session.buildings.push(Building::new("outpost", pos));
+    session.ensure_outpost(pos);
+    session.outposts[0].active = true;
+    session.outposts[0].expedition_paused = true;
+
+    assert_eq!(
+        building_status(&session, &data, session.building_at(pos).unwrap()),
+        Some(BuildingStatus::ExpeditionPaused)
+    );
+    assert_eq!(BuildingStatus::ExpeditionPaused.label(), "Scouting paused");
+}
+
+#[test]
 fn farm_waste_is_visible_before_a_janitor_is_recruited() {
     let (data, mut session) = boot();
     let farm = session.buildings_of("farm").next().unwrap().pos;

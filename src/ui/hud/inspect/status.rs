@@ -151,6 +151,9 @@ pub(super) fn inspect_status(
                 }
                 return ("Route inactive", dark::WARNING);
             }
+            if outpost.expedition_paused {
+                return ("Scouting paused", dark::WARNING);
+            }
             if !session.worm_awake {
                 return ("Route active", dark::POSITIVE);
             }

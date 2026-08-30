@@ -50,6 +50,8 @@ pub enum BuildingStatus {
     AwaitingHaul,
     /// A remote route that is turned off and needs activation before use.
     RouteInactive,
+    /// An awakened remote route whose scouting has been paused by the player.
+    ExpeditionPaused,
     /// Spoiled stores are accumulating faster than they are cleaned.
     WasteOverflow,
 }
@@ -70,6 +72,7 @@ impl BuildingStatus {
             BuildingStatus::Exhausted => "Exhausted",
             BuildingStatus::AwaitingHaul => "Awaiting haul",
             BuildingStatus::RouteInactive => "Route inactive",
+            BuildingStatus::ExpeditionPaused => "Scouting paused",
             BuildingStatus::WasteOverflow => "Waste accumulating",
         }
     }
@@ -173,6 +176,15 @@ pub fn building_status(
                 .is_some_and(|o| !o.active) =>
         {
             Some(BuildingStatus::RouteInactive)
+        }
+        "outpost"
+            if session
+                .outposts
+                .iter()
+                .find(|o| o.pos == pos)
+                .is_some_and(|o| o.active && o.expedition_paused) =>
+        {
+            Some(BuildingStatus::ExpeditionPaused)
         }
         _ => None,
     }

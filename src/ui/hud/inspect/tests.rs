@@ -278,6 +278,29 @@ fn active_outpost_before_awakening_reports_route_state() {
 }
 
 #[test]
+fn paused_outpost_reports_its_manual_scouting_state() {
+    let data = GameData::load().expect("embedded game data");
+    let mut session = GameSession::new(&data, 17);
+    let pos = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(pos, _)| session.can_place_building(*pos))
+        .map(|(pos, _)| pos)
+        .expect("a walkable outpost location");
+    session.buildings.push(Building::new("outpost", pos));
+    session.ensure_outpost(pos);
+    session.worm_awake = true;
+    session.outposts[0].active = true;
+    session.outposts[0].expedition_paused = true;
+
+    assert_eq!(
+        inspect_status(&session, &data, session.building_at(pos).unwrap()),
+        ("Scouting paused", dark::WARNING)
+    );
+}
+
+#[test]
 fn blacksmith_queue_reports_when_another_order_can_be_added() {
     let data = GameData::load().expect("embedded game data");
     let pos = TilePos::new(0, 0);
