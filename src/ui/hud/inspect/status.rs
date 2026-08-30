@@ -69,6 +69,10 @@ pub(super) fn outpost_return_label(cargo: u32, crew: usize) -> String {
     }
 }
 
+pub(super) fn outpost_cargo_only_return_label(cargo: u32) -> String {
+    format!("Send {cargo} cargo · keep crew")
+}
+
 pub(super) fn outpost_load_hint(
     session: &GameSession,
     data: &GameData,

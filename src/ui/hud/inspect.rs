@@ -23,9 +23,9 @@ mod workstations;
 use breeding::{breed_label, breeding_unlock_hint};
 use status::{
     inspect_status, local_mine_staffed_at, local_mine_worker_at, mine_staffing_label,
-    outpost_expedition_hint, outpost_has_loadable_payload, outpost_load_hint, outpost_return_label,
-    transit_destination, transit_payload_line, waste_inspection_hint, worm_waiting_for_food,
-    worm_waiting_for_ingots,
+    outpost_cargo_only_return_label, outpost_expedition_hint, outpost_has_loadable_payload,
+    outpost_load_hint, outpost_return_label, transit_destination, transit_payload_line,
+    waste_inspection_hint, worm_waiting_for_food, worm_waiting_for_ingots,
 };
 use workstations::{
     blacksmith_input_hint, blacksmith_queue_available, cook_pot_input_hint, kiln_input_hint,
@@ -56,7 +56,7 @@ pub(super) fn draw_inspect_panel(
         "blacksmith" => 194.0 + data.equipment.len() as f32 * 26.0,
         "breeding_pit" => 280.0,
         "worm_shrine" => 240.0,
-        "outpost" => 450.0,
+        "outpost" => 480.0,
         _ => 152.0,
     };
     let panel = Rect::new(LOGICAL_WIDTH - 262.0, top, 250.0, height);
@@ -563,6 +563,20 @@ pub(super) fn draw_inspect_panel(
                         actions.push(UiAction::TransitToShrine(pos));
                     }
                     y += 24.0;
+                    if cargo > 0
+                        && crew > 0
+                        && hud_button(
+                            Rect::new(x, y, panel.w - 28.0, 24.0),
+                            &outpost_cargo_only_return_label(cargo),
+                            true,
+                            mouse,
+                        )
+                    {
+                        actions.push(UiAction::TransitCargoToShrine(pos));
+                    }
+                    if cargo > 0 && crew > 0 {
+                        y += 26.0;
+                    }
                     let priority = outpost
                         .map(|route| route.cargo_priority.label())
                         .unwrap_or("Ore first");

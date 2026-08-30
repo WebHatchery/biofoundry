@@ -518,7 +518,7 @@ fn completed_objective_names_the_wait_step_for_a_scouting_outpost() {
 
     assert_eq!(
         objective.next,
-        "Next: let the Outpost expedition finish, then return its ore to the shrine."
+        "Next: let the Outpost expedition finish, then return its ore while keeping the scouts remote."
     );
 }
 

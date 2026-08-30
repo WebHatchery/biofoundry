@@ -557,6 +557,14 @@ fn outpost_return_label_names_each_payload_kind() {
 }
 
 #[test]
+fn outpost_cargo_only_return_label_keeps_the_remote_team_explicit() {
+    assert_eq!(
+        outpost_cargo_only_return_label(6),
+        "Send 6 cargo · keep crew"
+    );
+}
+
+#[test]
 fn outpost_cargo_priority_labels_are_player_readable() {
     assert_eq!(CargoPriority::Ore.label(), "Ore first");
     assert_eq!(CargoPriority::Ingots.label(), "Ingots first");

@@ -376,10 +376,10 @@ fn active_outpost_next_step(session: &GameSession, data: &GameData) -> &'static 
                 return "Next: tap the active Worm Outpost, then Resume scouting.";
             }
             crate::simulation::outposts::ExpeditionState::Scouting { .. } => {
-                return "Next: let the Outpost expedition finish, then return its ore to the shrine."
+                return "Next: let the Outpost expedition finish, then return its ore while keeping the scouts remote."
             }
             crate::simulation::outposts::ExpeditionState::HoldFull => {
-                return "Next: tap the active Worm Outpost, then send its cargo and crew to the shrine."
+                return "Next: tap the active Worm Outpost, then return its cargo while keeping the scouts remote."
             }
             crate::simulation::outposts::ExpeditionState::Inactive
             | crate::simulation::outposts::ExpeditionState::NoCrew => {}
@@ -387,7 +387,7 @@ fn active_outpost_next_step(session: &GameSession, data: &GameData) -> &'static 
     }
     match (has_cargo, has_crew) {
         (true, true) => {
-            "Next: tap the active Worm Outpost, then send its cargo and crew to the shrine."
+            "Next: tap the active Worm Outpost, then return its cargo while keeping the scouts remote."
         }
         (true, false) => "Next: tap the active Worm Outpost, then send its cargo to the shrine.",
         (false, true) => "Next: tap the active Worm Outpost, then send its crew to the shrine.",

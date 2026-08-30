@@ -55,6 +55,14 @@ fn transit_departure_notice_names_each_destination_without_assuming_payload() {
 }
 
 #[test]
+fn cargo_return_notice_explains_that_remote_crew_stays_put() {
+    assert_eq!(
+        cargo_return_departure_notice(),
+        "The worm begins its journey to the shrine with cargo only."
+    );
+}
+
+#[test]
 fn outpost_activation_notice_names_the_resulting_route_state() {
     assert_eq!(
         outpost_activation_notice(true),

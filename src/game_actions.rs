@@ -273,7 +273,9 @@ impl Game {
                     }
                 }
             }
-            UiAction::TransitToOutpost(pos) | UiAction::TransitToShrine(pos) => {
+            UiAction::TransitToOutpost(pos)
+            | UiAction::TransitToShrine(pos)
+            | UiAction::TransitCargoToShrine(pos) => {
                 let mut transit_started = false;
                 if let GameState::Warren(session) = &mut self.state {
                     let ok = match action {
@@ -282,6 +284,9 @@ impl Game {
                         }
                         UiAction::TransitToShrine(_) => {
                             simulation::outposts::start_to_shrine(session, &self.data, pos)
+                        }
+                        UiAction::TransitCargoToShrine(_) => {
+                            simulation::outposts::start_cargo_to_shrine(session, &self.data, pos)
                         }
                         _ => false,
                     };
@@ -292,10 +297,16 @@ impl Game {
                         transit_started = true;
                         let direction = match action {
                             UiAction::TransitToOutpost(_) => TransitDirection::ToOutpost,
-                            UiAction::TransitToShrine(_) => TransitDirection::ToShrine,
+                            UiAction::TransitToShrine(_) | UiAction::TransitCargoToShrine(_) => {
+                                TransitDirection::ToShrine
+                            }
                             _ => unreachable!("transit action branch only matches transit actions"),
                         };
-                        self.notifications.info(transit_departure_notice(direction));
+                        if matches!(action, UiAction::TransitCargoToShrine(_)) {
+                            self.notifications.info(cargo_return_departure_notice());
+                        } else {
+                            self.notifications.info(transit_departure_notice(direction));
+                        }
                     } else {
                         self.notifications
                             .warning("No valid cargo or route is ready.");
@@ -369,6 +380,10 @@ fn transit_departure_notice(direction: TransitDirection) -> &'static str {
         TransitDirection::ToOutpost => "The worm begins its journey to the outpost.",
         TransitDirection::ToShrine => "The worm begins its journey to the shrine.",
     }
+}
+
+fn cargo_return_departure_notice() -> &'static str {
+    "The worm begins its journey to the shrine with cargo only."
 }
 
 fn outpost_activation_notice(active: bool) -> &'static str {

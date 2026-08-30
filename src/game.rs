@@ -371,14 +371,16 @@ impl Game {
         }
 
         // The published game page reserves its lower-right corner for the
-        // Report a Bug widget. Keep the toast stack anchored to that corner
-        // while lifting it clear of the page chrome and map edge.
+        // Report a Bug widget and the tall Outpost inspection card both use
+        // the lower-right corner. Keep the toast stack anchored there while
+        // lifting it clear of the page chrome and shifting it left of the
+        // card's footprint.
         self.notifications.draw_with_config_and_offset(
             &NotificationRenderConfig {
                 anchor: NotificationAnchor::BottomRight,
                 ..Default::default()
             },
-            vec2(-180.0, -82.0),
+            vec2(-250.0, -82.0),
         );
     }
 

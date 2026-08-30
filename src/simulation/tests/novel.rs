@@ -7,6 +7,8 @@ use crate::state::outposts::{CargoPriority, TransitDirection};
 use crate::state::structures::Building;
 use macroquad_toolkit::grid::TilePos;
 
+mod cargo_return;
+
 fn active_outpost(
     seed: u64,
 ) -> (

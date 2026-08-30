@@ -31,11 +31,17 @@ pub fn activate_outpost(session: &mut GameSession, pos: TilePos) -> bool {
 }
 
 pub fn start_to_outpost(session: &mut GameSession, data: &GameData, pos: TilePos) -> bool {
-    start_transit(session, data, pos, TransitDirection::ToOutpost)
+    start_transit(session, data, pos, TransitDirection::ToOutpost, true)
 }
 
 pub fn start_to_shrine(session: &mut GameSession, data: &GameData, pos: TilePos) -> bool {
-    start_transit(session, data, pos, TransitDirection::ToShrine)
+    start_transit(session, data, pos, TransitDirection::ToShrine, true)
+}
+
+/// Start a return trip that unloads the remote hold but leaves stationed
+/// scouts at the Outpost for another expedition cycle.
+pub fn start_cargo_to_shrine(session: &mut GameSession, data: &GameData, pos: TilePos) -> bool {
+    start_transit(session, data, pos, TransitDirection::ToShrine, false)
 }
 
 /// Return the selected Outpost's current remote cargo capacity.
@@ -225,6 +231,7 @@ fn start_transit(
     data: &GameData,
     pos: TilePos,
     direction: TransitDirection,
+    return_crew: bool,
 ) -> bool {
     if !session.worm_awake
         || session.worm_transit.is_some()
@@ -277,7 +284,8 @@ fn start_transit(
             )
             .map(|c| c.id)
             .collect(),
-        TransitDirection::ToShrine => outpost.crew.clone(),
+        TransitDirection::ToShrine if return_crew => outpost.crew.clone(),
+        TransitDirection::ToShrine => Vec::new(),
     };
     if ore == 0 && ingots == 0 && food <= 0.0 && passengers.is_empty() {
         return false;
@@ -294,7 +302,7 @@ fn start_transit(
                 take_cargo(o, Good::Ore, ore);
                 take_cargo(o, Good::Ingot, ingots);
                 take_cargo(o, Good::CookedFood, food as u32);
-                o.crew.clear();
+                o.crew.retain(|id| !passengers.contains(id));
             }
         }
     }

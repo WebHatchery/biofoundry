@@ -65,6 +65,8 @@ pub enum UiAction {
     ToggleOutpostExpedition(TilePos),
     TransitToOutpost(TilePos),
     TransitToShrine(TilePos),
+    /// Return an outpost's cargo while leaving its remote crew in place.
+    TransitCargoToShrine(TilePos),
     DismissVictory,
     DismissFactory,
     DismissWorm,
