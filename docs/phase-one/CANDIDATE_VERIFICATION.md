@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `3f7623a`
+**Source revision:** `c61f716`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -220,6 +220,10 @@ automated simulation results into first-time-player evidence.
   makes the intended interaction explicit: inspect the existing Mine, place the
   Blacksmith, and when no eligible Idle worker is available, tap `−` by the
   named reassignable role before tapping `+` by Smith.
+- Construction remainder capture — the refreshed [ui_factory.png](../verification/ui_factory.png)
+  labels pending work as `Build 1 site · 4 ore left`, making the amount still
+  owed to the construction site explicit instead of presenting an unlabeled
+  ore counter.
 - Tutorial construction pacing — [ui_tutorial_food.png](../verification/ui_tutorial_food.png)
   names the Farm-then-open-floor placement taps, keeps the lesson active while
   construction is pending, and names the current pressure recovery controls;
