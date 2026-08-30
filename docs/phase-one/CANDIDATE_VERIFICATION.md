@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `85ce58b`
+**Source revision:** `a17e584`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -31,7 +31,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 196 unit tests and 2 integration tests pass.
+- `cargo test --all-targets` — 199 unit tests and 2 integration tests pass.
 - `cargo clippy --all-targets --all-features -- -D warnings` — pass.
 - `publish.ps1` with no parameters — pass; Windows and WebGL packages
   deployed to Preview.
@@ -74,6 +74,10 @@ automated simulation results into first-time-player evidence.
   name their tuned work, aura, or mine benefit in the recruitment notice;
   focused game-action coverage checks those data-driven percentages alongside
   the existing breeding labels.
+- Unlock feedback — newly earned building and creature systems now name their
+  visible destination (`Build & Dig` or the Breeding Pit), while Hardened Guards
+  and Preservation Techniques announce their percentage benefits; focused game
+  coverage keeps the practical guidance data-driven with a safe fallback.
 - Locked-gate progress capture — the refreshed [ui_optional.png](../verification/ui_optional.png)
   shows current/threshold values for the remaining Build & Dig unlocks, so a
   locked action communicates both its requirement and how close the warren is.
