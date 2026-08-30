@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `d33fa4b`
+**Source revision:** `88895e4`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -212,7 +212,8 @@ automated simulation results into first-time-player evidence.
 - Locked specialist progress — [ui_breeding_locked.png](../verification/ui_breeding_locked.png)
   shows each unavailable breeding choice with its exact forge requirement and
   live progress, while the refreshed [ui_breeding.png](../verification/ui_breeding.png)
-  keeps the unlocked specialist benefits and costs readable.
+  keeps the unlocked specialist benefits and costs readable. Both cards now
+  state that specialist choices spend banked ingots.
 - Factory tutorial capture — [ui_tutorial_factory.png](../verification/ui_tutorial_factory.png)
   makes the intended interaction explicit: inspect the existing Mine, place the
   Blacksmith, and when no eligible Idle worker is available, tap `−` by the
