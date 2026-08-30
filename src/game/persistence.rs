@@ -454,16 +454,28 @@ pub(super) fn validate_loaded_session(
                 outpost.pos
             ));
         }
+        validate_outpost_cargo(outpost, data)?;
         validate_nonnegative_finite(outpost.expedition_progress, "outpost expedition progress")?;
     }
     if let Some(transit) = &session.worm_transit {
-        if !session
+        let Some(outpost) = session
             .outposts
             .iter()
-            .any(|outpost| outpost.pos == transit.outpost)
-        {
+            .find(|outpost| outpost.pos == transit.outpost)
+        else {
             return Err(format!(
                 "transit targets an unknown outpost {:?}",
+                transit.outpost
+            ));
+        };
+        let capacity = crate::simulation::outposts::storage_capacity(outpost, data);
+        let cargo_without_food = transit
+            .ore
+            .checked_add(transit.ingots)
+            .ok_or_else(|| "worm transit cargo total overflows".to_owned())?;
+        if cargo_without_food > capacity || transit.food > (capacity - cargo_without_food) as f32 {
+            return Err(format!(
+                "worm transit cargo exceeds the {:?} outpost hold",
                 transit.outpost
             ));
         }
@@ -495,6 +507,25 @@ pub(super) fn validate_loaded_session(
         ("progress waste generated", session.progress.waste_generated),
     ] {
         validate_nonnegative_finite(value, name)?;
+    }
+    Ok(())
+}
+
+fn validate_outpost_cargo(
+    outpost: &crate::state::outposts::Outpost,
+    data: &GameData,
+) -> Result<(), String> {
+    let cargo_total = outpost
+        .cargo
+        .values()
+        .try_fold(0u32, |total, amount| total.checked_add(*amount))
+        .ok_or_else(|| format!("outpost cargo total overflows at {:?}", outpost.pos))?;
+    let capacity = crate::simulation::outposts::storage_capacity(outpost, data);
+    if cargo_total > capacity {
+        return Err(format!(
+            "outpost cargo exceeds its {capacity}-slot hold at {:?}",
+            outpost.pos
+        ));
     }
     Ok(())
 }

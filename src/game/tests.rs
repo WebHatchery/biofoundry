@@ -2,7 +2,9 @@ use super::persistence::validate_loaded_session;
 use super::*;
 use crate::data::GameData;
 use crate::state::creatures::Job;
-use crate::state::outposts::{ExpeditionCompletion, TransitCompletion, TransitDirection};
+use crate::state::outposts::{
+    ExpeditionCompletion, TransitCompletion, TransitDirection, WormTransit,
+};
 use crate::state::structures::{BuildSite, Building};
 use crate::state::GameSession;
 use macroquad_toolkit::notifications::{
@@ -282,6 +284,97 @@ fn loaded_session_validation_rejects_unknown_content_ids() {
         validate_loaded_session(&session, &data).expect_err("unknown content must be rejected");
 
     assert!(error.contains("unknown building id"));
+}
+
+#[test]
+fn loaded_session_validation_rejects_overfull_remote_cargo() {
+    let (data, mut session) = session();
+    let outpost_pos = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(pos, tile)| tile.walkable() && session.can_place_building(*pos))
+        .map(|(pos, _)| pos)
+        .expect("fresh warren needs a free outpost tile");
+    session
+        .buildings
+        .push(Building::new("outpost", outpost_pos));
+    session.ensure_outpost(outpost_pos);
+    session.outposts[0].cargo.insert(
+        crate::state::creatures::Good::Ore,
+        data.balance.outpost_storage_cap + 1,
+    );
+
+    let error = validate_loaded_session(&session, &data)
+        .expect_err("a remote hold cannot contain more cargo than its capacity");
+
+    assert!(error.contains("exceeds its ") && error.contains("-slot hold"));
+}
+
+#[test]
+fn loaded_session_validation_rejects_remote_cargo_sum_overflow() {
+    let (data, mut session) = session();
+    let outpost_pos = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(pos, tile)| tile.walkable() && session.can_place_building(*pos))
+        .map(|(pos, _)| pos)
+        .expect("fresh warren needs a free outpost tile");
+    session
+        .buildings
+        .push(Building::new("outpost", outpost_pos));
+    session.ensure_outpost(outpost_pos);
+    session.outposts[0]
+        .cargo
+        .insert(crate::state::creatures::Good::Ore, u32::MAX);
+    session.outposts[0]
+        .cargo
+        .insert(crate::state::creatures::Good::Ingot, 1);
+
+    let error = validate_loaded_session(&session, &data)
+        .expect_err("remote cargo totals must not overflow while loading");
+
+    assert!(error.contains("outpost cargo total overflows"));
+}
+
+#[test]
+fn loaded_session_validation_rejects_overfull_in_flight_cargo() {
+    let (data, mut session) = session();
+    let positions: Vec<_> = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .filter(|(pos, tile)| tile.walkable() && session.can_place_building(*pos))
+        .map(|(pos, _)| pos)
+        .take(2)
+        .collect();
+    assert_eq!(
+        positions.len(),
+        2,
+        "transit test needs two free floor tiles"
+    );
+    session
+        .buildings
+        .push(Building::new("worm_shrine", positions[0]));
+    session
+        .buildings
+        .push(Building::new("outpost", positions[1]));
+    session.ensure_outpost(positions[1]);
+    session.worm_transit = Some(WormTransit {
+        outpost: positions[1],
+        direction: TransitDirection::ToOutpost,
+        remaining: 1.0,
+        ore: data.balance.outpost_storage_cap,
+        ingots: 1,
+        food: 0.0,
+        passengers: Vec::new(),
+    });
+
+    let error = validate_loaded_session(&session, &data)
+        .expect_err("in-flight cargo cannot exceed the destination hold");
+
+    assert!(error.contains("worm transit cargo exceeds"));
 }
 
 #[test]
