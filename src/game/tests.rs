@@ -402,6 +402,133 @@ fn loaded_session_validation_rejects_overfull_in_flight_cargo() {
 }
 
 #[test]
+fn loaded_session_validation_rejects_in_flight_cargo_that_overfills_stored_hold() {
+    let (data, mut session) = session();
+    let positions: Vec<_> = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .filter(|(pos, tile)| tile.walkable() && session.can_place_building(*pos))
+        .map(|(pos, _)| pos)
+        .take(2)
+        .collect();
+    assert_eq!(
+        positions.len(),
+        2,
+        "transit test needs two free floor tiles"
+    );
+    session
+        .buildings
+        .push(Building::new("worm_shrine", positions[0]));
+    session
+        .buildings
+        .push(Building::new("outpost", positions[1]));
+    session.ensure_outpost(positions[1]);
+    session.outposts[0].cargo.insert(
+        crate::state::creatures::Good::Ore,
+        data.balance.outpost_storage_cap - 1,
+    );
+    session.worm_transit = Some(WormTransit {
+        outpost: positions[1],
+        direction: TransitDirection::ToOutpost,
+        remaining: 1.0,
+        ore: 2,
+        ingots: 0,
+        food: 0.0,
+        passengers: Vec::new(),
+    });
+
+    let error = validate_loaded_session(&session, &data)
+        .expect_err("stored and in-flight cargo cannot overfill the destination hold");
+
+    assert!(error.contains("when combined with stored cargo"));
+}
+
+#[test]
+fn loaded_session_validation_rejects_overfull_remote_crew() {
+    let (data, mut session) = session();
+    let positions: Vec<_> = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .filter(|(pos, tile)| tile.walkable() && session.can_place_building(*pos))
+        .map(|(pos, _)| pos)
+        .take(2)
+        .collect();
+    assert_eq!(positions.len(), 2, "route test needs two free floor tiles");
+    session
+        .buildings
+        .push(Building::new("worm_shrine", positions[0]));
+    session
+        .buildings
+        .push(Building::new("outpost", positions[1]));
+    session.ensure_outpost(positions[1]);
+    let capacity = data.balance.outpost_capacity as usize;
+    session.outposts[0].crew = session
+        .creatures
+        .iter()
+        .take(capacity + 1)
+        .map(|creature| creature.id)
+        .collect();
+
+    let error = validate_loaded_session(&session, &data)
+        .expect_err("a remote route cannot station more crew than its capacity");
+
+    assert!(error.contains("outpost crew exceeds"));
+}
+
+#[test]
+fn loaded_session_validation_rejects_arriving_crew_that_overfills_remote_capacity() {
+    let (data, mut session) = session();
+    let positions: Vec<_> = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .filter(|(pos, tile)| tile.walkable() && session.can_place_building(*pos))
+        .map(|(pos, _)| pos)
+        .take(2)
+        .collect();
+    assert_eq!(
+        positions.len(),
+        2,
+        "transit test needs two free floor tiles"
+    );
+    session
+        .buildings
+        .push(Building::new("worm_shrine", positions[0]));
+    session
+        .buildings
+        .push(Building::new("outpost", positions[1]));
+    session.ensure_outpost(positions[1]);
+    let capacity = data.balance.outpost_capacity as usize;
+    session.outposts[0].crew = session
+        .creatures
+        .iter()
+        .take(capacity)
+        .map(|creature| creature.id)
+        .collect();
+    let arriving_id = session
+        .creatures
+        .get(capacity)
+        .expect("transit test needs one arriving crew member")
+        .id;
+    session.worm_transit = Some(WormTransit {
+        outpost: positions[1],
+        direction: TransitDirection::ToOutpost,
+        remaining: 1.0,
+        ore: 0,
+        ingots: 0,
+        food: 0.0,
+        passengers: vec![arriving_id],
+    });
+
+    let error = validate_loaded_session(&session, &data)
+        .expect_err("arriving crew cannot overfill the destination outpost");
+
+    assert!(error.contains("worm transit crew exceeds"));
+}
+
+#[test]
 fn goal_modal_holds_the_simulation_until_the_report_is_dismissed() {
     let (data, mut session) = session();
     session.won = true;

@@ -2,7 +2,8 @@
 
 use super::Game;
 use crate::data::GameData;
-use crate::state::creatures::{Good, Job, Task};
+use crate::state::creatures::Job;
+use crate::state::outposts::TransitDirection;
 use crate::state::{GameSession, GameState};
 use crate::ui::UiMode;
 use macroquad_toolkit::notifications::{LoggedNotification, NotificationManager, MAX_HISTORY};
@@ -11,6 +12,14 @@ use macroquad_toolkit::persistence::{
     save_to_slot_with_version_and_backup, slot_backup_exists, slot_exists,
 };
 use std::collections::HashSet;
+
+mod validation;
+
+use validation::{
+    validate_actor_position, validate_map_position, validate_map_timer,
+    validate_nonnegative_finite, validate_outpost_cargo, validate_task_positions,
+    validate_unique_ids, validate_walkable_position, validate_wild_behavior,
+};
 
 impl Game {
     pub(super) fn save_game(&mut self) {
@@ -433,6 +442,13 @@ pub(super) fn validate_loaded_session(
         }
     }
 
+    let creature_ids: HashSet<u32> = session
+        .creatures
+        .iter()
+        .map(|creature| creature.id)
+        .collect();
+    let mut claimed_outpost_crew = HashSet::new();
+    let mut outpost_crew_counts = Vec::with_capacity(session.outposts.len());
     for outpost in &session.outposts {
         validate_walkable_position(session, outpost.pos, "outpost")?;
         if session
@@ -456,6 +472,19 @@ pub(super) fn validate_loaded_session(
         }
         validate_outpost_cargo(outpost, data)?;
         validate_nonnegative_finite(outpost.expedition_progress, "outpost expedition progress")?;
+
+        let crew_count = outpost
+            .crew
+            .iter()
+            .filter(|id| creature_ids.contains(id) && claimed_outpost_crew.insert(**id))
+            .count();
+        if crew_count > data.balance.outpost_capacity as usize {
+            return Err(format!(
+                "outpost crew exceeds its {}-creature capacity at {:?}",
+                data.balance.outpost_capacity, outpost.pos
+            ));
+        }
+        outpost_crew_counts.push((outpost.pos, crew_count));
     }
     if let Some(transit) = &session.worm_transit {
         let Some(outpost) = session
@@ -478,6 +507,51 @@ pub(super) fn validate_loaded_session(
                 "worm transit cargo exceeds the {:?} outpost hold",
                 transit.outpost
             ));
+        }
+        if transit.direction == TransitDirection::ToOutpost {
+            let stored_cargo = outpost
+                .cargo
+                .values()
+                .try_fold(0u32, |total, amount| total.checked_add(*amount))
+                .ok_or_else(|| format!("outpost cargo total overflows at {:?}", outpost.pos))?;
+            let combined_cargo = stored_cargo
+                .checked_add(cargo_without_food)
+                .ok_or_else(|| {
+                    format!(
+                        "worm transit cargo total overflows at {:?}",
+                        transit.outpost
+                    )
+                })?;
+            if combined_cargo > capacity || transit.food > (capacity - combined_cargo) as f32 {
+                return Err(format!(
+                    "worm transit cargo exceeds the {:?} outpost hold when combined with stored cargo",
+                    transit.outpost
+                ));
+            }
+
+            let arriving_crew = transit
+                .passengers
+                .iter()
+                .filter(|id| {
+                    let id = **id;
+                    creature_ids.contains(&id)
+                        && !outpost.crew.contains(&id)
+                        && !claimed_outpost_crew.contains(&id)
+                })
+                .copied()
+                .collect::<HashSet<_>>()
+                .len();
+            let stationed_crew = outpost_crew_counts
+                .iter()
+                .find(|(pos, _)| *pos == outpost.pos)
+                .map(|(_, count)| *count)
+                .unwrap_or(0);
+            if stationed_crew + arriving_crew > data.balance.outpost_capacity as usize {
+                return Err(format!(
+                    "worm transit crew exceeds the {:?} outpost capacity",
+                    transit.outpost
+                ));
+            }
         }
         validate_nonnegative_finite(transit.remaining, "worm transit timer")?;
         validate_nonnegative_finite(transit.food, "worm transit food")?;
@@ -511,199 +585,12 @@ pub(super) fn validate_loaded_session(
     Ok(())
 }
 
-fn validate_outpost_cargo(
-    outpost: &crate::state::outposts::Outpost,
-    data: &GameData,
-) -> Result<(), String> {
-    for good in outpost.cargo.keys() {
-        if !matches!(good, Good::Ore | Good::Ingot | Good::CookedFood) {
-            return Err(format!(
-                "outpost contains unsupported cargo {good:?} at {:?}",
-                outpost.pos
-            ));
-        }
-    }
-    let cargo_total = outpost
-        .cargo
-        .values()
-        .try_fold(0u32, |total, amount| total.checked_add(*amount))
-        .ok_or_else(|| format!("outpost cargo total overflows at {:?}", outpost.pos))?;
-    let capacity = crate::simulation::outposts::storage_capacity(outpost, data);
-    if cargo_total > capacity {
-        return Err(format!(
-            "outpost cargo exceeds its {capacity}-slot hold at {:?}",
-            outpost.pos
-        ));
-    }
-    Ok(())
-}
-
 pub(super) fn validate_loaded_session_boundary(
     session: GameSession,
     data: &GameData,
 ) -> Result<GameSession, String> {
     validate_loaded_session(&session, data)?;
     Ok(session)
-}
-
-fn validate_nonnegative_finite(value: f32, field: &str) -> Result<(), String> {
-    if !value.is_finite() || value < 0.0 {
-        return Err(format!("{field} is not a finite non-negative value"));
-    }
-    Ok(())
-}
-
-fn validate_map_position(
-    pos: macroquad_toolkit::grid::TilePos,
-    width: usize,
-    height: usize,
-    field: &str,
-) -> Result<(), String> {
-    if !pos.in_bounds(width, height) {
-        return Err(format!("{field} is outside the map at {pos:?}"));
-    }
-    Ok(())
-}
-
-fn validate_walkable_position(
-    session: &GameSession,
-    pos: macroquad_toolkit::grid::TilePos,
-    field: &str,
-) -> Result<(), String> {
-    validate_map_position(
-        pos,
-        session.world.tiles.width,
-        session.world.tiles.height,
-        field,
-    )?;
-    if !session
-        .world
-        .tiles
-        .get(pos)
-        .is_some_and(|tile| tile.walkable())
-    {
-        return Err(format!("{field} is not on walkable floor at {pos:?}"));
-    }
-    Ok(())
-}
-
-fn validate_map_timer(
-    pos: macroquad_toolkit::grid::TilePos,
-    remaining: f32,
-    width: usize,
-    height: usize,
-    field: &str,
-) -> Result<(), String> {
-    validate_map_position(pos, width, height, field)?;
-    validate_nonnegative_finite(remaining, field)
-}
-
-fn validate_actor_position(
-    session: &GameSession,
-    x: f32,
-    y: f32,
-    field: &str,
-) -> Result<(), String> {
-    if !x.is_finite()
-        || !y.is_finite()
-        || x < 0.0
-        || y < 0.0
-        || x >= session.world.tiles.width as f32
-        || y >= session.world.tiles.height as f32
-    {
-        return Err(format!("{field} position is outside the map"));
-    }
-    Ok(())
-}
-
-fn validate_unique_ids(
-    ids: impl IntoIterator<Item = u32>,
-    next_id: u32,
-    kind: &str,
-) -> Result<(), String> {
-    let mut seen = HashSet::new();
-    let mut max_id = 0;
-    for id in ids {
-        if id == 0 || !seen.insert(id) {
-            return Err(format!("{kind} ids are missing or duplicated"));
-        }
-        max_id = max_id.max(id);
-    }
-    if next_id == 0 || next_id <= max_id {
-        return Err(format!("next {kind} id does not follow the roster"));
-    }
-    Ok(())
-}
-
-fn validate_task_positions(
-    session: &GameSession,
-    task: &Task,
-    path: &[macroquad_toolkit::grid::TilePos],
-) -> Result<(), String> {
-    for path_pos in path {
-        validate_map_position(
-            *path_pos,
-            session.world.tiles.width,
-            session.world.tiles.height,
-            "creature path",
-        )?;
-    }
-    let task_pos = match task {
-        Task::GoMine(pos)
-        | Task::WorkMine(pos)
-        | Task::GoFetch(pos)
-        | Task::GoDig(pos)
-        | Task::DeliverTo(pos)
-        | Task::GoCook(pos)
-        | Task::GoSmelt(pos)
-        | Task::GoSmith(pos)
-        | Task::GoClean(pos) => Some(*pos),
-        Task::Cooking { pot, .. } => Some(*pot),
-        Task::Smelting { den, .. } => Some(*den),
-        Task::Smithing { shop, .. } => Some(*shop),
-        Task::Cleaning { building, .. } => Some(*building),
-        Task::Digging { mark, .. } => Some(*mark),
-        Task::Fetching { source, .. } => Some(*source),
-        Task::Feeding { trough, .. } => Some(*trough),
-        Task::Crafting { shop, .. } => Some(*shop),
-        Task::Hunt { .. }
-        | Task::Idle
-        | Task::DeliverOre
-        | Task::DeliverIngot
-        | Task::GoPickupOre
-        | Task::PickingUpOre { .. }
-        | Task::GoEquip => None,
-    };
-    if let Some(pos) = task_pos {
-        validate_map_position(
-            pos,
-            session.world.tiles.width,
-            session.world.tiles.height,
-            "creature task",
-        )?;
-    }
-    Ok(())
-}
-
-fn validate_wild_behavior(
-    session: &GameSession,
-    behavior: &crate::state::wildlife::WildBehavior,
-) -> Result<(), String> {
-    match behavior {
-        crate::state::wildlife::WildBehavior::Wander { next_move_in } => {
-            validate_nonnegative_finite(*next_move_in, "wild movement timer")?;
-        }
-        crate::state::wildlife::WildBehavior::Raid { origin, eaten, .. } => {
-            validate_map_position(
-                *origin,
-                session.world.tiles.width,
-                session.world.tiles.height,
-                "raid origin",
-            )?;
-            validate_nonnegative_finite(*eaten, "raid food eaten")?;
-        }
-    }
-    Ok(())
 }
 
 pub(super) fn non_viable_save_notice(
