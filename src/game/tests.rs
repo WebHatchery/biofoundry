@@ -95,6 +95,26 @@ fn missing_primary_save_uses_a_surviving_backup() {
 }
 
 #[test]
+fn save_failure_notice_keeps_recovery_state_explicit() {
+    assert_eq!(
+        save_failure_notice(false, true, "storage full"),
+        "Save failed — previous save remains available: storage full"
+    );
+    assert_eq!(
+        save_failure_notice(false, false, "storage full"),
+        "Save failed — no new save was written: storage full"
+    );
+    assert_eq!(
+        save_failure_notice(true, true, "storage full"),
+        "Autosave failed — previous save remains available; use Save to retry: storage full"
+    );
+    assert_eq!(
+        save_failure_notice(true, false, "storage full"),
+        "Autosave failed — use Save to create a checkpoint: storage full"
+    );
+}
+
+#[test]
 fn viable_save_notice_stays_empty_for_a_recoverable_warren() {
     let (data, mut session) = session();
     session.won = true;

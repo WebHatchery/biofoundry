@@ -26,12 +26,16 @@ impl Game {
     }
 
     fn persist_or_report_save(&mut self) {
+        let had_existing_save = self.save_exists;
         match self.persist_current_session() {
             Ok(()) => {
                 self.save_exists = true;
                 self.notifications.success("Warren saved.");
             }
-            Err(err) => self.notifications.danger(format!("Save failed: {err}")),
+            Err(err) => {
+                self.notifications
+                    .danger(save_failure_notice(false, had_existing_save, &err))
+            }
         }
     }
 
@@ -41,13 +45,15 @@ impl Game {
         if matches!(&self.state, GameState::Warren(session) if session.is_non_viable(&self.data)) {
             return;
         }
+        let had_existing_save = self.save_exists;
         match self.persist_current_session() {
             Ok(()) => {
                 self.save_exists = true;
             }
-            Err(err) => self
-                .notifications
-                .warning(format!("Autosave failed — use Save manually: {err}")),
+            Err(err) => {
+                self.notifications
+                    .warning(save_failure_notice(true, had_existing_save, &err))
+            }
         }
     }
 
@@ -217,6 +223,21 @@ impl Game {
 
 pub(super) fn should_restore_missing_primary(primary_exists: bool, backup_exists: bool) -> bool {
     !primary_exists && backup_exists
+}
+
+pub(super) fn save_failure_notice(autosave: bool, had_existing_save: bool, error: &str) -> String {
+    let recovery = match (autosave, had_existing_save) {
+        (true, true) => "previous save remains available; use Save to retry",
+        (true, false) => "use Save to create a checkpoint",
+        (false, true) => "previous save remains available",
+        (false, false) => "no new save was written",
+    };
+    let action = if autosave {
+        "Autosave failed"
+    } else {
+        "Save failed"
+    };
+    format!("{action} — {recovery}: {error}")
 }
 
 /// Rehydrate only the manager's non-timed history. Loading a save should not
