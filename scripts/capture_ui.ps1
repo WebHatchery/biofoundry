@@ -6,7 +6,7 @@
     Thin wrapper around the shared macroquad-toolkit capture script. Builds
     the debug exe and drives it through the env-var capture hook
     (BIOFOUNDRY_CAPTURE_*) provided by macroquad_toolkit::capture in
-    src/main.rs. Scenes: menu, new_warren_confirm, warren, tutorial_food, tutorial_factory, tutorial_worm, help, pause, collapse, mine, blacksmith, smelter, cook_pot, kiln, blacksmith_queue_full, equipment, overseer, factory, victory, security_stuck, factory_complete, optional, endless, endless_empty, endless_failure, endless_in_flight, endless_arrived, famine, food_warning, raid_food_warning, raid, raid_warning, breeding, shrine, worm, completion.
+    src/main.rs. Scenes: menu, new_warren_confirm, warren, tutorial_food, tutorial_factory, tutorial_worm, help, pause, collapse, mine, blacksmith, smelter, cook_pot, kiln, blacksmith_queue_full, equipment, overseer, factory, victory, security_stuck, factory_complete, optional, endless, endless_empty, endless_failure, endless_in_flight, endless_arrived, famine, food_warning, raid_food_warning, raid, raid_warning, breeding, breeding_locked, shrine, worm, completion.
 
 .EXAMPLE
     ./scripts/capture_ui.ps1

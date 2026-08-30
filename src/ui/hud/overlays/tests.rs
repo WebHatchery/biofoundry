@@ -27,3 +27,15 @@ fn recovery_guide_keeps_specialists_out_of_disabled_recovery_steps() {
     assert!(body.contains("free a worker, then + Carrier"));
     assert!(body.contains("free a worker, then + Guard"));
 }
+
+#[test]
+fn field_guide_explains_breeding_specialists() {
+    assert!(INSPECT_HELP_BODY.contains("Breeding Pit"));
+    assert!(INSPECT_HELP_BODY.contains("benefits"));
+}
+
+#[test]
+fn field_guide_points_to_post_campaign_cargo_runs() {
+    assert!(OBJECTIVE_HELP_BODY.contains("worm wakes"));
+    assert!(OBJECTIVE_HELP_BODY.contains("Outpost"));
+}
