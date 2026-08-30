@@ -129,7 +129,7 @@ developer present.
 - [ ] Capture every changed canonical verification scene directly into
   `docs/verification/`, replacing equivalent older images.
 - [ ] Verify readable layout at representative desktop and browser sizes.
-- [ ] Update `game_page.json`, catalog thumbnail, and public copy to match the
+- [x] Update `game_page.json`, catalog thumbnail, and public copy to match the
   shipped experience.
 - [ ] Reconcile this document so completed work and deferred work are explicit.
 
