@@ -31,6 +31,7 @@ fn recovery_guide_keeps_specialists_out_of_disabled_recovery_steps() {
 #[test]
 fn field_guide_explains_breeding_specialists() {
     assert!(INSPECT_HELP_BODY.contains("Breeding Pit"));
+    assert!(INSPECT_HELP_BODY.contains("after onboarding"));
     assert!(INSPECT_HELP_BODY.contains("benefits"));
 }
 
