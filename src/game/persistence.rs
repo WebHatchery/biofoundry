@@ -127,7 +127,14 @@ impl Game {
 
     fn recover_failed_load(&mut self, slot: &str, error: String) {
         let config = &self.data.config;
-        if !slot_exists(&config.game_name, slot) {
+        let primary_exists = slot_exists(&config.game_name, slot);
+        let backup_slot = format!("{slot}_backup");
+        let backup_exists = slot_backup_exists(&config.game_name, slot);
+        if should_restore_missing_primary(primary_exists, backup_exists) {
+            self.recover_missing_primary(slot, &backup_slot);
+            return;
+        }
+        if !primary_exists {
             self.notifications.warning(format!("Load failed: {error}"));
             return;
         }
@@ -142,7 +149,7 @@ impl Game {
             }
         };
 
-        if !slot_backup_exists(&config.game_name, slot) {
+        if !backup_exists {
             self.save_exists = false;
             self.notifications.danger(format!(
                 "Save is damaged; preserved it as {quarantine}. Use Menu → New Warren or repair it before loading again."
@@ -150,7 +157,6 @@ impl Game {
             return;
         }
 
-        let backup_slot = format!("{slot}_backup");
         match self.load_session_from_slot(&backup_slot) {
             Ok(session) => match restore_slot_backup(&config.game_name, slot) {
                 Ok(_) => {
@@ -176,6 +182,41 @@ impl Game {
             }
         }
     }
+
+    /// Recover the last safe copy when the primary slot vanished before the
+    /// load boundary. `restore_slot_backup` creates a new primary in this
+    /// branch, and the loaded session remains available even if that write is
+    /// rejected by a full or blocked storage backend.
+    fn recover_missing_primary(&mut self, slot: &str, backup_slot: &str) {
+        let config = &self.data.config;
+        match self.load_session_from_slot(backup_slot) {
+            Ok(session) => match restore_slot_backup(&config.game_name, slot) {
+                Ok(_) => {
+                    self.install_loaded_session(session);
+                    self.save_exists = true;
+                    self.notifications
+                        .warning("Primary save was missing; restored the previous safe save.");
+                }
+                Err(restore_error) => {
+                    self.install_loaded_session(session);
+                    self.save_exists = false;
+                    self.notifications.warning(format!(
+                        "Primary save was missing; loaded the safe backup, but could not restore it ({restore_error}). Use Save now."
+                    ));
+                }
+            },
+            Err(backup_error) => {
+                self.save_exists = false;
+                self.notifications.danger(format!(
+                    "Primary save is missing; the safe backup also failed ({backup_error}). Use Menu → New Warren or repair the backup."
+                ));
+            }
+        }
+    }
+}
+
+pub(super) fn should_restore_missing_primary(primary_exists: bool, backup_exists: bool) -> bool {
+    !primary_exists && backup_exists
 }
 
 /// Rehydrate only the manager's non-timed history. Loading a save should not

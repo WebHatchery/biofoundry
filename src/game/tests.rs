@@ -88,6 +88,13 @@ fn non_viable_save_notice_protects_the_last_checkpoint() {
 }
 
 #[test]
+fn missing_primary_save_uses_a_surviving_backup() {
+    assert!(should_restore_missing_primary(false, true));
+    assert!(!should_restore_missing_primary(false, false));
+    assert!(!should_restore_missing_primary(true, true));
+}
+
+#[test]
 fn viable_save_notice_stays_empty_for_a_recoverable_warren() {
     let (data, mut session) = session();
     session.won = true;

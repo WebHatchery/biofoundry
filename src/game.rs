@@ -29,7 +29,9 @@ mod persistence;
 mod tests;
 
 #[cfg(test)]
-use persistence::{migrate_tutorial_progress, non_viable_save_notice};
+use persistence::{
+    migrate_tutorial_progress, non_viable_save_notice, should_restore_missing_primary,
+};
 
 pub struct Game {
     data: GameData,
