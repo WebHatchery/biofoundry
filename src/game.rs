@@ -192,7 +192,7 @@ impl Game {
                         self.audio.play(Sfx::Deny);
                     }
                     for name in &report.wild.unlocked {
-                        self.notifications.success(format!("Unlocked: {name}"));
+                        self.notifications.success(unlock_notice(&self.data, name));
                         self.audio.play(Sfx::Complete);
                     }
                     if report.wild.bred_beetle {
@@ -676,6 +676,27 @@ fn warren_secured_notice(session: &GameSession) -> &'static str {
     } else {
         "The reserve gate is secure — assign a Guard to finish onboarding."
     }
+}
+
+fn unlock_notice(data: &GameData, name: &str) -> String {
+    let Some(unlock) = data.unlocks.iter().find(|unlock| unlock.name == name) else {
+        return format!("Unlocked: {name}");
+    };
+
+    let detail = match unlock.effect.as_str() {
+        "unlock_building" => unlock
+            .building
+            .as_deref()
+            .and_then(|id| data.buildings.get(id))
+            .map(|building| format!("build {} from Build & Dig", building.name))
+            .unwrap_or_else(|| "available in Build & Dig".to_owned()),
+        "unlock_creature" => "breed at the Breeding Pit".to_owned(),
+        "guard_dps_mult" => format!("Guards deal +{:.0}% damage", (unlock.value - 1.0) * 100.0),
+        "farm_cap_mult" => format!("Farms hold +{:.0}% food", (unlock.value - 1.0) * 100.0),
+        _ => unlock.description.trim_end_matches('.').to_owned(),
+    };
+
+    format!("Unlocked: {} — {detail}.", unlock.name)
 }
 
 /// Reconcile the old seven-step tutorial index with the current five-beat

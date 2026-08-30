@@ -171,3 +171,41 @@ fn transit_completion_notice_names_mixed_payloads() {
         "The worm returns to the shrine — cargo and crew delivered."
     );
 }
+
+#[test]
+fn unlock_notice_teaches_how_to_use_new_content() {
+    let (data, _session) = session();
+
+    assert_eq!(
+        unlock_notice(&data, "Beetle Breeding Pit"),
+        "Unlocked: Beetle Breeding Pit — build Breeding Pit from Build & Dig."
+    );
+    assert_eq!(
+        unlock_notice(&data, "Hobgoblin Brood"),
+        "Unlocked: Hobgoblin Brood — breed at the Breeding Pit."
+    );
+}
+
+#[test]
+fn unlock_notice_teaches_passive_benefits() {
+    let (data, _session) = session();
+
+    assert_eq!(
+        unlock_notice(&data, "Hardened Guards"),
+        "Unlocked: Hardened Guards — Guards deal +50% damage."
+    );
+    assert_eq!(
+        unlock_notice(&data, "Preservation Techniques"),
+        "Unlocked: Preservation Techniques — Farms hold +50% food."
+    );
+}
+
+#[test]
+fn unlock_notice_keeps_unknown_names_safe() {
+    let (data, _session) = session();
+
+    assert_eq!(
+        unlock_notice(&data, "Future discovery"),
+        "Unlocked: Future discovery"
+    );
+}
