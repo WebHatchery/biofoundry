@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `29cc65c`
+**Source revision:** `bdddd58`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -28,6 +28,7 @@ automated simulation results into first-time-player evidence.
 | Paused- and blocker-route status legibility | Pass (focused and capture evidence) | A manually paused active Outpost now carries a distinct pause glyph and `Scouting paused` label on the map and status legend, as well as the matching inspection status. Awakened routes without stationed crew, without enough scout food, or with a full remote hold now carry distinct `No scout crew`, `Scout food low`, or `Outpost full` map and inspection-detail states. The compact legend filters to statuses present in the current warren, keeping the badge, recovery control, and Objective visible together. |
 | Endless expedition feedback | Pass (focused and capture evidence) | A completed remote haul now reports its ore gain and food cost through the visible notification system and marks the haul as a safe-beat autosave, so progress is communicated and survives a refresh without keeping the inspection card open. Each Outpost persists its completed-haul count and lifetime ore gathered in the inspection card, while the completed-campaign Objective keeps aggregate `Runs` and `Hauls` visible across the Endless loop. |
 | Endless Outpost hold expansion | Pass (focused and capture evidence) | An active awakened route can spend 8 banked ingots once to expand its remote hold from 12 to 20 slots. The inspection card exposes the visible `Expand hold · 8 ingots` control, shows the upgraded `Cargo 6/20` capacity, and keeps transit, scouting, load-preview, full-hold, and Objective room calculations aligned. |
+| Endless crew dispatch quota | Pass (focused and capture evidence) | An awakened Outpost exposes the visible `Crew per run · Auto` control, which cycles through cargo-only and bounded scout counts. Legacy saves keep automatic dispatch, while cargo-only loads can deliver provisions without borrowing local workers; the Objective names the control when that setting blocks an otherwise-ready scouting payload. Refreshed [ui_endless_load_preview.png](../verification/ui_endless_load_preview.png), [ui_endless_upgrade.png](../verification/ui_endless_upgrade.png), and [ui_endless_upgraded.png](../verification/ui_endless_upgraded.png) captures keep the route controls readable. |
 | State-aware awakened objective recovery | Pass (focused and capture evidence) | After the worm wakes, the Objective now names the visible recovery action when the forge chain is incomplete: place a Blacksmith, replace an exhausted Mine, staff a Smith, or staff a Carrier. The refreshed worm and completion captures show the first of these prompts, and focused coverage keeps the guidance honest for each recovery state. |
 | Multi-route objective ordering | Pass (focused evidence) | If several active Worm Outposts are present, the completed-campaign Objective prioritizes a route with cargo or crew ready, then a route that can be loaded, before an empty active route. This keeps the next visible instruction actionable as the existing outpost activity scales. |
 | Minimum-layout spot check | Pass | The 1200×675 canvas and required HUD remained visible in the 1280×720 Preview viewport. |
@@ -42,7 +43,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 240 unit tests and 2 integration tests pass.
+- `cargo test --all-targets` — 246 unit tests and 2 integration tests pass.
 - `cargo clippy --all-targets --all-features -- -D warnings` — pass.
 - `publish.ps1` with no parameters — pass; Windows and WebGL packages
   deployed to Preview.
@@ -85,6 +86,17 @@ automated simulation results into first-time-player evidence.
   the enabled purchase control, while
   [ui_endless_upgraded.png](../verification/ui_endless_upgraded.png) shows the
   expanded `Cargo 6/20` hold and success toast.
+- Endless crew dispatch quota — pass; a save-compatible optional quota keeps
+  older routes on automatic dispatch, cycles the visible control through
+  cargo-only and bounded scout counts, and limits new passengers in transit.
+  The cargo-only state still permits a provisions or ore load, while the
+  inspection readiness and completed-campaign Objective explain the quota
+  when it is the reason no new scouts are being offered. Focused simulation,
+  save-roundtrip, state, inspection, and Objective coverage passes, and the
+  refreshed [ui_endless_load_preview.png](../verification/ui_endless_load_preview.png),
+  [ui_endless_upgrade.png](../verification/ui_endless_upgrade.png), and
+  [ui_endless_upgraded.png](../verification/ui_endless_upgraded.png) captures
+  keep the adjacent route controls readable.
 - State-aware awakened objective — pass; focused coverage names the visible
   Build & Dig or Jobs recovery for a missing Blacksmith, exhausted Mine, missing
   Smith, and missing Carrier instead of promising more ingots without a viable
