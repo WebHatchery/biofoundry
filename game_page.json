@@ -5,7 +5,7 @@
     "class": "playable"
   },
   "canvas_rendering": "pixelated",
-  "controls_hint": "Tap visible tools, Jobs controls, and campaign choices; drag the map or tap +/− to zoom",
+  "controls_hint": "Tap visible tools, Jobs controls, optional specialist and cargo-run actions, and campaign choices; drag the map or tap +/− to zoom",
   "about": [
     "Build a living factory beneath the earth. Dig tunnels, grow food, staff production lines, and awaken the Colossal Worm in a focused campaign before continuing into endless cargo runs."
   ],
@@ -33,6 +33,10 @@
     {
       "key": "Campaign choices",
       "desc": "After the Worm awakens, tap Continue in Endless or Return to Menu"
+    },
+    {
+      "key": "Optional systems",
+      "desc": "After the warren is secure, tap Breeding Pit choices to spend banked ingots on specialists; use an awakened Outpost for cargo runs"
     }
   ],
   "controls_note": "Pinch zoom is also supported on touch screens.",
