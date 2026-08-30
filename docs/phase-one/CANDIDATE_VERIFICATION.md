@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `6e5d7f6`
+**Source revision:** `8d41c0c`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -24,7 +24,7 @@ automated simulation results into first-time-player evidence.
 | Fresh WebGL campaign completion and Endless continuation | Pass (developer evidence) | A fresh Preview run used pointer controls through New Warren, zoom, map placement, Jobs reassignment, raid recovery, Blacksmith production, Shrine offerings, and the authored `The Colossal Worm Awakens` completion dialog. `Continue in Endless` opened the awakened-worm loop with a state-aware recovery objective and locked Pit/Outpost gates. This is repeatable developer evidence, not a qualifying first-time-player session. |
 | Packaged Windows launch and save recovery | Pass | The optimized `biofoundry.exe` launched from the current published Windows package after the stale prior test instance was isolated. Visible Continue restored the saved warren at `00:01` with the opening tutorial and `Warren loaded.`. Earlier packaged checks also covered Skip, zoom, Save, and Load; full packaged campaign completion and Endless continuation remain open below. |
 | Endless cargo priority control | Pass (capture evidence) | The awakened Outpost inspection card now exposes a visible `Load order · Ore first` control. Cycling it rotates through Ore, Ingots, and Food priority, while the shared route forecast shows the exact next Ore/Ingots/Food mix and explains when a full hold must return to the shrine. The compact 800×450 captures keep the control, forecast, and route actions readable. Live Preview route interaction remains unclaimed because the resumed developer save has not yet reached the Outpost unlock. |
-| Endless remote scouting loop | Pass (focused and capture evidence) | Once an awakened Outpost has remote crew and cooked food, its expedition advances toward a scouting haul, consumes provisions, and stores ore in the remote hold. The inspection card and Objective now agree on progress, food shortfall, or full-hold pause, while the compact captures show scouting and full-hold states. Live Preview route interaction remains unclaimed because the resumed developer save has not yet reached the Outpost unlock. |
+| Endless remote scouting loop | Pass (focused and capture evidence) | Once an awakened Outpost has remote crew and cooked food, its expedition advances toward a scouting haul, consumes provisions, and stores ore in the remote hold. The inspection card exposes a touch-first Pause/Resume scouting control that protects remote food without closing the route; the inspection card and Objective agree on progress, food shortfall, manual pause, or full-hold pause. Live Preview route interaction remains unclaimed because the resumed developer save has not yet reached the Outpost unlock. |
 | State-aware awakened objective recovery | Pass (focused and capture evidence) | After the worm wakes, the Objective now names the visible recovery action when the forge chain is incomplete: place a Blacksmith, replace an exhausted Mine, staff a Smith, or staff a Carrier. The refreshed worm and completion captures show the first of these prompts, and focused coverage keeps the guidance honest for each recovery state. |
 | Multi-route objective ordering | Pass (focused evidence) | If several active Worm Outposts are present, the completed-campaign Objective prioritizes a route with cargo or crew ready, then a route that can be loaded, before an empty active route. This keeps the next visible instruction actionable as the existing outpost activity scales. |
 | Minimum-layout spot check | Pass | The 1200×675 canvas and required HUD remained visible in the 1280×720 Preview viewport. |
@@ -39,7 +39,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 225 unit tests and 2 integration tests pass.
+- `cargo test --all-targets` — 228 unit tests and 2 integration tests pass.
 - `cargo clippy --all-targets --all-features -- -D warnings` — pass.
 - `publish.ps1` with no parameters — pass; Windows and WebGL packages
   deployed to Preview.
@@ -62,10 +62,12 @@ automated simulation results into first-time-player evidence.
 - Endless remote scouting — pass; active staffed outposts consume their stored
   cooked-food provision on a data-driven cycle and add the configured ore haul
   to the remote hold. The cycle pauses without enough food or hold capacity,
-  and save-compatible defaults preserve older outpost records. The Objective
-  follows the same state, pointing to provisioning, waiting, or returning as
-  appropriate. Focused simulation/UI coverage and the compact route captures
-  verify the progress, blocker, and output states.
+  and save-compatible defaults preserve older outpost records. A visible
+  Pause/Resume scouting control protects the remote provision while keeping
+  the route active, and its persisted state is reflected in the inspection
+  hint and completed-campaign Objective. Focused simulation/UI coverage and
+  the compact route captures verify the progress, blocker, manual pause, and
+  output states.
 - State-aware awakened objective — pass; focused coverage names the visible
   Build & Dig or Jobs recovery for a missing Blacksmith, exhausted Mine, missing
   Smith, and missing Carrier instead of promising more ingots without a viable
@@ -189,6 +191,10 @@ automated simulation results into first-time-player evidence.
   [ui_endless_load_preview.png](../verification/ui_endless_load_preview.png)
   shows the selected `Ingots first` order, the exact next Ore/Ingots/Food mix,
   and a staffed expedition progressing toward its next remote ore haul.
+- Paused expedition capture —
+  [ui_endless_expedition_paused.png](../verification/ui_endless_expedition_paused.png)
+  shows the touch-first `Resume scouting` control, the persisted player-paused
+  hint, and the matching Objective instruction while the route remains active.
 - Empty route capture — [ui_endless_empty.png](../verification/ui_endless_empty.png)
   shows an active awakened outpost with `Status · Awaiting payload`, disabled
   route actions, and the explicit `No cargo or crew ready at the warren`
@@ -395,6 +401,7 @@ automated simulation results into first-time-player evidence.
   `crew delivered` for this crew-only trip.
 - Route guidance captures — [ui_endless.png](../verification/ui_endless.png),
   [ui_endless_load_preview.png](../verification/ui_endless_load_preview.png),
+  [ui_endless_expedition_paused.png](../verification/ui_endless_expedition_paused.png),
   [ui_endless_in_flight.png](../verification/ui_endless_in_flight.png), and
   [ui_endless_arrived.png](../verification/ui_endless_arrived.png), and
   [ui_endless_empty.png](../verification/ui_endless_empty.png) show the
