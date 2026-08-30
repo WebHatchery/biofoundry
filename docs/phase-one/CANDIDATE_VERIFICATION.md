@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `4a6d192`
+**Source revision:** `85ce58b`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -31,7 +31,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 195 unit tests and 2 integration tests pass.
+- `cargo test --all-targets` — 196 unit tests and 2 integration tests pass.
 - `cargo clippy --all-targets --all-features -- -D warnings` — pass.
 - `publish.ps1` with no parameters — pass; Windows and WebGL packages
   deployed to Preview.
@@ -65,7 +65,8 @@ automated simulation results into first-time-player evidence.
   shows remaining food/ingot offerings, minimum feed time, and the automatic
   offering state in the final-demand card.
 - Optional support capture — [ui_optional.png](../verification/ui_optional.png)
-  shows recruit controls labeled with their practical actions (`Salam. forge`,
+  shows recruit controls labeled with their practical actions (`Beetle haul`,
+  `Salam. forge`,
   `Slime · clean`, and `Bat · 8 cargo`) plus the Engineer mine-throughput bonus
   at the published HUD scale. This improves discoverability evidence but does
   not replace first-time-player testing of optional-system value.
