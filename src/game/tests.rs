@@ -119,6 +119,27 @@ fn field_guide_pauses_a_viable_warren_while_open() {
 }
 
 #[test]
+fn progression_events_are_safe_autosave_beats() {
+    let mut report = simulation::TickReport::default();
+    assert!(!progression_reaches_safe_beat(&report));
+
+    report.wild.captured = 1;
+    assert!(progression_reaches_safe_beat(&report));
+
+    report.wild.captured = 0;
+    report.wild.unlocked.push("new_route".to_owned());
+    assert!(progression_reaches_safe_beat(&report));
+
+    report.wild.unlocked.clear();
+    report.wild.raid_survived = true;
+    assert!(progression_reaches_safe_beat(&report));
+
+    report.wild.raid_survived = false;
+    report.wild.bred_beetle = true;
+    assert!(progression_reaches_safe_beat(&report));
+}
+
+#[test]
 fn non_viable_recovery_stops_the_remaining_specialists() {
     let (data, mut session) = session();
     session.won = true;

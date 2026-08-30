@@ -143,6 +143,7 @@ impl Game {
                 let mut ticks = 0;
                 while self.accumulator >= SIM_DT && ticks < MAX_TICKS_PER_FRAME {
                     let report = simulation::tick(session, &self.data);
+                    safe_beat_reached |= progression_reaches_safe_beat(&report);
                     for deserter in &report.deserters {
                         self.notifications.danger(format!(
                             "A starving {} deserted the warren!",
@@ -245,6 +246,7 @@ impl Game {
             let camera_moved = (self.camera.target - self.last_camera.0).length() > 4.0
                 || (self.camera.zoom - self.last_camera.1).abs() > 0.01;
             if tutorial::advance(session, &self.data, TutorialInputs { camera_moved }) {
+                safe_beat_reached = true;
                 self.audio.play(Sfx::Select);
             }
             self.last_camera = (self.camera.target, self.camera.zoom);
@@ -510,6 +512,13 @@ fn simulation_blocked_by_modal(session: &GameSession, data: &GameData, help_open
         || (session.factory_complete && !session.factory_shown)
         || (session.worm_awake && !session.worm_shown)
         || (!session.worm_awake && session.is_non_viable(data))
+}
+
+fn progression_reaches_safe_beat(report: &simulation::TickReport) -> bool {
+    report.wild.raid_survived
+        || report.wild.captured > 0
+        || !report.wild.unlocked.is_empty()
+        || report.wild.bred_beetle
 }
 
 fn transit_completion_notice(completion: TransitCompletion) -> &'static str {
