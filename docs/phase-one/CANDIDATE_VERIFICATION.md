@@ -43,6 +43,9 @@ automated simulation results into first-time-player evidence.
 - Optional compact probes — pass; temporary 800×450 captures kept specialist,
   Breeding Pit, locked-progress, and Outpost route controls visible without
   clipping. The small text scale remains a human-readability follow-up.
+- Project-local capture wrapper — pass; `scripts/capture_ui.ps1` now forwards
+  viewport sizing and release/visible capture options to the shared toolkit,
+  and its 800×450 completion/Endless path was exercised successfully.
 - Camera drag release guard — focused input coverage keeps a claimed mouse
   drag from selecting a map tile or activating a HUD control on release.
 - Touch map taps — focused input coverage and the explicit gesture path keep a
