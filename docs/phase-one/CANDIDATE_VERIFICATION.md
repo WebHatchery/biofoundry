@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-31
-**Source revision:** `8cb8c3c`
+**Source revision:** `f27b471`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -27,6 +27,7 @@ automated simulation results into first-time-player evidence.
 | Endless cargo priority control | Pass (capture evidence) | The awakened Outpost inspection card now exposes a visible `Load order · Ore first` control. Cycling it rotates through Ore, Ingots, and Food priority, while the shared route forecast shows the exact next Ore/Ingots/Food mix and explains when a full hold must return to the shrine. The compact 800×450 captures keep the control, forecast, and route actions readable. Live Preview route interaction remains unclaimed because the resumed developer save has not yet reached the Outpost unlock. |
 | Endless remote scouting loop | Pass (focused and capture evidence) | Once an awakened Outpost has remote crew and cooked food, its expedition advances toward a scouting haul, consumes provisions, and stores ore in the remote hold. The inspection card exposes a touch-first Pause/Resume scouting control that protects remote food without closing the route; the map badge, legend, inspection card, and Objective agree on manual pause, while the card and Objective also agree on progress, food shortfall, or full-hold pause. Completed hauls report their ore and food delta through the visible notification system and autosave as a safe beat. Live Preview route interaction remains unclaimed because the resumed developer save has not yet reached the Outpost unlock. |
 | Paused- and blocker-route status legibility | Pass (focused and capture evidence) | A manually paused active Outpost now carries a distinct pause glyph and `Scouting paused` label on the map and status legend, as well as the matching inspection status. Awakened routes without stationed crew, without enough scout food, or with a full remote hold now carry distinct `No scout crew`, `Scout food low`, or `Outpost full` map and inspection-detail states. The compact legend filters to statuses present in the current warren, keeping the badge, recovery control, and Objective visible together. |
+| Worm Shrine reserve status legibility | Pass (focused and published capture evidence) | The map and filtered status legend now expose the same final-demand blockers already shown in the Shrine card: `Offerings paused`, `Food reserve low`, and `Ingot reserve low`. An awakened Shrine remains quiet, while the shared blocker helpers keep the map badge and inspection wording aligned. The published [ui_shrine_waiting.png](../verification/ui_shrine_waiting.png) capture shows the food-reserve badge beside the matching inspection state. |
 | Endless expedition feedback | Pass (focused and capture evidence) | A completed remote haul now reports its ore gain and food cost through the visible notification system and marks the haul as a safe-beat autosave, so progress is communicated and survives a refresh without keeping the inspection card open. Each Outpost persists its completed-haul count and lifetime ore gathered in the inspection card, while the completed-campaign Objective keeps aggregate `Runs` and `Hauls` visible across the Endless loop. |
 | Endless Outpost hold expansion | Pass (focused and capture evidence) | An active awakened route can spend 8 banked ingots once to expand its remote hold from 12 to 20 slots. The inspection card exposes the visible `Expand hold · 8 ingots` control, shows the upgraded `Cargo 6/20` capacity, and keeps transit, scouting, load-preview, full-hold, and Objective room calculations aligned. |
 | Endless crew dispatch quota | Pass (focused and capture evidence) | An awakened Outpost exposes the visible `Crew per run · Auto` control, which cycles through cargo-only and bounded scout counts. Legacy saves keep automatic dispatch, while cargo-only loads can deliver provisions without borrowing local workers; the Objective names the control when that setting blocks an otherwise-ready scouting payload. Refreshed [ui_endless_load_preview.png](../verification/ui_endless_load_preview.png), [ui_endless_upgrade.png](../verification/ui_endless_upgrade.png), and [ui_endless_upgraded.png](../verification/ui_endless_upgraded.png) captures keep the route controls readable. |
@@ -64,7 +65,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 293 unit tests and 2 integration/code-standard
+- `cargo test --all-targets` — 295 unit tests and 2 integration/code-standard
   targets pass,
   including fresh/simulated/remote-transit valid sessions, modal route
   planning, rejected malformed save shapes, and event-history save/load
@@ -260,6 +261,9 @@ automated simulation results into first-time-player evidence.
 - Worm Shrine inspection capture — [ui_shrine.png](../verification/ui_shrine.png)
   shows remaining food/ingot offerings, minimum feed time, and the automatic
   offering state in the final-demand card.
+- Worm Shrine reserve-stall capture — [ui_shrine_waiting.png](../verification/ui_shrine_waiting.png)
+  shows the `Food reserve low` map badge and filtered legend beside the
+  inspection card's matching `Waiting for food reserve` state.
 - Optional support capture — [ui_optional.png](../verification/ui_optional.png)
   shows active local support as `Beetle x1 haul` and `Salam x1 forge`, while
   the still-available `Slime · clean` and `Bat · 8 cargo` recruit controls name
