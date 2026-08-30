@@ -13,8 +13,10 @@ use macroquad_toolkit::grid::TilePos;
 use macroquad_toolkit::prelude::*;
 use macroquad_toolkit::ui::draw_ui_text_ex;
 
+mod breeding;
 mod workstations;
 
+use breeding::{breed_label, breeding_unlock_hint};
 use workstations::{
     blacksmith_input_hint, blacksmith_queue_available, cook_pot_input_hint, kiln_input_hint,
     local_smelter_staffed_at, local_smelter_worker_at, local_smith_staffed_at,
@@ -41,7 +43,7 @@ pub(super) fn draw_inspect_panel(
     // buttons, and the breeding pit its breed buttons — both taller.
     let height = match building.kind.as_str() {
         "blacksmith" => 194.0 + data.equipment.len() as f32 * 26.0,
-        "breeding_pit" => 230.0,
+        "breeding_pit" => 252.0,
         "worm_shrine" => 240.0,
         "outpost" => 270.0,
         _ => 152.0,
@@ -347,6 +349,11 @@ pub(super) fn draw_inspect_panel(
                     actions.push(UiAction::Breed(id.to_owned()));
                 }
                 y += 28.0;
+                if !unlocked {
+                    if let Some(hint) = breeding_unlock_hint(session, data, unlock) {
+                        line(&hint, dark::WARNING, &mut y);
+                    }
+                }
             }
         }
         "worm_shrine" => {
@@ -720,32 +727,6 @@ fn outpost_has_loadable_cargo(session: &GameSession, data: &GameData, cargo: u32
     session.economy.ore_stock > 0
         || session.economy.ingots_stock > 0
         || session.economy.food - data.balance.worm_feed_reserve >= 1.0
-}
-
-fn breed_label(id: &str, name: &str, cost: u32, data: &GameData) -> String {
-    match id {
-        "hobgoblin" => {
-            let work = data
-                .species
-                .get(id)
-                .map(|species| species.work_mult)
-                .unwrap_or(2.0);
-            format!("{name} · ×{work:.0} work ({cost})")
-        }
-        "overseer" => {
-            let aura = ((data.balance.overseer_aura_mult - 1.0) * 100.0).round();
-            format!("{name} · aura +{aura:.0}% ({cost})")
-        }
-        "engineer" => {
-            let mine = data
-                .species
-                .get(id)
-                .map(|species| (species.work_mult - 1.0) * 100.0)
-                .unwrap_or(25.0);
-            format!("{name} · Mine +{mine:.0}% ({cost})")
-        }
-        _ => format!("{name} ({cost} ingots)"),
-    }
 }
 
 fn worm_waiting_for_food(session: &GameSession, data: &GameData) -> bool {

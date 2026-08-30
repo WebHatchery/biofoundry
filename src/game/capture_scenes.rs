@@ -445,6 +445,31 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                 game.selected_building = session.buildings_of("breeding_pit").next().map(|b| b.pos);
             }
         }
+        "breeding_locked" => {
+            game.transition(StateTransition::StartWarren);
+            if let GameState::Warren(session) = &mut game.state {
+                // Keep specialist choices locked but close enough to show the
+                // live ingot prerequisite on every breeding button.
+                session.tutorial_dismissed = true;
+                session.economy.food = 260.0;
+                session.economy.ingots_forged = 7;
+                session.won = true;
+                session.victory_shown = true;
+                session.creatures[0].job = Job::Guard;
+                let spawn = session.spawn_tile();
+                let spot = session
+                    .world
+                    .tiles
+                    .iter_with_pos()
+                    .filter(|(pos, _)| session.can_place_building(*pos))
+                    .map(|(pos, _)| pos)
+                    .min_by_key(|p| (p.manhattan_distance(&spawn), p.x, p.y));
+                if let Some(spot) = spot {
+                    session.buildings.push(Building::new("breeding_pit", spot));
+                    game.selected_building = Some(spot);
+                }
+            }
+        }
         "optional" => {
             game.transition(StateTransition::StartWarren);
             if let GameState::Warren(session) = &mut game.state {

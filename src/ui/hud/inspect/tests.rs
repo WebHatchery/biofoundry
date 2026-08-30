@@ -74,6 +74,18 @@ fn locked_specialist_marker_uses_font_safe_ascii() {
 }
 
 #[test]
+fn locked_specialists_show_their_live_unlock_progress() {
+    let data = GameData::load().expect("embedded game data");
+    let mut session = GameSession::new(&data, 13);
+    session.economy.ingots_forged = 7;
+
+    assert_eq!(
+        breeding_unlock_hint(&session, &data, "hobgoblin").as_deref(),
+        Some("Next: forge 30 ingots (7/30)")
+    );
+}
+
+#[test]
 fn shrine_labels_a_manual_pause_without_misattributing_it() {
     let (data, mut session, pos) = shrine_session();
     session.worm_feeding_paused = true;
