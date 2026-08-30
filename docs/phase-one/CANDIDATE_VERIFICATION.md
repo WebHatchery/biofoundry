@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `ebe2261`
+**Source revision:** `416e548`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -23,7 +23,7 @@ automated simulation results into first-time-player evidence.
 | Current WebGL refresh recovery | Pass | On the published `1827d8f` Preview, a fresh Warren was saved through the visible controls, returned to the title with Menu, and restored after page refresh through Continue; the run retained tutorial `2/5 — Stabilize the Food Grid` and showed `Warren loaded.`. |
 | Fresh WebGL campaign completion and Endless continuation | Pass (developer evidence) | A fresh Preview run used pointer controls through New Warren, zoom, map placement, Jobs reassignment, raid recovery, Blacksmith production, Shrine offerings, and the authored `The Colossal Worm Awakens` completion dialog. `Continue in Endless` opened the awakened-worm loop with a state-aware recovery objective and locked Pit/Outpost gates. This is repeatable developer evidence, not a qualifying first-time-player session. |
 | Packaged Windows launch and save recovery | Pass | The optimized `biofoundry.exe` launched from the current published Windows package after the stale prior test instance was isolated. Visible Continue restored the saved warren at `00:01` with the opening tutorial and `Warren loaded.`. Earlier packaged checks also covered Skip, zoom, Save, and Load; full packaged campaign completion and Endless continuation remain open below. |
-| Endless cargo priority control | Pass (capture evidence) | The awakened Outpost inspection card now exposes a visible `Load order · Ore first` control. Cycling it rotates through Ore, Ingots, and Food priority, while the existing default remains ore-first and the compact 800×450 capture keeps the control and route actions readable. Live Preview route interaction remains unclaimed because the resumed developer save has not yet reached the Outpost unlock. |
+| Endless cargo priority control | Pass (capture evidence) | The awakened Outpost inspection card now exposes a visible `Load order · Ore first` control. Cycling it rotates through Ore, Ingots, and Food priority, while the shared route forecast shows the exact next Ore/Ingots/Food mix and explains when a full hold must return to the shrine. The compact 800×450 captures keep the control, forecast, and route actions readable. Live Preview route interaction remains unclaimed because the resumed developer save has not yet reached the Outpost unlock. |
 | State-aware awakened objective recovery | Pass (focused and capture evidence) | After the worm wakes, the Objective now names the visible recovery action when the forge chain is incomplete: place a Blacksmith, replace an exhausted Mine, staff a Smith, or staff a Carrier. The refreshed worm and completion captures show the first of these prompts, and focused coverage keeps the guidance honest for each recovery state. |
 | Multi-route objective ordering | Pass (focused evidence) | If several active Worm Outposts are present, the completed-campaign Objective prioritizes a route with cargo or crew ready, then a route that can be loaded, before an empty active route. This keeps the next visible instruction actionable as the existing outpost activity scales. |
 | Minimum-layout spot check | Pass | The 1200×675 canvas and required HUD remained visible in the 1280×720 Preview viewport. |
@@ -38,7 +38,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 217 unit tests and 2 integration tests pass.
+- `cargo test --all-targets` — 220 unit tests and 2 integration tests pass.
 - `cargo clippy --all-targets --all-features -- -D warnings` — pass.
 - `publish.ps1` with no parameters — pass; Windows and WebGL packages
   deployed to Preview.
@@ -51,8 +51,13 @@ automated simulation results into first-time-player evidence.
   clipping. The small text scale remains a human-readability follow-up.
 - Endless cargo priority — pass; the outbound hold obeys Ore, Ingots, or Food
   priority, preserves the local food reserve, and persists the selected order
-  through a save roundtrip. `ui_endless.png` shows the visible control in the
-  compact Outpost card, and the field guide explains how to use it.
+  through a save roundtrip. The shared `CargoLoad` forecast now drives both
+  route execution and the inspection preview, so the player can see the next
+  load before departure and receives a recovery hint when the hold is full.
+  `ui_endless.png` shows the full-hold state, while
+  [ui_endless_load_preview.png](../verification/ui_endless_load_preview.png)
+  shows the selected `Ingots first` mix in the compact Outpost card. The field
+  guide still explains how to use the priority control.
 - State-aware awakened objective — pass; focused coverage names the visible
   Build & Dig or Jobs recovery for a missing Blacksmith, exhausted Mine, missing
   Smith, and missing Carrier instead of promising more ingots without a viable
@@ -170,7 +175,12 @@ automated simulation results into first-time-player evidence.
   live-session check below.
 - Endless route capture — [ui_endless.png](../verification/ui_endless.png) shows
   the completed Objective pointing to a cargo run and an active Worm Outpost
-  with cargo mix, capacity, crew, and directional transit controls.
+  with cargo mix, capacity, crew, directional transit controls, and a clear
+  full-hold return hint.
+- Load forecast capture —
+  [ui_endless_load_preview.png](../verification/ui_endless_load_preview.png)
+  shows the selected `Ingots first` order and the exact next Ore/Ingots/Food
+  mix before the load action is tapped.
 - Empty route capture — [ui_endless_empty.png](../verification/ui_endless_empty.png)
   shows an active awakened outpost with `Status · Awaiting payload`, disabled
   route actions, and the explicit `No cargo or crew ready at the warren`
@@ -376,6 +386,7 @@ automated simulation results into first-time-player evidence.
   normal safe-beat autosave path, and the real-loop toast accurately says
   `crew delivered` for this crew-only trip.
 - Route guidance captures — [ui_endless.png](../verification/ui_endless.png),
+  [ui_endless_load_preview.png](../verification/ui_endless_load_preview.png),
   [ui_endless_in_flight.png](../verification/ui_endless_in_flight.png), and
   [ui_endless_arrived.png](../verification/ui_endless_arrived.png), and
   [ui_endless_empty.png](../verification/ui_endless_empty.png) show the
