@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-31
-**Source revision:** `83709ae`
+**Source revision:** `92e28cd`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -39,6 +39,7 @@ automated simulation results into first-time-player evidence.
 | Loaded session integrity validation | Pass (focused and published build evidence) | Migrated primary and backup saves are checked before installation for valid map storage, non-overlapping world objects, known content IDs, safe actor/task positions, unique roster IDs, and finite simulation values. Invalid shapes enter the existing quarantine/backup recovery flow instead of poisoning the live Warren. |
 | Backup-only load recovery | Pass (focused and published build evidence) | If a primary slot is missing while its conventional `_backup` survives, `Load` now validates the backup, restores the primary slot, and installs the recovered Warren; if the restore write is rejected, the valid backup remains playable and the player is told to use Save. The focused recovery-path coverage and published candidate include this branch, while ordinary Preview Continue remains verified separately. |
 | Save failure recovery guidance | Pass (focused and published build evidence) | Manual save failures now say whether the previous checkpoint remains available or no new save was written; autosave failures distinguish an existing checkpoint from a first-save attempt and explain the retry path. The four message states are covered by focused tests and the published candidate; forced browser quota/blocked-storage behavior remains open below. |
+| Missing-save Continue reconciliation | Pass (focused and published build evidence) | If Load finds neither the primary slot nor its backup, the title screen now disables the stale Continue action and reports that no saved warren is available, with a visible New Warren recovery path. Surviving-backup and damaged-save recovery remain unchanged. |
 | Outpost route setting persistence | Pass (focused and published build evidence) | Successful route activation, cargo-order changes, crew quotas, scouting pause/resume, and automatic return/resupply policy changes now write an autosave immediately. A refresh after changing a route control therefore preserves the player's recovery or logistics decision instead of waiting for a later transit or expedition beat. |
 | Worm Shrine offering policy persistence | Pass (focused and published build evidence) | The visible Pause/Resume offerings control now autosaves immediately after a successful toggle, so protecting the reserve remains in force across refreshes instead of silently restarting the Shrine draw. Invalid targets do not write a checkpoint. |
 | Direct player decision persistence | Pass (focused and published build evidence) | Successful job reassignment, specialist recruitment, breeding, Blacksmith queueing, tutorial skip, milestone-report dismissal, building placement, and dig designation now write an immediate autosave. Failed or duplicate actions do not write, and the refreshed save roundtrip covers the persisted job, queue, map, and decision flags. |
