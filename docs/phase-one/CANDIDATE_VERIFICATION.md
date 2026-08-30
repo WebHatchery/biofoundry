@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `2a08fee`
+**Source revision:** `ebe2261`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -25,6 +25,7 @@ automated simulation results into first-time-player evidence.
 | Packaged Windows launch and save recovery | Pass | The optimized `biofoundry.exe` launched from the published Windows package. Visible Continue restored the saved warren, Skip dismissed the tutorial, zoom changed the camera, Save produced `Warren saved.`, and Load restored the run with `Warren loaded.`. This covers the shipped recovery loop; full packaged campaign completion and Endless continuation remain open below. |
 | Endless cargo priority control | Pass (capture evidence) | The awakened Outpost inspection card now exposes a visible `Load order · Ore first` control. Cycling it rotates through Ore, Ingots, and Food priority, while the existing default remains ore-first and the compact 800×450 capture keeps the control and route actions readable. Live Preview route interaction remains unclaimed because the resumed developer save has not yet reached the Outpost unlock. |
 | State-aware awakened objective recovery | Pass (focused and capture evidence) | After the worm wakes, the Objective now names the visible recovery action when the forge chain is incomplete: place a Blacksmith, replace an exhausted Mine, staff a Smith, or staff a Carrier. The refreshed worm and completion captures show the first of these prompts, and focused coverage keeps the guidance honest for each recovery state. |
+| Multi-route objective ordering | Pass (focused evidence) | If several active Worm Outposts are present, the completed-campaign Objective prioritizes a route with cargo or crew ready, then a route that can be loaded, before an empty active route. This keeps the next visible instruction actionable as the existing outpost activity scales. |
 | Minimum-layout spot check | Pass | The 1200×675 canvas and required HUD remained visible in the 1280×720 Preview viewport. |
 | Public metadata alignment | Pass | The published game page now names the visible touch actions for panning, inspection, tools, Jobs controls, optional specialist recruitment, awakened Outpost cargo runs, and the post-awakening Endless/Menu choices. |
 | Compact viewport exploration | Pass with follow-up | The hosted Preview smoke path at 800×450 keeps the title, field guide, and Warren HUD on-canvas; capture probes at 800×450, 1024×576, 1280×720, and 1440×900 keep the Food/Factory/Worm tutorial cards, Blacksmith queue controls, Shrine pause control, completion choices, and Endless outpost actions visible without clipping or overlap. Additional 800×450 probes keep specialist actions, Breeding Pit choices, locked-progress lines, and compact Outpost return/load actions visible. The release capture set verifies that pause, famine, food, raid, transit, and route-failure alerts stay clear of the fixed controls. The 800×450 and 1024×576 layouts remain dense, so first-time-player readability and comprehension still require human validation. |
@@ -37,7 +38,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 216 unit tests and 2 integration tests pass.
+- `cargo test --all-targets` — 217 unit tests and 2 integration tests pass.
 - `cargo clippy --all-targets --all-features -- -D warnings` — pass.
 - `publish.ps1` with no parameters — pass; Windows and WebGL packages
   deployed to Preview.
@@ -61,6 +62,9 @@ automated simulation results into first-time-player evidence.
   shows live `37/60` Worm Transit progress once the chain is viable. Pending
   Blacksmith and replacement Mine build sites also keep their hauling guidance
   instead of asking for duplicate structures.
+- Multi-route objective ordering — pass; focused coverage selects a ready or
+  loadable active outpost before an empty active route, preserving an actionable
+  next step when more than one existing outpost is in play.
 - Project-local capture wrapper — pass; `scripts/capture_ui.ps1` now forwards
   viewport sizing and release/visible capture options to the shared toolkit,
   and its 800×450 completion/Endless path was exercised successfully.
