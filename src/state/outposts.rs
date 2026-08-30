@@ -5,11 +5,42 @@ use macroquad_toolkit::grid::TilePos;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
+/// The order in which an outbound worm route fills its limited cargo hold.
+/// The default preserves the original route behavior: ore, then ingots, then
+/// food above the reserve.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub enum CargoPriority {
+    #[default]
+    Ore,
+    Ingots,
+    Food,
+}
+
+impl CargoPriority {
+    pub fn next(self) -> Self {
+        match self {
+            Self::Ore => Self::Ingots,
+            Self::Ingots => Self::Food,
+            Self::Food => Self::Ore,
+        }
+    }
+
+    pub fn label(self) -> &'static str {
+        match self {
+            Self::Ore => "Ore first",
+            Self::Ingots => "Ingots first",
+            Self::Food => "Food first",
+        }
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Outpost {
     pub pos: TilePos,
     #[serde(default)]
     pub active: bool,
+    #[serde(default)]
+    pub cargo_priority: CargoPriority,
     #[serde(default)]
     pub cargo: HashMap<Good, u32>,
     #[serde(default)]
@@ -23,6 +54,7 @@ impl Outpost {
         Self {
             pos,
             active: false,
+            cargo_priority: CargoPriority::default(),
             cargo: HashMap::new(),
             crew: Vec::new(),
             last_failure: None,
@@ -32,7 +64,14 @@ impl Outpost {
     pub fn cargo_total(&self) -> u32 {
         self.cargo.values().sum()
     }
+
+    pub fn cycle_cargo_priority(&mut self) {
+        self.cargo_priority = self.cargo_priority.next();
+    }
 }
+
+#[cfg(test)]
+mod tests;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum TransitDirection {

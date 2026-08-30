@@ -3,7 +3,7 @@
 use super::boot;
 use crate::simulation::{self, outposts, SIM_DT};
 use crate::state::creatures::{Good, Job, Task};
-use crate::state::outposts::TransitDirection;
+use crate::state::outposts::{CargoPriority, TransitDirection};
 use crate::state::structures::Building;
 use macroquad_toolkit::grid::TilePos;
 
@@ -462,6 +462,32 @@ fn worm_transit_appends_new_cargo_to_existing_remote_stacks() {
 }
 
 #[test]
+fn worm_transit_fills_the_hold_in_the_selected_cargo_order() {
+    let (data, mut session, outpost_pos) = active_outpost(26);
+    session.creatures.clear();
+    session.economy.food = data.balance.worm_feed_reserve + 6.0;
+    session.economy.ore_stock = 0;
+    session.economy.ingots_stock = 0;
+    session.outposts[0].cargo_priority = CargoPriority::Food;
+
+    assert!(outposts::start_to_outpost(&mut session, &data, outpost_pos));
+    let transit = session.worm_transit.as_ref().expect("cargo is in transit");
+    assert_eq!(transit.food, 6.0);
+    assert_eq!(transit.ore, 0);
+    assert_eq!(transit.ingots, 0);
+
+    session.worm_transit = None;
+    session.economy.ore_stock = 20;
+    session.economy.ingots_stock = 20;
+    session.outposts[0].cargo_priority = CargoPriority::Ingots;
+    assert!(outposts::start_to_outpost(&mut session, &data, outpost_pos));
+    let transit = session.worm_transit.as_ref().expect("cargo is in transit");
+    assert_eq!(transit.ingots, data.balance.outpost_storage_cap);
+    assert_eq!(transit.ore, 0);
+    assert_eq!(transit.food, 0.0);
+}
+
+#[test]
 fn simulation_reports_arrival_after_a_cargo_run_completes() {
     let (data, mut session, outpost_pos) = active_outpost(22);
     session.economy.ore_stock = 1;
@@ -484,6 +510,7 @@ fn simulation_reports_arrival_after_a_cargo_run_completes() {
 #[test]
 fn in_flight_worm_transit_survives_a_save_roundtrip() {
     let (data, mut session, outpost_pos) = active_outpost(21);
+    session.outposts[0].cargo_priority = CargoPriority::Food;
     session.economy.ore_stock = 3;
     assert!(outposts::start_to_outpost(&mut session, &data, outpost_pos));
 
@@ -499,4 +526,5 @@ fn in_flight_worm_transit_survives_a_save_roundtrip() {
         data.balance.outpost_capacity as usize
     );
     assert!(restored.outposts[0].active);
+    assert_eq!(restored.outposts[0].cargo_priority, CargoPriority::Food);
 }

@@ -528,6 +528,18 @@ pub(super) fn draw_inspect_panel(
                         actions.push(UiAction::TransitToShrine(pos));
                     }
                     y += 28.0;
+                    let priority = outpost
+                        .map(|route| route.cargo_priority.label())
+                        .unwrap_or("Ore first");
+                    if hud_button(
+                        Rect::new(x, y, panel.w - 28.0, 24.0),
+                        &format!("Load order · {priority}"),
+                        session.worm_transit.is_none(),
+                        mouse,
+                    ) {
+                        actions.push(UiAction::CycleOutpostCargo(pos));
+                    }
+                    y += 28.0;
                     if hud_button(
                         Rect::new(x, y, panel.w - 28.0, 24.0),
                         "Load outpost from warren",

@@ -1,5 +1,6 @@
 use super::*;
 use crate::state::creatures::Job;
+use crate::state::outposts::CargoPriority;
 use crate::state::structures::Building;
 
 fn shrine_session() -> (GameData, GameSession, TilePos) {
@@ -453,6 +454,13 @@ fn outpost_return_label_names_each_payload_kind() {
     assert_eq!(outpost_return_label(6, 0), "Send 6 cargo to shrine");
     assert_eq!(outpost_return_label(0, 4), "Send 4 crew to shrine");
     assert_eq!(outpost_return_label(0, 0), "No cargo or crew to return");
+}
+
+#[test]
+fn outpost_cargo_priority_labels_are_player_readable() {
+    assert_eq!(CargoPriority::Ore.label(), "Ore first");
+    assert_eq!(CargoPriority::Ingots.label(), "Ingots first");
+    assert_eq!(CargoPriority::Food.label(), "Food first");
 }
 
 #[test]

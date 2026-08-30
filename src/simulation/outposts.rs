@@ -2,7 +2,9 @@
 
 use crate::data::GameData;
 use crate::state::creatures::Good;
-use crate::state::outposts::{Outpost, TransitCompletion, TransitDirection, WormTransit};
+use crate::state::outposts::{
+    CargoPriority, Outpost, TransitCompletion, TransitDirection, WormTransit,
+};
 use crate::state::GameSession;
 use macroquad_toolkit::grid::TilePos;
 
@@ -56,22 +58,17 @@ fn start_transit(
     }
     let cap = data.balance.outpost_storage_cap;
     let (ore, ingots, food) = match direction {
-        TransitDirection::ToOutpost => {
-            let used = outpost.cargo_total();
-            let room = cap.saturating_sub(used);
+        TransitDirection::ToOutpost => load_cargo(
+            outpost,
+            cap,
+            session.economy.ore_stock,
+            session.economy.ingots_stock,
             // Remote cargo is stored in whole units; leave any fractional
             // food behind instead of charging it and truncating it at arrival.
-            let food = (session.economy.food - data.balance.worm_feed_reserve)
+            (session.economy.food - data.balance.worm_feed_reserve)
                 .max(0.0)
-                .min(room as f32)
-                .floor();
-            let ore = session.economy.ore_stock.min(room);
-            let room_after_ore = room.saturating_sub(ore);
-            let ingots = session.economy.ingots_stock.min(room_after_ore);
-            let room_after_ingots = room_after_ore.saturating_sub(ingots);
-            let food = food.min(room_after_ingots as f32);
-            (ore, ingots, food)
-        }
+                .floor() as u32,
+        ),
         TransitDirection::ToShrine => (
             *outpost.cargo.get(&Good::Ore).unwrap_or(&0),
             *outpost.cargo.get(&Good::Ingot).unwrap_or(&0),
@@ -130,6 +127,51 @@ fn start_transit(
     });
     session.last_transit_failure = None;
     true
+}
+
+/// Fill an outbound hold according to the player's selected priority. Food
+/// has already been reduced to the amount above the protected local reserve.
+fn load_cargo(
+    outpost: &Outpost,
+    capacity: u32,
+    ore_available: u32,
+    ingots_available: u32,
+    food_available: u32,
+) -> (u32, u32, f32) {
+    let mut room = capacity.saturating_sub(outpost.cargo_total());
+    let mut ore = 0;
+    let mut ingots = 0;
+    let mut food = 0;
+    for kind in priority_order(outpost.cargo_priority) {
+        let available = match kind {
+            CargoKind::Ore => ore_available,
+            CargoKind::Ingots => ingots_available,
+            CargoKind::Food => food_available,
+        };
+        let take = available.min(room);
+        match kind {
+            CargoKind::Ore => ore = take,
+            CargoKind::Ingots => ingots = take,
+            CargoKind::Food => food = take,
+        }
+        room -= take;
+    }
+    (ore, ingots, food as f32)
+}
+
+#[derive(Clone, Copy)]
+enum CargoKind {
+    Ore,
+    Ingots,
+    Food,
+}
+
+fn priority_order(priority: CargoPriority) -> [CargoKind; 3] {
+    match priority {
+        CargoPriority::Ore => [CargoKind::Ore, CargoKind::Ingots, CargoKind::Food],
+        CargoPriority::Ingots => [CargoKind::Ingots, CargoKind::Ore, CargoKind::Food],
+        CargoPriority::Food => [CargoKind::Food, CargoKind::Ore, CargoKind::Ingots],
+    }
 }
 
 pub fn tick_transit(

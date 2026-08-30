@@ -55,6 +55,8 @@ pub enum UiAction {
     Breed(String),
     ToggleShrineFeeding(TilePos),
     ActivateOutpost(TilePos),
+    /// Rotate the outbound cargo fill order for an awakened worm route.
+    CycleOutpostCargo(TilePos),
     TransitToOutpost(TilePos),
     TransitToShrine(TilePos),
     DismissVictory,

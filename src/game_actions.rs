@@ -185,6 +185,24 @@ impl Game {
                     }
                 }
             }
+            UiAction::CycleOutpostCargo(pos) => {
+                if let GameState::Warren(session) = &mut self.state {
+                    if session
+                        .building_at(pos)
+                        .is_some_and(|building| building.kind == "outpost")
+                    {
+                        session.ensure_outpost(pos);
+                        if let Some(outpost) = session.outposts.iter_mut().find(|o| o.pos == pos) {
+                            outpost.cycle_cargo_priority();
+                            self.notifications.info(format!(
+                                "Outbound cargo order: {}.",
+                                outpost.cargo_priority.label()
+                            ));
+                            self.audio.play(Sfx::Select);
+                        }
+                    }
+                }
+            }
             UiAction::TransitToOutpost(pos) | UiAction::TransitToShrine(pos) => {
                 let mut transit_started = false;
                 if let GameState::Warren(session) = &mut self.state {
