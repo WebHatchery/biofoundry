@@ -53,11 +53,7 @@ pub(super) fn draw_route_overview(
     // control painted underneath the modal.
     macroquad_toolkit::ui::occlude(Rect::new(0.0, 0.0, LOGICAL_WIDTH, LOGICAL_HEIGHT));
     draw_ui_text_ex(
-        &format!(
-            "{} awakened route{} · tap Inspect to open its existing Outpost card",
-            session.outposts.len(),
-            if session.outposts.len() == 1 { "" } else { "s" }
-        ),
+        &route_network_summary(session, data),
         panel.x + 24.0,
         panel.y + 58.0,
         TextStyle::new(14.0, dark::TEXT_DIM).params(),
@@ -157,6 +153,48 @@ fn route_column_count(route_count: usize) -> usize {
     } else {
         3
     }
+}
+
+fn route_network_summary(session: &GameSession, data: &GameData) -> String {
+    let active = session
+        .outposts
+        .iter()
+        .filter(|outpost| outpost.active)
+        .count();
+    let held_cargo = session.outposts.iter().fold(0u32, |total, outpost| {
+        total.saturating_add(outpost.cargo_total())
+    });
+    let remote_crew = session.outposts.iter().fold(0usize, |total, outpost| {
+        total.saturating_add(outpost.crew.len())
+    });
+    let scouted_ore = session.outposts.iter().fold(0u32, |total, outpost| {
+        total.saturating_add(outpost.ore_scouted)
+    });
+    let attention = session
+        .outposts
+        .iter()
+        .filter(|outpost| route_needs_attention(outpost, data))
+        .count();
+    format!(
+        "Routes {} · Active {} · Held cargo {} · Remote crew {} · Ore scouted {} · Attention {}",
+        session.outposts.len(),
+        active,
+        held_cargo,
+        remote_crew,
+        scouted_ore,
+        attention
+    )
+}
+
+fn route_needs_attention(outpost: &Outpost, data: &GameData) -> bool {
+    !outpost.active
+        || outpost.last_failure.is_some()
+        || matches!(
+            crate::simulation::outposts::expedition_state(outpost, data),
+            crate::simulation::outposts::ExpeditionState::Paused
+                | crate::simulation::outposts::ExpeditionState::NeedsFood { .. }
+                | crate::simulation::outposts::ExpeditionState::HoldFull
+        )
 }
 
 fn route_metrics(session: &GameSession, data: &GameData, outpost: &Outpost) -> String {

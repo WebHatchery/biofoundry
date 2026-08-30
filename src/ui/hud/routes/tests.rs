@@ -15,6 +15,38 @@ fn route_ledger_adds_a_column_before_cards_can_run_into_the_close_button() {
 }
 
 #[test]
+fn route_network_summary_reports_the_whole_warren_network() {
+    let data = GameData::load().expect("embedded game data");
+    let mut session = GameSession::new(&data, 41);
+    let first = Outpost::new(TilePos::new(4, 4));
+    let mut second = Outpost::new(TilePos::new(8, 8));
+    second.active = true;
+    second.cargo.insert(Good::Ore, 5);
+    second.crew.extend([1, 2]);
+    second.ore_scouted = 9;
+    session.outposts = vec![first, second];
+
+    assert_eq!(
+        route_network_summary(&session, &data),
+        "Routes 2 · Active 1 · Held cargo 5 · Remote crew 2 · Ore scouted 9 · Attention 2"
+    );
+}
+
+#[test]
+fn route_network_summary_counts_active_blockers_as_attention() {
+    let data = GameData::load().expect("embedded game data");
+    let mut session = GameSession::new(&data, 42);
+    let mut route = Outpost::new(TilePos::new(4, 4));
+    route.active = true;
+    route.expedition_paused = true;
+    route.crew.push(1);
+    session.outposts.push(route);
+
+    assert!(route_needs_attention(&session.outposts[0], &data));
+    assert!(route_network_summary(&session, &data).ends_with("Attention 1"));
+}
+
+#[test]
 fn route_policy_label_explains_automatic_choices() {
     let mut route = Outpost::new(TilePos::new(4, 4));
     assert_eq!(route_policy_label(&route), "Manual route");
