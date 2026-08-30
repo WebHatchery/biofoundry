@@ -22,7 +22,7 @@ automated simulation results into first-time-player evidence.
 | Fresh-tab relaunch and Continue | Pass | A new Preview tab restored the same `00:36` state and objective with visible controls. |
 | Minimum-layout spot check | Pass | The 1200×675 canvas and required HUD remained visible in the 1280×720 Preview viewport. |
 | Public metadata alignment | Pass | The published game page now names the visible touch actions for panning, inspection, tools, Jobs controls, optional specialist recruitment, awakened Outpost cargo runs, and the post-awakening Endless/Menu choices. |
-| Compact viewport exploration | Follow-up required | The hosted Preview smoke path at 800×450 keeps the title, field guide, and Warren HUD on-canvas; compact capture probes now also cover Food/Factory/Worm tutorial cards, Blacksmith queue controls, Shrine pause control, completion choices, and Endless outpost actions with required labels visible. The release capture set verifies that pause, famine, food, raid, transit, and route-failure alerts stay clear of the fixed controls. A temporary in-app browser viewport probe reported DOM canvas bounds correctly but rendered its fixed play layer into a stale screenshot-sized compositor tile, so that tool result is inconclusive rather than a shipped layout failure. The fixed 1280×720 layout is still dense enough that no release-quality layout pass is claimed below the current target. |
+| Compact viewport exploration | Pass with follow-up | The hosted Preview smoke path at 800×450 keeps the title, field guide, and Warren HUD on-canvas; capture probes at 800×450, 1024×576, 1280×720, and 1440×900 keep the Food/Factory/Worm tutorial cards, Blacksmith queue controls, Shrine pause control, completion choices, and Endless outpost actions visible without clipping or overlap. The release capture set verifies that pause, famine, food, raid, transit, and route-failure alerts stay clear of the fixed controls. The 800×450 and 1024×576 layouts remain dense, so first-time-player readability and comprehension still require human validation. |
 | Visible-control smoke path | Pass | A fresh full-screen Preview warren advanced through visible New Warren, + zoom, direct map drag, map-tap inspection (`Stockpile`), valid Farm placement, `− Miner`/`+ Carrier` reassignment, Pause/Resume, Help/Close, Save, and Load without keyboard input. Invalid placement also returned the readable `Can't build there.` notice. The Load round-trip restored the saved `04:45` state with the 10-ore construction site, 2 Miner/2 Carrier staffing, and tutorial `2/5 — Stabilize the Food Grid`; successful placement returned to Inspect instead of creating a second site. This is developer smoke evidence, not a qualifying first-time-player session. |
 | Hosted-page toast safety | Pass | The placement confirmation remained fully readable above and left of the fixed Report a Bug widget in the published Preview. |
 | Active tool marker | Pass | The published Preview renders the selected Dig tool as `> Dig`; the active-tool marker is readable instead of the bundled font's missing-glyph square. |
@@ -35,6 +35,10 @@ automated simulation results into first-time-player evidence.
 - `cargo clippy --all-targets --all-features -- -D warnings` — pass.
 - `publish.ps1` with no parameters — pass; Windows and WebGL packages
   deployed to Preview.
+- Representative layout probes — pass; temporary 1024×576 and 1440×900
+  captures kept tutorial, crafting, completion, and Endless controls visible
+  without clipping or overlap. The compact 800×450 view remains dense and is
+  still covered by the open human playtest gate.
 - Camera drag release guard — focused input coverage keeps a claimed mouse
   drag from selecting a map tile or activating a HUD control on release.
 - Touch map taps — focused input coverage and the explicit gesture path keep a

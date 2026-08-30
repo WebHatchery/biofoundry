@@ -130,10 +130,12 @@ developer present.
   `docs/verification/`, replacing equivalent older images. The current
   candidate includes refreshed `ui_optional.png` and the locked breeding
   evidence alongside the existing release capture set.
-- [ ] Verify readable layout at representative desktop and browser sizes.
+- [x] Verify readable layout at representative desktop and browser sizes.
+  Capture review passes at 800×450, 1024×576, 1280×720, and 1440×900;
+  compact layouts remain dense and still need first-time-player validation.
 - [x] Update `game_page.json`, catalog thumbnail, and public copy to match the
   shipped experience.
-- [ ] Reconcile this document so completed work and deferred work are explicit.
+- [x] Reconcile this document so completed work and deferred work are explicit.
 
 **Acceptance:** every item in the release gate below is true on the candidate
 commit.
