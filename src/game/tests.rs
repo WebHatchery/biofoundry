@@ -153,3 +153,10 @@ fn transit_completion_notice_names_mixed_payloads() {
         "The worm returns to the shrine — cargo and crew delivered."
     );
 }
+
+#[test]
+fn claimed_mouse_drag_blocks_the_release_action() {
+    assert!(camera_claim_after_mouse_release(false, true));
+    assert!(camera_claim_after_mouse_release(true, false));
+    assert!(!camera_claim_after_mouse_release(false, false));
+}

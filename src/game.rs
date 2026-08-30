@@ -59,6 +59,8 @@ pub struct Game {
     right_press: Vec2,
     /// Where the primary pointer went down for direct map panning.
     mouse_pan_start: Option<Vec2>,
+    /// Whether the primary-pointer gesture crossed the drag threshold.
+    mouse_camera_claimed: bool,
     /// Whether this frame's primary-pointer gesture claimed the map.
     camera_input_claimed: bool,
     /// Touch recognizer for one-finger map drags and two-finger pinch zoom.
@@ -104,6 +106,7 @@ impl Game {
             save_exists,
             right_press: vec2(0.0, 0.0),
             mouse_pan_start: None,
+            mouse_camera_claimed: false,
             camera_input_claimed: false,
             touch_gesture: TouchGesture::new(),
             touch_camera_claimed: false,
@@ -504,6 +507,7 @@ impl Game {
         self.confirm_new_warren = false;
         self.selected_building = None;
         self.mouse_pan_start = None;
+        self.mouse_camera_claimed = false;
         self.camera_input_claimed = false;
         self.touch_camera_claimed = false;
     }
@@ -625,16 +629,19 @@ impl Game {
         // while a claimed touch is being released.
         if touch.active || self.touch_camera_claimed {
             self.mouse_pan_start = None;
+            self.mouse_camera_claimed = false;
         } else {
             let mouse: Vec2 = mouse_position().into();
             if is_mouse_button_pressed(MouseButton::Left) {
                 self.mouse_pan_start = Some(mouse);
+                self.mouse_camera_claimed = false;
                 self.camera_input_claimed = false;
             }
             if let Some(start) = self.mouse_pan_start {
                 if is_mouse_button_down(MouseButton::Left)
                     && mouse.distance(start) > CAMERA_DRAG_THRESHOLD
                 {
+                    self.mouse_camera_claimed = true;
                     self.camera_input_claimed = true;
                     self.camera.pan(-(mouse - start) / self.camera.zoom);
                     // Continue from the current pointer position so the
@@ -642,7 +649,12 @@ impl Game {
                     self.mouse_pan_start = Some(mouse);
                 }
                 if is_mouse_button_released(MouseButton::Left) {
+                    self.camera_input_claimed = camera_claim_after_mouse_release(
+                        self.camera_input_claimed,
+                        self.mouse_camera_claimed,
+                    );
                     self.mouse_pan_start = None;
+                    self.mouse_camera_claimed = false;
                 }
             }
         }
@@ -762,4 +774,8 @@ fn camera_config(data: &GameData, tile_size: f32) -> Camera2DConfig {
         bounds: Some(CameraBounds::new(vec2(0.0, 0.0), vec2(world_w, world_h))),
         ..Default::default()
     }
+}
+
+fn camera_claim_after_mouse_release(frame_claimed: bool, gesture_claimed: bool) -> bool {
+    frame_claimed || gesture_claimed
 }
