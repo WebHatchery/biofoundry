@@ -63,7 +63,7 @@
     "id": "slime_janitor",
     "name": "Slime Janitor",
     "description": "A waste-fed slime joins the warren and keeps spoiled stores from choking the food loop.",
-    "counter": "waste_processed",
+    "counter": "waste_generated",
     "threshold": 10,
     "effect": "unlock_creature",
     "value": 0.0,

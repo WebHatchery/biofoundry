@@ -87,10 +87,32 @@ fn raw_food_spoils_into_waste_and_cooked_alias_persists() {
     assert!(session.economy.raw_food > 0.0);
     assert!(session.economy.cooked_food >= 0.0);
     assert!(session.economy.waste > 0.0);
+    assert!(session.progress.waste_generated > 0.0);
     let encoded = serde_json::to_string(&session).unwrap();
     let restored: crate::state::GameSession = serde_json::from_str(&encoded).unwrap();
     assert_eq!(restored.economy.cooked_food, session.economy.cooked_food);
     assert_eq!(restored.economy.raw_food, session.economy.raw_food);
+}
+
+#[test]
+fn spoilage_unlocks_janitor_before_any_janitor_exists() {
+    let (data, mut session) = boot(131);
+    let farm = session.buildings_of("farm").next().unwrap().pos;
+    session
+        .building_at_mut(farm)
+        .unwrap()
+        .add_stock(Good::Mushroom, 24.0);
+    session.progress.waste_generated = 9.9995;
+
+    assert!(!session.unlocked.contains("slime_janitor"));
+    assert!(!session
+        .creatures
+        .iter()
+        .any(|creature| creature.species == "slime_janitor"));
+    simulation::tick(&mut session, &data);
+
+    assert!(session.progress.waste_generated >= 10.0);
+    assert!(session.unlocked.contains("slime_janitor"));
 }
 
 #[test]

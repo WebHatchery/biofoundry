@@ -15,6 +15,6 @@ fn unlocks_explain_the_action_and_threshold() {
     );
     assert_eq!(
         unlock_requirement(&data, "slime_janitor").as_deref(),
-        Some("process 10 waste")
+        Some("spoil 10 food")
     );
 }

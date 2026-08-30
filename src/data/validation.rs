@@ -11,6 +11,7 @@ const UNLOCK_COUNTERS: &[&str] = &[
     "specimens",
     "knowledge",
     "waste_processed",
+    "waste_generated",
     "courier_deliveries",
     "ingots_forged",
     "ore_delivered_total",

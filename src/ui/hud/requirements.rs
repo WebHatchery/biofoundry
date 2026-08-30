@@ -12,6 +12,7 @@ pub(super) fn unlock_requirement(data: &GameData, id: &str) -> Option<String> {
         "specimens" => format!("house {} specimens", unlock.threshold),
         "knowledge" => format!("gain {} study", unlock.threshold),
         "waste_processed" => format!("process {} waste", unlock.threshold),
+        "waste_generated" => format!("spoil {} food", unlock.threshold),
         "courier_deliveries" => format!("complete {} courier deliveries", unlock.threshold),
         "ingots_forged" => format!("forge {} ingots", unlock.threshold),
         "ore_delivered_total" => format!("deliver {} ore", unlock.threshold),

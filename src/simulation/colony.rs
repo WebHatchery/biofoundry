@@ -35,6 +35,7 @@ pub fn tick_spoilage(session: &mut GameSession, data: &GameData, dt: f32) {
     let raw_rate = data.balance.raw_spoilage_per_min / 60.0 * dt;
     let cooked_rate = data.balance.cooked_spoilage_per_min / 60.0 * dt;
     let mut raw_food = 0.0;
+    let mut waste_generated = 0.0;
     for building in &mut session.buildings {
         raw_food += building.stock(Good::Mushroom);
         let raw = building.stock(Good::Mushroom);
@@ -42,6 +43,7 @@ pub fn tick_spoilage(session: &mut GameSession, data: &GameData, dt: f32) {
         if spoiled > 0.0 {
             building.take_stock(Good::Mushroom, spoiled);
             add_waste(building, spoiled, data);
+            waste_generated += spoiled;
         }
         if building.kind == "feeding_trough" {
             let cooked = building.stock(Good::CookedFood);
@@ -49,12 +51,14 @@ pub fn tick_spoilage(session: &mut GameSession, data: &GameData, dt: f32) {
             if spoiled > 0.0 {
                 building.take_stock(Good::CookedFood, spoiled);
                 add_waste(building, spoiled, data);
+                waste_generated += spoiled;
             }
         }
         let decayed = (data.balance.waste_decay_per_min / 60.0 * dt).min(building.waste);
         building.waste -= decayed;
         session.economy.waste = (session.economy.waste - decayed).max(0.0);
     }
+    session.progress.waste_generated += waste_generated;
     session.economy.raw_food = raw_food;
     let mut total_waste: f32 = session.buildings.iter().map(|b| b.waste).sum();
     if total_waste > data.balance.waste_storage_cap {

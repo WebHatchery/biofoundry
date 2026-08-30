@@ -66,6 +66,9 @@ pub struct Progress {
     /// Lifetime waste removed by Slime Janitors.
     #[serde(default)]
     pub waste_processed: u32,
+    /// Lifetime food units that spoiled before a Slime Janitor could remove them.
+    #[serde(default)]
+    pub waste_generated: f32,
     /// Successful remote deliveries, used by courier progression.
     #[serde(default)]
     pub courier_deliveries: u32,
@@ -81,6 +84,7 @@ impl Progress {
             "specimens" => self.specimens,
             "knowledge" => self.knowledge.max(0.0).floor() as u32,
             "waste_processed" => self.waste_processed,
+            "waste_generated" => self.waste_generated.max(0.0).floor() as u32,
             "courier_deliveries" => self.courier_deliveries,
             _ => 0,
         }
