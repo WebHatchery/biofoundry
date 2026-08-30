@@ -31,17 +31,17 @@ pub fn activate_outpost(session: &mut GameSession, pos: TilePos) -> bool {
 }
 
 pub fn start_to_outpost(session: &mut GameSession, data: &GameData, pos: TilePos) -> bool {
-    start_transit(session, data, pos, TransitDirection::ToOutpost, true)
+    start_transit(session, data, pos, TransitDirection::ToOutpost, true, false)
 }
 
 pub fn start_to_shrine(session: &mut GameSession, data: &GameData, pos: TilePos) -> bool {
-    start_transit(session, data, pos, TransitDirection::ToShrine, true)
+    start_transit(session, data, pos, TransitDirection::ToShrine, true, false)
 }
 
 /// Start a return trip that unloads the remote hold but leaves stationed
 /// scouts at the Outpost for another expedition cycle.
 pub fn start_cargo_to_shrine(session: &mut GameSession, data: &GameData, pos: TilePos) -> bool {
-    start_transit(session, data, pos, TransitDirection::ToShrine, false)
+    start_transit(session, data, pos, TransitDirection::ToShrine, false, false)
 }
 
 /// Return the selected Outpost's current remote cargo capacity.
@@ -242,7 +242,7 @@ pub fn start_auto_return_if_full(session: &mut GameSession, data: &GameData) -> 
                 && outpost.cargo_total() >= storage_capacity(outpost, data)
         })
         .map(|outpost| outpost.pos)?;
-    start_cargo_to_shrine(session, data, pos).then_some(pos)
+    start_transit(session, data, pos, TransitDirection::ToShrine, false, true).then_some(pos)
 }
 
 fn start_transit(
@@ -251,6 +251,7 @@ fn start_transit(
     pos: TilePos,
     direction: TransitDirection,
     return_crew: bool,
+    preserve_expedition_food: bool,
 ) -> bool {
     if !session.worm_awake
         || session.worm_transit.is_some()
@@ -281,11 +282,20 @@ fn start_transit(
             );
             (load.ore, load.ingots, load.food as f32)
         }
-        TransitDirection::ToShrine => (
-            *outpost.cargo.get(&Good::Ore).unwrap_or(&0),
-            *outpost.cargo.get(&Good::Ingot).unwrap_or(&0),
-            *outpost.cargo.get(&Good::CookedFood).unwrap_or(&0) as f32,
-        ),
+        TransitDirection::ToShrine => {
+            let food = *outpost.cargo.get(&Good::CookedFood).unwrap_or(&0);
+            let keep_food = if preserve_expedition_food {
+                (outpost.crew.len() as u32)
+                    .saturating_mul(data.balance.outpost_expedition_food_per_crew)
+            } else {
+                0
+            };
+            (
+                *outpost.cargo.get(&Good::Ore).unwrap_or(&0),
+                *outpost.cargo.get(&Good::Ingot).unwrap_or(&0),
+                food.saturating_sub(keep_food) as f32,
+            )
+        }
     };
     let passengers = match direction {
         TransitDirection::ToOutpost => session

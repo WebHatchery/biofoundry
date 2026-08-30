@@ -47,7 +47,7 @@ fn cargo_only_return_keeps_remote_crew_at_the_outpost() {
 }
 
 #[test]
-fn auto_return_starts_when_the_hold_is_full_and_keeps_crew_remote() {
+fn auto_return_starts_when_the_hold_is_full_and_preserves_remote_provisions() {
     let (data, mut session, outpost_pos) = active_outpost(43);
     session.creatures.clear();
     session.economy.food = 0.0;
@@ -62,9 +62,11 @@ fn auto_return_starts_when_the_hold_is_full_and_keeps_crew_remote() {
         &data,
         data.balance.worm_transit_time_sec + 0.1,
     );
+    let capacity = data.balance.outpost_storage_cap;
     session.outposts[0]
         .cargo
-        .insert(Good::Ore, data.balance.outpost_storage_cap);
+        .insert(Good::Ore, capacity.saturating_sub(2));
+    session.outposts[0].cargo.insert(Good::CookedFood, 2);
     session.outposts[0].auto_return_cargo = true;
 
     let report = simulation::tick(&mut session, &data);
@@ -76,5 +78,6 @@ fn auto_return_starts_when_the_hold_is_full_and_keeps_crew_remote() {
         .expect("auto return is in flight");
     assert!(transit.passengers.is_empty());
     assert!(session.outposts[0].crew.contains(&crew_id));
-    assert!(session.outposts[0].cargo.is_empty());
+    assert_eq!(session.outposts[0].cargo.get(&Good::Ore), None);
+    assert_eq!(session.outposts[0].cargo.get(&Good::CookedFood), Some(&1));
 }
