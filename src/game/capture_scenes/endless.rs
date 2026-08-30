@@ -3,6 +3,7 @@
 use super::super::Game;
 use crate::simulation;
 use crate::state::creatures::Good;
+use crate::state::structures::Building;
 use crate::state::GameState;
 
 pub(super) fn begin(game: &mut Game, scene: &str) {
@@ -48,6 +49,34 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                     "Outpost hold expanded to {} slots.",
                     game.data.balance.outpost_upgraded_storage_cap
                 ));
+            }
+        }
+        "endless_routes" => {
+            super::begin(game, "endless_load_preview");
+            if let GameState::Warren(session) = &mut game.state {
+                let spawn = session.spawn_tile();
+                let second_outpost = session
+                    .world
+                    .tiles
+                    .iter_with_pos()
+                    .filter(|(pos, _)| {
+                        session.can_place_building(*pos) && pos.manhattan_distance(&spawn) >= 4
+                    })
+                    .map(|(pos, _)| pos)
+                    .find(|pos| !session.outposts.iter().any(|route| route.pos == *pos));
+                if let Some(pos) = second_outpost {
+                    session.buildings.push(Building::new("outpost", pos));
+                    session.ensure_outpost(pos);
+                    if let Some(route) = session.outposts.iter_mut().find(|route| route.pos == pos)
+                    {
+                        route.active = true;
+                        route.cargo.clear();
+                        route.cargo.insert(Good::Ingot, 5);
+                        route.expedition_paused = true;
+                        route.auto_return_cargo = true;
+                    }
+                }
+                game.routes_open = true;
             }
         }
         _ => {}

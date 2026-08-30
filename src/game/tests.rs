@@ -187,26 +187,36 @@ fn goal_modal_holds_the_simulation_until_the_report_is_dismissed() {
     let (data, mut session) = session();
     session.won = true;
 
-    assert!(simulation_blocked_by_modal(&session, &data, false));
+    assert!(simulation_blocked_by_modal(&session, &data, false, false));
 
     session.victory_shown = true;
     session.factory_complete = true;
-    assert!(simulation_blocked_by_modal(&session, &data, false));
+    assert!(simulation_blocked_by_modal(&session, &data, false, false));
 
     session.factory_shown = true;
     session.worm_awake = true;
-    assert!(simulation_blocked_by_modal(&session, &data, false));
+    assert!(simulation_blocked_by_modal(&session, &data, false, false));
 
     session.worm_shown = true;
-    assert!(!simulation_blocked_by_modal(&session, &data, false));
+    assert!(!simulation_blocked_by_modal(&session, &data, false, false));
 }
 
 #[test]
 fn field_guide_pauses_a_viable_warren_while_open() {
     let (data, session) = session();
 
-    assert!(simulation_blocked_by_modal(&session, &data, true));
-    assert!(!simulation_blocked_by_modal(&session, &data, false));
+    assert!(simulation_blocked_by_modal(&session, &data, true, false));
+    assert!(!simulation_blocked_by_modal(&session, &data, false, false));
+}
+
+#[test]
+fn route_ledger_pauses_an_awakened_warren_while_open() {
+    let (data, mut session) = session();
+    session.worm_awake = true;
+    session.worm_shown = true;
+
+    assert!(simulation_blocked_by_modal(&session, &data, false, true));
+    assert!(!simulation_blocked_by_modal(&session, &data, false, false));
 }
 
 #[test]
@@ -237,7 +247,7 @@ fn non_viable_recovery_stops_the_remaining_specialists() {
     session.creatures.clear();
     session.spawn_creature(&data, "overseer", Job::Idle);
 
-    assert!(simulation_blocked_by_modal(&session, &data, false));
+    assert!(simulation_blocked_by_modal(&session, &data, false, false));
 }
 
 #[test]

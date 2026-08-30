@@ -271,6 +271,17 @@ pub(super) fn draw_top_bar(
     ) {
         actions.push(UiAction::ToggleHelp);
     }
+    if session.worm_awake
+        && !session.outposts.is_empty()
+        && hud_button(
+            Rect::new(bar.right() - 606.0, bar.y + 8.0, 74.0, 32.0),
+            "Routes",
+            true,
+            mouse,
+        )
+    {
+        actions.push(UiAction::ToggleRoutes);
+    }
 }
 
 pub(super) fn draw_jobs_panel(

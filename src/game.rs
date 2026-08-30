@@ -71,6 +71,8 @@ pub struct Game {
     touch_tap: Option<Vec2>,
     /// Building tile the player clicked to inspect (first-pass legibility).
     selected_building: Option<TilePos>,
+    /// Whether the post-awakening route ledger is showing.
+    routes_open: bool,
     /// Embedded storybook creature atlas used by the warren renderer.
     world_sprites: ui::warren::WorldSprites,
     /// Hand-painted cavern tableau used by the title menu.
@@ -114,6 +116,7 @@ impl Game {
             touch_camera_claimed: false,
             touch_tap: None,
             selected_building: None,
+            routes_open: false,
             world_sprites: ui::warren::WorldSprites::load(),
             menu_sprites: ui::menu::MenuSprites::load(),
             hud_sprites: ui::hud::HudSprites::load(),
@@ -138,7 +141,14 @@ impl Game {
 
         let mut safe_beat_reached = false;
         if let GameState::Warren(session) = &mut self.state {
-            if !self.paused && !simulation_blocked_by_modal(session, &self.data, self.help_open) {
+            if !self.paused
+                && !simulation_blocked_by_modal(
+                    session,
+                    &self.data,
+                    self.help_open,
+                    self.routes_open,
+                )
+            {
                 self.accumulator += dt;
                 let mut ticks = 0;
                 while self.accumulator >= SIM_DT && ticks < MAX_TICKS_PER_FRAME {
@@ -351,6 +361,7 @@ impl Game {
                     self.selected_building,
                     ui::hud::HudOptions {
                         help_open: self.help_open,
+                        routes_open: self.routes_open,
                         paused: self.paused,
                         save_exists: self.save_exists,
                         touch_position: self.touch_tap,
@@ -489,6 +500,7 @@ impl Game {
             StateTransition::BackToMenu => {
                 self.mode = UiMode::Inspect;
                 self.help_open = false;
+                self.routes_open = false;
                 self.paused = false;
                 self.confirm_new_warren = false;
                 self.state = GameState::Menu;
@@ -506,8 +518,14 @@ impl Game {
     }
 }
 
-fn simulation_blocked_by_modal(session: &GameSession, data: &GameData, help_open: bool) -> bool {
+fn simulation_blocked_by_modal(
+    session: &GameSession,
+    data: &GameData,
+    help_open: bool,
+    routes_open: bool,
+) -> bool {
     help_open
+        || routes_open
         || (session.won && !session.victory_shown)
         || (session.factory_complete && !session.factory_shown)
         || (session.worm_awake && !session.worm_shown)

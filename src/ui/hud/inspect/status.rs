@@ -130,7 +130,7 @@ pub(super) fn outpost_expedition_hint(data: &GameData, outpost: &Outpost) -> Opt
 
 /// Give every inspected building the same first-read answer: is it working,
 /// stalled, paused, or on a route that needs attention?
-pub(super) fn inspect_status(
+pub(in crate::ui::hud) fn inspect_status(
     session: &GameSession,
     data: &GameData,
     building: &Building,

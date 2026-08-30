@@ -574,6 +574,7 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                 }
             }
         }
+        "endless_routes" => endless::begin(game, scene),
         "endless_auto_return"
         | "endless_auto_resupply"
         | "endless_upgrade"

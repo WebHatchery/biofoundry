@@ -21,8 +21,9 @@ mod status;
 mod workstations;
 
 use breeding::{breed_label, breeding_unlock_hint};
+pub(super) use status::inspect_status;
 use status::{
-    inspect_status, local_mine_staffed_at, local_mine_worker_at, mine_staffing_label,
+    local_mine_staffed_at, local_mine_worker_at, mine_staffing_label,
     outpost_cargo_only_return_label, outpost_expedition_hint, outpost_has_loadable_payload,
     outpost_load_hint, outpost_return_label, transit_destination, transit_payload_line,
     waste_inspection_hint, worm_waiting_for_food, worm_waiting_for_ingots,

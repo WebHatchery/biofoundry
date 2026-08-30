@@ -107,6 +107,7 @@ impl Game {
         self.famine_announced = false;
         self.mode = UiMode::Inspect;
         self.help_open = false;
+        self.routes_open = false;
         self.paused = false;
         self.confirm_new_warren = false;
         self.selected_building = None;

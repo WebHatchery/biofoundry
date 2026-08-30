@@ -181,6 +181,31 @@ impl Game {
                 };
                 self.audio.play(Sfx::Select);
             }
+            UiAction::ToggleRoutes => {
+                let available = matches!(
+                    &self.state,
+                    GameState::Warren(session)
+                        if session.worm_awake && !session.outposts.is_empty()
+                );
+                if available {
+                    self.routes_open = !self.routes_open;
+                    self.audio.play(Sfx::Select);
+                } else {
+                    self.routes_open = false;
+                }
+            }
+            UiAction::SelectBuilding(pos) => {
+                let selected = matches!(
+                    &self.state,
+                    GameState::Warren(session) if session.building_at(pos).is_some()
+                );
+                if selected {
+                    self.selected_building = Some(pos);
+                    self.routes_open = false;
+                    self.mode = UiMode::Inspect;
+                    self.audio.play(Sfx::Select);
+                }
+            }
             UiAction::Breed(species) => {
                 let mut bred = false;
                 if let GameState::Warren(session) = &mut self.state {

@@ -11,6 +11,7 @@ mod objective;
 mod overlays;
 mod panels;
 mod requirements;
+mod routes;
 mod widgets;
 
 use crate::data::GameData;
@@ -38,6 +39,7 @@ pub struct HudSprites {
 #[derive(Debug, Clone, Copy, Default)]
 pub struct HudOptions {
     pub help_open: bool,
+    pub routes_open: bool,
     pub paused: bool,
     pub save_exists: bool,
     /// Touch release in logical screen coordinates, when the gesture was a
@@ -133,6 +135,7 @@ pub fn draw(
     let victory_up = session.won && !session.victory_shown;
     let factory_up = session.factory_complete && !session.factory_shown;
     let worm_up = session.worm_awake && !session.worm_shown;
+    let routes_up = options.routes_open && session.worm_awake && !session.outposts.is_empty();
     let colony_failure = colony_failure_reason(session, data);
     let modal_overlay = colony_failure.is_some() || worm_up || factory_up || victory_up;
     if modal_overlay {
@@ -176,6 +179,14 @@ pub fn draw(
         );
     }
 
+    if routes_up {
+        // The route ledger is a modal shortcut into the existing inspection
+        // card. Clearing the underlying HUD intents prevents a tap on a route
+        // row from also changing a job or tool beneath the overlay.
+        actions.clear();
+        routes::draw_route_overview(session, data, mouse, &mut actions);
+    }
+
     if options.help_open {
         // The field guide is modal: discard any button intents collected from
         // the HUD underneath and let its Close button be the only action.
@@ -186,6 +197,7 @@ pub fn draw(
     let pointer_over_ui = victory_up
         || factory_up
         || worm_up
+        || routes_up
         || colony_failure.is_some()
         || options.help_open
         || tutorial_panel

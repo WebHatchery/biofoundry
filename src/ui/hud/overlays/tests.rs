@@ -39,6 +39,7 @@ fn field_guide_explains_breeding_specialists() {
 #[test]
 fn field_guide_points_to_post_campaign_cargo_runs() {
     assert!(OBJECTIVE_HELP_BODY.contains("worm wakes"));
+    assert!(OBJECTIVE_HELP_BODY.contains("tap Routes"));
     assert!(OBJECTIVE_HELP_BODY.contains("Outpost"));
     assert!(INSPECT_HELP_BODY.contains("scout for ore"));
     assert!(INSPECT_HELP_BODY.contains("Auto-resupply · Food only"));

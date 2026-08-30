@@ -77,6 +77,10 @@ pub enum UiAction {
     SkipTutorial,
     /// Toggle a tool mode (clicking the active mode returns to Inspect).
     SetMode(UiMode),
+    /// Open or close the post-awakening route ledger.
+    ToggleRoutes,
+    /// Select a building from a HUD shortcut such as the route ledger.
+    SelectBuilding(TilePos),
     /// The player clicked this world tile with the active tool.
     WorldClick(TilePos),
     /// Queue an equipment craft (item id) at the blacksmith at this tile.
