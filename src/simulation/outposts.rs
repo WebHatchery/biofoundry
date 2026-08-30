@@ -54,6 +54,7 @@ pub struct CargoLoad {
 pub enum ExpeditionState {
     Inactive,
     NoCrew,
+    Paused,
     HoldFull,
     NeedsFood {
         required: u32,
@@ -112,6 +113,9 @@ pub fn expedition_state(outpost: &Outpost, data: &GameData) -> ExpeditionState {
     if crew == 0 {
         return ExpeditionState::NoCrew;
     }
+    if outpost.expedition_paused {
+        return ExpeditionState::Paused;
+    }
     if outpost.cargo_total() >= data.balance.outpost_storage_cap {
         return ExpeditionState::HoldFull;
     }
@@ -142,7 +146,7 @@ pub fn tick_expeditions(session: &mut GameSession, data: &GameData, dt: f32) {
     let food_per_crew = data.balance.outpost_expedition_food_per_crew;
     let ore_per_crew = data.balance.outpost_expedition_ore_per_crew;
     for outpost in &mut session.outposts {
-        if !outpost.active || outpost.crew.is_empty() {
+        if !outpost.active || outpost.expedition_paused || outpost.crew.is_empty() {
             continue;
         }
         let crew = outpost.crew.len() as u32;

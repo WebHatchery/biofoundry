@@ -56,7 +56,7 @@ pub(super) fn draw_inspect_panel(
         "blacksmith" => 194.0 + data.equipment.len() as f32 * 26.0,
         "breeding_pit" => 280.0,
         "worm_shrine" => 240.0,
-        "outpost" => 350.0,
+        "outpost" => 390.0,
         _ => 152.0,
     };
     let panel = Rect::new(LOGICAL_WIDTH - 262.0, top, 250.0, height);
@@ -548,6 +548,23 @@ pub(super) fn draw_inspect_panel(
                         actions.push(UiAction::CycleOutpostCargo(pos));
                     }
                     y += 28.0;
+                    if crew > 0
+                        && hud_button(
+                            Rect::new(x, y, panel.w - 28.0, 24.0),
+                            if outpost.is_some_and(|route| route.expedition_paused) {
+                                "Resume scouting"
+                            } else {
+                                "Pause scouting"
+                            },
+                            session.worm_transit.is_none(),
+                            mouse,
+                        )
+                    {
+                        actions.push(UiAction::ToggleOutpostExpedition(pos));
+                    }
+                    if crew > 0 {
+                        y += 28.0;
+                    }
                     if let Some(load_hint) =
                         outpost.and_then(|route| outpost_load_hint(session, data, route))
                     {

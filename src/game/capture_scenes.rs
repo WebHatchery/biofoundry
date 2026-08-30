@@ -572,6 +572,14 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                 }
             }
         }
+        "endless_expedition_paused" => {
+            begin(game, "endless_load_preview");
+            if let GameState::Warren(session) = &mut game.state {
+                if let Some(route) = session.outposts.last_mut() {
+                    route.expedition_paused = true;
+                }
+            }
+        }
         "endless_forge" => {
             game.transition(StateTransition::StartWarren);
             if let GameState::Warren(session) = &mut game.state {

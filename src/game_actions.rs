@@ -203,6 +203,26 @@ impl Game {
                     }
                 }
             }
+            UiAction::ToggleOutpostExpedition(pos) => {
+                if let GameState::Warren(session) = &mut self.state {
+                    if session.worm_awake
+                        && session.worm_transit.is_none()
+                        && session
+                            .building_at(pos)
+                            .is_some_and(|building| building.kind == "outpost")
+                    {
+                        session.ensure_outpost(pos);
+                        if let Some(outpost) = session.outposts.iter_mut().find(|o| o.pos == pos) {
+                            if outpost.active && !outpost.crew.is_empty() {
+                                outpost.toggle_expedition();
+                                self.notifications
+                                    .info(outpost_expedition_notice(outpost.expedition_paused));
+                                self.audio.play(Sfx::Select);
+                            }
+                        }
+                    }
+                }
+            }
             UiAction::TransitToOutpost(pos) | UiAction::TransitToShrine(pos) => {
                 let mut transit_started = false;
                 if let GameState::Warren(session) = &mut self.state {
@@ -306,6 +326,14 @@ fn outpost_activation_notice(active: bool) -> &'static str {
         "The worm route is now active."
     } else {
         "The worm route is now inactive."
+    }
+}
+
+fn outpost_expedition_notice(paused: bool) -> &'static str {
+    if paused {
+        "Outpost scouting paused."
+    } else {
+        "Outpost scouting resumed."
     }
 }
 

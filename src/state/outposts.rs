@@ -45,6 +45,9 @@ pub struct Outpost {
     pub cargo: HashMap<Good, u32>,
     #[serde(default)]
     pub crew: Vec<u32>,
+    /// Whether remote scouting is paused while the route remains active.
+    #[serde(default)]
+    pub expedition_paused: bool,
     /// Seconds accumulated toward the next remote scouting haul.
     #[serde(default)]
     pub expedition_progress: f32,
@@ -60,6 +63,7 @@ impl Outpost {
             cargo_priority: CargoPriority::default(),
             cargo: HashMap::new(),
             crew: Vec::new(),
+            expedition_paused: false,
             expedition_progress: 0.0,
             last_failure: None,
         }
@@ -71,6 +75,10 @@ impl Outpost {
 
     pub fn cycle_cargo_priority(&mut self) {
         self.cargo_priority = self.cargo_priority.next();
+    }
+
+    pub fn toggle_expedition(&mut self) {
+        self.expedition_paused = !self.expedition_paused;
     }
 }
 

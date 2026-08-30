@@ -65,3 +65,12 @@ fn outpost_activation_notice_names_the_resulting_route_state() {
         "The worm route is now inactive."
     );
 }
+
+#[test]
+fn outpost_expedition_notice_names_the_resulting_scouting_state() {
+    assert_eq!(outpost_expedition_notice(true), "Outpost scouting paused.");
+    assert_eq!(
+        outpost_expedition_notice(false),
+        "Outpost scouting resumed."
+    );
+}

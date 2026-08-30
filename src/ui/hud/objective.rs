@@ -322,6 +322,18 @@ fn active_outpost_next_step(session: &GameSession, data: &GameData) -> &'static 
                 .find(|outpost| {
                     matches!(
                         crate::simulation::outposts::expedition_state(outpost, data),
+                        crate::simulation::outposts::ExpeditionState::Paused
+                    )
+                })
+        })
+        .or_else(|| {
+            session
+                .outposts
+                .iter()
+                .filter(|outpost| outpost.active)
+                .find(|outpost| {
+                    matches!(
+                        crate::simulation::outposts::expedition_state(outpost, data),
                         crate::simulation::outposts::ExpeditionState::NeedsFood { .. }
                     )
                 })
@@ -346,6 +358,9 @@ fn active_outpost_next_step(session: &GameSession, data: &GameData) -> &'static 
                     return "Next: tap the active Worm Outpost, then load food for its expedition.";
                 }
                 return "Next: keep cooked Food above reserve, then load the Outpost expedition.";
+            }
+            crate::simulation::outposts::ExpeditionState::Paused => {
+                return "Next: tap the active Worm Outpost, then Resume scouting.";
             }
             crate::simulation::outposts::ExpeditionState::Scouting { .. } => {
                 return "Next: let the Outpost expedition finish, then return its ore to the shrine."

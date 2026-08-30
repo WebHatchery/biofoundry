@@ -7,6 +7,7 @@ fn new_outpost_defaults_to_ore_first_loading() {
 
     assert_eq!(outpost.cargo_priority, CargoPriority::Ore);
     assert_eq!(outpost.cargo_priority.label(), "Ore first");
+    assert!(!outpost.expedition_paused);
 }
 
 #[test]
@@ -19,4 +20,9 @@ fn cargo_priority_cycles_in_a_predictable_loop() {
     outpost.cycle_cargo_priority();
     outpost.cycle_cargo_priority();
     assert_eq!(outpost.cargo_priority, CargoPriority::Food);
+
+    outpost.toggle_expedition();
+    assert!(outpost.expedition_paused);
+    outpost.toggle_expedition();
+    assert!(!outpost.expedition_paused);
 }

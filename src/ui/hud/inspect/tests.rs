@@ -522,6 +522,12 @@ fn outpost_expedition_hint_names_remote_progress_and_blockers() {
         outpost_expedition_hint(&data, &outpost).as_deref(),
         Some("Expedition paused · need 1 food")
     );
+
+    outpost.expedition_paused = true;
+    assert_eq!(
+        outpost_expedition_hint(&data, &outpost).as_deref(),
+        Some("Expedition paused · player paused")
+    );
 }
 
 #[test]

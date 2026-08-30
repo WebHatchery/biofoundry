@@ -590,6 +590,36 @@ fn outpost_scouting_pauses_without_provisions_or_hold_room() {
 }
 
 #[test]
+fn player_paused_outpost_preserves_remote_food_and_progress() {
+    let (data, mut session, _outpost_pos) = active_outpost(30);
+    let crew: Vec<u32> = session
+        .creatures
+        .iter()
+        .take(2)
+        .map(|creature| creature.id)
+        .collect();
+    session.outposts[0].crew = crew;
+    session.outposts[0].cargo.insert(Good::CookedFood, 4);
+    session.outposts[0].expedition_progress = 8.0;
+    session.outposts[0].expedition_paused = true;
+
+    assert_eq!(
+        outposts::expedition_state(&session.outposts[0], &data),
+        outposts::ExpeditionState::Paused
+    );
+
+    outposts::tick_expeditions(
+        &mut session,
+        &data,
+        data.balance.outpost_expedition_cycle_sec,
+    );
+
+    assert_eq!(session.outposts[0].cargo.get(&Good::CookedFood), Some(&4));
+    assert_eq!(session.outposts[0].cargo.get(&Good::Ore), None);
+    assert_eq!(session.outposts[0].expedition_progress, 8.0);
+}
+
+#[test]
 fn simulation_reports_arrival_after_a_cargo_run_completes() {
     let (data, mut session, outpost_pos) = active_outpost(22);
     session.economy.ore_stock = 1;
