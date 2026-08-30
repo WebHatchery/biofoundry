@@ -471,7 +471,9 @@ fn start_transit(
         food,
         passengers,
     });
-    session.last_transit_failure = None;
+    // Starting a healthy route must not hide another Outpost's unresolved
+    // failure from the global HUD banner.
+    sync_transit_failure_banner(session);
     true
 }
 

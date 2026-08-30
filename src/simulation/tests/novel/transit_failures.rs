@@ -58,6 +58,30 @@ fn reopening_one_failed_route_keeps_another_route_failure_visible() {
 }
 
 #[test]
+fn starting_a_healthy_route_keeps_another_failure_visible() {
+    let (data, mut session, first_pos) = active_outpost(50);
+    let second_pos = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(pos, tile)| tile.walkable() && session.can_place_building(*pos))
+        .map(|(pos, _)| pos)
+        .expect("a second walkable outpost location");
+    session.buildings.push(Building::new("outpost", second_pos));
+    session.ensure_outpost(second_pos);
+    session.outposts[0].active = false;
+    session.outposts[0].last_failure = Some("First route failed.".to_owned());
+    session.outposts[1].active = true;
+    session.last_transit_failure =
+        Some("Transit failed because an outpost was inactive.".to_owned());
+    session.economy.ore_stock = 1;
+
+    assert!(outposts::start_to_outpost(&mut session, &data, second_pos));
+    assert_eq!(session.outposts[0].pos, first_pos);
+    assert!(session.last_transit_failure.is_some());
+}
+
+#[test]
 fn syncing_loaded_routes_repairs_and_clears_the_global_failure_banner() {
     let (_data, mut session, _outpost_pos) = active_outpost(49);
     session.outposts[0].last_failure = Some("The worm route collapsed.".to_owned());
