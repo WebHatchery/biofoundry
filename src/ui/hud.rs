@@ -251,14 +251,16 @@ pub fn draw(
         }
     }
 
-    let pointer_over_ui = victory_up
-        || factory_up
-        || worm_up
-        || routes_up
-        || colony_failure.is_some()
-        || options.help_open
-        || tutorial_panel
-            .is_some_and(|r| panel_input_rect(r, ui.scale).contains_point(interaction_point))
+    let pointer_over_ui = modal_owns_world_input(
+        victory_up,
+        factory_up,
+        worm_up,
+        routes_up,
+        colony_failure.is_some(),
+        options.help_open,
+        options.confirm_load,
+    ) || tutorial_panel
+        .is_some_and(|r| panel_input_rect(r, ui.scale).contains_point(interaction_point))
         || panel_input_rect(objective_panel, ui.scale).contains_point(interaction_point)
         || inspect_panel
             .is_some_and(|r| panel_input_rect(r, ui.scale).contains_point(interaction_point))
@@ -275,6 +277,18 @@ pub fn draw(
         actions,
         pointer_over_ui,
     }
+}
+
+fn modal_owns_world_input(
+    victory_up: bool,
+    factory_up: bool,
+    worm_up: bool,
+    routes_up: bool,
+    colony_failure: bool,
+    help_open: bool,
+    confirm_load: bool,
+) -> bool {
+    victory_up || factory_up || worm_up || routes_up || colony_failure || help_open || confirm_load
 }
 
 fn colony_failure_reason(session: &GameSession, data: &GameData) -> Option<ColonyFailure> {

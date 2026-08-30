@@ -49,6 +49,16 @@ fn touch_release_position_can_claim_hud_when_mouse_is_elsewhere() {
 }
 
 #[test]
+fn active_load_confirmation_owns_world_input() {
+    assert!(modal_owns_world_input(
+        false, false, false, false, false, false, true
+    ));
+    assert!(!modal_owns_world_input(
+        false, false, false, false, false, false, false
+    ));
+}
+
+#[test]
 fn worm_completion_summary_names_the_resources_consumed() {
     let data = GameData::load().unwrap();
     let mut session = GameSession::new(&data, 42);
