@@ -555,6 +555,42 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                 }
             }
         }
+        "endless_forge" => {
+            game.transition(StateTransition::StartWarren);
+            if let GameState::Warren(session) = &mut game.state {
+                // Show the viable forge chain before Worm Transit unlocks, so
+                // the completed-campaign objective's live progress can be
+                // reviewed without a route modal covering it.
+                session.tutorial_dismissed = true;
+                session.economy.food = 220.0;
+                session.economy.ingots_forged = 37;
+                session.economy.ingots_stock = 6;
+                session.won = true;
+                session.victory_shown = true;
+                session.factory_complete = true;
+                session.factory_shown = true;
+                session.worm_fed = game.data.balance.worm_awaken_at;
+                session.worm_ingots_fed = game.data.balance.worm_awaken_ingots;
+                session.worm_awake = true;
+                session.worm_shown = true;
+                session.creatures[0].job = Job::Smith;
+                for unlock in ["worm_shrine", "hobgoblin"] {
+                    session.unlocked.insert(unlock.to_owned());
+                }
+                let spawn = session.spawn_tile();
+                if let Some(spot) = session
+                    .world
+                    .tiles
+                    .iter_with_pos()
+                    .filter(|(pos, _)| session.can_place_building(*pos))
+                    .min_by_key(|(pos, _)| (pos.manhattan_distance(&spawn), pos.x, pos.y))
+                    .map(|(pos, _)| pos)
+                {
+                    session.buildings.push(Building::new("blacksmith", spot));
+                }
+                game.paused = true;
+            }
+        }
         "endless_empty" => {
             begin(game, "endless");
             game.paused = true;

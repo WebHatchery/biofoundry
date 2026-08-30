@@ -204,7 +204,14 @@ fn endless_forge_next_step(session: &GameSession, data: &GameData) -> String {
             )
         );
     }
-    "Next: keep the Blacksmith supplied while it forges ingots to unlock Worm Transit.".to_owned()
+    let transit_goal = data
+        .unlocks
+        .iter()
+        .find(|unlock| unlock.id == "worm_transit")
+        .map(|unlock| unlock.threshold)
+        .unwrap_or(60);
+    let forged = session.economy.ingots_forged.min(transit_goal);
+    format!("Next: forge ingots to unlock Worm Transit ({forged}/{transit_goal}).")
 }
 
 fn shrine_build_requirement(session: &GameSession, data: &GameData) -> (String, String) {

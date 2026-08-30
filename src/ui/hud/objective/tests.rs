@@ -224,6 +224,31 @@ fn awakened_objective_names_the_visible_carrier_recovery() {
 }
 
 #[test]
+fn awakened_objective_shows_live_transit_progress_when_the_chain_is_viable() {
+    let (data, mut session) = boot();
+    session.worm_awake = true;
+    let blacksmith = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(pos, _)| session.can_place_building(*pos))
+        .map(|(pos, _)| pos)
+        .unwrap();
+    session
+        .buildings
+        .push(Building::new("blacksmith", blacksmith));
+    session.creatures[0].job = Job::Smith;
+    session.economy.ingots_forged = 12;
+
+    let objective = CampaignObjective::current(&session, &data);
+
+    assert_eq!(
+        objective.next,
+        "Next: forge ingots to unlock Worm Transit (12/60)."
+    );
+}
+
+#[test]
 fn completed_objective_points_into_an_unlocked_outpost_route() {
     let (data, mut session) = boot();
     session.worm_awake = true;
