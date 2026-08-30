@@ -584,6 +584,15 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                 session.worm_awakened_at_tick = Some(session.tick.saturating_sub(12));
             }
         }
+        "save_failure" => {
+            begin(game, "warren");
+            game.checkpoint_warning = Some(super::persistence::save_failure_banner(true));
+        }
+        "save_failure_first_save" => {
+            begin(game, "warren");
+            game.save_exists = false;
+            game.checkpoint_warning = Some(super::persistence::save_failure_banner(false));
+        }
         "help" => overlays::help(game),
         "event_log" => overlays::event_log(game),
         "event_log_older" => overlays::event_log_older(game),

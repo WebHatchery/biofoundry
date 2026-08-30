@@ -135,6 +135,12 @@ fn save_failure_notice_keeps_recovery_state_explicit() {
 }
 
 #[test]
+fn save_failure_banner_keeps_the_checkpoint_action_visible() {
+    assert_eq!(save_failure_banner(true), "SAVE FAILED · checkpoint safe");
+    assert_eq!(save_failure_banner(false), "SAVE FAILED · tap Save");
+}
+
+#[test]
 fn viable_save_notice_stays_empty_for_a_recoverable_warren() {
     let (data, mut session) = session();
     session.won = true;

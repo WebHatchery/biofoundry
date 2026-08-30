@@ -30,13 +30,19 @@ const TUTORIAL_PANEL_HEIGHT: f32 = 168.0;
 const TUTORIAL_BODY_HEIGHT: f32 = 94.0;
 const LOCKED_TOOL_MARKER: &str = "[L]";
 
+#[derive(Debug, Clone, Copy)]
+pub(super) struct TopBarState<'a> {
+    pub(super) paused: bool,
+    pub(super) checkpoint_warning: Option<&'a str>,
+}
+
 pub(super) fn draw_top_bar(
     session: &GameSession,
     data: &GameData,
     bar: Rect,
     mouse: Vec2,
     ui_scale: f32,
-    paused: bool,
+    top_bar_state: TopBarState<'_>,
     actions: &mut Vec<UiAction>,
 ) {
     draw_surface(
@@ -61,7 +67,14 @@ pub(super) fn draw_top_bar(
     );
 
     let compact = compact_top_bar(ui_scale);
-    if paused {
+    if let Some(warning) = top_bar_state.checkpoint_warning {
+        draw_ui_text_ex(
+            warning,
+            bar.x + 380.0,
+            bar.y + 31.0,
+            TextStyle::new(15.0, dark::NEGATIVE).params(),
+        );
+    } else if top_bar_state.paused {
         draw_ui_text_ex(
             if compact {
                 "PAUSED — tap Resume"
@@ -229,7 +242,11 @@ pub(super) fn draw_top_bar(
     }
     if hud_button(
         Rect::new(bar.right() - 512.0, chrome_y, 74.0, chrome_height),
-        if paused { "Resume" } else { "Pause" },
+        if top_bar_state.paused {
+            "Resume"
+        } else {
+            "Pause"
+        },
         true,
         mouse,
     ) {

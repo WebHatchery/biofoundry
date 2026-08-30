@@ -41,9 +41,11 @@ impl Game {
         match self.persist_current_session() {
             Ok(()) => {
                 self.save_exists = true;
+                self.checkpoint_warning = None;
                 self.notifications.success("Warren saved.");
             }
             Err(err) => {
+                self.checkpoint_warning = Some(save_failure_banner(had_existing_save));
                 self.notifications
                     .danger(save_failure_notice(false, had_existing_save, &err))
             }
@@ -60,8 +62,10 @@ impl Game {
         match self.persist_current_session() {
             Ok(()) => {
                 self.save_exists = true;
+                self.checkpoint_warning = None;
             }
             Err(err) => {
+                self.checkpoint_warning = Some(save_failure_banner(had_existing_save));
                 self.notifications
                     .warning(save_failure_notice(true, had_existing_save, &err))
             }
@@ -92,6 +96,7 @@ impl Game {
                 // a prior failed recovery), so a successful load must restore
                 // the title screen's Continue affordance as well.
                 self.save_exists = true;
+                self.checkpoint_warning = None;
                 self.notifications.success("Warren loaded.");
             }
             Err(err) => self.recover_failed_load(&slot, err),
@@ -276,6 +281,17 @@ pub(super) fn save_failure_notice(autosave: bool, had_existing_save: bool, error
         "Save failed"
     };
     format!("{action} — {recovery}: {error}")
+}
+
+/// Persistent compact banner for a rejected save. The full storage error is
+/// retained in the transient toast and Recent Events; this banner stays short
+/// enough to sit beside the visible Save button at the compact layout.
+pub(super) fn save_failure_banner(had_existing_save: bool) -> &'static str {
+    if had_existing_save {
+        "SAVE FAILED · checkpoint safe"
+    } else {
+        "SAVE FAILED · tap Save"
+    }
 }
 
 /// Rehydrate only the manager's non-timed history. Loading a save should not

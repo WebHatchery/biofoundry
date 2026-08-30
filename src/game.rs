@@ -31,7 +31,7 @@ mod tests;
 #[cfg(test)]
 use persistence::{
     migrate_tutorial_progress, missing_save_notice, no_saved_slot_available,
-    non_viable_save_notice, save_failure_notice, save_slot_available,
+    non_viable_save_notice, save_failure_banner, save_failure_notice, save_slot_available,
     should_restore_missing_primary,
 };
 
@@ -63,6 +63,9 @@ pub struct Game {
     paused: bool,
     /// A save slot exists, so the menu can offer Continue.
     save_exists: bool,
+    /// Short-lived shell state that keeps a rejected save visible until the
+    /// player successfully checkpoints again or loads a safe session.
+    checkpoint_warning: Option<&'static str>,
     /// Where the right button went down, to tell a click from a camera drag.
     right_press: Vec2,
     /// Where the primary pointer went down for direct map panning.
@@ -123,6 +126,7 @@ impl Game {
             event_log_page: 0,
             paused: false,
             save_exists,
+            checkpoint_warning: None,
             right_press: vec2(0.0, 0.0),
             mouse_pan_start: None,
             mouse_camera_claimed: false,
@@ -404,6 +408,7 @@ impl Game {
                         routes_open: self.routes_open,
                         paused: self.paused,
                         save_exists: self.save_exists,
+                        checkpoint_warning: self.checkpoint_warning,
                         touch_position: self.touch_tap,
                     },
                 );

@@ -46,6 +46,8 @@ pub struct HudOptions<'a> {
     pub routes_open: bool,
     pub paused: bool,
     pub save_exists: bool,
+    /// Persistent shell warning when the last checkpoint write was rejected.
+    pub checkpoint_warning: Option<&'a str>,
     /// Touch release in logical screen coordinates, when the gesture was a
     /// tap. It keeps world-click suppression aligned with touch UI hits.
     pub touch_position: Option<Vec2>,
@@ -123,7 +125,10 @@ pub fn draw(
         top_bar,
         mouse,
         ui.scale,
-        options.paused,
+        panels::TopBarState {
+            paused: options.paused,
+            checkpoint_warning: options.checkpoint_warning,
+        },
         &mut actions,
     );
     panels::draw_food_grid_panel(session, data, food_panel);
