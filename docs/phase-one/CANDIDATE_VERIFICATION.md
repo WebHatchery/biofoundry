@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `9636ef9`
+**Source revision:** `793a9ce`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -29,7 +29,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 188 unit tests and 2 integration tests pass.
+- `cargo test --all-targets` — 190 unit tests and 2 integration tests pass.
 - `cargo clippy --all-targets --all-features -- -D warnings` — pass.
 - `publish.ps1` with no parameters — pass; Windows and WebGL packages
   deployed to Preview.
@@ -78,6 +78,9 @@ automated simulation results into first-time-player evidence.
 - Kiln input stall — [ui_kiln.png](../verification/ui_kiln.png) shows the
   autonomous charcoal kiln with an empty wood buffer and the direct recovery
   line `Needs 1 wood`.
+- Fractional recipe status — focused legibility coverage keeps a Cook Pot's
+  `Starved` status aligned with the simulation's rounded-up batch requirement
+  when data-driven recipe multipliers produce a fractional amount.
 - Completion capture — [ui_completion.png](../verification/ui_completion.png)
   shows the Worm Awakened summary naming the food and ingot totals, with visible
   Continue in Endless and Return to Menu choices. The completed Objective also
