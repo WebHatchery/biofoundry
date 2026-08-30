@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `7e05338`
+**Source revision:** `0396041`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -29,7 +29,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 178 unit tests and 2 integration tests pass.
+- `cargo test --all-targets` — 179 unit tests and 2 integration tests pass.
 - `cargo clippy --all-targets --all-features -- -D warnings` — pass.
 - `publish.ps1` with no parameters — pass; Windows and WebGL packages
   deployed to Preview.
@@ -55,6 +55,9 @@ automated simulation results into first-time-player evidence.
 - Locked-gate progress capture — the refreshed [ui_optional.png](../verification/ui_optional.png)
   shows current/threshold values for the remaining Build & Dig unlocks, so a
   locked action communicates both its requirement and how close the warren is.
+- Objective gate alignment — the optional capture now keeps the Objective's
+  Worm Shrine prerequisite aligned with the disabled Shrine button when the
+  unlock is missing, including the same forge count and next action.
 - Completion capture — [ui_completion.png](../verification/ui_completion.png)
   shows the Worm Awakened summary naming the food and ingot totals, with visible
   Continue in Endless and Return to Menu choices. The completed Objective also
