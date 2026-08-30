@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `bfeea0d`
+**Source revision:** `790493c`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -21,9 +21,10 @@ automated simulation results into first-time-player evidence.
 | Refresh and Continue | Pass | Reload returned to the title screen with Continue enabled; Continue restored `00:36` and showed `Warren loaded.`. |
 | Fresh-tab relaunch and Continue | Pass | A new Preview tab restored the same `00:36` state and objective with visible controls. |
 | Current WebGL refresh recovery | Pass | On the published `1827d8f` Preview, a fresh Warren was saved through the visible controls, returned to the title with Menu, and restored after page refresh through Continue; the run retained tutorial `2/5 — Stabilize the Food Grid` and showed `Warren loaded.`. |
-| Fresh WebGL campaign completion and Endless continuation | Pass (developer evidence) | A fresh Preview run used pointer controls through New Warren, zoom, map placement, Jobs reassignment, raid recovery, Blacksmith production, Shrine offerings, and the authored `The Colossal Worm Awakens` completion dialog. `Continue in Endless` opened the awakened-worm loop with the visible `forge 60 ingots` objective and locked Pit/Outpost gates. This is repeatable developer evidence, not a qualifying first-time-player session. |
+| Fresh WebGL campaign completion and Endless continuation | Pass (developer evidence) | A fresh Preview run used pointer controls through New Warren, zoom, map placement, Jobs reassignment, raid recovery, Blacksmith production, Shrine offerings, and the authored `The Colossal Worm Awakens` completion dialog. `Continue in Endless` opened the awakened-worm loop with a state-aware recovery objective and locked Pit/Outpost gates. This is repeatable developer evidence, not a qualifying first-time-player session. |
 | Packaged Windows launch and save recovery | Pass | The optimized `biofoundry.exe` launched from the published Windows package. Visible Continue restored the saved warren, Skip dismissed the tutorial, zoom changed the camera, Save produced `Warren saved.`, and Load restored the run with `Warren loaded.`. This covers the shipped recovery loop; full packaged campaign completion and Endless continuation remain open below. |
 | Endless cargo priority control | Pass (capture evidence) | The awakened Outpost inspection card now exposes a visible `Load order · Ore first` control. Cycling it rotates through Ore, Ingots, and Food priority, while the existing default remains ore-first and the compact 800×450 capture keeps the control and route actions readable. Live Preview route interaction remains unclaimed because the resumed developer save has not yet reached the Outpost unlock. |
+| State-aware awakened objective recovery | Pass (focused and capture evidence) | After the worm wakes, the Objective now names the visible recovery action when the forge chain is incomplete: place a Blacksmith, replace an exhausted Mine, staff a Smith, or staff a Carrier. The refreshed worm and completion captures show the first of these prompts, and focused coverage keeps the guidance honest for each recovery state. |
 | Minimum-layout spot check | Pass | The 1200×675 canvas and required HUD remained visible in the 1280×720 Preview viewport. |
 | Public metadata alignment | Pass | The published game page now names the visible touch actions for panning, inspection, tools, Jobs controls, optional specialist recruitment, awakened Outpost cargo runs, and the post-awakening Endless/Menu choices. |
 | Compact viewport exploration | Pass with follow-up | The hosted Preview smoke path at 800×450 keeps the title, field guide, and Warren HUD on-canvas; capture probes at 800×450, 1024×576, 1280×720, and 1440×900 keep the Food/Factory/Worm tutorial cards, Blacksmith queue controls, Shrine pause control, completion choices, and Endless outpost actions visible without clipping or overlap. Additional 800×450 probes keep specialist actions, Breeding Pit choices, locked-progress lines, and compact Outpost return/load actions visible. The release capture set verifies that pause, famine, food, raid, transit, and route-failure alerts stay clear of the fixed controls. The 800×450 and 1024×576 layouts remain dense, so first-time-player readability and comprehension still require human validation. |
@@ -36,7 +37,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 206 unit tests and 2 integration tests pass.
+- `cargo test --all-targets` — 212 unit tests and 2 integration tests pass.
 - `cargo clippy --all-targets --all-features -- -D warnings` — pass.
 - `publish.ps1` with no parameters — pass; Windows and WebGL packages
   deployed to Preview.
@@ -51,6 +52,12 @@ automated simulation results into first-time-player evidence.
   priority, preserves the local food reserve, and persists the selected order
   through a save roundtrip. `ui_endless.png` shows the visible control in the
   compact Outpost card, and the field guide explains how to use it.
+- State-aware awakened objective — pass; focused coverage names the visible
+  Build & Dig or Jobs recovery for a missing Blacksmith, exhausted Mine, missing
+  Smith, and missing Carrier instead of promising more ingots without a viable
+  production chain. Refreshed [ui_worm.png](../verification/ui_worm.png) and
+  [ui_completion.png](../verification/ui_completion.png) captures show the
+  Blacksmith recovery prompt.
 - Project-local capture wrapper — pass; `scripts/capture_ui.ps1` now forwards
   viewport sizing and release/visible capture options to the shared toolkit,
   and its 800×450 completion/Endless path was exercised successfully.
@@ -152,7 +159,7 @@ automated simulation results into first-time-player evidence.
 - Completion capture — [ui_completion.png](../verification/ui_completion.png)
   shows the Worm Awakened summary naming the food and ingot totals, with visible
   Continue in Endless and Return to Menu choices. The completed Objective also
-  points toward the Worm Transit unlock. Packaged completion remains an open
+  points toward the first visible Endless forge recovery step. Packaged completion remains an open
   live-session check below.
 - Endless route capture — [ui_endless.png](../verification/ui_endless.png) shows
   the completed Objective pointing to a cargo run and an active Worm Outpost
