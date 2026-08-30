@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `eefe762`
+**Source revision:** `9cb12aa`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -30,10 +30,11 @@ automated simulation results into first-time-player evidence.
 | Endless Outpost hold expansion | Pass (focused and capture evidence) | An active awakened route can spend 8 banked ingots once to expand its remote hold from 12 to 20 slots. The inspection card exposes the visible `Expand hold · 8 ingots` control, shows the upgraded `Cargo 6/20` capacity, and keeps transit, scouting, load-preview, full-hold, and Objective room calculations aligned. |
 | Endless crew dispatch quota | Pass (focused and capture evidence) | An awakened Outpost exposes the visible `Crew per run · Auto` control, which cycles through cargo-only and bounded scout counts. Legacy saves keep automatic dispatch, while cargo-only loads can deliver provisions without borrowing local workers; the Objective names the control when that setting blocks an otherwise-ready scouting payload. Refreshed [ui_endless_load_preview.png](../verification/ui_endless_load_preview.png), [ui_endless_upgrade.png](../verification/ui_endless_upgrade.png), and [ui_endless_upgraded.png](../verification/ui_endless_upgraded.png) captures keep the route controls readable. |
 | Endless cargo-only returns | Pass (focused and capture evidence) | A staffed Outpost exposes `Send N cargo · keep crew` beside the normal full return, so a completed haul can come home without recalling the remote scouts. The route keeps those scouts assigned for another expedition, the departure notice explains the choice, and the Objective/field guide describe the remote-team outcome. Refreshed [ui_endless.png](../verification/ui_endless.png), [ui_endless_expedition_report.png](../verification/ui_endless_expedition_report.png), and [ui_endless_upgraded.png](../verification/ui_endless_upgraded.png) captures keep both return paths readable. |
+| Endless automatic cargo returns | Pass (focused and capture evidence) | An awakened Outpost exposes the persisted `Auto-return · Off` / `Auto-return · Cargo only` policy. When an opted-in hold reaches capacity, the fixed-step simulation starts one cargo-only return, preserves the remote scouts, emits a departure notice, and autosaves the safe beat; later routes wait for the global worm transit. Refreshed [ui_endless_auto_return.png](../verification/ui_endless_auto_return.png) shows the enabled policy beside the manual return and scouting controls. Live Preview route interaction remains unclaimed because the resumed developer save has not yet reached the Outpost unlock. |
 | State-aware awakened objective recovery | Pass (focused and capture evidence) | After the worm wakes, the Objective now names the visible recovery action when the forge chain is incomplete: place a Blacksmith, replace an exhausted Mine, staff a Smith, or staff a Carrier. The refreshed worm and completion captures show the first of these prompts, and focused coverage keeps the guidance honest for each recovery state. |
 | Multi-route objective ordering | Pass (focused evidence) | If several active Worm Outposts are present, the completed-campaign Objective prioritizes a route with cargo or crew ready, then a route that can be loaded, before an empty active route. This keeps the next visible instruction actionable as the existing outpost activity scales. |
 | Minimum-layout spot check | Pass | The 1200×675 canvas and required HUD remained visible in the 1280×720 Preview viewport. |
-| Public metadata alignment | Pass | The published game page now names the visible touch actions for panning, inspection, tools, Jobs controls, optional specialist recruitment, awakened Outpost cargo runs, and the post-awakening Endless/Menu choices. |
+| Public metadata alignment | Pass | The published game page now names the visible touch actions for panning, inspection, tools, Jobs controls, optional specialist recruitment, awakened Outpost cargo runs, optional automatic cargo-only returns, and the post-awakening Endless/Menu choices. |
 | Compact viewport exploration | Pass with follow-up | The hosted Preview smoke path at 800×450 keeps the title, field guide, and Warren HUD on-canvas; capture probes at 800×450, 1024×576, 1280×720, and 1440×900 keep the Food/Factory/Worm tutorial cards, Blacksmith queue controls, Shrine pause control, completion choices, and Endless outpost actions visible without clipping or overlap. Additional 800×450 probes keep specialist actions, Breeding Pit choices, locked-progress lines, and compact Outpost return/load actions visible. The release capture set verifies that pause, famine, food, raid, transit, and route-failure alerts stay clear of the fixed controls. The 800×450 and 1024×576 layouts remain dense, so first-time-player readability and comprehension still require human validation. |
 | Visible-control smoke path | Pass | A fresh full-screen Preview warren advanced through visible New Warren, + zoom, direct map drag, map-tap inspection (`Stockpile`), valid Farm placement, `− Miner`/`+ Carrier` reassignment, Pause/Resume, Help/Close, Save, and Load without keyboard input. Invalid placement also returned the readable `Can't build there.` notice. The Load round-trip restored the saved `04:45` state with the 10-ore construction site, 2 Miner/2 Carrier staffing, and tutorial `2/5 — Stabilize the Food Grid`; successful placement returned to Inspect instead of creating a second site. This is developer smoke evidence, not a qualifying first-time-player session. |
 | Packaged HUD recovery controls | Pass | A fresh full-screen Preview run changed Settings volume with visible `−`/`+` controls, opened and closed the Field Guide while paused, and resumed the warren with the same visible HUD and tutorial state. This confirms the modal guide leaves the underlying Warren controls recoverable by pointer; it does not replace the still-open full-campaign evidence. |
@@ -44,7 +45,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 249 unit tests and 2 integration tests pass.
+- `cargo test --all-targets` — 252 unit tests and 2 integration tests pass.
 - `cargo clippy --all-targets --all-features -- -D warnings` — pass.
 - `publish.ps1` with no parameters — pass; Windows and WebGL packages
   deployed to Preview.
@@ -108,6 +109,16 @@ automated simulation results into first-time-player evidence.
   [ui_endless_expedition_report.png](../verification/ui_endless_expedition_report.png),
   and [ui_endless_upgraded.png](../verification/ui_endless_upgraded.png) captures
   verify the visible choices.
+- Endless automatic cargo returns — pass; an awakened route can persist an
+  opt-in `Auto-return · Cargo only` policy. When its remote hold reaches the
+  shared capacity, the simulation starts a cargo-only shrine transit, preserves
+  the stationed crew, emits a distinct notification, and marks the departure as
+  a safe-beat autosave. The global worm transit remains serialized across
+  multiple routes, and the default-off field keeps older saves unchanged.
+  Focused state, save-roundtrip, simulation, and game-notice coverage passes,
+  with [ui_endless_auto_return.png](../verification/ui_endless_auto_return.png)
+  showing the enabled touch control alongside the manual return and scouting
+  actions.
 - State-aware awakened objective — pass; focused coverage names the visible
   Build & Dig or Jobs recovery for a missing Blacksmith, exhausted Mine, missing
   Smith, and missing Carrier instead of promising more ingots without a viable
@@ -231,6 +242,11 @@ automated simulation results into first-time-player evidence.
   [ui_endless_load_preview.png](../verification/ui_endless_load_preview.png)
   shows the selected `Ingots first` order, the exact next Ore/Ingots/Food mix,
   and a staffed expedition progressing toward its next remote ore haul.
+- Automatic return policy capture —
+  [ui_endless_auto_return.png](../verification/ui_endless_auto_return.png)
+  shows `Auto-return · Cargo only` enabled while the manual cargo-only return,
+  cargo order, crew quota, hold upgrade, and Pause scouting controls remain
+  visible.
 - Paused expedition capture —
   [ui_endless_expedition_paused.png](../verification/ui_endless_expedition_paused.png)
   shows the touch-first `Resume scouting` control, the persisted player-paused
