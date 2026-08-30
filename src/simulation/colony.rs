@@ -37,7 +37,6 @@ pub fn tick_spoilage(session: &mut GameSession, data: &GameData, dt: f32) {
     let mut raw_food = 0.0;
     let mut waste_generated = 0.0;
     for building in &mut session.buildings {
-        raw_food += building.stock(Good::Mushroom);
         let raw = building.stock(Good::Mushroom);
         let spoiled = (raw * raw_rate).min(raw);
         if spoiled > 0.0 {
@@ -54,6 +53,9 @@ pub fn tick_spoilage(session: &mut GameSession, data: &GameData, dt: f32) {
                 waste_generated += spoiled;
             }
         }
+        // Report what remains after this tick's spoilage, not the stale
+        // pre-decay amount that was visible for one extra frame.
+        raw_food += building.stock(Good::Mushroom);
         let decayed = (data.balance.waste_decay_per_min / 60.0 * dt).min(building.waste);
         building.waste -= decayed;
         session.economy.waste = (session.economy.waste - decayed).max(0.0);

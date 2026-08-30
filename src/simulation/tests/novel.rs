@@ -95,6 +95,25 @@ fn raw_food_spoils_into_waste_and_cooked_alias_persists() {
 }
 
 #[test]
+fn raw_food_ledger_matches_stock_after_spoilage() {
+    let (data, mut session) = boot(130);
+    let farm = session.buildings_of("farm").next().unwrap().pos;
+    session
+        .building_at_mut(farm)
+        .unwrap()
+        .add_stock(Good::Mushroom, 20.0);
+
+    crate::simulation::colony::tick_spoilage(&mut session, &data, SIM_DT);
+
+    let stock_total: f32 = session
+        .buildings
+        .iter()
+        .map(|building| building.stock(Good::Mushroom))
+        .sum();
+    assert!((session.economy.raw_food - stock_total).abs() < 0.001);
+}
+
+#[test]
 fn spoilage_unlocks_janitor_before_any_janitor_exists() {
     let (data, mut session) = boot(131);
     let farm = session.buildings_of("farm").next().unwrap().pos;
