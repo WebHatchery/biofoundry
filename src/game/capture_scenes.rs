@@ -126,9 +126,9 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
         "blacksmith" => {
             game.transition(StateTransition::StartWarren);
             if let GameState::Warren(session) = &mut game.state {
-                // The mine → blacksmith → ingot chain mid-flow: place a
-                // blacksmith by the warren, staff a smith, keep everyone
-                // fed, and let the ore route light up.
+                // A smith with a queued order but no ore: the inspection
+                // card should expose the missing input instead of calling
+                // an unpaid order nominally "working".
                 session.tutorial_dismissed = true;
                 session.economy.food = 200.0;
                 let spawn = session.spawn_tile();
@@ -140,9 +140,12 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                     .map(|(pos, _)| pos)
                     .min_by_key(|p| (p.manhattan_distance(&spawn), p.x, p.y));
                 if let Some(spot) = spot {
-                    session.buildings.push(Building::new("blacksmith", spot));
+                    let mut shop = Building::new("blacksmith", spot);
+                    shop.orders.push("iron_pickaxe".to_owned());
+                    session.buildings.push(shop);
                 }
-                // Free two miners to haul, and put one on the anvil.
+                // Free two miners to haul, and put one on the anvil so the
+                // blocked order is visibly staffed rather than abandoned.
                 let species = &game.data.species;
                 session.reassign(Job::Miner, Job::Carrier, |s| {
                     species.get(s).map(|d| d.reassignable).unwrap_or(false)

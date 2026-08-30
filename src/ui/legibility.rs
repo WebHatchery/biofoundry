@@ -114,10 +114,11 @@ pub fn building_status(
             if !staffed_at(session, pos, Job::Smith) {
                 return Some(BuildingStatus::NoWorker);
             }
-            // Idle for lack of ore, and nothing queued to justify waiting.
-            if building.stock(Good::Ore) < data.balance.smith_batch_ore as f32
-                && building.orders.is_empty()
-            {
+            // A queued order is only actionable immediately when its ingot
+            // cost is already paid. Otherwise the smith needs an ore batch
+            // to forge the missing ingots; expose that stall instead of
+            // calling an empty anvil nominally "Working".
+            if blacksmith_needs_ore(building, data) {
                 return Some(BuildingStatus::InputStarved);
             }
             None
@@ -168,6 +169,18 @@ pub fn building_status(
         }
         _ => None,
     }
+}
+
+fn blacksmith_needs_ore(building: &Building, data: &GameData) -> bool {
+    let has_ore = building.stock(Good::Ore) >= data.balance.smith_batch_ore as f32;
+    if has_ore {
+        return false;
+    }
+    let order_paid = building.orders.first().and_then(|item| {
+        data.equipment_def(item)
+            .map(|equipment| building.stock(Good::Ingot) >= equipment.cost_ingots as f32)
+    });
+    building.orders.is_empty() || !order_paid.unwrap_or(false)
 }
 
 /// Rough count of pending haul jobs — pickup points holding goods that want

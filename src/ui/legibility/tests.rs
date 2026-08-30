@@ -83,6 +83,40 @@ fn starved_blacksmith_and_kiln_read_starved() {
 }
 
 #[test]
+fn queued_blacksmith_reports_missing_ore_until_the_order_is_paid() {
+    let (data, mut session) = boot();
+    let spot = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(pos, _)| session.can_place_building(*pos))
+        .map(|(pos, _)| pos)
+        .unwrap();
+    session.buildings.push(Building::new("blacksmith", spot));
+    session.spawn_creature(&data, "goblin", Job::Smith);
+    session.creatures.last_mut().unwrap().task = Task::GoSmith(spot);
+    session
+        .building_at_mut(spot)
+        .unwrap()
+        .orders
+        .push("iron_pickaxe".to_owned());
+
+    assert_eq!(
+        building_status(&session, &data, session.building_at(spot).unwrap()),
+        Some(BuildingStatus::InputStarved)
+    );
+
+    session.building_at_mut(spot).unwrap().add_stock(
+        Good::Ingot,
+        data.equipment_def("iron_pickaxe").unwrap().cost_ingots as f32,
+    );
+    assert_eq!(
+        building_status(&session, &data, session.building_at(spot).unwrap()),
+        None
+    );
+}
+
+#[test]
 fn cook_pot_reads_missing_cook_then_missing_mushrooms() {
     let (data, mut session) = boot();
     let pot = session.buildings_of("cook_pot").next().unwrap().pos;
