@@ -10,11 +10,22 @@ fn new_outpost_defaults_to_ore_first_loading() {
     assert!(!outpost.expedition_paused);
     assert_eq!(outpost.crew_dispatch_limit, None);
     assert!(!outpost.storage_upgraded);
+    assert!(!outpost.crew_upgraded);
     assert!(!outpost.auto_return_cargo);
     assert_eq!(outpost.auto_return_label(), "Auto-return · Off");
     assert!(!outpost.auto_resupply_food);
     assert_eq!(outpost.auto_resupply_label(), "Auto-resupply · Off");
     assert_eq!(outpost.crew_dispatch_label(4), "Crew per run · Auto");
+}
+
+#[test]
+fn crew_capacity_expansion_uses_the_larger_configured_capacity() {
+    let mut outpost = Outpost::new(TilePos::new(4, 4));
+    assert_eq!(outpost.crew_capacity(4, 6), 4);
+
+    outpost.upgrade_crew_capacity();
+    assert_eq!(outpost.crew_capacity(4, 6), 6);
+    assert_eq!(outpost.crew_capacity(6, 4), 6);
 }
 
 #[test]

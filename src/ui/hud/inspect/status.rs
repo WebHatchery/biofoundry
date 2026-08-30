@@ -188,6 +188,7 @@ pub(in crate::ui::hud) fn inspect_status(
                 0,
                 0,
                 crate::simulation::outposts::storage_capacity(outpost, data),
+                crate::simulation::outposts::crew_capacity(outpost, data),
                 outpost.crew_dispatch_limit,
             ) {
                 return ("Ready to load", dark::POSITIVE);
@@ -246,9 +247,10 @@ pub(super) fn outpost_has_loadable_payload(
     cargo: u32,
     crew: usize,
     capacity: u32,
+    crew_capacity: u32,
     crew_dispatch_limit: Option<u32>,
 ) -> bool {
-    let crew_ready = crew < data.balance.outpost_capacity as usize
+    let crew_ready = crew < crew_capacity as usize
         && crew_dispatch_limit != Some(0)
         && session
             .creatures

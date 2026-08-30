@@ -30,6 +30,7 @@ automated simulation results into first-time-player evidence.
 | Worm Shrine reserve status legibility | Pass (focused and published capture evidence) | The map and filtered status legend now expose the same final-demand blockers already shown in the Shrine card: `Offerings paused`, `Food reserve low`, and `Ingot reserve low`. An awakened Shrine remains quiet, while the shared blocker helpers keep the map badge and inspection wording aligned. The published [ui_shrine_waiting.png](../verification/ui_shrine_waiting.png) capture shows the food-reserve badge beside the matching inspection state. |
 | Endless expedition feedback | Pass (focused and capture evidence) | A completed remote haul now reports its ore gain and food cost through the visible notification system and marks the haul as a safe-beat autosave, so progress is communicated and survives a refresh without keeping the inspection card open. Each Outpost persists its completed-haul count and lifetime ore gathered in the inspection card, while the completed-campaign Objective keeps aggregate `Runs` and `Hauls` visible across the Endless loop. |
 | Endless Outpost hold expansion | Pass (focused and capture evidence) | An active awakened route can spend 8 banked ingots once to expand its remote hold from 12 to 20 slots. The inspection card exposes the visible `Expand hold · 8 ingots` control, shows the upgraded `Cargo 6/20` capacity, and keeps transit, scouting, load-preview, full-hold, and Objective room calculations aligned. |
+| Endless Outpost camp expansion | Pass (focused and capture evidence) | An active awakened route can spend 12 banked ingots once to expand its remote camp from 4 to 6 crew. The inspection card exposes `Expand camp · 12 ingots`, dynamic capacity flows through dispatch, transit validation, remote-room pressure, and the route ledger, and legacy saves keep the base capacity. Refreshed [ui_endless_crew_upgrade.png](../verification/ui_endless_crew_upgrade.png) and [ui_endless_crew_upgraded.png](../verification/ui_endless_crew_upgraded.png) captures show the purchase and expanded route. |
 | Endless crew dispatch quota | Pass (focused and capture evidence) | An awakened Outpost exposes the visible `Crew per run · Auto` control, which cycles through cargo-only and bounded scout counts. Legacy saves keep automatic dispatch, while cargo-only loads can deliver provisions without borrowing local workers; the Objective names the control when that setting blocks an otherwise-ready scouting payload. Refreshed [ui_endless_load_preview.png](../verification/ui_endless_load_preview.png), [ui_endless_upgrade.png](../verification/ui_endless_upgrade.png), and [ui_endless_upgraded.png](../verification/ui_endless_upgraded.png) captures keep the route controls readable. |
 | Endless cargo-only returns | Pass (focused and capture evidence) | A staffed Outpost exposes `Send N cargo · keep crew` beside the normal full return, so a completed haul can come home without recalling the remote scouts. The route keeps those scouts assigned for another expedition, the departure notice explains the choice, and the Objective/field guide describe the remote-team outcome. Refreshed [ui_endless.png](../verification/ui_endless.png), [ui_endless_expedition_report.png](../verification/ui_endless_expedition_report.png), and [ui_endless_upgraded.png](../verification/ui_endless_upgraded.png) captures keep both return paths readable. |
 | Endless automatic cargo returns | Pass (focused and capture evidence) | An awakened Outpost exposes the persisted `Auto-return · Off` / `Auto-return · Cargo only` policy. When an opted-in hold reaches capacity, the fixed-step simulation starts one cargo-only return, preserves the remote scouts and one configured expedition's food when other cargo creates room, and returns provisions too when they alone fill the hold so the route can resupply. It emits a departure notice and autosaves the safe beat; later routes wait for the global worm transit. Refreshed [ui_endless_auto_return.png](../verification/ui_endless_auto_return.png) shows the enabled policy beside the manual return and scouting controls. Live Preview route interaction remains unclaimed because the resumed developer save has not yet reached the Outpost unlock. |
@@ -122,6 +123,14 @@ automated simulation results into first-time-player evidence.
   the enabled purchase control, while
   [ui_endless_upgraded.png](../verification/ui_endless_upgraded.png) shows the
   expanded `Cargo 6/20` hold and success toast.
+- Endless Outpost camp expansion — pass; an active awakened route can purchase
+  its one-time 12-ingot camp expansion, the save-compatible route flag raises
+  remote crew capacity from 4 to 6, and the larger capacity flows through
+  dispatch, transit validation, remote-room pressure, and the route ledger.
+  [ui_endless_crew_upgrade.png](../verification/ui_endless_crew_upgrade.png)
+  shows the enabled `Expand camp · 12 ingots` control, while
+  [ui_endless_crew_upgraded.png](../verification/ui_endless_crew_upgraded.png)
+  shows `Crew 2/6` and the success toast.
 - Endless crew dispatch quota — pass; a save-compatible optional quota keeps
   older routes on automatic dispatch, cycles the visible control through
   cargo-only and bounded scout counts, and limits new passengers in transit.
@@ -360,6 +369,12 @@ automated simulation results into first-time-player evidence.
   [ui_endless_load_preview.png](../verification/ui_endless_load_preview.png)
   shows the selected `Ingots first` order, the exact next Ore/Ingots/Food mix,
   and a staffed expedition progressing toward its next remote ore haul.
+- Camp expansion captures —
+  [ui_endless_crew_upgrade.png](../verification/ui_endless_crew_upgrade.png)
+  shows the enabled `Expand camp · 12 ingots` purchase beside the existing hold
+  upgrade, while
+  [ui_endless_crew_upgraded.png](../verification/ui_endless_crew_upgraded.png)
+  shows the resulting `Crew 2/6` capacity and success toast.
 - Automatic return policy capture —
   [ui_endless_auto_return.png](../verification/ui_endless_auto_return.png)
   shows `Auto-return · Cargo only` enabled while the manual cargo-only return,

@@ -111,6 +111,18 @@ pub(super) fn draw_compact_route_controls(context: CompactRouteContext<'_>) {
         }
         *y += button_step;
     }
+    if outpost.is_some_and(|route| !route.crew_upgraded) {
+        let upgrade_cost = data.balance.outpost_crew_upgrade_ingots;
+        if hud_button(
+            Rect::new(x, *y, panel.w - 28.0, button_height),
+            &format!("Expand camp · {upgrade_cost} ingots"),
+            session.economy.ingots_stock >= upgrade_cost,
+            mouse,
+        ) {
+            actions.push(UiAction::UpgradeOutpostCrew(pos));
+        }
+        *y += button_step;
+    }
     if crew > 0
         && hud_button(
             Rect::new(x, *y, panel.w - 28.0, button_height),

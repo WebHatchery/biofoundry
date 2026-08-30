@@ -482,6 +482,9 @@ pub(super) fn draw_inspect_panel(
             let active = outpost.is_some_and(|o| o.active);
             let cargo = outpost.map(|o| o.cargo_total()).unwrap_or(0);
             let crew = outpost.map(|o| o.crew.len()).unwrap_or(0);
+            let crew_cap = outpost
+                .map(|route| crate::simulation::outposts::crew_capacity(route, data))
+                .unwrap_or(data.balance.outpost_capacity);
             let crew_dispatch_limit = outpost.and_then(|route| route.crew_dispatch_limit);
             let storage_cap = outpost
                 .map(|route| crate::simulation::outposts::storage_capacity(route, data))
@@ -505,7 +508,7 @@ pub(super) fn draw_inspect_panel(
                     cargo,
                     storage_cap,
                     crew,
-                    data.balance.outpost_capacity
+                    crew_cap
                 ),
                 if active {
                     dark::POSITIVE
@@ -589,6 +592,7 @@ pub(super) fn draw_inspect_panel(
                         cargo,
                         crew,
                         storage_cap,
+                        crew_cap,
                         crew_dispatch_limit,
                     );
                     let return_label = outpost_return_label(cargo, crew);
@@ -668,7 +672,11 @@ pub(super) fn draw_inspect_panel(
                         }
                         y += 26.0;
                         let crew_label = outpost
-                            .map(|route| route.crew_dispatch_label(data.balance.outpost_capacity))
+                            .map(|route| {
+                                route.crew_dispatch_label(
+                                    crate::simulation::outposts::crew_capacity(route, data),
+                                )
+                            })
                             .unwrap_or_else(|| "Crew per run · Auto".to_owned());
                         if hud_button(
                             Rect::new(x, y, panel.w - 28.0, 24.0),
@@ -688,6 +696,18 @@ pub(super) fn draw_inspect_panel(
                                 mouse,
                             ) {
                                 actions.push(UiAction::UpgradeOutpost(pos));
+                            }
+                            y += 26.0;
+                        }
+                        if outpost.is_some_and(|route| !route.crew_upgraded) {
+                            let upgrade_cost = data.balance.outpost_crew_upgrade_ingots;
+                            if hud_button(
+                                Rect::new(x, y, panel.w - 28.0, 24.0),
+                                &format!("Expand camp · {upgrade_cost} ingots"),
+                                session.economy.ingots_stock >= upgrade_cost,
+                                mouse,
+                            ) {
+                                actions.push(UiAction::UpgradeOutpostCrew(pos));
                             }
                             y += 26.0;
                         }

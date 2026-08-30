@@ -208,6 +208,7 @@ fn empty_outpost_reports_when_no_payload_is_ready_to_load() {
         0,
         0,
         data.balance.outpost_storage_cap,
+        data.balance.outpost_capacity,
         None,
     ));
 
@@ -218,6 +219,7 @@ fn empty_outpost_reports_when_no_payload_is_ready_to_load() {
         0,
         0,
         data.balance.outpost_storage_cap,
+        data.balance.outpost_capacity,
         None,
     ));
 }
@@ -239,6 +241,7 @@ fn empty_outpost_does_not_count_remote_crew_as_ready_to_load() {
         0,
         0,
         data.balance.outpost_storage_cap,
+        data.balance.outpost_capacity,
         None,
     ));
 }
@@ -707,6 +710,7 @@ fn cargo_only_outpost_does_not_count_local_crew_as_loadable() {
         0,
         0,
         data.balance.outpost_storage_cap,
+        data.balance.outpost_capacity,
         Some(0),
     ));
 }

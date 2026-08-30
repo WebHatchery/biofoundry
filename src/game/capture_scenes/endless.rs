@@ -51,6 +51,32 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                 ));
             }
         }
+        "endless_crew_upgrade" => {
+            super::begin(game, "endless_load_preview");
+            if let GameState::Warren(session) = &mut game.state {
+                session.economy.ingots_stock = game.data.balance.outpost_crew_upgrade_ingots;
+            }
+        }
+        "endless_crew_upgraded" => {
+            begin(game, "endless_crew_upgrade");
+            let upgraded = if let GameState::Warren(session) = &mut game.state {
+                session
+                    .outposts
+                    .last()
+                    .map(|route| route.pos)
+                    .is_some_and(|pos| {
+                        simulation::outposts::upgrade_outpost_crew(session, &game.data, pos)
+                    })
+            } else {
+                false
+            };
+            if upgraded {
+                game.notifications.success(format!(
+                    "Outpost camp expanded to {} crew.",
+                    game.data.balance.outpost_upgraded_capacity
+                ));
+            }
+        }
         "endless_routes" => {
             super::begin(game, "endless_load_preview");
             if let GameState::Warren(session) = &mut game.state {

@@ -325,6 +325,32 @@ impl Game {
                     self.autosave_game();
                 }
             }
+            UiAction::UpgradeOutpostCrew(pos) => {
+                let mut upgraded = false;
+                if let GameState::Warren(session) = &mut self.state {
+                    if simulation::outposts::upgrade_outpost_crew(session, &self.data, pos) {
+                        let capacity = session
+                            .outposts
+                            .iter()
+                            .find(|outpost| outpost.pos == pos)
+                            .map(|outpost| simulation::outposts::crew_capacity(outpost, &self.data))
+                            .unwrap_or(self.data.balance.outpost_capacity);
+                        self.notifications
+                            .success(format!("Outpost camp expanded to {capacity} crew."));
+                        self.audio.play(Sfx::Complete);
+                        upgraded = true;
+                    } else {
+                        self.notifications.warning(format!(
+                            "Needs {} banked ingots and an active route.",
+                            self.data.balance.outpost_crew_upgrade_ingots
+                        ));
+                        self.audio.play(Sfx::Deny);
+                    }
+                }
+                if upgraded {
+                    self.autosave_game();
+                }
+            }
             UiAction::CycleOutpostCrew(pos) => {
                 let mut route_changed = false;
                 if let GameState::Warren(session) = &mut self.state {
@@ -337,11 +363,13 @@ impl Game {
                         session.ensure_outpost(pos);
                         if let Some(outpost) = session.outposts.iter_mut().find(|o| o.pos == pos) {
                             if outpost.active {
-                                outpost.cycle_crew_dispatch(self.data.balance.outpost_capacity);
+                                let capacity =
+                                    simulation::outposts::crew_capacity(outpost, &self.data);
+                                outpost.cycle_crew_dispatch(capacity);
                                 route_changed = true;
                                 self.notifications.info(format!(
                                     "Next outpost run: {}.",
-                                    outpost.crew_dispatch_label(self.data.balance.outpost_capacity)
+                                    outpost.crew_dispatch_label(capacity)
                                 ));
                                 self.audio.play(Sfx::Select);
                             }

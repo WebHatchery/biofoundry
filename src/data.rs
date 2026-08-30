@@ -223,6 +223,12 @@ pub struct Balance {
     /// Capacity of an Outpost after its hold is expanded.
     #[serde(default = "default_outpost_upgraded_storage")]
     pub outpost_upgraded_storage_cap: u32,
+    /// Ingot cost for the one-time Outpost camp expansion.
+    #[serde(default = "default_outpost_crew_upgrade_ingots")]
+    pub outpost_crew_upgrade_ingots: u32,
+    /// Crew capacity of an Outpost after its camp is expanded.
+    #[serde(default = "default_outpost_upgraded_capacity")]
+    pub outpost_upgraded_capacity: u32,
     #[serde(default = "default_worm_transit_time")]
     pub worm_transit_time_sec: f32,
     /// Time for a staffed remote outpost to complete one scouting haul.
@@ -303,6 +309,12 @@ fn default_outpost_upgrade_ingots() -> u32 {
 }
 fn default_outpost_upgraded_storage() -> u32 {
     20
+}
+fn default_outpost_crew_upgrade_ingots() -> u32 {
+    12
+}
+fn default_outpost_upgraded_capacity() -> u32 {
+    6
 }
 fn default_worm_transit_time() -> f32 {
     18.0

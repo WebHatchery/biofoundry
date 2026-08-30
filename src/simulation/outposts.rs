@@ -92,6 +92,14 @@ pub fn storage_capacity(outpost: &Outpost, data: &GameData) -> u32 {
     }
 }
 
+/// Return the selected Outpost's current remote crew capacity.
+pub fn crew_capacity(outpost: &Outpost, data: &GameData) -> u32 {
+    outpost.crew_capacity(
+        data.balance.outpost_capacity,
+        data.balance.outpost_upgraded_capacity,
+    )
+}
+
 /// Buy the one-time remote hold expansion for an active awakened route.
 pub fn upgrade_outpost(session: &mut GameSession, data: &GameData, pos: TilePos) -> bool {
     if !session.worm_awake
@@ -118,6 +126,35 @@ pub fn upgrade_outpost(session: &mut GameSession, data: &GameData, pos: TilePos)
     }
     session.economy.ingots_stock -= data.balance.outpost_upgrade_ingots;
     session.outposts[index].upgrade_storage();
+    true
+}
+
+/// Buy the one-time remote camp expansion for an active awakened route.
+pub fn upgrade_outpost_crew(session: &mut GameSession, data: &GameData, pos: TilePos) -> bool {
+    if !session.worm_awake
+        || session.worm_transit.is_some()
+        || session
+            .building_at(pos)
+            .is_none_or(|building| building.kind != "outpost")
+    {
+        return false;
+    }
+    session.ensure_outpost(pos);
+    let Some(index) = session
+        .outposts
+        .iter()
+        .position(|outpost| outpost.pos == pos)
+    else {
+        return false;
+    };
+    if !session.outposts[index].active
+        || session.outposts[index].crew_upgraded
+        || session.economy.ingots_stock < data.balance.outpost_crew_upgrade_ingots
+    {
+        return false;
+    }
+    session.economy.ingots_stock -= data.balance.outpost_crew_upgrade_ingots;
+    session.outposts[index].upgrade_crew_capacity();
     true
 }
 
@@ -432,13 +469,9 @@ fn start_transit(
             .filter(|c| {
                 !c.is_remote() && c.carrying.is_none() && c.tile() == session.stockpile_pos()
             })
-            .take(
-                outpost.crew_dispatch_count(
-                    data.balance
-                        .outpost_capacity
-                        .saturating_sub(outpost.crew.len() as u32),
-                ) as usize,
-            )
+            .take(outpost.crew_dispatch_count(
+                crew_capacity(outpost, data).saturating_sub(outpost.crew.len() as u32),
+            ) as usize)
             .map(|c| c.id)
             .collect(),
         (TransitDirection::ToShrine, TransitPlan::Standard) => outpost.crew.clone(),

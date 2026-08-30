@@ -99,6 +99,23 @@ fn route_metrics_reports_live_scouting_progress() {
 }
 
 #[test]
+fn route_metrics_reports_an_expanded_remote_camp() {
+    let data = GameData::load().expect("embedded game data");
+    let session = GameSession::new(&data, 42);
+    let mut route = Outpost::new(TilePos::new(4, 4));
+    route.crew_upgraded = true;
+    route.crew.extend([1, 2, 3, 4, 5]);
+
+    assert_eq!(
+        route_metrics(&session, &data, &route),
+        format!(
+            "Cargo 0/{} · Crew 5/{}",
+            data.balance.outpost_storage_cap, data.balance.outpost_upgraded_capacity
+        )
+    );
+}
+
+#[test]
 fn route_status_reuses_the_inspection_vocabulary() {
     let data = GameData::load().expect("embedded game data");
     let mut session = GameSession::new(&data, 43);

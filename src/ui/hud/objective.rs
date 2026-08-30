@@ -427,7 +427,8 @@ fn outpost_has_loadable_payload(
     let food_ready = session.economy.food - data.balance.worm_feed_reserve >= 1.0;
     let cargo_ready = room > 0
         && (session.economy.ore_stock > 0 || session.economy.ingots_stock > 0 || food_ready);
-    let crew_ready = outpost.crew.len() < data.balance.outpost_capacity as usize
+    let crew_ready = outpost.crew.len()
+        < crate::simulation::outposts::crew_capacity(outpost, data) as usize
         && session.creatures.iter().any(|creature| {
             !creature.is_remote()
                 && creature.carrying.is_none()

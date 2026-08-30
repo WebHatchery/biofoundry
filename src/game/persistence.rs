@@ -478,10 +478,11 @@ pub(super) fn validate_loaded_session(
             .iter()
             .filter(|id| creature_ids.contains(id) && claimed_outpost_crew.insert(**id))
             .count();
-        if crew_count > data.balance.outpost_capacity as usize {
+        let capacity = crate::simulation::outposts::crew_capacity(outpost, data) as usize;
+        if crew_count > capacity {
             return Err(format!(
                 "outpost crew exceeds its {}-creature capacity at {:?}",
-                data.balance.outpost_capacity, outpost.pos
+                capacity, outpost.pos
             ));
         }
         outpost_crew_counts.push((outpost.pos, crew_count));
@@ -549,7 +550,8 @@ pub(super) fn validate_loaded_session(
                 .find(|(pos, _)| *pos == outpost.pos)
                 .map(|(_, count)| *count)
                 .unwrap_or(0);
-            if stationed_crew + arriving_crew > data.balance.outpost_capacity as usize {
+            let crew_capacity = crate::simulation::outposts::crew_capacity(outpost, data);
+            if stationed_crew + arriving_crew > crew_capacity as usize {
                 return Err(format!(
                     "worm transit crew exceeds the {:?} outpost capacity",
                     transit.outpost

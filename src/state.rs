@@ -350,13 +350,31 @@ impl GameSession {
     /// Number of usable tiles, plus the rooms remote outposts provide.
     pub fn usable_warren_capacity(&self, data: &GameData) -> usize {
         self.local_warren_capacity(data)
-            + self.outposts.iter().filter(|o| o.active).count()
-                * data.balance.outpost_capacity as usize
+            + self
+                .outposts
+                .iter()
+                .filter(|o| o.active)
+                .map(|outpost| {
+                    outpost.crew_capacity(
+                        data.balance.outpost_capacity,
+                        data.balance.outpost_upgraded_capacity,
+                    ) as usize
+                })
+                .sum::<usize>()
     }
 
     pub fn overcrowding_ratio(&self, data: &GameData) -> f32 {
-        let remote_rooms = self.outposts.iter().filter(|o| o.active).count()
-            * data.balance.outpost_capacity as usize;
+        let remote_rooms = self
+            .outposts
+            .iter()
+            .filter(|o| o.active)
+            .map(|outpost| {
+                outpost.crew_capacity(
+                    data.balance.outpost_capacity,
+                    data.balance.outpost_upgraded_capacity,
+                ) as usize
+            })
+            .sum::<usize>();
         let local_capacity = self
             .usable_warren_capacity(data)
             .saturating_sub(remote_rooms)

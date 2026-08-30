@@ -85,6 +85,8 @@
   "outpost_storage_cap": 12,
   "outpost_upgrade_ingots": 8,
   "outpost_upgraded_storage_cap": 20,
+  "outpost_crew_upgrade_ingots": 12,
+  "outpost_upgraded_capacity": 6,
   "worm_transit_time_sec": 18.0,
   "outpost_expedition_cycle_sec": 30.0,
   "outpost_expedition_food_per_crew": 1,
