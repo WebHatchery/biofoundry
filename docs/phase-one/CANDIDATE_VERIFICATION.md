@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `748a640`
+**Source revision:** `4b21163`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -29,7 +29,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 186 unit tests and 2 integration tests pass.
+- `cargo test --all-targets` — 187 unit tests and 2 integration tests pass.
 - `cargo clippy --all-targets --all-features -- -D warnings` — pass.
 - `publish.ps1` with no parameters — pass; Windows and WebGL packages
   deployed to Preview.
@@ -38,6 +38,9 @@ automated simulation results into first-time-player evidence.
 - Touch map taps — focused input coverage and the explicit gesture path keep a
   short touch on open floor available to world tools and building inspection,
   even when the browser does not synthesize a mouse release.
+- Touch HUD ownership — focused HUD coverage maps a letterboxed touch release
+  into UI coordinates, so a button tap cannot also fall through to the map
+  when the mouse cursor is elsewhere.
 - Shared toolkit notification-offset tests — 360 tests pass; the hosted-page
   toast offset is opt-in, so existing notification anchors remain unchanged.
 - Fixed-seed campaign beats — secure `19.4m`, factory `24.4m`, shrine
