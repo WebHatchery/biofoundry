@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `c1f42fb`
+**Source revision:** `79bd8a9`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -29,7 +29,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 183 unit tests and 2 integration tests pass.
+- `cargo test --all-targets` — 184 unit tests and 2 integration tests pass.
 - `cargo clippy --all-targets --all-features -- -D warnings` — pass.
 - `publish.ps1` with no parameters — pass; Windows and WebGL packages
   deployed to Preview.
@@ -108,6 +108,10 @@ automated simulation results into first-time-player evidence.
   in the warren from Engineers posted remotely, so the Mine bonus is not shown
   as locally active when the specialist is away; focused UI coverage exercises
   the summary states.
+- Local workforce capacity — the Jobs panel now shows local workers against
+  local floor capacity beside Idle, using the same remote-outpost exclusion as
+  the crowding simulation; the refreshed optional capture keeps the readout
+  legible with advanced controls visible.
 - In-flight payload feedback — the selected outpost now names the cargo and crew
   currently carried by the worm during transit, so emptied storage counters are
   not mistaken for lost payload; focused UI coverage exercises the summary.
