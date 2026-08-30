@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-31
-**Source revision:** `3f87722`
+**Source revision:** `d8ca177`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -37,6 +37,7 @@ automated simulation results into first-time-player evidence.
 | Endless transit failure recovery | Pass (focused and published build evidence) | If an in-flight worm route is deactivated, the simulation restores its payload, records the failed Outpost, and emits a one-shot transit-failure event. The game turns that event into a visible danger notification with the exact recovery action and treats it as a safe-beat autosave, so a refresh cannot erase the route's recovered state. |
 | Multi-route failure visibility | Pass (focused evidence) | Reopening one failed Outpost now clears only that route's failure; the global route warning remains visible while any other Outpost still needs recovery, including when a healthy second route starts a transit. This keeps the top-bar warning consistent with the per-route inspection state as remote routes multiply. |
 | Loaded route failure visibility | Pass (focused and published build evidence) | Installing a save now reconciles each persisted Outpost failure with the global top-bar warning, repairing a missing banner and clearing a stale one. The route records remain authoritative across refresh and load boundaries. |
+| Loaded Outpost record recovery | Pass (focused and published build evidence) | Loading a structurally valid legacy session now recreates a missing route record for every placed Outpost before HUD and remote-crew reconciliation. The repaired route starts inactive at the matching tile, restores Routes ledger availability, and is ready to persist on the next normal Save. |
 | Loaded session integrity validation | Pass (focused and published build evidence) | Current-version, migrated primary, and backup saves are checked before installation for valid map storage, non-overlapping world objects, known content IDs, safe actor/task positions, unique roster IDs, bounded remote cargo, and finite simulation values. The current-version toolkit fast path now receives the same game-owned validation as migrated saves; invalid shapes enter the existing quarantine/backup recovery flow instead of poisoning the live Warren. |
 | Backup-only load recovery | Pass (focused and published build evidence) | If a primary slot is missing while its conventional `_backup` survives, `Load` now validates the backup, restores the primary slot, and installs the recovered Warren; if the restore write is rejected, the valid backup remains playable and the player is told to use Save. The focused recovery-path coverage and published candidate include this branch, while ordinary Preview Continue remains verified separately. |
 | Backup-only startup recovery | Pass (focused and published build evidence) | Title-screen availability now treats either the primary slot or its conventional `_backup` as a recoverable save. A primary-missing/backup-survives launch can therefore reach `Load` and use the existing backup recovery path instead of incorrectly disabling Continue. |
@@ -68,7 +69,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 309 unit tests and 2 integration/code-standard
+- `cargo test --all-targets` — 310 unit tests and 2 integration/code-standard
   targets pass,
   including fresh/simulated/remote-transit valid sessions, modal route
   planning, rejected malformed save shapes, and event-history save/load
@@ -177,6 +178,11 @@ automated simulation results into first-time-player evidence.
   global route warning from persisted per-Outpost failure records, repairing a
   missing banner and clearing a stale one. Focused recovery coverage verifies
   both load-boundary states, and the published Preview includes the update.
+- Loaded Outpost record recovery — pass; load reconciliation now creates the
+  missing route record for every placed Outpost building before remote-crew
+  markers and HUD state are rebuilt. Focused state coverage verifies the
+  inactive record is restored at the building tile, and the published Preview
+  includes the update.
 - Current-version save validation — pass; the game shell validates the session
   returned by the toolkit even when the current-version fast path skips the
   migration callback. Focused coverage rejects a malformed current-version
