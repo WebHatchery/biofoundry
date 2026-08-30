@@ -115,8 +115,10 @@ pub fn draw(
     panels::draw_tools_panel(session, data, tools_panel, mode, mouse, &mut actions);
     let tutorial_panel = panels::draw_tutorial_panel(session, data, mouse, &mut actions);
     let objective_panel = panels::draw_objective_panel(session, data);
-    let inspect_panel = selected
-        .and_then(|pos| inspect::draw_inspect_panel(session, data, pos, mouse, &mut actions));
+    let inspect_top = inspect_panel_top(tutorial_panel);
+    let inspect_panel = selected.and_then(|pos| {
+        inspect::draw_inspect_panel(session, data, pos, inspect_top, mouse, &mut actions)
+    });
 
     // A status-icon legend, shown only while some node is stalled — it
     // teaches the in-world badges exactly when they matter.
@@ -296,6 +298,10 @@ fn interaction_point(ui: &VirtualUi, mouse: Vec2, touch_position: Option<Vec2>) 
     touch_position
         .and_then(|position| ui.screen_to_ui_checked(position))
         .unwrap_or(mouse)
+}
+
+fn inspect_panel_top(tutorial_panel: Option<Rect>) -> f32 {
+    tutorial_panel.map_or(210.0, |panel| panel.y + panel.h + 10.0)
 }
 
 #[cfg(test)]

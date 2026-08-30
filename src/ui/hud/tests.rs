@@ -30,6 +30,14 @@ fn panels_claim_scaled_button_margins_before_world_input() {
 }
 
 #[test]
+fn inspection_card_moves_below_the_tutorial_card() {
+    let tutorial = Rect::new(938.0, 72.0, 330.0, 168.0);
+
+    assert_eq!(inspect_panel_top(Some(tutorial)), 250.0);
+    assert_eq!(inspect_panel_top(None), 210.0);
+}
+
+#[test]
 fn touch_release_position_can_claim_hud_when_mouse_is_elsewhere() {
     let ui = VirtualUi::from_screen_size(1280.0, 720.0, 1440.0, 900.0);
     let touch_screen = ui.ui_to_screen(vec2(50.0, 30.0));

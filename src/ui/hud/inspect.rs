@@ -32,6 +32,7 @@ pub(super) fn draw_inspect_panel(
     session: &GameSession,
     data: &GameData,
     pos: TilePos,
+    top: f32,
     mouse: Vec2,
     actions: &mut Vec<UiAction>,
 ) -> Option<Rect> {
@@ -48,7 +49,7 @@ pub(super) fn draw_inspect_panel(
         "outpost" => 270.0,
         _ => 152.0,
     };
-    let panel = Rect::new(LOGICAL_WIDTH - 262.0, 210.0, 250.0, height);
+    let panel = Rect::new(LOGICAL_WIDTH - 262.0, top, 250.0, height);
     draw_surface_with_title(
         panel,
         Some(name),
