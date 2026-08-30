@@ -33,7 +33,8 @@ impl Game {
         }
     }
 
-    /// Persist a campaign milestone without interrupting the player's flow.
+    /// Persist a campaign milestone or direct player decision without
+    /// interrupting the player's flow.
     pub(super) fn autosave_game(&mut self) {
         if matches!(&self.state, GameState::Warren(session) if session.is_non_viable(&self.data)) {
             return;

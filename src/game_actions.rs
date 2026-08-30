@@ -42,8 +42,10 @@ impl Game {
             UiAction::Assign(job) => self.reassign(Job::Idle, job),
             UiAction::Unassign(job) => self.reassign(job, Job::Idle),
             UiAction::AttractBeetle => {
+                let mut recruited = false;
                 if let GameState::Warren(session) = &mut self.state {
                     if simulation::try_attract_beetle(session, &self.data) {
+                        recruited = true;
                         self.notifications.success(recruitment_notice(
                             &self.data,
                             "beetle",
@@ -55,10 +57,15 @@ impl Game {
                         self.audio.play(Sfx::Deny);
                     }
                 }
+                if recruited {
+                    self.autosave_game();
+                }
             }
             UiAction::AttractSalamander => {
+                let mut recruited = false;
                 if let GameState::Warren(session) = &mut self.state {
                     if simulation::try_attract_salamander(session, &self.data) {
+                        recruited = true;
                         self.notifications.success(recruitment_notice(
                             &self.data,
                             "salamander",
@@ -71,10 +78,15 @@ impl Game {
                         self.audio.play(Sfx::Deny);
                     }
                 }
+                if recruited {
+                    self.autosave_game();
+                }
             }
             UiAction::AttractSlimeJanitor => {
+                let mut recruited = false;
                 if let GameState::Warren(session) = &mut self.state {
                     if simulation::try_attract_slime_janitor(session, &self.data) {
+                        recruited = true;
                         self.notifications.success(recruitment_notice(
                             &self.data,
                             "slime_janitor",
@@ -87,10 +99,15 @@ impl Game {
                         self.audio.play(Sfx::Deny);
                     }
                 }
+                if recruited {
+                    self.autosave_game();
+                }
             }
             UiAction::AttractBatCourier => {
+                let mut recruited = false;
                 if let GameState::Warren(session) = &mut self.state {
                     if simulation::try_attract_bat_courier(session, &self.data) {
+                        recruited = true;
                         self.notifications.success(recruitment_notice(
                             &self.data,
                             "bat_courier",
@@ -103,26 +120,57 @@ impl Game {
                         self.audio.play(Sfx::Deny);
                     }
                 }
+                if recruited {
+                    self.autosave_game();
+                }
             }
             UiAction::DismissVictory => {
+                let mut dismissed = false;
                 if let GameState::Warren(session) = &mut self.state {
-                    session.victory_shown = true;
+                    if !session.victory_shown {
+                        session.victory_shown = true;
+                        dismissed = true;
+                    }
+                }
+                if dismissed {
+                    self.autosave_game();
                 }
             }
             UiAction::DismissFactory => {
+                let mut dismissed = false;
                 if let GameState::Warren(session) = &mut self.state {
-                    session.factory_shown = true;
+                    if !session.factory_shown {
+                        session.factory_shown = true;
+                        dismissed = true;
+                    }
+                }
+                if dismissed {
+                    self.autosave_game();
                 }
             }
             UiAction::DismissWorm => {
+                let mut dismissed = false;
                 if let GameState::Warren(session) = &mut self.state {
-                    session.worm_shown = true;
+                    if !session.worm_shown {
+                        session.worm_shown = true;
+                        dismissed = true;
+                    }
+                }
+                if dismissed {
+                    self.autosave_game();
                 }
             }
             UiAction::SkipTutorial => {
+                let mut dismissed = false;
                 if let GameState::Warren(session) = &mut self.state {
-                    session.tutorial_dismissed = true;
-                    self.audio.play(Sfx::Select);
+                    if !session.tutorial_dismissed {
+                        session.tutorial_dismissed = true;
+                        dismissed = true;
+                        self.audio.play(Sfx::Select);
+                    }
+                }
+                if dismissed {
+                    self.autosave_game();
                 }
             }
             UiAction::SetMode(mode) => {
@@ -134,6 +182,7 @@ impl Game {
                 self.audio.play(Sfx::Select);
             }
             UiAction::Breed(species) => {
+                let mut bred = false;
                 if let GameState::Warren(session) = &mut self.state {
                     let ok = match species.as_str() {
                         "hobgoblin" => simulation::try_breed_hobgoblin(session, &self.data),
@@ -142,6 +191,7 @@ impl Game {
                         _ => false,
                     };
                     if ok {
+                        bred = true;
                         self.notifications.success(recruitment_notice(
                             &self.data,
                             &species,
@@ -153,6 +203,9 @@ impl Game {
                             .warning("Needs the unlock, a breeding pit, and banked ingots.");
                         self.audio.play(Sfx::Deny);
                     }
+                }
+                if bred {
+                    self.autosave_game();
                 }
             }
             UiAction::ToggleShrineFeeding(pos) => {
@@ -398,16 +451,21 @@ impl Game {
             UiAction::WorldClick(tile) => self.world_click(tile),
             UiAction::QueueOrder(pos, item) => {
                 let cap = self.data.balance.order_queue_size;
+                let mut queued = false;
                 if let GameState::Warren(session) = &mut self.state {
                     if let Some(b) = session.building_at_mut(pos) {
                         if b.kind == "blacksmith" && b.orders.len() < cap {
                             b.orders.push(item);
+                            queued = true;
                             self.notifications.info("Order queued.");
                             self.audio.play(Sfx::Select);
                         } else {
                             self.audio.play(Sfx::Deny);
                         }
                     }
+                }
+                if queued {
+                    self.autosave_game();
                 }
             }
             UiAction::Save => self.save_game(),

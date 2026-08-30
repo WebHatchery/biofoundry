@@ -455,14 +455,17 @@ impl Game {
     }
 
     fn reassign(&mut self, from: Job, to: Job) {
-        let GameState::Warren(session) = &mut self.state else {
-            return;
+        let changed = if let GameState::Warren(session) = &mut self.state {
+            let species = &self.data.species;
+            session.reassign(from, to, |s| {
+                species.get(s).map(|d| d.reassignable).unwrap_or(false)
+            })
+        } else {
+            false
         };
-        let species = &self.data.species;
-        if session.reassign(from, to, |s| {
-            species.get(s).map(|d| d.reassignable).unwrap_or(false)
-        }) {
+        if changed {
             self.audio.play(Sfx::Select);
+            self.autosave_game();
         }
     }
 

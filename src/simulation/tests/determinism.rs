@@ -2,7 +2,9 @@
 //! a save/load roundtrip must not perturb it.
 
 use super::*;
+use crate::state::creatures::Job;
 use crate::state::outposts::CargoPriority;
+use crate::state::structures::Building;
 
 #[test]
 fn ticks_accumulate_deterministically() {
@@ -93,6 +95,46 @@ fn save_roundtrip_preserves_shrine_feeding_pause() {
     let restored: GameSession = serde_json::from_str(&json).expect("deserialize");
 
     assert!(restored.worm_feeding_paused);
+}
+
+#[test]
+fn save_roundtrip_preserves_player_decisions() {
+    let (data, mut session) = boot_on_config_seed();
+    session.tutorial_dismissed = true;
+    session.tutorial_reassigned = true;
+    session.victory_shown = true;
+    session.factory_shown = true;
+    session.worm_shown = true;
+    session.creatures[0].job = Job::Carrier;
+
+    let blacksmith_pos = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(pos, tile)| tile.walkable() && session.can_place_building(*pos))
+        .map(|(pos, _)| pos)
+        .expect("open blacksmith site");
+    let mut blacksmith = Building::new("blacksmith", blacksmith_pos);
+    blacksmith.orders = vec!["iron_pickaxe".to_owned(), "guard_blade".to_owned()];
+    session.buildings.push(blacksmith);
+
+    let json = serde_json::to_string(&session).expect("serialize");
+    let restored: GameSession = serde_json::from_str(&json).expect("deserialize");
+
+    assert!(restored.tutorial_dismissed);
+    assert!(restored.tutorial_reassigned);
+    assert!(restored.victory_shown);
+    assert!(restored.factory_shown);
+    assert!(restored.worm_shown);
+    assert_eq!(restored.creatures[0].job, Job::Carrier);
+    assert_eq!(
+        restored.buildings_of("blacksmith").next().unwrap().orders,
+        ["iron_pickaxe".to_owned(), "guard_blade".to_owned()]
+    );
+
+    // Keep the data binding meaningful: this roundtrip remains valid for the
+    // same configured game that supplies the building and tutorial schema.
+    assert!(data.buildings.get("blacksmith").is_some());
 }
 
 /// Full-session serde roundtrip: a loaded save simulates identically
