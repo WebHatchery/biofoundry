@@ -4,6 +4,7 @@
 mod food;
 mod specialists;
 mod top_bar;
+mod workforce;
 
 pub(super) use food::draw_food_grid_panel;
 use specialists::{optional_specialist_label, optional_support_label};
@@ -11,6 +12,7 @@ pub(super) use top_bar::{
     compact_food_recovery_hint, compact_raid_defense_hint, compact_top_bar,
     condensed_food_recovery_hint, condensed_raid_defense_hint, reassignable_job_count,
 };
+use workforce::{engineer_status_label, workforce_capacity_label, workforce_pressure_label};
 
 use crate::data::GameData;
 use crate::simulation::{self, food as simulation_food};
@@ -380,7 +382,20 @@ pub(super) fn draw_jobs_panel(
         y + 18.0,
         TextStyle::new(16.0, dark::TEXT_DIM).params(),
     );
-    y += 28.0;
+    let workforce_pressure = workforce_pressure_label(session, data);
+    if let Some(pressure) = workforce_pressure.as_deref() {
+        draw_ui_text_ex(
+            pressure,
+            x + 22.0,
+            y + 36.0,
+            TextStyle::new(13.0, dark::WARNING).params(),
+        );
+    }
+    y += if workforce_pressure.is_some() {
+        46.0
+    } else {
+        28.0
+    };
 
     if !advanced_systems_unlocked(session) {
         draw_ui_text_ex(
@@ -503,25 +518,6 @@ pub(super) fn draw_jobs_panel(
             );
         }
     }
-}
-
-fn engineer_status_label(local: usize, total: usize) -> String {
-    if local > 0 {
-        format!("Engineer {local} local · Mine +25%")
-    } else if total > 0 {
-        format!("Engineer 0 local · {total} posted")
-    } else {
-        "Engineer 0 · no local bonus".to_owned()
-    }
-}
-
-fn workforce_capacity_label(session: &GameSession, data: &GameData) -> String {
-    format!(
-        "Idle {} · Local {}/{}",
-        session.job_count(Job::Idle),
-        session.local_creature_count(),
-        session.local_warren_capacity(data)
-    )
 }
 
 #[cfg(test)]

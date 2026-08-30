@@ -602,6 +602,19 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
         "event_log_older" => overlays::event_log_older(game),
         "pause" => overlays::pause(game),
         "collapse" => overlays::collapse(game),
+        "crowding" => {
+            game.transition(StateTransition::StartWarren);
+            game.paused = true;
+            if let GameState::Warren(session) = &mut game.state {
+                session.tutorial_dismissed = true;
+                session.economy.food = 240.0;
+                session.creatures.clear();
+                let capacity = session.local_warren_capacity(&game.data);
+                for _ in 0..capacity + 8 {
+                    session.spawn_creature(&game.data, "goblin", Job::Idle);
+                }
+            }
+        }
         // "warren" and the harness default "gameplay" boot straight
         // into a fresh session on the config seed.
         _ => game.transition(StateTransition::StartWarren),

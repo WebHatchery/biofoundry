@@ -230,6 +230,29 @@ fn jobs_panel_capacity_uses_local_workers_and_floor_space() {
 }
 
 #[test]
+fn jobs_panel_names_dig_as_the_crowding_recovery() {
+    let data = GameData::load().expect("embedded game data");
+    let mut session = GameSession::new(&data, 7);
+    session.creatures.clear();
+    let capacity = session.local_warren_capacity(&data);
+    for _ in 0..capacity + 8 {
+        session.spawn_creature(&data, "goblin", Job::Idle);
+    }
+
+    let pressure = workforce_pressure_label(&session, &data).expect("crowding warning");
+    assert!(pressure.starts_with("Crowded · work −"));
+    assert!(pressure.ends_with(" · tap Dig"));
+}
+
+#[test]
+fn jobs_panel_hides_crowding_recovery_when_floor_is_sufficient() {
+    let data = GameData::load().expect("embedded game data");
+    let session = GameSession::new(&data, 7);
+
+    assert_eq!(workforce_pressure_label(&session, &data), None);
+}
+
+#[test]
 fn engineer_summary_distinguishes_local_and_posted_specialists() {
     assert_eq!(engineer_status_label(0, 0), "Engineer 0 · no local bonus");
     assert_eq!(engineer_status_label(0, 1), "Engineer 0 local · 1 posted");

@@ -12,6 +12,8 @@
     endless_resonator_upgrade, endless_resonator_upgraded, endless_charter,
     and endless_charter_awarded.
 
+    The explicit `crowding` scene demonstrates the Jobs-panel recovery guidance.
+
 .EXAMPLE
     ./scripts/capture_ui.ps1
     ./scripts/capture_ui.ps1 -Scenes warren -Frames 60 -SkipBuild
@@ -30,6 +32,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 if (-not $PSBoundParameters.ContainsKey("Scenes")) {
+    $Scenes += "crowding"
     $Scenes += @(
         "endless_crew_upgrade",
         "endless_crew_upgraded",
