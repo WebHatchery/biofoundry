@@ -3,7 +3,7 @@
 use crate::data::GameData;
 use crate::state::creatures::Good;
 use crate::state::outposts::{
-    CargoPriority, Outpost, TransitCompletion, TransitDirection, WormTransit,
+    CargoPriority, ExpeditionCompletion, Outpost, TransitCompletion, TransitDirection, WormTransit,
 };
 use crate::state::GameSession;
 use macroquad_toolkit::grid::TilePos;
@@ -138,13 +138,18 @@ pub fn expedition_state(outpost: &Outpost, data: &GameData) -> ExpeditionState {
     }
 }
 
-pub fn tick_expeditions(session: &mut GameSession, data: &GameData, dt: f32) {
+pub fn tick_expeditions(
+    session: &mut GameSession,
+    data: &GameData,
+    dt: f32,
+) -> Vec<ExpeditionCompletion> {
     if !session.worm_awake {
-        return;
+        return Vec::new();
     }
     let cycle = data.balance.outpost_expedition_cycle_sec.max(0.1);
     let food_per_crew = data.balance.outpost_expedition_food_per_crew;
     let ore_per_crew = data.balance.outpost_expedition_ore_per_crew;
+    let mut completed = Vec::new();
     for outpost in &mut session.outposts {
         if !outpost.active || outpost.expedition_paused || outpost.crew.is_empty() {
             continue;
@@ -164,13 +169,16 @@ pub fn tick_expeditions(session: &mut GameSession, data: &GameData, dt: f32) {
             continue;
         }
         take_cargo(outpost, Good::CookedFood, food_cost);
-        add_cargo(
-            outpost,
-            Good::Ore,
-            crew.saturating_mul(ore_per_crew).min(room),
-        );
+        let ore = crew.saturating_mul(ore_per_crew).min(room);
+        add_cargo(outpost, Good::Ore, ore);
         outpost.expedition_progress -= cycle;
+        completed.push(ExpeditionCompletion {
+            outpost: outpost.pos,
+            ore,
+            food_spent: food_cost,
+        });
     }
+    completed
 }
 
 fn start_transit(

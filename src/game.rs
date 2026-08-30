@@ -5,7 +5,7 @@ use crate::audio::{Audio, Sfx};
 use crate::data::GameData;
 use crate::simulation::{self, MAX_TICKS_PER_FRAME, SIM_DT};
 use crate::state::creatures::Job;
-use crate::state::outposts::{TransitCompletion, TransitDirection};
+use crate::state::outposts::{ExpeditionCompletion, TransitCompletion, TransitDirection};
 use crate::state::{GameSession, GameState, StateTransition};
 use crate::tutorial::{self, TutorialInputs};
 use crate::ui::{self, UiAction, UiMode};
@@ -166,6 +166,12 @@ impl Game {
                         self.notifications
                             .success("The ground heaves — the Colossal Worm awakens!");
                         self.audio.play(Sfx::Worm);
+                    }
+                    for completion in &report.expedition_completed {
+                        safe_beat_reached = true;
+                        self.notifications
+                            .info(format_expedition_completion(*completion));
+                        self.audio.play(Sfx::Complete);
                     }
                     if let Some(completion) = report.transit_completed {
                         safe_beat_reached = true;
@@ -505,6 +511,13 @@ fn transit_completion_notice(completion: TransitCompletion) -> &'static str {
             _ => "The worm returns to the shrine — route complete.",
         },
     }
+}
+
+fn format_expedition_completion(completion: ExpeditionCompletion) -> String {
+    format!(
+        "Outpost haul · +{} ore / -{} food.",
+        completion.ore, completion.food_spent
+    )
 }
 
 fn warren_secured_notice(session: &GameSession) -> &'static str {

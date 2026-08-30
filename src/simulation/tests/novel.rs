@@ -541,12 +541,20 @@ fn staffed_outpost_scouting_consumes_food_and_stores_remote_ore() {
         }
     );
 
-    outposts::tick_expeditions(
+    let completions = outposts::tick_expeditions(
         &mut session,
         &data,
         data.balance.outpost_expedition_cycle_sec,
     );
 
+    assert_eq!(
+        completions,
+        vec![crate::state::outposts::ExpeditionCompletion {
+            outpost: session.outposts[0].pos,
+            ore: 6,
+            food_spent: 2,
+        }]
+    );
     assert_eq!(session.outposts[0].cargo.get(&Good::CookedFood), Some(&2));
     assert_eq!(session.outposts[0].cargo.get(&Good::Ore), Some(&6));
     assert_eq!(session.outposts[0].expedition_progress, 0.0);
@@ -571,11 +579,12 @@ fn outpost_scouting_pauses_without_provisions_or_hold_room() {
             available: 1,
         }
     );
-    outposts::tick_expeditions(
+    let completions = outposts::tick_expeditions(
         &mut session,
         &data,
         data.balance.outpost_expedition_cycle_sec,
     );
+    assert!(completions.is_empty());
     assert_eq!(session.outposts[0].cargo.get(&Good::Ore), None);
 
     session.outposts[0].cargo.insert(Good::CookedFood, 2);
@@ -608,15 +617,40 @@ fn player_paused_outpost_preserves_remote_food_and_progress() {
         outposts::ExpeditionState::Paused
     );
 
-    outposts::tick_expeditions(
+    let completions = outposts::tick_expeditions(
         &mut session,
         &data,
         data.balance.outpost_expedition_cycle_sec,
     );
 
+    assert!(completions.is_empty());
     assert_eq!(session.outposts[0].cargo.get(&Good::CookedFood), Some(&4));
     assert_eq!(session.outposts[0].cargo.get(&Good::Ore), None);
     assert_eq!(session.outposts[0].expedition_progress, 8.0);
+}
+
+#[test]
+fn simulation_tick_reports_a_completed_outpost_expedition() {
+    let (data, mut session, _outpost_pos) = active_outpost(31);
+    let crew: Vec<u32> = session
+        .creatures
+        .iter()
+        .take(2)
+        .map(|creature| creature.id)
+        .collect();
+    session.outposts[0].crew = crew;
+    session.outposts[0].cargo.insert(Good::CookedFood, 4);
+    session.outposts[0].expedition_progress = data.balance.outpost_expedition_cycle_sec - SIM_DT;
+
+    let report = simulation::tick(&mut session, &data);
+
+    assert_eq!(report.expedition_completed.len(), 1);
+    assert_eq!(
+        report.expedition_completed[0].outpost,
+        session.outposts[0].pos
+    );
+    assert_eq!(report.expedition_completed[0].ore, 6);
+    assert_eq!(report.expedition_completed[0].food_spent, 2);
 }
 
 #[test]

@@ -98,6 +98,13 @@ pub struct TransitCompletion {
     pub passenger_count: usize,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct ExpeditionCompletion {
+    pub outpost: TilePos,
+    pub ore: u32,
+    pub food_spent: u32,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct WormTransit {
     pub outpost: TilePos,

@@ -1,7 +1,7 @@
 use super::*;
 use crate::data::GameData;
 use crate::state::creatures::Job;
-use crate::state::outposts::{TransitCompletion, TransitDirection};
+use crate::state::outposts::{ExpeditionCompletion, TransitCompletion, TransitDirection};
 use crate::state::structures::BuildSite;
 use crate::state::GameSession;
 
@@ -155,6 +155,18 @@ fn transit_completion_notice_names_a_crew_only_arrival() {
     assert_eq!(
         transit_completion_notice(completion),
         "The worm reaches the outpost — crew delivered."
+    );
+}
+
+#[test]
+fn expedition_completion_notice_names_the_remote_yield_and_upkeep() {
+    assert_eq!(
+        format_expedition_completion(ExpeditionCompletion {
+            outpost: macroquad_toolkit::grid::TilePos::new(4, 4),
+            ore: 6,
+            food_spent: 2,
+        }),
+        "Outpost haul · +6 ore / -2 food."
     );
 }
 

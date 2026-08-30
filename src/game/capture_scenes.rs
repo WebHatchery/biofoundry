@@ -1,6 +1,6 @@
 //! Deterministic scene setup used by the screenshot verification harness.
 
-use super::Game;
+use super::{format_expedition_completion, Game};
 use crate::simulation;
 use crate::state::creatures::{Good, Job};
 use crate::state::outposts::CargoPriority;
@@ -577,6 +577,24 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
             if let GameState::Warren(session) = &mut game.state {
                 if let Some(route) = session.outposts.last_mut() {
                     route.expedition_paused = true;
+                }
+            }
+        }
+        "endless_expedition_report" => {
+            begin(game, "endless_load_preview");
+            let report = if let GameState::Warren(session) = &mut game.state {
+                if let Some(route) = session.outposts.last_mut() {
+                    route.expedition_progress =
+                        game.data.balance.outpost_expedition_cycle_sec - simulation::SIM_DT;
+                }
+                Some(simulation::tick(session, &game.data))
+            } else {
+                None
+            };
+            if let Some(report) = report {
+                for completion in report.expedition_completed {
+                    game.notifications
+                        .info(format_expedition_completion(completion));
                 }
             }
         }

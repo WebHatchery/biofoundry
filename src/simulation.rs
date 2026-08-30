@@ -18,7 +18,7 @@ mod tests;
 
 use crate::data::GameData;
 use crate::state::creatures::Creature;
-use crate::state::outposts::TransitCompletion;
+use crate::state::outposts::{ExpeditionCompletion, TransitCompletion};
 use crate::state::GameSession;
 
 pub use actions::{
@@ -39,6 +39,7 @@ pub struct TickReport {
     pub won_this_tick: bool,
     pub factory_this_tick: bool,
     pub worm_this_tick: bool,
+    pub expedition_completed: Vec<ExpeditionCompletion>,
     pub transit_completed: Option<TransitCompletion>,
     pub wild: wildlife::WildReport,
 }
@@ -100,7 +101,7 @@ pub fn tick(session: &mut GameSession, data: &GameData) -> TickReport {
         (ingot_per_min - session.economy.ingot_ema_per_min) * smoothing;
     let wild = wildlife::tick_wildlife(session, data, dt);
     let deserters = food::tick_hunger(session, data, dt);
-    outposts::tick_expeditions(session, data, dt);
+    let expedition_completed = outposts::tick_expeditions(session, data, dt);
     let transit_completed = outposts::tick_transit(session, data, dt);
 
     let mut won_this_tick = false;
@@ -163,6 +164,7 @@ pub fn tick(session: &mut GameSession, data: &GameData) -> TickReport {
         won_this_tick,
         factory_this_tick,
         worm_this_tick,
+        expedition_completed,
         transit_completed,
         wild,
     }
