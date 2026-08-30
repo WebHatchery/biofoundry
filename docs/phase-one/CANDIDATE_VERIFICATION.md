@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-31
-**Source revision:** `00e8d76`
+**Source revision:** `284515b`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -38,6 +38,7 @@ automated simulation results into first-time-player evidence.
 | Loaded route failure visibility | Pass (focused and published build evidence) | Installing a save now reconciles each persisted Outpost failure with the global top-bar warning, repairing a missing banner and clearing a stale one. The route records remain authoritative across refresh and load boundaries. |
 | Loaded session integrity validation | Pass (focused and published build evidence) | Migrated primary and backup saves are checked before installation for valid map storage, non-overlapping world objects, known content IDs, safe actor/task positions, unique roster IDs, and finite simulation values. Invalid shapes enter the existing quarantine/backup recovery flow instead of poisoning the live Warren. |
 | Backup-only load recovery | Pass (focused and published build evidence) | If a primary slot is missing while its conventional `_backup` survives, `Load` now validates the backup, restores the primary slot, and installs the recovered Warren; if the restore write is rejected, the valid backup remains playable and the player is told to use Save. The focused recovery-path coverage and published candidate include this branch, while ordinary Preview Continue remains verified separately. |
+| Save failure recovery guidance | Pass (focused and published build evidence) | Manual save failures now say whether the previous checkpoint remains available or no new save was written; autosave failures distinguish an existing checkpoint from a first-save attempt and explain the retry path. The four message states are covered by focused tests and the published candidate; forced browser quota/blocked-storage behavior remains open below. |
 | Outpost route setting persistence | Pass (focused and published build evidence) | Successful route activation, cargo-order changes, crew quotas, scouting pause/resume, and automatic return/resupply policy changes now write an autosave immediately. A refresh after changing a route control therefore preserves the player's recovery or logistics decision instead of waiting for a later transit or expedition beat. |
 | Worm Shrine offering policy persistence | Pass (focused and published build evidence) | The visible Pause/Resume offerings control now autosaves immediately after a successful toggle, so protecting the reserve remains in force across refreshes instead of silently restarting the Shrine draw. Invalid targets do not write a checkpoint. |
 | Direct player decision persistence | Pass (focused and published build evidence) | Successful job reassignment, specialist recruitment, breeding, Blacksmith queueing, tutorial skip, milestone-report dismissal, building placement, and dig designation now write an immediate autosave. Failed or duplicate actions do not write, and the refreshed save roundtrip covers the persisted job, queue, map, and decision flags. |
@@ -62,7 +63,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 291 unit tests and 2 integration tests pass,
+- `cargo test --all-targets` — 292 unit tests and 2 integration tests pass,
   including fresh/simulated/remote-transit valid sessions, modal route
   planning, rejected malformed save shapes, and event-history save/load
   compatibility coverage.
@@ -609,5 +610,6 @@ automated simulation results into first-time-player evidence.
   counts toward the first-time-player gate.
 - Browser storage-quota/blocked-storage behavior has not been forced in a live
   session; the runtime surfaces the shared storage rejection as a save or
-  autosave warning when it occurs.
+  autosave warning and now identifies whether the last checkpoint remains
+  available when it occurs.
 - The five-player comprehension and completion targets remain unmeasured.
