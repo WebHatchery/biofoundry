@@ -5,7 +5,9 @@ use crate::state::creatures::Job;
 use crate::state::outposts::{ExpeditionCompletion, TransitCompletion, TransitDirection};
 use crate::state::structures::{BuildSite, Building};
 use crate::state::GameSession;
-use macroquad_toolkit::notifications::{LoggedNotification, NotificationManager, NotificationType};
+use macroquad_toolkit::notifications::{
+    LoggedNotification, NotificationManager, NotificationType, MAX_HISTORY,
+};
 
 fn session() -> (GameData, GameSession) {
     let data = GameData::load().unwrap();
@@ -117,6 +119,24 @@ fn notification_history_rehydrates_without_replaying_old_toasts() {
     super::persistence::restore_notification_history(&mut manager, &history);
 
     assert_eq!(manager.history(), history.as_slice());
+    assert!(manager.is_empty());
+}
+
+#[test]
+fn notification_history_rehydration_keeps_only_the_bounded_tail() {
+    let history = (0..MAX_HISTORY + 2)
+        .map(|index| LoggedNotification {
+            message: format!("Event {index}"),
+            notification_type: NotificationType::Info,
+        })
+        .collect::<Vec<_>>();
+    let mut manager = NotificationManager::new();
+
+    super::persistence::restore_notification_history(&mut manager, &history);
+
+    assert_eq!(manager.history().len(), MAX_HISTORY);
+    assert_eq!(manager.history().first().unwrap().message, "Event 2");
+    assert_eq!(manager.history().last().unwrap().message, "Event 201");
     assert!(manager.is_empty());
 }
 

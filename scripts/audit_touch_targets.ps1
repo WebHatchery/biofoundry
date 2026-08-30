@@ -23,6 +23,7 @@ param(
         "new_warren_confirm",
         "help",
         "event_log",
+        "event_log_older",
         "blacksmith",
         "breeding",
         "shrine",
