@@ -55,8 +55,11 @@ pub(super) fn draw_inspect_panel(
     let name = def.map(|d| d.name.as_str()).unwrap_or(&building.kind);
 
     let compact = super::panels::compact_top_bar(ui_scale);
-    let inspect_button_height = if compact { 30.0 } else { 24.0 };
-    let inspect_button_step = if compact { 34.0 } else { 26.0 };
+    // Crafting and breeding are deliberate choices rather than high-frequency
+    // chrome. Give their compact cards a little more vertical breathing room
+    // so a player can target the action and read its benefit at 800×450.
+    let (inspect_button_height, inspect_button_step) =
+        inspection_button_metrics(&building.kind, compact);
 
     // The blacksmith panel carries the production-order queue and craft
     // buttons, and the breeding pit its breed buttons — both taller.
@@ -64,7 +67,7 @@ pub(super) fn draw_inspect_panel(
         "blacksmith" => 194.0 + data.equipment.len() as f32 * inspect_button_step,
         "breeding_pit" => {
             if compact {
-                320.0
+                350.0
             } else {
                 280.0
             }
@@ -89,8 +92,8 @@ pub(super) fn draw_inspect_panel(
 
     let x = panel.x + 14.0;
     let mut y = panel.y + 50.0;
-    let outpost_button_height = inspect_button_height;
-    let outpost_button_step = inspect_button_step;
+    let outpost_button_height = if compact { 30.0 } else { 24.0 };
+    let outpost_button_step = if compact { 34.0 } else { 26.0 };
     let line = |text: &str, color: Color, y: &mut f32| {
         draw_ui_text_ex(text, x, *y, TextStyle::new(14.0, color).params());
         *y += 20.0;
@@ -741,6 +744,16 @@ pub(super) fn draw_inspect_panel(
     }
 
     Some(panel)
+}
+
+fn inspection_button_metrics(kind: &str, compact: bool) -> (f32, f32) {
+    if compact && matches!(kind, "blacksmith" | "breeding_pit") {
+        (36.0, 40.0)
+    } else if compact {
+        (30.0, 34.0)
+    } else {
+        (24.0, 26.0)
+    }
 }
 
 #[cfg(test)]

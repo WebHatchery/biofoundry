@@ -75,6 +75,17 @@ fn locked_specialist_marker_uses_font_safe_ascii() {
 }
 
 #[test]
+fn compact_specialist_cards_use_larger_action_targets() {
+    assert_eq!(inspection_button_metrics("blacksmith", true), (36.0, 40.0));
+    assert_eq!(
+        inspection_button_metrics("breeding_pit", true),
+        (36.0, 40.0)
+    );
+    assert_eq!(inspection_button_metrics("worm_shrine", true), (30.0, 34.0));
+    assert_eq!(inspection_button_metrics("blacksmith", false), (24.0, 26.0));
+}
+
+#[test]
 fn locked_specialists_show_their_live_unlock_progress() {
     let data = GameData::load().expect("embedded game data");
     let mut session = GameSession::new(&data, 13);
