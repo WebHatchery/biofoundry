@@ -4,7 +4,6 @@
 use crate::data::GameData;
 use crate::state::creatures::{Creature, Good, Job, Task};
 use crate::state::outposts::{TransitDirection, WormTransit};
-use crate::state::structures::Building;
 use crate::state::GameSession;
 use crate::ui::hud::widgets::{hud_button, panel_style};
 use crate::ui::legibility::BuildingStatus;
@@ -13,6 +12,14 @@ use macroquad::prelude::*;
 use macroquad_toolkit::grid::TilePos;
 use macroquad_toolkit::prelude::*;
 use macroquad_toolkit::ui::draw_ui_text_ex;
+
+mod workstations;
+
+use workstations::{
+    blacksmith_input_hint, blacksmith_queue_available, cook_pot_input_hint, kiln_input_hint,
+    local_smelter_staffed_at, local_smelter_worker_at, local_smith_staffed_at,
+    local_smith_worker_at, smelter_input_hint,
+};
 
 const LOCKED_SPECIALIST_MARKER: &str = "[L]";
 
@@ -255,6 +262,29 @@ pub(super) fn draw_inspect_panel(
             );
         }
         "smelter" => {
+            let working = session
+                .creatures
+                .iter()
+                .any(|c| local_smelter_worker_at(c, pos));
+            let staffed = session
+                .creatures
+                .iter()
+                .any(|c| local_smelter_staffed_at(c, pos));
+            line(
+                if working {
+                    "Salamander at work"
+                } else if staffed {
+                    "Salamander stationed"
+                } else {
+                    "No salamander — idle"
+                },
+                if staffed {
+                    dark::POSITIVE
+                } else {
+                    dark::WARNING
+                },
+                &mut y,
+            );
             line(
                 &format!(
                     "Ore {:.0}  Charcoal {:.0}",
@@ -516,49 +546,6 @@ pub(super) fn draw_inspect_panel(
     Some(panel)
 }
 
-fn blacksmith_queue_available(building: &Building, data: &GameData) -> bool {
-    building.orders.len() < data.balance.order_queue_size
-}
-
-fn blacksmith_input_hint(building: &Building, data: &GameData) -> String {
-    let ore_needed = (data.balance.smith_batch_ore as f32 - building.stock(Good::Ore))
-        .max(0.0)
-        .ceil() as u32;
-    if let Some(item) = building.orders.first() {
-        if let Some(equipment) = data.equipment_def(item) {
-            return format!("Needs {ore_needed} ore · next {}", equipment.name);
-        }
-    }
-    format!("Needs {ore_needed} ore · next ingot")
-}
-
-fn smelter_input_hint(building: &Building, data: &GameData) -> String {
-    let ore_needed = (data.balance.smelt_batch_ore as f32 - building.stock(Good::Ore))
-        .max(0.0)
-        .ceil() as u32;
-    let charcoal_needed = (data.balance.smelt_batch_charcoal - building.stock(Good::Charcoal))
-        .max(0.0)
-        .ceil() as u32;
-    let mut missing = Vec::new();
-    if ore_needed > 0 {
-        missing.push(format!("{ore_needed} ore"));
-    }
-    if charcoal_needed > 0 {
-        missing.push(format!("{charcoal_needed} charcoal"));
-    }
-    format!("Needs {}", missing.join(" + "))
-}
-
-fn cook_pot_input_hint(building: &Building, data: &GameData) -> String {
-    let batch = data.balance.cook_batch_mushrooms as f32 * data.balance.raw_recipe_multiplier;
-    let mushrooms_needed = (batch - building.stock(Good::Mushroom)).max(0.0).ceil() as u32;
-    format!("Needs {mushrooms_needed} mushrooms")
-}
-
-fn kiln_input_hint() -> String {
-    "Needs 1 wood".to_owned()
-}
-
 fn local_mine_worker_at(creature: &Creature, pos: TilePos) -> bool {
     !creature.is_remote() && matches!(&creature.task, Task::WorkMine(p) if *p == pos)
 }
@@ -578,23 +565,6 @@ fn local_mine_staffed_at(creature: &Creature, pos: TilePos) -> bool {
         && (creature.job == Job::Miner || creature.job == Job::Engineer)
         && match &creature.task {
             Task::WorkMine(p) | Task::GoMine(p) => *p == pos,
-            _ => creature.tile() == pos,
-        }
-}
-
-fn local_smith_worker_at(creature: &Creature, pos: TilePos) -> bool {
-    !creature.is_remote()
-        && (matches!(&creature.task, Task::Smithing { shop, .. } if *shop == pos)
-            || matches!(&creature.task, Task::Crafting { shop, .. } if *shop == pos))
-}
-
-fn local_smith_staffed_at(creature: &Creature, pos: TilePos) -> bool {
-    !creature.is_remote()
-        && creature.job == Job::Smith
-        && match &creature.task {
-            Task::Smithing { shop, .. } | Task::Crafting { shop, .. } | Task::GoSmith(shop) => {
-                *shop == pos
-            }
             _ => creature.tile() == pos,
         }
 }

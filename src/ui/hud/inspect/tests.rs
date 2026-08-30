@@ -376,6 +376,29 @@ fn inspection_staffing_recognizes_an_engineer_at_a_mine() {
 }
 
 #[test]
+fn inspection_smelter_staffing_ignores_remote_salamanders() {
+    let data = GameData::load().expect("embedded game data");
+    let mut session = GameSession::new(&data, 32);
+    let spot = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(pos, _)| session.can_place_building(*pos))
+        .map(|(pos, _)| pos)
+        .expect("a walkable smelter location");
+    session.buildings.push(Building::new("smelter", spot));
+    session.creatures.clear();
+    session.spawn_creature(&data, "salamander", Job::Smelter);
+    session.creatures[0].task = Task::GoSmelt(spot);
+
+    assert!(!local_smelter_worker_at(&session.creatures[0], spot));
+    assert!(local_smelter_staffed_at(&session.creatures[0], spot));
+
+    session.creatures[0].remote_outpost = Some(TilePos::new(4, 4));
+    assert!(!local_smelter_staffed_at(&session.creatures[0], spot));
+}
+
+#[test]
 fn mine_staffing_label_names_specialist_neutral_states() {
     assert_eq!(mine_staffing_label(0, 2, false), "No mine worker — stopped");
     assert_eq!(mine_staffing_label(1, 2, false), "Mine staff 1/2");
