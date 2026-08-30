@@ -1,3 +1,4 @@
+use super::specialists::{optional_specialist_label, optional_support_label};
 use super::*;
 
 #[test]
@@ -202,6 +203,42 @@ fn optional_support_buttons_name_their_practical_roles() {
     assert_eq!(
         optional_support_label("salamander", 20, 0),
         "Salam. forge (20)"
+    );
+}
+
+#[test]
+fn optional_support_buttons_disclose_their_ongoing_supply_draw() {
+    let data = GameData::load().expect("embedded game data");
+
+    assert_eq!(
+        optional_support_button_label("beetle", 25, 0, &data),
+        "Beetle haul (25)\n+5 food/min"
+    );
+    assert_eq!(
+        optional_support_button_label("salamander", 20, 0, &data),
+        "Salam. forge (20)\n1 charcoal/batch"
+    );
+    assert_eq!(
+        optional_specialist_button_label("slime_janitor", false, &data),
+        "Slime · clean\n+3 food/min"
+    );
+    assert_eq!(
+        optional_specialist_button_label("bat_courier", false, &data),
+        "Bat · 8 cargo\n+4 food/min"
+    );
+}
+
+#[test]
+fn posted_optional_support_keeps_its_role_label_without_recruitment_detail() {
+    let data = GameData::load().expect("embedded game data");
+
+    assert_eq!(
+        optional_support_button_label("beetle", 25, 1, &data),
+        "Beetle x1 haul"
+    );
+    assert_eq!(
+        optional_specialist_button_label("slime_janitor", true, &data),
+        "Slime · posted"
     );
 }
 

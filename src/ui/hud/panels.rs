@@ -7,7 +7,7 @@ mod top_bar;
 mod workforce;
 
 pub(super) use food::draw_food_grid_panel;
-use specialists::{optional_specialist_label, optional_support_label};
+use specialists::{optional_specialist_button_label, optional_support_button_label};
 pub(super) use top_bar::{
     compact_food_recovery_hint, compact_raid_defense_hint, compact_top_bar,
     condensed_food_recovery_hint, condensed_raid_defense_hint, reassignable_job_count,
@@ -432,7 +432,7 @@ pub(super) fn draw_jobs_panel(
     let specialist_step = if compact { 38.0 } else { 34.0 };
     if hud_button(
         Rect::new(x, y, half, specialist_height),
-        &optional_support_label("beetle", data.balance.beetle_ore_cost, local_beetles),
+        &optional_support_button_label("beetle", data.balance.beetle_ore_cost, local_beetles, data),
         session.economy.ore_stock >= data.balance.beetle_ore_cost,
         mouse,
     ) {
@@ -441,10 +441,11 @@ pub(super) fn draw_jobs_panel(
     let has_den = session.buildings_of("smelter").next().is_some();
     if hud_button(
         Rect::new(x + half + 8.0, y, half, specialist_height),
-        &optional_support_label(
+        &optional_support_button_label(
             "salamander",
             data.balance.salamander_ore_cost,
             local_salamanders,
+            data,
         ),
         has_den && session.economy.ore_stock >= data.balance.salamander_ore_cost,
         mouse,
@@ -454,7 +455,7 @@ pub(super) fn draw_jobs_panel(
     y += specialist_step;
     if hud_button(
         Rect::new(x, y, half, specialist_height),
-        optional_specialist_label("slime_janitor", janitors > 0),
+        &optional_specialist_button_label("slime_janitor", janitors > 0, data),
         session.unlocked.contains("slime_janitor") && janitors == 0,
         mouse,
     ) {
@@ -462,7 +463,7 @@ pub(super) fn draw_jobs_panel(
     }
     if hud_button(
         Rect::new(x + half + 8.0, y, half, specialist_height),
-        optional_specialist_label("bat_courier", couriers > 0),
+        &optional_specialist_button_label("bat_courier", couriers > 0, data),
         session.unlocked.contains("bat_courier") && couriers == 0,
         mouse,
     ) {
