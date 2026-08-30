@@ -70,6 +70,25 @@ fn starting_buildings_land_on_walkable_floor() {
 }
 
 #[test]
+fn generated_spawn_chamber_keeps_a_walkable_worker_exit() {
+    let data = GameData::load().unwrap();
+
+    for seed in 0..128 {
+        let session = GameSession::new(&data, seed);
+        let spawn = session.spawn_tile();
+        assert_eq!(session.world.tiles.get(spawn), Some(&Tile::Floor));
+        assert!(
+            spawn.neighbors_4way().iter().all(|neighbor| session
+                .world
+                .tiles
+                .get(*neighbor)
+                .is_some_and(|tile| tile.walkable())),
+            "seed {seed} must leave a worker exit at {spawn:?}"
+        );
+    }
+}
+
+#[test]
 fn placement_rules_reject_occupied_and_rock_tiles() {
     let data = GameData::load().unwrap();
     let mut session = GameSession::new(&data, 5);
@@ -101,6 +120,34 @@ fn placement_rules_reject_occupied_and_rock_tiles() {
     assert!(session.toggle_dig_mark(rock));
     assert!(!session.dig_marks.contains(&rock));
     assert!(!session.toggle_dig_mark(open));
+}
+
+#[test]
+fn placement_rules_reject_an_isolated_floor_pocket() {
+    let data = GameData::load().unwrap();
+    let mut session = GameSession::new(&data, 6);
+    let stockpile = session.stockpile_pos();
+    let pocket = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(pos, tile)| {
+            **tile == Tile::Floor
+                && *pos != stockpile
+                && pos.manhattan_distance(&stockpile) >= 3
+                && session.building_at(*pos).is_none()
+        })
+        .map(|(pos, _)| pos)
+        .expect("a free floor tile for the reachability check");
+
+    for neighbor in pocket.neighbors_4way() {
+        session.world.tiles.set(neighbor, Tile::Rock);
+    }
+
+    assert!(
+        !session.can_place_building(pocket),
+        "workers must not be sent to an unreachable construction pocket"
+    );
 }
 
 #[test]

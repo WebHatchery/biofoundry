@@ -303,9 +303,16 @@ impl GameSession {
         self.build_sites.iter().find(|s| s.pos == pos)
     }
 
-    /// Whether a ghost can go here: open walkable floor, nothing else on it.
+    /// Whether a ghost can go here: open floor reachable from the stockpile,
+    /// with nothing else on it. Construction is worker-delivered, so allowing
+    /// an isolated pocket would create a permanent build-site dead end.
     pub fn can_place_building(&self, pos: TilePos) -> bool {
         self.world.tiles.get(pos).is_some_and(|t| *t == Tile::Floor)
+            && self
+                .world
+                .tiles
+                .bfs_path(self.stockpile_pos(), pos, false, |_, tile| tile.walkable())
+                .is_some()
             && self.building_at(pos).is_none()
             && self.site_at(pos).is_none()
     }

@@ -45,6 +45,14 @@ impl WorldMap {
         place_sporewood_groves(&mut tiles, center, rng);
         place_ore_veins(&mut tiles, rng);
 
+        // Water pools are allowed to overwrite carved floor, but never the
+        // spawn chamber's immediate exits. The stockpile is placed at spawn
+        // and worker-delivered construction must always have a walkable home.
+        tiles.set(center, Tile::Floor);
+        for neighbor in center.neighbors_4way() {
+            tiles.set(neighbor, Tile::Floor);
+        }
+
         Self {
             tiles,
             spawn: center,
