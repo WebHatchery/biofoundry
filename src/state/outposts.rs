@@ -57,6 +57,9 @@ pub struct Outpost {
     /// Lifetime ore returned by this route's scouting expeditions.
     #[serde(default)]
     pub ore_scouted: u32,
+    /// Whether this route has purchased its expanded remote cargo hold.
+    #[serde(default)]
+    pub storage_upgraded: bool,
     #[serde(default)]
     pub last_failure: Option<String>,
 }
@@ -73,6 +76,7 @@ impl Outpost {
             expedition_progress: 0.0,
             expeditions_completed: 0,
             ore_scouted: 0,
+            storage_upgraded: false,
             last_failure: None,
         }
     }
@@ -87,6 +91,10 @@ impl Outpost {
 
     pub fn toggle_expedition(&mut self) {
         self.expedition_paused = !self.expedition_paused;
+    }
+
+    pub fn upgrade_storage(&mut self) {
+        self.storage_upgraded = true;
     }
 }
 

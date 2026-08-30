@@ -57,6 +57,8 @@ pub enum UiAction {
     ActivateOutpost(TilePos),
     /// Rotate the outbound cargo fill order for an awakened worm route.
     CycleOutpostCargo(TilePos),
+    /// Buy the one-time expanded cargo hold for an awakened worm route.
+    UpgradeOutpost(TilePos),
     /// Pause or resume remote scouting without closing the worm route.
     ToggleOutpostExpedition(TilePos),
     TransitToOutpost(TilePos),

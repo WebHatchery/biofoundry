@@ -203,6 +203,34 @@ impl Game {
                     }
                 }
             }
+            UiAction::UpgradeOutpost(pos) => {
+                let mut upgraded = false;
+                if let GameState::Warren(session) = &mut self.state {
+                    if simulation::outposts::upgrade_outpost(session, &self.data, pos) {
+                        let capacity = session
+                            .outposts
+                            .iter()
+                            .find(|outpost| outpost.pos == pos)
+                            .map(|outpost| {
+                                simulation::outposts::storage_capacity(outpost, &self.data)
+                            })
+                            .unwrap_or(self.data.balance.outpost_storage_cap);
+                        self.notifications
+                            .success(format!("Outpost hold expanded to {capacity} slots."));
+                        self.audio.play(Sfx::Complete);
+                        upgraded = true;
+                    } else {
+                        self.notifications.warning(format!(
+                            "Needs {} banked ingots and an active route.",
+                            self.data.balance.outpost_upgrade_ingots
+                        ));
+                        self.audio.play(Sfx::Deny);
+                    }
+                }
+                if upgraded {
+                    self.autosave_game();
+                }
+            }
             UiAction::ToggleOutpostExpedition(pos) => {
                 if let GameState::Warren(session) = &mut self.state {
                     if session.worm_awake

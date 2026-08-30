@@ -38,6 +38,46 @@ pub fn start_to_shrine(session: &mut GameSession, data: &GameData, pos: TilePos)
     start_transit(session, data, pos, TransitDirection::ToShrine)
 }
 
+/// Return the selected Outpost's current remote cargo capacity.
+pub fn storage_capacity(outpost: &Outpost, data: &GameData) -> u32 {
+    if outpost.storage_upgraded {
+        data.balance
+            .outpost_upgraded_storage_cap
+            .max(data.balance.outpost_storage_cap)
+    } else {
+        data.balance.outpost_storage_cap
+    }
+}
+
+/// Buy the one-time remote hold expansion for an active awakened route.
+pub fn upgrade_outpost(session: &mut GameSession, data: &GameData, pos: TilePos) -> bool {
+    if !session.worm_awake
+        || session.worm_transit.is_some()
+        || session
+            .building_at(pos)
+            .is_none_or(|building| building.kind != "outpost")
+    {
+        return false;
+    }
+    session.ensure_outpost(pos);
+    let Some(index) = session
+        .outposts
+        .iter()
+        .position(|outpost| outpost.pos == pos)
+    else {
+        return false;
+    };
+    if !session.outposts[index].active
+        || session.outposts[index].storage_upgraded
+        || session.economy.ingots_stock < data.balance.outpost_upgrade_ingots
+    {
+        return false;
+    }
+    session.economy.ingots_stock -= data.balance.outpost_upgrade_ingots;
+    session.outposts[index].upgrade_storage();
+    true
+}
+
 /// The cargo that the next outbound run will put in an Outpost hold.
 ///
 /// This is intentionally a small value type shared by the route action and
@@ -116,7 +156,7 @@ pub fn expedition_state(outpost: &Outpost, data: &GameData) -> ExpeditionState {
     if outpost.expedition_paused {
         return ExpeditionState::Paused;
     }
-    if outpost.cargo_total() >= data.balance.outpost_storage_cap {
+    if outpost.cargo_total() >= storage_capacity(outpost, data) {
         return ExpeditionState::HoldFull;
     }
     let food_required = crew.saturating_mul(data.balance.outpost_expedition_food_per_crew);
@@ -155,10 +195,7 @@ pub fn tick_expeditions(
             continue;
         }
         let crew = outpost.crew.len() as u32;
-        let room = data
-            .balance
-            .outpost_storage_cap
-            .saturating_sub(outpost.cargo_total());
+        let room = storage_capacity(outpost, data).saturating_sub(outpost.cargo_total());
         let food_cost = crew.saturating_mul(food_per_crew);
         let food_available = outpost.cargo.get(&Good::CookedFood).copied().unwrap_or(0);
         if room == 0 || food_available < food_cost {
@@ -201,7 +238,7 @@ fn start_transit(
     if !outpost.active {
         return false;
     }
-    let cap = data.balance.outpost_storage_cap;
+    let cap = storage_capacity(outpost, data);
     let (ore, ingots, food) = match direction {
         TransitDirection::ToOutpost => {
             // Remote cargo is stored in whole units; leave any fractional

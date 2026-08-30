@@ -160,10 +160,22 @@ fn empty_outpost_reports_when_no_payload_is_ready_to_load() {
     session.economy.ingots_stock = 0;
     session.economy.food = data.balance.worm_feed_reserve;
 
-    assert!(!outpost_has_loadable_payload(&session, &data, 0, 0));
+    assert!(!outpost_has_loadable_payload(
+        &session,
+        &data,
+        0,
+        0,
+        data.balance.outpost_storage_cap,
+    ));
 
     session.economy.food += 1.0;
-    assert!(outpost_has_loadable_payload(&session, &data, 0, 0));
+    assert!(outpost_has_loadable_payload(
+        &session,
+        &data,
+        0,
+        0,
+        data.balance.outpost_storage_cap,
+    ));
 }
 
 #[test]
@@ -177,7 +189,13 @@ fn empty_outpost_does_not_count_remote_crew_as_ready_to_load() {
     session.spawn_creature(&data, "goblin", crate::state::creatures::Job::Carrier);
     session.creatures[0].remote_outpost = Some(TilePos::new(4, 4));
 
-    assert!(!outpost_has_loadable_payload(&session, &data, 0, 0));
+    assert!(!outpost_has_loadable_payload(
+        &session,
+        &data,
+        0,
+        0,
+        data.balance.outpost_storage_cap,
+    ));
 }
 
 #[test]
@@ -579,6 +597,22 @@ fn full_outpost_load_hint_explains_the_disabled_load_action() {
     assert_eq!(
         outpost_load_hint(&session, &data, &outpost).as_deref(),
         Some("Cargo hold full · return to shrine")
+    );
+}
+
+#[test]
+fn upgraded_outpost_load_hint_uses_the_expanded_hold() {
+    let data = GameData::load().expect("embedded game data");
+    let mut session = GameSession::new(&data, 36);
+    let mut outpost = crate::state::outposts::Outpost::new(TilePos::new(4, 4));
+    outpost.storage_upgraded = true;
+    outpost.cargo_priority = CargoPriority::Ore;
+    session.economy.ore_stock = 10;
+    session.economy.ingots_stock = 10;
+
+    assert_eq!(
+        outpost_load_hint(&session, &data, &outpost).as_deref(),
+        Some("Ore 10 · Ingots 10 · Food 0")
     );
 }
 

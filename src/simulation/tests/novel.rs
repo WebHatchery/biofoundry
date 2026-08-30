@@ -488,6 +488,40 @@ fn worm_transit_fills_the_hold_in_the_selected_cargo_order() {
 }
 
 #[test]
+fn outpost_hold_upgrade_spends_ingots_once_and_expands_capacity() {
+    let (data, mut session, outpost_pos) = active_outpost(37);
+    session.economy.ingots_stock = data.balance.outpost_upgrade_ingots;
+
+    assert_eq!(
+        outposts::storage_capacity(&session.outposts[0], &data),
+        data.balance.outpost_storage_cap
+    );
+    assert!(outposts::upgrade_outpost(&mut session, &data, outpost_pos));
+    assert_eq!(session.economy.ingots_stock, 0);
+    assert!(session.outposts[0].storage_upgraded);
+    assert_eq!(
+        outposts::storage_capacity(&session.outposts[0], &data),
+        data.balance.outpost_upgraded_storage_cap
+    );
+    assert!(!outposts::upgrade_outpost(&mut session, &data, outpost_pos));
+}
+
+#[test]
+fn upgraded_outpost_transit_uses_the_larger_remote_hold() {
+    let (data, mut session, outpost_pos) = active_outpost(38);
+    session.creatures.clear();
+    session.economy.ingots_stock = data
+        .balance
+        .outpost_upgrade_ingots
+        .saturating_add(data.balance.outpost_upgraded_storage_cap);
+    assert!(outposts::upgrade_outpost(&mut session, &data, outpost_pos));
+
+    assert!(outposts::start_to_outpost(&mut session, &data, outpost_pos));
+    let transit = session.worm_transit.as_ref().expect("cargo is in transit");
+    assert_eq!(transit.ingots, data.balance.outpost_upgraded_storage_cap);
+}
+
+#[test]
 fn cargo_preview_matches_the_next_transit_and_respects_existing_cargo() {
     let (data, mut session, outpost_pos) = active_outpost(27);
     session.creatures.clear();

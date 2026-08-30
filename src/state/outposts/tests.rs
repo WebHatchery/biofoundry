@@ -8,6 +8,7 @@ fn new_outpost_defaults_to_ore_first_loading() {
     assert_eq!(outpost.cargo_priority, CargoPriority::Ore);
     assert_eq!(outpost.cargo_priority.label(), "Ore first");
     assert!(!outpost.expedition_paused);
+    assert!(!outpost.storage_upgraded);
 }
 
 #[test]

@@ -79,7 +79,7 @@ pub(super) fn outpost_load_hint(
         .floor() as u32;
     let load = crate::simulation::outposts::preview_outbound_cargo(
         outpost,
-        data.balance.outpost_storage_cap,
+        crate::simulation::outposts::storage_capacity(outpost, data),
         session.economy.ore_stock,
         session.economy.ingots_stock,
         food_available,
@@ -89,7 +89,8 @@ pub(super) fn outpost_load_hint(
             "Ore {} · Ingots {} · Food {}",
             load.ore, load.ingots, load.food
         ))
-    } else if outpost.cargo_total() >= data.balance.outpost_storage_cap {
+    } else if outpost.cargo_total() >= crate::simulation::outposts::storage_capacity(outpost, data)
+    {
         Some("Cargo hold full · return to shrine".to_owned())
     } else {
         None
@@ -173,7 +174,13 @@ pub(super) fn inspect_status(
             if outpost.cargo_total() > 0 || !outpost.crew.is_empty() {
                 return ("Payload ready", dark::POSITIVE);
             }
-            if outpost_has_loadable_payload(session, data, 0, 0) {
+            if outpost_has_loadable_payload(
+                session,
+                data,
+                0,
+                0,
+                crate::simulation::outposts::storage_capacity(outpost, data),
+            ) {
                 return ("Ready to load", dark::POSITIVE);
             } else {
                 return ("Awaiting payload", dark::WARNING);
@@ -229,17 +236,23 @@ pub(super) fn outpost_has_loadable_payload(
     data: &GameData,
     cargo: u32,
     crew: usize,
+    capacity: u32,
 ) -> bool {
     let crew_ready = crew < data.balance.outpost_capacity as usize
         && session
             .creatures
             .iter()
             .any(|c| !c.is_remote() && c.carrying.is_none() && c.tile() == session.stockpile_pos());
-    outpost_has_loadable_cargo(session, data, cargo) || crew_ready
+    outpost_has_loadable_cargo(session, data, cargo, capacity) || crew_ready
 }
 
-fn outpost_has_loadable_cargo(session: &GameSession, data: &GameData, cargo: u32) -> bool {
-    if cargo >= data.balance.outpost_storage_cap {
+fn outpost_has_loadable_cargo(
+    session: &GameSession,
+    data: &GameData,
+    cargo: u32,
+    capacity: u32,
+) -> bool {
+    if cargo >= capacity {
         return false;
     }
     session.economy.ore_stock > 0

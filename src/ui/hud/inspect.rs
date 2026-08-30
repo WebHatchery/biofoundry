@@ -56,7 +56,7 @@ pub(super) fn draw_inspect_panel(
         "blacksmith" => 194.0 + data.equipment.len() as f32 * 26.0,
         "breeding_pit" => 280.0,
         "worm_shrine" => 240.0,
-        "outpost" => 390.0,
+        "outpost" => 420.0,
         _ => 152.0,
     };
     let panel = Rect::new(LOGICAL_WIDTH - 262.0, top, 250.0, height);
@@ -444,6 +444,9 @@ pub(super) fn draw_inspect_panel(
             let active = outpost.is_some_and(|o| o.active);
             let cargo = outpost.map(|o| o.cargo_total()).unwrap_or(0);
             let crew = outpost.map(|o| o.crew.len()).unwrap_or(0);
+            let storage_cap = outpost
+                .map(|route| crate::simulation::outposts::storage_capacity(route, data))
+                .unwrap_or(data.balance.outpost_storage_cap);
             let cargo_ore = outpost
                 .and_then(|o| o.cargo.get(&Good::Ore))
                 .copied()
@@ -461,7 +464,7 @@ pub(super) fn draw_inspect_panel(
                     "{} · Cargo {}/{} · Crew {}/{}",
                     if active { "Active" } else { "Inactive" },
                     cargo,
-                    data.balance.outpost_storage_cap,
+                    storage_cap,
                     crew,
                     data.balance.outpost_capacity
                 ),
@@ -541,7 +544,8 @@ pub(super) fn draw_inspect_panel(
                     line("Reactivate route to return payload", dark::WARNING, &mut y);
                 }
                 if active && session.worm_awake {
-                    let loadable_payload = outpost_has_loadable_payload(session, data, cargo, crew);
+                    let loadable_payload =
+                        outpost_has_loadable_payload(session, data, cargo, crew, storage_cap);
                     let return_label = outpost_return_label(cargo, crew);
                     if hud_button(
                         Rect::new(x, y, panel.w - 28.0, 24.0),
@@ -564,6 +568,18 @@ pub(super) fn draw_inspect_panel(
                         actions.push(UiAction::CycleOutpostCargo(pos));
                     }
                     y += 28.0;
+                    if outpost.is_some_and(|route| !route.storage_upgraded) {
+                        let upgrade_cost = data.balance.outpost_upgrade_ingots;
+                        if hud_button(
+                            Rect::new(x, y, panel.w - 28.0, 24.0),
+                            &format!("Expand hold · {upgrade_cost} ingots"),
+                            session.economy.ingots_stock >= upgrade_cost,
+                            mouse,
+                        ) {
+                            actions.push(UiAction::UpgradeOutpost(pos));
+                        }
+                        y += 28.0;
+                    }
                     if crew > 0
                         && hud_button(
                             Rect::new(x, y, panel.w - 28.0, 24.0),

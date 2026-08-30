@@ -397,9 +397,7 @@ fn outpost_has_loadable_payload(
     data: &GameData,
     outpost: &crate::state::outposts::Outpost,
 ) -> bool {
-    let room = data
-        .balance
-        .outpost_storage_cap
+    let room = crate::simulation::outposts::storage_capacity(outpost, data)
         .saturating_sub(outpost.cargo_total());
     let food_ready = session.economy.food - data.balance.worm_feed_reserve >= 1.0;
     let cargo_ready = room > 0

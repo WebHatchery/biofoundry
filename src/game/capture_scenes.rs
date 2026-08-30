@@ -9,6 +9,8 @@ use crate::state::world::Tile;
 use crate::state::{GameState, StateTransition};
 use macroquad_toolkit::grid::TilePos;
 
+mod endless;
+
 /// Seed a named scene for the headless screenshot harness.
 pub(super) fn begin(game: &mut Game, scene: &str) {
     match scene {
@@ -572,6 +574,7 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                 }
             }
         }
+        "endless_upgrade" | "endless_upgraded" => endless::begin(game, scene),
         "endless_expedition_paused" => {
             begin(game, "endless_load_preview");
             if let GameState::Warren(session) = &mut game.state {
