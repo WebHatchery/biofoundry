@@ -2,7 +2,7 @@
 
 use super::Game;
 use crate::data::GameData;
-use crate::state::creatures::{Job, Task};
+use crate::state::creatures::{Good, Job, Task};
 use crate::state::{GameSession, GameState};
 use crate::ui::UiMode;
 use macroquad_toolkit::notifications::{LoggedNotification, NotificationManager, MAX_HISTORY};
@@ -515,6 +515,14 @@ fn validate_outpost_cargo(
     outpost: &crate::state::outposts::Outpost,
     data: &GameData,
 ) -> Result<(), String> {
+    for good in outpost.cargo.keys() {
+        if !matches!(good, Good::Ore | Good::Ingot | Good::CookedFood) {
+            return Err(format!(
+                "outpost contains unsupported cargo {good:?} at {:?}",
+                outpost.pos
+            ));
+        }
+    }
     let cargo_total = outpost
         .cargo
         .values()

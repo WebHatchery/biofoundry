@@ -339,6 +339,30 @@ fn loaded_session_validation_rejects_remote_cargo_sum_overflow() {
 }
 
 #[test]
+fn loaded_session_validation_rejects_unsupported_remote_cargo() {
+    let (data, mut session) = session();
+    let outpost_pos = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(pos, tile)| tile.walkable() && session.can_place_building(*pos))
+        .map(|(pos, _)| pos)
+        .expect("fresh warren needs a free outpost tile");
+    session
+        .buildings
+        .push(Building::new("outpost", outpost_pos));
+    session.ensure_outpost(outpost_pos);
+    session.outposts[0]
+        .cargo
+        .insert(crate::state::creatures::Good::Wood, 1);
+
+    let error = validate_loaded_session(&session, &data)
+        .expect_err("remote routes cannot safely carry local-only goods");
+
+    assert!(error.contains("unsupported cargo"));
+}
+
+#[test]
 fn loaded_session_validation_rejects_overfull_in_flight_cargo() {
     let (data, mut session) = session();
     let positions: Vec<_> = session

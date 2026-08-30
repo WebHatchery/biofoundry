@@ -85,6 +85,54 @@ fn auto_return_starts_when_the_hold_is_full_and_preserves_remote_provisions() {
 }
 
 #[test]
+fn auto_return_flushes_provisions_when_they_fill_the_entire_hold() {
+    let (mut data, mut session, outpost_pos) = active_outpost(161);
+    // Exercise the data-driven edge where one crew cycle needs the whole
+    // hold; the shipped balance normally keeps one cycle below capacity.
+    data.balance.outpost_expedition_food_per_crew = 3;
+    session.creatures.clear();
+    session.economy.food = 0.0;
+    session.economy.ore_stock = 0;
+    session.economy.ingots_stock = 0;
+    let capacity = data.balance.outpost_storage_cap as usize;
+    for _ in 0..capacity {
+        session.spawn_creature(&data, "goblin", Job::Carrier);
+    }
+
+    assert!(outposts::start_to_outpost(&mut session, &data, outpost_pos));
+    outposts::tick_transit(
+        &mut session,
+        &data,
+        data.balance.worm_transit_time_sec + 0.1,
+    );
+    session.outposts[0]
+        .cargo
+        .insert(Good::CookedFood, capacity as u32);
+    let crew_count = session.outposts[0].crew.len();
+    session.outposts[0].auto_return_cargo = true;
+
+    assert_eq!(
+        outposts::start_auto_return_if_full(&mut session, &data),
+        Some(outpost_pos)
+    );
+    let transit = session
+        .worm_transit
+        .as_ref()
+        .expect("the full provision hold needs a return transit");
+    assert_eq!(transit.food, capacity as f32);
+    assert_eq!(session.outposts[0].cargo_total(), 0);
+    assert_eq!(session.outposts[0].crew.len(), crew_count);
+
+    outposts::tick_transit(
+        &mut session,
+        &data,
+        data.balance.worm_transit_time_sec + 0.1,
+    );
+    assert_eq!(session.economy.food, capacity as f32);
+    assert_eq!(session.outposts[0].crew.len(), crew_count);
+}
+
+#[test]
 fn auto_resupply_sends_food_without_dispatching_more_crew() {
     let (data, mut session, outpost_pos) = active_outpost(44);
     session.creatures.clear();

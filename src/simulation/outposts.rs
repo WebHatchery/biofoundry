@@ -402,14 +402,21 @@ fn start_transit(
             (load.ore, load.ingots, load.food as f32)
         }
         (TransitDirection::ToShrine, TransitPlan::AutoCargoReturn) => {
+            let ore = *outpost.cargo.get(&Good::Ore).unwrap_or(&0);
+            let ingots = *outpost.cargo.get(&Good::Ingot).unwrap_or(&0);
             let food = *outpost.cargo.get(&Good::CookedFood).unwrap_or(&0);
             let keep_food = (outpost.crew.len() as u32)
                 .saturating_mul(data.balance.outpost_expedition_food_per_crew);
-            (
-                *outpost.cargo.get(&Good::Ore).unwrap_or(&0),
-                *outpost.cargo.get(&Good::Ingot).unwrap_or(&0),
-                food.saturating_sub(keep_food) as f32,
-            )
+            // Usually an automatic return leaves one expedition's provisions
+            // behind. If those provisions fill the entire hold, though, no
+            // expedition can start and the policy would retry forever. Send
+            // that food home so an automatic resupply can refill the route.
+            let food_to_send = if ore == 0 && ingots == 0 && food <= keep_food {
+                food
+            } else {
+                food.saturating_sub(keep_food)
+            };
+            (ore, ingots, food_to_send as f32)
         }
         (TransitDirection::ToShrine, _) => (
             *outpost.cargo.get(&Good::Ore).unwrap_or(&0),
