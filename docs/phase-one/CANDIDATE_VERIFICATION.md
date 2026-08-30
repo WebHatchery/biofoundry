@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `c61f716`
+**Source revision:** `e54afdf`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -284,8 +284,8 @@ automated simulation results into first-time-player evidence.
   warren sees the enabled `− Miner, then + Carrier/Guard` recovery paths, and
   specialist-only states receive a `free a worker` fallback instead of a
   disabled assignment. The same guide now points to the Breeding Pit for
-  specialist unlocks, costs, and benefits, and to the Outpost for optional
-  cargo runs after the worm wakes.
+  specialist unlocks, costs, and benefits after onboarding, and to the Outpost
+  for optional cargo runs after the worm wakes.
 - Shared security guidance — the victory report, raid banner, and persistent
   Objective now use the same eligibility-aware action hint, including the
   visible `in Jobs` destination and the specialist-only `free a worker`
