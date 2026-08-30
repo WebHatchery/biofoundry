@@ -4,7 +4,7 @@ use super::{format_expedition_completion, Game};
 use crate::simulation;
 use crate::state::creatures::{Good, Job};
 use crate::state::outposts::CargoPriority;
-use crate::state::structures::Building;
+use crate::state::structures::{BuildSite, Building};
 use crate::state::world::Tile;
 use crate::state::{GameState, StateTransition};
 use macroquad_toolkit::grid::TilePos;
@@ -74,7 +74,24 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
             game.transition(StateTransition::StartWarren);
             if let GameState::Warren(session) = &mut game.state {
                 session.tutorial_step = 1;
-                session.economy.food = 48.0;
+                session.economy.food = 36.0;
+                // Show the lesson at the exact recovery handoff: a player-
+                // placed Farm is waiting on ore while Food Grid is under
+                // pressure, so the Objective can name both visible responses.
+                let spot = session
+                    .world
+                    .tiles
+                    .iter_with_pos()
+                    .find(|(pos, _)| session.can_place_building(*pos))
+                    .map(|(pos, _)| pos);
+                if let Some(spot) = spot {
+                    session.build_sites.push(BuildSite {
+                        kind: "farm".to_owned(),
+                        pos: spot,
+                        ore_needed: 10,
+                        ore_delivered: 0,
+                    });
+                }
             }
         }
         "tutorial_factory" => {

@@ -79,12 +79,24 @@ impl CampaignObjective {
             let food = session.economy.food.min(food_goal);
             let ore_goal = data.balance.win_ore_delivered;
             let ore = session.economy.ore_delivered_total.min(ore_goal) as f32;
-            let next = if food < food_goal {
-                "Next: keep Food Grid production above Upkeep."
+            let next: String = if food < food_goal {
+                if pending_build_site(session, "farm") {
+                    format!(
+                        "Next: keep carriers delivering ore to the Farm site; if Food Grid keeps falling, {}.",
+                        job_assignment_action_hint(
+                            session,
+                            data,
+                            Job::Carrier,
+                            &[Job::Miner, Job::Cook, Job::Smith, Job::Guard]
+                        )
+                    )
+                } else {
+                    "Next: keep Food Grid production above Upkeep.".to_owned()
+                }
             } else if ore < ore_goal as f32 {
-                "Next: keep the Mine staffed and carriers hauling ore."
+                "Next: keep the Mine staffed and carriers hauling ore.".to_owned()
             } else {
-                "Next: hold both reserves until the warren is secure."
+                "Next: hold both reserves until the warren is secure.".to_owned()
             };
             return Self {
                 title: "Secure the warren".to_owned(),
@@ -92,7 +104,7 @@ impl CampaignObjective {
                     "Food {:.0}/{:.0}  ·  Ore {}/{}",
                     food, food_goal, ore as u32, ore_goal
                 ),
-                next: next.to_owned(),
+                next,
                 ratio: ((food / food_goal.max(1.0)) + (ore / ore_goal.max(1) as f32)) / 2.0,
                 complete: false,
             };

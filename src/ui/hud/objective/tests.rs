@@ -24,6 +24,24 @@ fn objective_starts_with_both_security_requirements() {
 }
 
 #[test]
+fn objective_names_pending_farm_recovery_during_food_pressure() {
+    let (data, mut session) = boot();
+    session.build_sites.push(BuildSite {
+        kind: "farm".to_owned(),
+        pos: session.spawn_tile(),
+        ore_needed: 10,
+        ore_delivered: 0,
+    });
+
+    let objective = CampaignObjective::current(&session, &data);
+
+    assert_eq!(
+        objective.next,
+        "Next: keep carriers delivering ore to the Farm site; if Food Grid keeps falling, tap − beside Miner, then + beside Carrier in Jobs."
+    );
+}
+
+#[test]
 fn objective_moves_through_factory_and_shrine() {
     let (data, mut session) = boot();
     session.creatures[0].job = Job::Guard;
