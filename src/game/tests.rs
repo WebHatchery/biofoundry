@@ -148,6 +148,22 @@ fn loaded_session_validation_accepts_a_fresh_warren() {
 }
 
 #[test]
+fn current_version_save_payloads_still_receive_integrity_validation() {
+    let (data, mut session) = session();
+    session.buildings[0].kind = "unknown_building".to_owned();
+
+    // The toolkit's current-version fast path deserializes the wrapper
+    // directly, so this mirrors the payload that the game shell receives
+    // before its post-load validation boundary.
+    let encoded = serde_json::to_value(&session).expect("session serializes");
+    let restored: GameSession = serde_json::from_value(encoded).expect("payload deserializes");
+    let error = super::persistence::validate_loaded_session_boundary(restored, &data)
+        .expect_err("current-version payload must not bypass validation");
+
+    assert!(error.contains("unknown building id"));
+}
+
+#[test]
 fn notification_history_rehydrates_without_replaying_old_toasts() {
     let mut manager = NotificationManager::new();
     let history = vec![

@@ -89,7 +89,7 @@ impl Game {
 
     fn load_session_from_slot(&self, slot: &str) -> Result<GameSession, String> {
         let config = &self.data.config;
-        load_from_slot_with_migration(
+        let session = load_from_slot_with_migration(
             &config.game_name,
             slot,
             &config.version,
@@ -98,10 +98,14 @@ impl Game {
                 let mut session: GameSession = serde_json::from_value(payload)
                     .map_err(|err| format!("Unsupported save {version:?}: {err}"))?;
                 migrate_tutorial_progress(&mut session, self.data.tutorial.len());
-                validate_loaded_session(&session, &self.data)?;
                 Ok(session)
             },
-        )
+        )?;
+        // The toolkit returns current-version saves through a fast path that
+        // does not invoke the migration callback. Keep integrity validation at
+        // this project-owned boundary so current and migrated saves receive
+        // the same map, roster, content, and finite-value checks.
+        validate_loaded_session_boundary(session, &self.data)
     }
 
     fn install_loaded_session(&mut self, session: GameSession) {
@@ -493,6 +497,14 @@ pub(super) fn validate_loaded_session(
         validate_nonnegative_finite(value, name)?;
     }
     Ok(())
+}
+
+pub(super) fn validate_loaded_session_boundary(
+    session: GameSession,
+    data: &GameData,
+) -> Result<GameSession, String> {
+    validate_loaded_session(&session, data)?;
+    Ok(session)
 }
 
 fn validate_nonnegative_finite(value: f32, field: &str) -> Result<(), String> {
