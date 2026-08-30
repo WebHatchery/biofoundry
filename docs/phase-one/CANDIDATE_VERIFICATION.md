@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-31
-**Source revision:** `0be602a`
+**Source revision:** `3f87722`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -32,7 +32,7 @@ automated simulation results into first-time-player evidence.
 | Endless Outpost hold expansion | Pass (focused and capture evidence) | An active awakened route can spend 8 banked ingots once to expand its remote hold from 12 to 20 slots. The inspection card exposes the visible `Expand hold · 8 ingots` control, shows the upgraded `Cargo 6/20` capacity, and keeps transit, scouting, load-preview, full-hold, and Objective room calculations aligned. |
 | Endless crew dispatch quota | Pass (focused and capture evidence) | An awakened Outpost exposes the visible `Crew per run · Auto` control, which cycles through cargo-only and bounded scout counts. Legacy saves keep automatic dispatch, while cargo-only loads can deliver provisions without borrowing local workers; the Objective names the control when that setting blocks an otherwise-ready scouting payload. Refreshed [ui_endless_load_preview.png](../verification/ui_endless_load_preview.png), [ui_endless_upgrade.png](../verification/ui_endless_upgrade.png), and [ui_endless_upgraded.png](../verification/ui_endless_upgraded.png) captures keep the route controls readable. |
 | Endless cargo-only returns | Pass (focused and capture evidence) | A staffed Outpost exposes `Send N cargo · keep crew` beside the normal full return, so a completed haul can come home without recalling the remote scouts. The route keeps those scouts assigned for another expedition, the departure notice explains the choice, and the Objective/field guide describe the remote-team outcome. Refreshed [ui_endless.png](../verification/ui_endless.png), [ui_endless_expedition_report.png](../verification/ui_endless_expedition_report.png), and [ui_endless_upgraded.png](../verification/ui_endless_upgraded.png) captures keep both return paths readable. |
-| Endless automatic cargo returns | Pass (focused and capture evidence) | An awakened Outpost exposes the persisted `Auto-return · Off` / `Auto-return · Cargo only` policy. When an opted-in hold reaches capacity, the fixed-step simulation starts one cargo-only return, preserves the remote scouts and one configured expedition's food, emits a departure notice, and autosaves the safe beat; later routes wait for the global worm transit. Refreshed [ui_endless_auto_return.png](../verification/ui_endless_auto_return.png) shows the enabled policy beside the manual return and scouting controls. Live Preview route interaction remains unclaimed because the resumed developer save has not yet reached the Outpost unlock. |
+| Endless automatic cargo returns | Pass (focused and capture evidence) | An awakened Outpost exposes the persisted `Auto-return · Off` / `Auto-return · Cargo only` policy. When an opted-in hold reaches capacity, the fixed-step simulation starts one cargo-only return, preserves the remote scouts and one configured expedition's food when other cargo creates room, and returns provisions too when they alone fill the hold so the route can resupply. It emits a departure notice and autosaves the safe beat; later routes wait for the global worm transit. Refreshed [ui_endless_auto_return.png](../verification/ui_endless_auto_return.png) shows the enabled policy beside the manual return and scouting controls. Live Preview route interaction remains unclaimed because the resumed developer save has not yet reached the Outpost unlock. |
 | Endless automatic Outpost resupply | Pass (focused and capture evidence) | An awakened Outpost exposes the persisted `Auto-resupply · Off` / `Auto-resupply · Food only` policy. When staffed remote scouts need provisions, the fixed-step simulation starts a food-only transit from the home reserve without dispatching more crew; a manually paused expedition is left untouched. The departure notice, Objective, and field guide name the automatic behavior. Refreshed [ui_endless_auto_resupply.png](../verification/ui_endless_auto_resupply.png) shows the shortage state, enabled policy, and visible recovery controls. Live Preview route interaction remains unclaimed because the resumed developer save has not yet reached the Outpost unlock. |
 | Endless transit failure recovery | Pass (focused and published build evidence) | If an in-flight worm route is deactivated, the simulation restores its payload, records the failed Outpost, and emits a one-shot transit-failure event. The game turns that event into a visible danger notification with the exact recovery action and treats it as a safe-beat autosave, so a refresh cannot erase the route's recovered state. |
 | Multi-route failure visibility | Pass (focused evidence) | Reopening one failed Outpost now clears only that route's failure; the global route warning remains visible while any other Outpost still needs recovery, including when a healthy second route starts a transit. This keeps the top-bar warning consistent with the per-route inspection state as remote routes multiply. |
@@ -68,7 +68,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 307 unit tests and 2 integration/code-standard
+- `cargo test --all-targets` — 309 unit tests and 2 integration/code-standard
   targets pass,
   including fresh/simulated/remote-transit valid sessions, modal route
   planning, rejected malformed save shapes, and event-history save/load
@@ -143,10 +143,12 @@ automated simulation results into first-time-player evidence.
 - Endless automatic cargo returns — pass; an awakened route can persist an
   opt-in `Auto-return · Cargo only` policy. When its remote hold reaches the
   shared capacity, the simulation starts a cargo-only shrine transit, preserves
-  the stationed crew and one configured expedition's food, emits a distinct
-  notification, and marks the departure as a safe-beat autosave. The global
-  worm transit remains serialized across multiple routes, and the default-off
-  field keeps older saves unchanged.
+  the stationed crew and one configured expedition's food when there is other
+  cargo to unload, and flushes provisions as well when they alone fill the
+  hold, leaving room for a later resupply. It emits a distinct notification
+  and marks the departure as a safe-beat autosave. The global worm transit
+  remains serialized across multiple routes, and the default-off field keeps
+  older saves unchanged.
   Focused state, save-roundtrip, simulation, and game-notice coverage passes,
   with [ui_endless_auto_return.png](../verification/ui_endless_auto_return.png)
   showing the enabled touch control alongside the manual return and scouting
@@ -181,6 +183,8 @@ automated simulation results into first-time-player evidence.
   payload before it can reach the live Warren. Remote Outpost cargo is also
   checked for arithmetic overflow and hold capacity, including cargo already
   stored at a route and payload currently carried by the worm.
+  Local-only goods in a remote hold are rejected as unsupported instead of
+  creating a route state that the transport actions cannot unload.
 - Outpost route setting persistence — pass; successful route controls now
   trigger immediate autosaves, and the save-roundtrip coverage includes cargo
   priority and scouting pause alongside dispatch and automatic logistics
