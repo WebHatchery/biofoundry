@@ -6,6 +6,14 @@ use crate::state::GameState;
 
 pub(super) fn begin(game: &mut Game, scene: &str) {
     match scene {
+        "endless_auto_return" => {
+            super::begin(game, "endless_load_preview");
+            if let GameState::Warren(session) = &mut game.state {
+                if let Some(route) = session.outposts.last_mut() {
+                    route.auto_return_cargo = true;
+                }
+            }
+        }
         "endless_upgrade" => {
             super::begin(game, "endless_load_preview");
             if let GameState::Warren(session) = &mut game.state {

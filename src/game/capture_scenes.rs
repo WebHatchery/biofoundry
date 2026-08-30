@@ -574,15 +574,9 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                 }
             }
         }
-        "endless_auto_return" => {
-            begin(game, "endless_load_preview");
-            if let GameState::Warren(session) = &mut game.state {
-                if let Some(route) = session.outposts.last_mut() {
-                    route.auto_return_cargo = true;
-                }
-            }
+        "endless_auto_return" | "endless_upgrade" | "endless_upgraded" => {
+            endless::begin(game, scene)
         }
-        "endless_upgrade" | "endless_upgraded" => endless::begin(game, scene),
         "endless_expedition_paused" => {
             begin(game, "endless_load_preview");
             if let GameState::Warren(session) = &mut game.state {
