@@ -101,7 +101,15 @@ pub fn draw(
     // makes its buttons disappear below the browser fold at 1280x720.
     let tools_panel = Rect::new(PANEL_W + 28.0, 66.0, PANEL_W, 252.0);
 
-    panels::draw_top_bar(session, data, top_bar, mouse, options.paused, &mut actions);
+    panels::draw_top_bar(
+        session,
+        data,
+        top_bar,
+        mouse,
+        ui.scale,
+        options.paused,
+        &mut actions,
+    );
     panels::draw_food_grid_panel(session, data, food_panel);
     panels::draw_jobs_panel(session, data, sprites, jobs_panel, mouse, &mut actions);
     panels::draw_tools_panel(session, data, tools_panel, mode, mouse, &mut actions);

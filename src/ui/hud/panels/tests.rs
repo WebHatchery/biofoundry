@@ -115,6 +115,29 @@ fn compact_raid_hint_stays_short_when_a_worker_is_free() {
 }
 
 #[test]
+fn condensed_alert_hints_fit_a_narrow_top_bar() {
+    let data = GameData::load().expect("embedded game data");
+    let session = GameSession::new(&data, 7);
+
+    assert_eq!(
+        condensed_raid_defense_hint(&session, &data),
+        "tap −Miner→+Guard"
+    );
+    assert_eq!(
+        condensed_food_recovery_hint(&session, &data),
+        "tap −Miner→+Carrier"
+    );
+}
+
+#[test]
+fn compact_top_bar_only_applies_below_the_design_scale() {
+    assert!(compact_top_bar(0.625));
+    assert!(!compact_top_bar(0.9));
+    assert!(!compact_top_bar(1.0));
+    assert!(!compact_top_bar(f32::NAN));
+}
+
+#[test]
 fn hints_do_not_promise_reassignment_of_a_specialist() {
     let data = GameData::load().expect("embedded game data");
     let mut session = GameSession::new(&data, 7);

@@ -2,8 +2,13 @@
 //! job assignment panel, the build/dig tools, and the tutorial card.
 
 mod food;
+mod top_bar;
 
 pub(super) use food::draw_food_grid_panel;
+pub(super) use top_bar::{
+    compact_food_recovery_hint, compact_raid_defense_hint, compact_top_bar,
+    condensed_food_recovery_hint, condensed_raid_defense_hint, reassignable_job_count,
+};
 
 use crate::data::GameData;
 use crate::simulation::{self, food as simulation_food};
@@ -26,6 +31,7 @@ pub(super) fn draw_top_bar(
     data: &GameData,
     bar: Rect,
     mouse: Vec2,
+    ui_scale: f32,
     paused: bool,
     actions: &mut Vec<UiAction>,
 ) {
@@ -50,26 +56,40 @@ pub(super) fn draw_top_bar(
         TextStyle::new(18.0, dark::TEXT).params(),
     );
 
+    let compact = compact_top_bar(ui_scale);
     if paused {
         draw_ui_text_ex(
-            "PAUSED — tap Resume to continue",
+            if compact {
+                "PAUSED — tap Resume"
+            } else {
+                "PAUSED — tap Resume to continue"
+            },
             bar.x + 380.0,
             bar.y + 31.0,
             TextStyle::new(15.0, dark::WARNING).params(),
         );
     } else if let Some(transit) = &session.worm_transit {
-        draw_ui_text_ex(
-            &format!(
+        let transit_label = if compact {
+            format!("WORM TRANSIT — {:.0}s", transit.remaining.max(0.0))
+        } else {
+            format!(
                 "WORM TRANSIT — {:.0}s remaining",
                 transit.remaining.max(0.0)
-            ),
+            )
+        };
+        draw_ui_text_ex(
+            &transit_label,
             bar.x + 380.0,
             bar.y + 31.0,
             TextStyle::new(18.0, dark::POSITIVE).params(),
         );
     } else if session.last_transit_failure.is_some() {
         draw_ui_text_ex(
-            "WORM ROUTE FAILED — inspect the outpost",
+            if compact {
+                "ROUTE FAILED — inspect outpost"
+            } else {
+                "WORM ROUTE FAILED — inspect the outpost"
+            },
             bar.x + 380.0,
             bar.y + 31.0,
             TextStyle::new(18.0, dark::NEGATIVE).params(),
@@ -80,23 +100,40 @@ pub(super) fn draw_top_bar(
         let food_suffix = if session.economy.food <= 0.0 {
             " · FAMINE".to_owned()
         } else if let Some(seconds) = food_warning {
-            format!(" · FOOD IN {}", format_mmss(seconds))
+            if compact {
+                format!(" · FOOD {}", format_mmss(seconds))
+            } else {
+                format!(" · FOOD IN {}", format_mmss(seconds))
+            }
         } else {
             String::new()
         };
-        draw_ui_text_ex(
-            &format!(
+        let raid_label = if compact {
+            format!(
+                "RAID — {}{}",
+                condensed_raid_defense_hint(session, data),
+                food_suffix
+            )
+        } else {
+            format!(
                 "RAID — gnarls are after the larder! {}{}",
                 compact_raid_defense_hint(session, data),
                 food_suffix
-            ),
+            )
+        };
+        draw_ui_text_ex(
+            &raid_label,
             bar.x + 380.0,
             bar.y + 31.0,
             TextStyle::new(15.0, dark::NEGATIVE).params(),
         );
     } else if session.economy.food <= 0.0 {
         draw_ui_text_ex(
-            "FAMINE — workers are slowing down",
+            if compact {
+                "FAMINE — workers slowing"
+            } else {
+                "FAMINE — workers are slowing down"
+            },
             bar.x + 380.0,
             bar.y + 31.0,
             TextStyle::new(18.0, dark::NEGATIVE).params(),
@@ -105,36 +142,64 @@ pub(super) fn draw_top_bar(
         .filter(|seconds| *seconds <= data.balance.food_warning_sec)
     {
         if session.raid_in <= data.balance.raid_warning_sec {
-            draw_ui_text_ex(
-                &format!(
+            let warning_label = if compact {
+                format!(
+                    "FOOD {} · RAID {} · {}",
+                    format_mmss(seconds),
+                    format_mmss(session.raid_in.max(0.0)),
+                    condensed_raid_defense_hint(session, data)
+                )
+            } else {
+                format!(
                     "FOOD IN {} · RAID IN {} · {}",
                     format_mmss(seconds),
                     format_mmss(session.raid_in.max(0.0)),
                     compact_raid_defense_hint(session, data)
-                ),
+                )
+            };
+            draw_ui_text_ex(
+                &warning_label,
                 bar.x + 380.0,
                 bar.y + 31.0,
                 TextStyle::new(15.0, dark::WARNING).params(),
             );
         } else {
-            draw_ui_text_ex(
-                &format!(
+            let warning_label = if compact {
+                format!(
+                    "FOOD {} · {}",
+                    format_mmss(seconds),
+                    condensed_food_recovery_hint(session, data)
+                )
+            } else {
+                format!(
                     "FOOD IN {} · {}",
                     format_mmss(seconds),
                     compact_food_recovery_hint(session, data)
-                ),
+                )
+            };
+            draw_ui_text_ex(
+                &warning_label,
                 bar.x + 380.0,
                 bar.y + 31.0,
                 TextStyle::new(15.0, dark::WARNING).params(),
             );
         }
     } else if session.raid_in <= data.balance.raid_warning_sec {
-        draw_ui_text_ex(
-            &format!(
+        let warning_label = if compact {
+            format!(
+                "RAID {} · {}",
+                format_mmss(session.raid_in.max(0.0)),
+                condensed_raid_defense_hint(session, data)
+            )
+        } else {
+            format!(
                 "RAID IN {} — {}",
                 format_mmss(session.raid_in.max(0.0)),
                 compact_raid_defense_hint(session, data)
-            ),
+            )
+        };
+        draw_ui_text_ex(
+            &warning_label,
             bar.x + 380.0,
             bar.y + 31.0,
             TextStyle::new(15.0, dark::WARNING).params(),
@@ -413,51 +478,6 @@ fn workforce_capacity_label(session: &GameSession, data: &GameData) -> String {
         session.local_creature_count(),
         session.local_warren_capacity(data)
     )
-}
-
-/// Keep a combined food/raid banner short while naming the visible Guard
-/// control that resolves the incoming threat.
-pub(super) fn compact_raid_defense_hint(session: &GameSession, data: &GameData) -> String {
-    if reassignable_job_count(session, data, Job::Guard) > 0 {
-        "guards on watch".to_owned()
-    } else if reassignable_job_count(session, data, Job::Idle) > 0 {
-        "tap + Guard".to_owned()
-    } else {
-        [Job::Miner, Job::Carrier, Job::Cook, Job::Smith]
-            .into_iter()
-            .find(|job| reassignable_job_count(session, data, *job) > 0)
-            .map(|job| format!("tap − {}, then + Guard", job.label()))
-            .unwrap_or_else(|| "free a worker, then + Guard".to_owned())
-    }
-}
-
-/// Shorten the opening response enough to share the top bar with its buttons.
-/// The full control names remain in the tutorial card beside the banner.
-pub(super) fn compact_food_recovery_hint(session: &GameSession, data: &GameData) -> String {
-    if reassignable_job_count(session, data, Job::Idle) > 0 {
-        "tap + Carrier or Cook".to_owned()
-    } else {
-        [Job::Miner, Job::Smith, Job::Guard]
-            .into_iter()
-            .find(|job| reassignable_job_count(session, data, *job) > 0)
-            .map(|job| format!("tap − {}, then + Carrier", job.label()))
-            .unwrap_or_else(|| "free a worker, then + Carrier".to_owned())
-    }
-}
-
-fn reassignable_job_count(session: &GameSession, data: &GameData, job: Job) -> usize {
-    session
-        .creatures
-        .iter()
-        .filter(|creature| {
-            !creature.is_remote()
-                && creature.job == job
-                && data
-                    .species
-                    .get(&creature.species)
-                    .is_some_and(|species| species.reassignable)
-        })
-        .count()
 }
 
 #[cfg(test)]
