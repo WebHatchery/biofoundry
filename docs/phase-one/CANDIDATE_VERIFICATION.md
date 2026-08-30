@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `819a26d`
+**Source revision:** `cf119d6`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -26,7 +26,7 @@ automated simulation results into first-time-player evidence.
 | Endless cargo priority control | Pass (capture evidence) | The awakened Outpost inspection card now exposes a visible `Load order · Ore first` control. Cycling it rotates through Ore, Ingots, and Food priority, while the shared route forecast shows the exact next Ore/Ingots/Food mix and explains when a full hold must return to the shrine. The compact 800×450 captures keep the control, forecast, and route actions readable. Live Preview route interaction remains unclaimed because the resumed developer save has not yet reached the Outpost unlock. |
 | Endless remote scouting loop | Pass (focused and capture evidence) | Once an awakened Outpost has remote crew and cooked food, its expedition advances toward a scouting haul, consumes provisions, and stores ore in the remote hold. The inspection card exposes a touch-first Pause/Resume scouting control that protects remote food without closing the route; the map badge, legend, inspection card, and Objective agree on manual pause, while the card and Objective also agree on progress, food shortfall, or full-hold pause. Completed hauls report their ore and food delta through the visible notification system and autosave as a safe beat. Live Preview route interaction remains unclaimed because the resumed developer save has not yet reached the Outpost unlock. |
 | Paused- and blocker-route status legibility | Pass (focused and capture evidence) | A manually paused active Outpost now carries a distinct pause glyph and `Scouting paused` label on the map and status legend, as well as the matching inspection status. Awakened routes without stationed crew, without enough scout food, or with a full remote hold now carry distinct `No scout crew`, `Scout food low`, or `Outpost full` map and inspection-detail states. The compact legend filters to statuses present in the current warren, keeping the badge, recovery control, and Objective visible together. |
-| Endless expedition feedback | Pass (focused and capture evidence) | A completed remote haul now reports its ore gain and food cost through the visible notification system and marks the haul as a safe-beat autosave, so progress is communicated and survives a refresh without keeping the inspection card open. Each Outpost also persists its completed-haul count and lifetime ore gathered, which remain visible in the inspection card. |
+| Endless expedition feedback | Pass (focused and capture evidence) | A completed remote haul now reports its ore gain and food cost through the visible notification system and marks the haul as a safe-beat autosave, so progress is communicated and survives a refresh without keeping the inspection card open. Each Outpost persists its completed-haul count and lifetime ore gathered in the inspection card, while the completed-campaign Objective keeps aggregate `Runs` and `Hauls` visible across the Endless loop. |
 | State-aware awakened objective recovery | Pass (focused and capture evidence) | After the worm wakes, the Objective now names the visible recovery action when the forge chain is incomplete: place a Blacksmith, replace an exhausted Mine, staff a Smith, or staff a Carrier. The refreshed worm and completion captures show the first of these prompts, and focused coverage keeps the guidance honest for each recovery state. |
 | Multi-route objective ordering | Pass (focused evidence) | If several active Worm Outposts are present, the completed-campaign Objective prioritizes a route with cargo or crew ready, then a route that can be loaded, before an empty active route. This keeps the next visible instruction actionable as the existing outpost activity scales. |
 | Minimum-layout spot check | Pass | The 1200×675 canvas and required HUD remained visible in the 1280×720 Preview viewport. |
@@ -74,7 +74,8 @@ automated simulation results into first-time-player evidence.
   and filtered status legend keep manually paused, food-starved, and full-hold
   routes legible before inspection; an unstaffed awakened route also exposes
   `No scout crew` and a matching compact detail line. Each route persists its
-  completed-haul count and scouted ore total for the next inspection.
+  completed-haul count and scouted ore total for the next inspection, and the
+  completed-campaign Objective summarizes aggregate `Runs` and `Hauls`.
 - State-aware awakened objective — pass; focused coverage names the visible
   Build & Dig or Jobs recovery for a missing Blacksmith, exhausted Mine, missing
   Smith, and missing Carrier instead of promising more ingots without a viable
@@ -409,7 +410,7 @@ automated simulation results into first-time-player evidence.
   counts successful cargo runs.
 - Transit arrival capture — [ui_endless_arrived.png](../verification/ui_endless_arrived.png)
   shows the delivered crew at the active outpost and the completed-campaign
-  Objective incremented to `Cargo runs 1`; the arrival is persisted through the
+  Objective incremented to `Runs 1 · Hauls 0`; the arrival is persisted through the
   normal safe-beat autosave path, and the real-loop toast accurately says
   `crew delivered` for this crew-only trip.
 - Route guidance captures — [ui_endless.png](../verification/ui_endless.png),
