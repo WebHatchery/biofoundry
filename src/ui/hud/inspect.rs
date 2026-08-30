@@ -21,7 +21,7 @@ mod outpost;
 mod status;
 mod workstations;
 
-use breeding::{breed_label, breeding_unlock_hint};
+use breeding::{breed_button_label, breeding_unlock_hint};
 use outpost::{
     draw_compact_route_controls, draw_route_upgrade_controls, CompactRouteContext,
     RouteUpgradeContext,
@@ -386,7 +386,7 @@ pub(super) fn draw_inspect_panel(
                 } else if blocked {
                     format!("{name} — posted")
                 } else {
-                    breed_label(id, name, cost, data)
+                    breed_button_label(id, name, cost, data)
                 };
                 let enabled = unlocked && !blocked && session.economy.ingots_stock >= cost;
                 if hud_button(
@@ -764,6 +764,8 @@ pub(super) fn draw_inspect_panel(
 fn inspection_button_metrics(kind: &str, compact: bool) -> (f32, f32) {
     if compact && matches!(kind, "blacksmith" | "breeding_pit") {
         (36.0, 40.0)
+    } else if !compact && kind == "breeding_pit" {
+        (38.0, 42.0)
     } else if compact {
         (30.0, 34.0)
     } else {

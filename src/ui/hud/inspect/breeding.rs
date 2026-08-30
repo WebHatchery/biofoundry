@@ -30,6 +30,27 @@ pub(super) fn breed_label(id: &str, name: &str, cost: u32, data: &GameData) -> S
     }
 }
 
+/// Add the ongoing food draw to an available bred-specialist action. The
+/// benefit and one-time ingot price stay on the first line; the second line
+/// makes the continuing cost visible before the player commits.
+pub(super) fn breed_button_label(id: &str, name: &str, cost: u32, data: &GameData) -> String {
+    let label = breed_label(id, name, cost, data);
+    let Some(species) = data.species.get(id) else {
+        return label;
+    };
+    if species.diet != "food" || species.food_per_min <= 0.0 {
+        return label;
+    }
+    let heading = label
+        .rsplit_once(" (")
+        .map(|(heading, _)| heading)
+        .unwrap_or(label.as_str());
+    format!(
+        "{heading}\n{cost} ingots · +{:.1} food/min",
+        species.food_per_min
+    )
+}
+
 pub(super) fn breeding_unlock_hint(
     session: &GameSession,
     data: &GameData,

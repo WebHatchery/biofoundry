@@ -63,6 +63,7 @@ automated simulation results into first-time-player evidence.
 | Multi-route objective ordering | Pass (focused evidence) | If several active Worm Outposts are present, the completed-campaign Objective prioritizes a route with cargo or crew ready, then a route that can be loaded, before an empty active route. This keeps the next visible instruction actionable as the existing outpost activity scales. |
 | Crowding recovery diagnosis | Pass (focused and capture evidence) | The Jobs panel now turns the existing local-capacity penalty into an actionable warning: when local workers exceed floor capacity it shows the estimated work-rate loss and the visible `Dig` control to open more room. The warning is absent when capacity is sufficient, and [ui_crowding.png](../verification/ui_crowding.png) keeps the diagnosis readable at 800×450. |
 | Optional support upkeep disclosure | Pass (focused and capture evidence) | Available post-campaign support actions now show their ongoing supply draw on a second line before recruitment: food-eaters name their `+food/min` draw and Salamanders name their charcoal-per-batch meal. Already-posted specialists retain their practical role labels, and the refreshed [ui_optional.png](../verification/ui_optional.png) remains readable in the compact layout. |
+| Breeding upkeep disclosure | Pass (focused and capture evidence) | Available Hobgoblin, Overseer, and Engineer actions now show their role benefit, one-time ingot price, and ongoing `food/min` draw before recruitment. Refreshed [ui_breeding.png](../verification/ui_breeding.png) and [ui_compact_breeding.png](../verification/ui_compact_breeding.png) captures keep the two-line choices readable at normal and compact scales. |
 | Minimum-layout spot check | Pass | The 1200×675 canvas and required HUD remained visible in the 1280×720 Preview viewport. |
 | Public metadata alignment | Pass (Preview) | The generated Preview page names the visible touch actions for panning, inspection, tools, Jobs controls, optional specialist recruitment, awakened Outpost cargo runs, optional automatic cargo-only returns and food-only resupply, and the post-awakening Endless/Menu choices. Production FTP publication remains a separate release action. |
 | Compact viewport exploration | Pass with follow-up | The hosted Preview smoke path at 800×450 keeps the title, field guide, and Warren HUD on-canvas; capture probes at 800×450, 1024×576, 1280×720, and 1440×900 keep the Food/Factory/Worm tutorial cards, Blacksmith queue controls, Shrine pause control, completion choices, and Endless outpost actions visible without clipping or overlap. The compact branch now gives the high-frequency top-bar, Jobs, Build & Dig, Outpost, Blacksmith, Breeding Pit, and Shrine controls larger visual affordances, and the refreshed warning captures keep their messages clear of that row. Representative [ui_compact_warren.png](../verification/ui_compact_warren.png), [ui_compact_blacksmith.png](../verification/ui_compact_blacksmith.png), [ui_compact_breeding.png](../verification/ui_compact_breeding.png), [ui_compact_shrine.png](../verification/ui_compact_shrine.png), [ui_compact_endless_load_preview.png](../verification/ui_compact_endless_load_preview.png), and [ui_compact_endless_upgraded.png](../verification/ui_compact_endless_upgraded.png) captures preserve the responsive states. The compact Blacksmith and Breeding Pit follow-up now uses 36-pixel action targets with 40-pixel spacing; remaining text density and first-time-player comprehension still require human validation. |
@@ -77,7 +78,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 350 unit tests and 2 integration/code-standard
+- `cargo test --all-targets` — 351 unit tests and 2 integration/code-standard
   targets pass,
   including fresh/simulated/remote-transit valid sessions, modal route
   planning, rejected malformed save shapes, and event-history save/load
@@ -343,6 +344,11 @@ automated simulation results into first-time-player evidence.
   Engineer mine-throughput bonus remains visible at the published HUD scale.
   This improves discoverability evidence but does not replace first-time-player
   testing of optional-system value.
+- Breeding upkeep capture — [ui_breeding.png](../verification/ui_breeding.png)
+  and [ui_compact_breeding.png](../verification/ui_compact_breeding.png) show the
+  three available bred specialists with their role, ingot price, and ongoing
+  food draw on separate readable lines; focused label coverage keeps those
+  values data-driven.
 - Breeding feedback — successful Hobgoblin, Overseer, and Engineer choices now
   name their tuned work, aura, or mine benefit in the recruitment notice;
   focused game-action coverage checks those data-driven percentages alongside

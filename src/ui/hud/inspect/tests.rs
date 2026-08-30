@@ -1,3 +1,4 @@
+use super::breeding::breed_label;
 use super::*;
 use crate::state::creatures::Job;
 use crate::state::outposts::CargoPriority;
@@ -70,6 +71,24 @@ fn breeding_labels_explain_specialist_roles() {
 }
 
 #[test]
+fn available_breeding_choices_disclose_their_ongoing_food_draw() {
+    let data = GameData::load().expect("embedded game data");
+
+    assert_eq!(
+        breed_button_label("hobgoblin", "Hobgoblin", 4, &data),
+        "Hobgoblin · ×2 work\n4 ingots · +5.0 food/min"
+    );
+    assert_eq!(
+        breed_button_label("overseer", "Goblin Overseer", 6, &data),
+        "Goblin Overseer · aura +35%\n6 ingots · +6.0 food/min"
+    );
+    assert_eq!(
+        breed_button_label("engineer", "Goblin Engineer", 8, &data),
+        "Goblin Engineer · Mine +25%\n8 ingots · +3.5 food/min"
+    );
+}
+
+#[test]
 fn locked_specialist_marker_uses_font_safe_ascii() {
     assert_eq!(LOCKED_SPECIALIST_MARKER, "[L]");
 }
@@ -80,6 +99,10 @@ fn compact_specialist_cards_use_larger_action_targets() {
     assert_eq!(
         inspection_button_metrics("breeding_pit", true),
         (36.0, 40.0)
+    );
+    assert_eq!(
+        inspection_button_metrics("breeding_pit", false),
+        (38.0, 42.0)
     );
     assert_eq!(inspection_button_metrics("worm_shrine", true), (30.0, 34.0));
     assert_eq!(inspection_button_metrics("blacksmith", false), (24.0, 26.0));
