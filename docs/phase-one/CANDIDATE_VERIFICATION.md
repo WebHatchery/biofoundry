@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `ef1d765`
+**Source revision:** `9636ef9`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -72,6 +72,12 @@ automated simulation results into first-time-player evidence.
 - Smelter input stall — [ui_smelter.png](../verification/ui_smelter.png)
   shows a staffed Salamander with both batch inputs withheld, and the
   inspection card names the exact recovery need: `Needs 1 ore + 1 charcoal`.
+- Cook Pot input stall — [ui_cook_pot.png](../verification/ui_cook_pot.png)
+  shows a staffed cook with no mushrooms, and the critical-path inspection
+  card names the next batch need: `Needs 2 mushrooms`.
+- Kiln input stall — [ui_kiln.png](../verification/ui_kiln.png) shows the
+  autonomous charcoal kiln with an empty wood buffer and the direct recovery
+  line `Needs 1 wood`.
 - Completion capture — [ui_completion.png](../verification/ui_completion.png)
   shows the Worm Awakened summary naming the food and ingot totals, with visible
   Continue in Endless and Return to Menu choices. The completed Objective also
