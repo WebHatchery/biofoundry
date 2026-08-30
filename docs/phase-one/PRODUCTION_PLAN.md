@@ -126,8 +126,10 @@ developer present.
 - [ ] Meet the comprehension and completion targets in `PLAYTEST_PLAN.md`.
 - [x] Run format, unit/integration tests, clippy with warnings denied, and the
   required no-parameter `publish.ps1` path on the current candidate.
-- [ ] Capture every changed canonical verification scene directly into
-  `docs/verification/`, replacing equivalent older images.
+- [x] Capture every changed canonical verification scene directly into
+  `docs/verification/`, replacing equivalent older images. The current
+  candidate includes refreshed `ui_optional.png` and the locked breeding
+  evidence alongside the existing release capture set.
 - [ ] Verify readable layout at representative desktop and browser sizes.
 - [x] Update `game_page.json`, catalog thumbnail, and public copy to match the
   shipped experience.

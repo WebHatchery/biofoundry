@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `7629745`
+**Source revision:** `eb2fb6f`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -31,7 +31,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 200 unit tests and 2 integration tests pass.
+- `cargo test --all-targets` — 201 unit tests and 2 integration tests pass.
 - `cargo clippy --all-targets --all-features -- -D warnings` — pass.
 - `publish.ps1` with no parameters — pass; Windows and WebGL packages
   deployed to Preview.
@@ -87,6 +87,10 @@ automated simulation results into first-time-player evidence.
 - Raw ingredient ledger — the Food Grid now shows the raw mushroom total beside
   production and labels the reserve as cooked food; focused simulation coverage
   keeps the displayed raw mirror aligned with post-spoilage stock.
+- Spendable ingot ledger — the Food Grid now keeps banked ingots visible beside
+  banked ore, so optional breeding and shrine costs have an always-visible
+  resource source; [ui_optional.png](../verification/ui_optional.png) confirms
+  the line remains readable with advanced controls open.
 - Blacksmith input stall — [ui_blacksmith.png](../verification/ui_blacksmith.png)
   shows a staffed smith with an unpaid Iron Pickaxe queued, `Ore 0`, and the
   visible `Status · Starved` plus `Needs 2 ore · next Iron Pickaxe` recovery
