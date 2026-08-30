@@ -56,3 +56,17 @@ fn reopening_one_failed_route_keeps_another_route_failure_visible() {
     assert!(session.outposts[1].last_failure.is_some());
     assert!(session.last_transit_failure.is_some());
 }
+
+#[test]
+fn syncing_loaded_routes_repairs_and_clears_the_global_failure_banner() {
+    let (_data, mut session, _outpost_pos) = active_outpost(49);
+    session.outposts[0].last_failure = Some("The worm route collapsed.".to_owned());
+    session.last_transit_failure = None;
+
+    outposts::sync_transit_failure_banner(&mut session);
+    assert!(session.last_transit_failure.is_some());
+
+    session.outposts[0].last_failure = None;
+    outposts::sync_transit_failure_banner(&mut session);
+    assert!(session.last_transit_failure.is_none());
+}

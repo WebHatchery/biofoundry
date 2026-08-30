@@ -92,6 +92,7 @@ impl Game {
     fn install_loaded_session(&mut self, session: GameSession) {
         let mut session = session;
         session.sync_remote_crew_state();
+        crate::simulation::outposts::sync_transit_failure_banner(&mut session);
         self.reset_camera_for(&session);
         self.reset_session_view_state();
         self.state = GameState::Warren(Box::new(session));

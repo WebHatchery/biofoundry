@@ -26,12 +26,15 @@ pub fn activate_outpost(session: &mut GameSession, pos: TilePos) -> bool {
         // Clear the global banner too, otherwise the top bar reports a stale
         // failure until a new transit happens to launch. Keep it when another
         // Outpost still carries an unresolved failure, though.
-        refresh_transit_failure_banner(session);
+        sync_transit_failure_banner(session);
     }
     true
 }
 
-fn refresh_transit_failure_banner(session: &mut GameSession) {
+/// Reconcile the persisted per-route failure records with the global warning
+/// shown by the HUD. This also repairs saves written while a route failure was
+/// being recovered or clears a stale banner after the last failure is gone.
+pub fn sync_transit_failure_banner(session: &mut GameSession) {
     if session
         .outposts
         .iter()
