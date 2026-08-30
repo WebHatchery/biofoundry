@@ -424,9 +424,11 @@ impl Game {
         let GameState::Warren(session) = &mut self.state else {
             return;
         };
+        let mut map_changed = false;
         match mode {
             UiMode::Build(kind) => {
                 if simulation::try_place_build_site(session, &self.data, &kind, tile) {
+                    map_changed = true;
                     // Building is a one-shot map action. Return to Inspect so
                     // the next map tap can select a building instead of
                     // silently placing another copy of the same site.
@@ -447,10 +449,14 @@ impl Game {
             }
             UiMode::Dig => {
                 if session.toggle_dig_mark(tile) {
+                    map_changed = true;
                     self.audio.play(Sfx::Select);
                 }
             }
             UiMode::Inspect => {}
+        }
+        if map_changed {
+            self.autosave_game();
         }
     }
 

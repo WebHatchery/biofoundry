@@ -4,7 +4,7 @@
 use super::*;
 use crate::state::creatures::Job;
 use crate::state::outposts::CargoPriority;
-use crate::state::structures::Building;
+use crate::state::structures::{BuildSite, Building};
 
 #[test]
 fn ticks_accumulate_deterministically() {
@@ -118,6 +118,29 @@ fn save_roundtrip_preserves_player_decisions() {
     blacksmith.orders = vec!["iron_pickaxe".to_owned(), "guard_blade".to_owned()];
     session.buildings.push(blacksmith);
 
+    let dig_pos = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(_, tile)| **tile == crate::state::world::Tile::Rock)
+        .map(|(pos, _)| pos)
+        .expect("rock designation");
+    session.dig_marks.insert(dig_pos);
+
+    let build_site_pos = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(pos, tile)| tile.walkable() && session.can_place_building(*pos))
+        .map(|(pos, _)| pos)
+        .expect("open construction site");
+    session.build_sites.push(BuildSite {
+        kind: "farm".to_owned(),
+        pos: build_site_pos,
+        ore_needed: 6,
+        ore_delivered: 2,
+    });
+
     let json = serde_json::to_string(&session).expect("serialize");
     let restored: GameSession = serde_json::from_str(&json).expect("deserialize");
 
@@ -131,6 +154,12 @@ fn save_roundtrip_preserves_player_decisions() {
         restored.buildings_of("blacksmith").next().unwrap().orders,
         ["iron_pickaxe".to_owned(), "guard_blade".to_owned()]
     );
+    assert!(restored.dig_marks.contains(&dig_pos));
+    assert_eq!(restored.dig_marks.len(), 1);
+    assert_eq!(restored.build_sites.len(), 1);
+    assert_eq!(restored.build_sites[0].kind, "farm");
+    assert_eq!(restored.build_sites[0].pos, build_site_pos);
+    assert_eq!(restored.build_sites[0].ore_delivered, 2);
 
     // Keep the data binding meaningful: this roundtrip remains valid for the
     // same configured game that supplies the building and tutorial schema.
