@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `60fdfa1`
+**Source revision:** `c1f42fb`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -29,7 +29,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 182 unit tests and 2 integration tests pass.
+- `cargo test --all-targets` — 183 unit tests and 2 integration tests pass.
 - `cargo clippy --all-targets --all-features -- -D warnings` — pass.
 - `publish.ps1` with no parameters — pass; Windows and WebGL packages
   deployed to Preview.
@@ -84,6 +84,9 @@ automated simulation results into first-time-player evidence.
 - Route toggle feedback — the activation toast now names the resulting active or
   inactive state, matching the selected outpost's button and persisted route.
   Focused game-action coverage exercises both toggle outcomes.
+- Route failure recovery — reopening a failed inactive route now clears the
+  global top-bar failure banner as well as the selected outpost's local failure,
+  so recovery feedback does not remain stale before the next transit.
 - Station inspection feedback — Mine and Blacksmith detail cards now distinguish
   assigned or en-route local workers from active production, while excluding
   remote outpost crew; focused UI coverage exercises both boundaries.
