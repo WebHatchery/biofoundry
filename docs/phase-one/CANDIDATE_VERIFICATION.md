@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `741043d`
+**Source revision:** `d5c898a`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -31,7 +31,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 205 unit tests and 2 integration tests pass.
+- `cargo test --all-targets` — 206 unit tests and 2 integration tests pass.
 - `cargo clippy --all-targets --all-features -- -D warnings` — pass.
 - `publish.ps1` with no parameters — pass; Windows and WebGL packages
   deployed to Preview.
@@ -235,7 +235,9 @@ automated simulation results into first-time-player evidence.
   unrelated building cannot satisfy the Farm-construction lesson; the lesson
   now waits for the player-built second Farm.
 - Tutorial tap capture — [ui_tutorial_worm.png](../verification/ui_tutorial_worm.png)
-  names the tap on the Worm Shrine before its final-demand inspection.
+  names the tap on the Worm Shrine before its final-demand inspection; the
+  inspection card now starts below the expanded tutorial card, leaving the
+  visible `Skip` action reachable in the canonical and compact captures.
 - One-shot placement coverage — a successful building placement returns the
   pointer to Inspect mode, so the next map tap can select a building; focused
   UI tests cover the mode transition and the live Preview smoke path confirms
