@@ -171,6 +171,21 @@ fn optional_specialist_buttons_explain_when_the_unique_post_is_filled() {
 }
 
 #[test]
+fn jobs_panel_capacity_uses_local_workers_and_floor_space() {
+    let data = GameData::load().expect("embedded game data");
+    let session = GameSession::new(&data, 7);
+
+    assert_eq!(
+        workforce_capacity_label(&session, &data),
+        format!(
+            "Idle 0 · Local {}/{}",
+            session.local_creature_count(),
+            session.local_warren_capacity(&data)
+        )
+    );
+}
+
+#[test]
 fn engineer_summary_distinguishes_local_and_posted_specialists() {
     assert_eq!(engineer_status_label(0, 0), "Engineer 0 · no local bonus");
     assert_eq!(engineer_status_label(0, 1), "Engineer 0 local · 1 posted");

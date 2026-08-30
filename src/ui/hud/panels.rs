@@ -220,7 +220,6 @@ pub(super) fn draw_jobs_panel(
         TextStyle::new(17.0, dark::TEXT),
     );
 
-    let idle = session.job_count(Job::Idle);
     let idle_reassignable = reassignable_job_count(session, data, Job::Idle);
     let x = panel.x + 14.0;
     let mut y = panel.y + 44.0;
@@ -272,7 +271,7 @@ pub(super) fn draw_jobs_panel(
 
     sprites.draw_job(Job::Idle, vec2(x + 9.0, y + 13.0));
     draw_ui_text_ex(
-        &format!("Idle {idle}"),
+        &workforce_capacity_label(session, data),
         x + 22.0,
         y + 18.0,
         TextStyle::new(16.0, dark::TEXT_DIM).params(),
@@ -404,6 +403,15 @@ fn engineer_status_label(local: usize, total: usize) -> String {
     } else {
         "Engineer 0 · no local bonus".to_owned()
     }
+}
+
+fn workforce_capacity_label(session: &GameSession, data: &GameData) -> String {
+    format!(
+        "Idle {} · Local {}/{}",
+        session.job_count(Job::Idle),
+        session.local_creature_count(),
+        session.local_warren_capacity(data)
+    )
 }
 
 /// Keep a combined food/raid banner short while naming the visible Guard

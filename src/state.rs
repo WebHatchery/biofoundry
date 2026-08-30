@@ -317,7 +317,10 @@ impl GameSession {
     }
 
     /// Number of walkable tiles available to workers in the warren itself.
-    fn local_warren_capacity(&self, data: &GameData) -> usize {
+    /// Number of local workers the warren's walkable floor can support before
+    /// crowding pressure begins. Active outpost rooms are intentionally not
+    /// included: they house remote crew rather than expanding local floor.
+    pub fn local_warren_capacity(&self, data: &GameData) -> usize {
         let floor_tiles = self
             .world
             .tiles
