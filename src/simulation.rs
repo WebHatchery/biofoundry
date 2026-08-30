@@ -41,6 +41,7 @@ pub struct TickReport {
     pub factory_this_tick: bool,
     pub worm_this_tick: bool,
     pub expedition_completed: Vec<ExpeditionCompletion>,
+    pub outpost_charter_awarded: bool,
     /// Outpost that automatically started a cargo-only return this tick.
     pub auto_return_started: Option<TilePos>,
     /// Outpost that automatically started a food-only resupply this tick.
@@ -111,6 +112,7 @@ pub fn tick(session: &mut GameSession, data: &GameData) -> TickReport {
     let wild = wildlife::tick_wildlife(session, data, dt);
     let deserters = food::tick_hunger(session, data, dt);
     let expedition_completed = outposts::tick_expeditions(session, data, dt);
+    let outpost_charter_awarded = outposts::claim_outpost_charter(session, data);
     let auto_return_started = outposts::start_auto_return_if_full(session, data);
     let auto_resupply_started = outposts::start_auto_resupply_if_needed(session, data);
     let transit_target = session.worm_transit.as_ref().map(|transit| transit.outpost);
@@ -182,6 +184,7 @@ pub fn tick(session: &mut GameSession, data: &GameData) -> TickReport {
         factory_this_tick,
         worm_this_tick,
         expedition_completed,
+        outpost_charter_awarded,
         auto_return_started,
         auto_resupply_started,
         transit_completed,

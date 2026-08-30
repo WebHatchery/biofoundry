@@ -2,6 +2,7 @@
 //! the shared harness; each submodule is one suite.
 
 mod campaign;
+mod charter;
 mod crafting;
 mod determinism;
 mod economy;

@@ -19,6 +19,7 @@ const UNLOCK_COUNTERS: &[&str] = &[
 
 pub(super) fn validate(data: &GameData) -> Result<(), String> {
     validate_config(data)?;
+    validate_balance(data)?;
     validate_registry_ids(data)?;
     validate_building_references(data)?;
     validate_unlocks(data)?;
@@ -38,6 +39,14 @@ pub(super) fn validate(data: &GameData) -> Result<(), String> {
                 "building data is missing required id '{required_building}'"
             ));
         }
+    }
+    Ok(())
+}
+
+fn validate_balance(data: &GameData) -> Result<(), String> {
+    let balance = &data.balance;
+    if balance.outpost_charter_haul_goal == 0 || balance.outpost_charter_reward_ingots == 0 {
+        return Err("outpost charter goal and reward must be positive".to_owned());
     }
     Ok(())
 }

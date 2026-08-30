@@ -57,11 +57,7 @@ impl CampaignObjective {
             } else {
                 "Next: activate the Worm Outpost, then send a cargo run.".to_owned()
             };
-            let scouting_hauls: u32 = session
-                .outposts
-                .iter()
-                .map(|outpost| outpost.expeditions_completed)
-                .sum();
+            let scouting_hauls = crate::simulation::outposts::total_expeditions(session);
             let route_upgrades: u32 = session
                 .outposts
                 .iter()
@@ -411,6 +407,9 @@ fn active_outpost_next_step(session: &GameSession, data: &GameData) -> String {
                 return "Next: tap the active Worm Outpost, then Resume scouting.".to_owned();
             }
             crate::simulation::outposts::ExpeditionState::Scouting { .. } => {
+                if let Some(guidance) = charter_guidance(session, data) {
+                    return guidance;
+                }
                 return "Next: let the Outpost expedition finish, then return its ore while keeping the scouts remote."
                     .to_owned()
             }
@@ -441,6 +440,18 @@ fn active_outpost_next_step(session: &GameSession, data: &GameData) -> String {
         }
     }
     .to_owned()
+}
+
+fn charter_guidance(session: &GameSession, data: &GameData) -> Option<String> {
+    let goal = data.balance.outpost_charter_haul_goal;
+    if session.outpost_charter_claimed || goal == 0 {
+        return None;
+    }
+    let completed = crate::simulation::outposts::total_expeditions(session).min(goal);
+    Some(format!(
+        "Next: finish scouting · Charter {completed}/{goal} · +{} ingots.",
+        data.balance.outpost_charter_reward_ingots
+    ))
 }
 
 fn outpost_upgrade_next_step(

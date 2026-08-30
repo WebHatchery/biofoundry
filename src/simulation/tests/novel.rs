@@ -12,7 +12,7 @@ mod cargo_return;
 mod engineering;
 mod transit_failures;
 
-fn active_outpost(
+pub(super) fn active_outpost(
     seed: u64,
 ) -> (
     crate::data::GameData,

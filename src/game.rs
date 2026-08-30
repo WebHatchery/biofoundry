@@ -209,6 +209,14 @@ impl Game {
                             .info(format_expedition_completion(*completion));
                         self.audio.play(Sfx::Complete);
                     }
+                    if report.outpost_charter_awarded {
+                        safe_beat_reached = true;
+                        self.notifications.success(format!(
+                            "Worm Road Charter · +{} ingots.",
+                            self.data.balance.outpost_charter_reward_ingots
+                        ));
+                        self.audio.play(Sfx::Complete);
+                    }
                     if report.auto_return_started.is_some() {
                         safe_beat_reached = true;
                         self.notifications.info(auto_return_notice());

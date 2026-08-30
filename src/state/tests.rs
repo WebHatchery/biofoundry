@@ -17,6 +17,7 @@ fn session_boots_from_config() {
     assert!(!session.patch_regrow.is_empty());
     assert!(!session.vein_ore.is_empty());
     assert!(session.economy.food > 0.0);
+    assert!(!session.outpost_charter_claimed);
 }
 
 #[test]
@@ -44,6 +45,21 @@ fn saves_from_before_event_history_load_with_an_empty_history() {
     let restored: GameSession = serde_json::from_value(encoded).unwrap();
 
     assert!(restored.event_history.is_empty());
+}
+
+#[test]
+fn saves_from_before_outpost_charter_load_unclaimed() {
+    let data = GameData::load().unwrap();
+    let session = GameSession::new(&data, 42);
+    let mut encoded = serde_json::to_value(&session).unwrap();
+    encoded
+        .as_object_mut()
+        .unwrap()
+        .remove("outpost_charter_claimed");
+
+    let restored: GameSession = serde_json::from_value(encoded).unwrap();
+
+    assert!(!restored.outpost_charter_claimed);
 }
 
 #[test]

@@ -6,6 +6,7 @@ use crate::state::outposts::{Outpost, WormTransit};
 use crate::state::structures::{BuildSite, Building};
 use crate::state::GameSession;
 
+mod charter;
 mod route_upgrades;
 
 fn boot() -> (GameData, GameSession) {
@@ -570,7 +571,7 @@ fn completed_objective_names_the_wait_step_for_a_scouting_outpost() {
 
     assert_eq!(
         objective.next,
-        "Next: let the Outpost expedition finish, then return its ore while keeping the scouts remote."
+        "Next: finish scouting · Charter 0/3 · +12 ingots."
     );
 }
 

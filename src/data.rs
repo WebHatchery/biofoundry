@@ -241,6 +241,12 @@ pub struct Balance {
     /// Scouting cycle after a resonance beacon is installed.
     #[serde(default = "default_outpost_resonator_cycle_sec")]
     pub outpost_resonator_cycle_sec: f32,
+    /// Completed scouting hauls required for the one-time Worm Road Charter.
+    #[serde(default = "default_outpost_charter_haul_goal")]
+    pub outpost_charter_haul_goal: u32,
+    /// Ingots awarded when the Worm Road Charter is completed.
+    #[serde(default = "default_outpost_charter_reward_ingots")]
+    pub outpost_charter_reward_ingots: u32,
     #[serde(default = "default_worm_transit_time")]
     pub worm_transit_time_sec: f32,
     /// Time for a staffed remote outpost to complete one scouting haul.
@@ -339,6 +345,12 @@ fn default_outpost_resonator_upgrade_ingots() -> u32 {
 }
 fn default_outpost_resonator_cycle_sec() -> f32 {
     20.0
+}
+fn default_outpost_charter_haul_goal() -> u32 {
+    3
+}
+fn default_outpost_charter_reward_ingots() -> u32 {
+    12
 }
 fn default_worm_transit_time() -> f32 {
     18.0

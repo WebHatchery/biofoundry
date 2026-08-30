@@ -156,6 +156,9 @@ pub struct GameSession {
     /// Persisting it keeps multi-route automatic logistics fair across saves.
     #[serde(default)]
     pub auto_route_cursor: usize,
+    /// Whether the one-time Worm Road Charter reward has been claimed.
+    #[serde(default)]
+    pub outpost_charter_claimed: bool,
     #[serde(default)]
     pub worm_transit: Option<WormTransit>,
     #[serde(default)]
@@ -248,6 +251,7 @@ impl GameSession {
             tutorial_build_completed: false,
             outposts: Vec::new(),
             auto_route_cursor: 0,
+            outpost_charter_claimed: false,
             worm_transit: None,
             last_transit_failure: None,
             event_history: Vec::new(),

@@ -140,6 +140,38 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                 ));
             }
         }
+        "endless_charter" => {
+            begin(game, "endless_resonator_upgraded");
+            game.notifications.clear();
+            game.paused = true;
+            if let GameState::Warren(session) = &mut game.state {
+                session.economy.ingots_stock = 0;
+                if let Some(route) = session.outposts.last_mut() {
+                    let goal = game.data.balance.outpost_charter_haul_goal;
+                    route.expeditions_completed = goal.saturating_sub(1);
+                    route.ore_scouted = route
+                        .expeditions_completed
+                        .saturating_mul(route.crew.len() as u32)
+                        .saturating_mul(game.data.balance.outpost_upgraded_ore_per_crew);
+                    route.cargo.clear();
+                    route.cargo.insert(Good::CookedFood, 2);
+                    route.expedition_progress = 0.0;
+                    route.expedition_paused = false;
+                }
+                session.outpost_charter_claimed = false;
+            }
+        }
+        "endless_charter_awarded" => {
+            begin(game, "endless_charter");
+            game.paused = false;
+            if let GameState::Warren(session) = &mut game.state {
+                if let Some(route) = session.outposts.last_mut() {
+                    route.expedition_progress =
+                        simulation::outposts::expedition_cycle_sec(route, &game.data)
+                            - simulation::SIM_DT;
+                }
+            }
+        }
         "endless_routes" => {
             super::begin(game, "endless_load_preview");
             if let GameState::Warren(session) = &mut game.state {
