@@ -179,6 +179,14 @@ fn auto_return_notice_names_the_remote_team_outcome() {
 }
 
 #[test]
+fn auto_resupply_notice_names_the_food_only_transit() {
+    assert_eq!(
+        auto_resupply_notice(),
+        "Outpost scouts need food — a food-only resupply is on its way."
+    );
+}
+
+#[test]
 fn transit_completion_notice_names_mixed_payloads() {
     let completion = TransitCompletion {
         direction: TransitDirection::ToShrine,

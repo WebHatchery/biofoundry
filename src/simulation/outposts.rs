@@ -31,17 +31,35 @@ pub fn activate_outpost(session: &mut GameSession, pos: TilePos) -> bool {
 }
 
 pub fn start_to_outpost(session: &mut GameSession, data: &GameData, pos: TilePos) -> bool {
-    start_transit(session, data, pos, TransitDirection::ToOutpost, true, false)
+    start_transit(
+        session,
+        data,
+        pos,
+        TransitDirection::ToOutpost,
+        TransitPlan::Standard,
+    )
 }
 
 pub fn start_to_shrine(session: &mut GameSession, data: &GameData, pos: TilePos) -> bool {
-    start_transit(session, data, pos, TransitDirection::ToShrine, true, false)
+    start_transit(
+        session,
+        data,
+        pos,
+        TransitDirection::ToShrine,
+        TransitPlan::Standard,
+    )
 }
 
 /// Start a return trip that unloads the remote hold but leaves stationed
 /// scouts at the Outpost for another expedition cycle.
 pub fn start_cargo_to_shrine(session: &mut GameSession, data: &GameData, pos: TilePos) -> bool {
-    start_transit(session, data, pos, TransitDirection::ToShrine, false, false)
+    start_transit(
+        session,
+        data,
+        pos,
+        TransitDirection::ToShrine,
+        TransitPlan::CargoOnly,
+    )
 }
 
 /// Return the selected Outpost's current remote cargo capacity.
@@ -242,7 +260,61 @@ pub fn start_auto_return_if_full(session: &mut GameSession, data: &GameData) -> 
                 && outpost.cargo_total() >= storage_capacity(outpost, data)
         })
         .map(|outpost| outpost.pos)?;
-    start_transit(session, data, pos, TransitDirection::ToShrine, false, true).then_some(pos)
+    start_transit(
+        session,
+        data,
+        pos,
+        TransitDirection::ToShrine,
+        TransitPlan::AutoCargoReturn,
+    )
+    .then_some(pos)
+}
+
+/// Start one opt-in food-only trip when stationed scouts need provisions.
+/// Manual pause is respected so a player who is protecting a route does not
+/// have food pulled from the warren unexpectedly.
+pub fn start_auto_resupply_if_needed(
+    session: &mut GameSession,
+    data: &GameData,
+) -> Option<TilePos> {
+    if session.worm_transit.is_some() {
+        return None;
+    }
+    let pos = session
+        .outposts
+        .iter()
+        .find(|outpost| {
+            let food_required = (outpost.crew.len() as u32)
+                .saturating_mul(data.balance.outpost_expedition_food_per_crew);
+            let food_available = outpost.cargo.get(&Good::CookedFood).copied().unwrap_or(0);
+            let food_ready_at_warren = (session.economy.food - data.balance.worm_feed_reserve)
+                .max(0.0)
+                .floor() as u32;
+            outpost.active
+                && outpost.auto_resupply_food
+                && !outpost.expedition_paused
+                && !outpost.crew.is_empty()
+                && outpost.cargo_total() < storage_capacity(outpost, data)
+                && food_available < food_required
+                && food_ready_at_warren > 0
+        })
+        .map(|outpost| outpost.pos)?;
+    start_transit(
+        session,
+        data,
+        pos,
+        TransitDirection::ToOutpost,
+        TransitPlan::FoodResupply,
+    )
+    .then_some(pos)
+}
+
+#[derive(Clone, Copy)]
+enum TransitPlan {
+    Standard,
+    CargoOnly,
+    AutoCargoReturn,
+    FoodResupply,
 }
 
 fn start_transit(
@@ -250,8 +322,7 @@ fn start_transit(
     data: &GameData,
     pos: TilePos,
     direction: TransitDirection,
-    return_crew: bool,
-    preserve_expedition_food: bool,
+    plan: TransitPlan,
 ) -> bool {
     if !session.worm_awake
         || session.worm_transit.is_some()
@@ -266,8 +337,15 @@ fn start_transit(
         return false;
     }
     let cap = storage_capacity(outpost, data);
-    let (ore, ingots, food) = match direction {
-        TransitDirection::ToOutpost => {
+    let (ore, ingots, food) = match (direction, plan) {
+        (TransitDirection::ToOutpost, TransitPlan::FoodResupply) => {
+            let room = cap.saturating_sub(outpost.cargo_total());
+            let food_available = (session.economy.food - data.balance.worm_feed_reserve)
+                .max(0.0)
+                .floor() as u32;
+            (0, 0, food_available.min(room) as f32)
+        }
+        (TransitDirection::ToOutpost, _) => {
             // Remote cargo is stored in whole units; leave any fractional
             // food behind instead of charging it and truncating it at arrival.
             let food_available = (session.economy.food - data.balance.worm_feed_reserve)
@@ -282,23 +360,25 @@ fn start_transit(
             );
             (load.ore, load.ingots, load.food as f32)
         }
-        TransitDirection::ToShrine => {
+        (TransitDirection::ToShrine, TransitPlan::AutoCargoReturn) => {
             let food = *outpost.cargo.get(&Good::CookedFood).unwrap_or(&0);
-            let keep_food = if preserve_expedition_food {
-                (outpost.crew.len() as u32)
-                    .saturating_mul(data.balance.outpost_expedition_food_per_crew)
-            } else {
-                0
-            };
+            let keep_food = (outpost.crew.len() as u32)
+                .saturating_mul(data.balance.outpost_expedition_food_per_crew);
             (
                 *outpost.cargo.get(&Good::Ore).unwrap_or(&0),
                 *outpost.cargo.get(&Good::Ingot).unwrap_or(&0),
                 food.saturating_sub(keep_food) as f32,
             )
         }
+        (TransitDirection::ToShrine, _) => (
+            *outpost.cargo.get(&Good::Ore).unwrap_or(&0),
+            *outpost.cargo.get(&Good::Ingot).unwrap_or(&0),
+            *outpost.cargo.get(&Good::CookedFood).unwrap_or(&0) as f32,
+        ),
     };
-    let passengers = match direction {
-        TransitDirection::ToOutpost => session
+    let passengers = match (direction, plan) {
+        (TransitDirection::ToOutpost, TransitPlan::FoodResupply) => Vec::new(),
+        (TransitDirection::ToOutpost, _) => session
             .creatures
             .iter()
             .filter(|c| {
@@ -313,8 +393,8 @@ fn start_transit(
             )
             .map(|c| c.id)
             .collect(),
-        TransitDirection::ToShrine if return_crew => outpost.crew.clone(),
-        TransitDirection::ToShrine => Vec::new(),
+        (TransitDirection::ToShrine, TransitPlan::Standard) => outpost.crew.clone(),
+        (TransitDirection::ToShrine, _) => Vec::new(),
     };
     if ore == 0 && ingots == 0 && food <= 0.0 && passengers.is_empty() {
         return false;

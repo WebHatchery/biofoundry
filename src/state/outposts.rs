@@ -69,6 +69,10 @@ pub struct Outpost {
     /// stationed for the next expedition.
     #[serde(default)]
     pub auto_return_cargo: bool,
+    /// Automatically send cooked food from the warren when remote scouts need
+    /// another expedition provision.
+    #[serde(default)]
+    pub auto_resupply_food: bool,
     #[serde(default)]
     pub last_failure: Option<String>,
 }
@@ -88,6 +92,7 @@ impl Outpost {
             crew_dispatch_limit: None,
             storage_upgraded: false,
             auto_return_cargo: false,
+            auto_resupply_food: false,
             last_failure: None,
         }
     }
@@ -141,6 +146,18 @@ impl Outpost {
             "Auto-return · Cargo only"
         } else {
             "Auto-return · Off"
+        }
+    }
+
+    pub fn toggle_auto_resupply(&mut self) {
+        self.auto_resupply_food = !self.auto_resupply_food;
+    }
+
+    pub fn auto_resupply_label(&self) -> &'static str {
+        if self.auto_resupply_food {
+            "Auto-resupply · Food only"
+        } else {
+            "Auto-resupply · Off"
         }
     }
 }

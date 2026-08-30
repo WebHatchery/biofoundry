@@ -589,6 +589,18 @@ pub(super) fn draw_inspect_panel(
                         actions.push(UiAction::ToggleOutpostAutoReturn(pos));
                     }
                     y += 26.0;
+                    let auto_resupply_label = outpost
+                        .map(|route| route.auto_resupply_label())
+                        .unwrap_or("Auto-resupply · Off");
+                    if hud_button(
+                        Rect::new(x, y, panel.w - 28.0, 24.0),
+                        auto_resupply_label,
+                        session.worm_transit.is_none(),
+                        mouse,
+                    ) {
+                        actions.push(UiAction::ToggleOutpostAutoResupply(pos));
+                    }
+                    y += 26.0;
                     let priority = outpost
                         .map(|route| route.cargo_priority.label())
                         .unwrap_or("Ore first");

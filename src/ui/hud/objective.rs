@@ -367,6 +367,11 @@ fn active_outpost_next_step(session: &GameSession, data: &GameData) -> &'static 
     if has_crew {
         match crate::simulation::outposts::expedition_state(outpost, data) {
             crate::simulation::outposts::ExpeditionState::NeedsFood { .. } => {
+                if outpost.auto_resupply_food
+                    && session.economy.food - data.balance.worm_feed_reserve >= 1.0
+                {
+                    return "Next: let Auto-resupply deliver food to the remote scouts.";
+                }
                 if session.economy.food - data.balance.worm_feed_reserve >= 1.0 {
                     return "Next: tap the active Worm Outpost, then load food for its expedition.";
                 }

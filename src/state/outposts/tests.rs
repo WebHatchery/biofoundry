@@ -12,6 +12,8 @@ fn new_outpost_defaults_to_ore_first_loading() {
     assert!(!outpost.storage_upgraded);
     assert!(!outpost.auto_return_cargo);
     assert_eq!(outpost.auto_return_label(), "Auto-return · Off");
+    assert!(!outpost.auto_resupply_food);
+    assert_eq!(outpost.auto_resupply_label(), "Auto-resupply · Off");
     assert_eq!(outpost.crew_dispatch_label(4), "Crew per run · Auto");
 }
 
@@ -59,4 +61,17 @@ fn auto_return_toggle_names_the_cargo_only_policy() {
     outpost.toggle_auto_return();
     assert!(!outpost.auto_return_cargo);
     assert_eq!(outpost.auto_return_label(), "Auto-return · Off");
+}
+
+#[test]
+fn auto_resupply_toggle_names_the_food_only_policy() {
+    let mut outpost = Outpost::new(TilePos::new(4, 4));
+
+    outpost.toggle_auto_resupply();
+    assert!(outpost.auto_resupply_food);
+    assert_eq!(outpost.auto_resupply_label(), "Auto-resupply · Food only");
+
+    outpost.toggle_auto_resupply();
+    assert!(!outpost.auto_resupply_food);
+    assert_eq!(outpost.auto_resupply_label(), "Auto-resupply · Off");
 }

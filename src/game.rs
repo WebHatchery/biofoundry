@@ -178,6 +178,11 @@ impl Game {
                         self.notifications.info(auto_return_notice());
                         self.audio.play(Sfx::Select);
                     }
+                    if report.auto_resupply_started.is_some() {
+                        safe_beat_reached = true;
+                        self.notifications.info(auto_resupply_notice());
+                        self.audio.play(Sfx::Select);
+                    }
                     if let Some(completion) = report.transit_completed {
                         safe_beat_reached = true;
                         self.notifications
@@ -529,6 +534,10 @@ fn format_expedition_completion(completion: ExpeditionCompletion) -> String {
 
 fn auto_return_notice() -> &'static str {
     "Outpost hold full — cargo returning while scouts remain remote."
+}
+
+fn auto_resupply_notice() -> &'static str {
+    "Outpost scouts need food — a food-only resupply is on its way."
 }
 
 fn warren_secured_notice(session: &GameSession) -> &'static str {

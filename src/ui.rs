@@ -65,6 +65,8 @@ pub enum UiAction {
     ToggleOutpostExpedition(TilePos),
     /// Toggle automatic cargo-only returns when an awakened hold is full.
     ToggleOutpostAutoReturn(TilePos),
+    /// Toggle automatic food-only resupply for an awakened remote crew.
+    ToggleOutpostAutoResupply(TilePos),
     TransitToOutpost(TilePos),
     TransitToShrine(TilePos),
     /// Return an outpost's cargo while leaving its remote crew in place.

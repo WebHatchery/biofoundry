@@ -11,7 +11,7 @@ use macroquad_toolkit::prelude::*;
 use macroquad_toolkit::ui::draw_ui_text_ex;
 
 const INSPECT_HELP_BODY: &str =
-    "Tap a building on the map to see its status and controls. Tap an equipment button in the Blacksmith card to queue it; after onboarding, Breeding Pit buttons show specialist benefits. At an awakened Outpost, tap Load order for cargo priority, Crew per run for cargo-only or scout counts, then Load to send food and crew to scout for ore; pause scouting to protect provisions, use the cargo-only return to bring ore home while keeping scouts remote, or turn on Auto-return · Cargo only for full holds.";
+    "Tap a building on the map to see its status and controls. Tap an equipment button in the Blacksmith card to queue it; after onboarding, Breeding Pit buttons show specialist benefits. At an awakened Outpost, tap Load order for cargo priority, Crew per run for cargo-only or scout counts, then Load to send food and crew to scout for ore; pause scouting to protect provisions, use the cargo-only return to bring ore home while keeping scouts remote, turn on Auto-return · Cargo only for full holds, or turn on Auto-resupply · Food only when remote scouts need provisions.";
 const OBJECTIVE_HELP_BODY: &str =
     "Read the Objective card for the current campaign milestone and its next requirement. Locked gates name their exact unlock; after the worm wakes, inspect the Outpost to prepare cargo runs.";
 

@@ -2,6 +2,7 @@
 
 use super::super::Game;
 use crate::simulation;
+use crate::state::creatures::Good;
 use crate::state::GameState;
 
 pub(super) fn begin(game: &mut Game, scene: &str) {
@@ -11,6 +12,15 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
             if let GameState::Warren(session) = &mut game.state {
                 if let Some(route) = session.outposts.last_mut() {
                     route.auto_return_cargo = true;
+                }
+            }
+        }
+        "endless_auto_resupply" => {
+            super::begin(game, "endless_load_preview");
+            if let GameState::Warren(session) = &mut game.state {
+                if let Some(route) = session.outposts.last_mut() {
+                    route.auto_resupply_food = true;
+                    route.cargo.remove(&Good::CookedFood);
                 }
             }
         }
