@@ -30,6 +30,17 @@ fn panels_claim_scaled_button_margins_before_world_input() {
 }
 
 #[test]
+fn touch_release_position_can_claim_hud_when_mouse_is_elsewhere() {
+    let ui = VirtualUi::from_screen_size(1280.0, 720.0, 1440.0, 900.0);
+    let touch_screen = ui.ui_to_screen(vec2(50.0, 30.0));
+    let touch_ui = interaction_point(&ui, vec2(600.0, 500.0), Some(touch_screen));
+    let top_bar = Rect::new(12.0, 12.0, 1256.0, 48.0);
+
+    assert!(top_bar_input_rect(top_bar, ui.scale).contains_point(touch_ui));
+    assert!(!top_bar_input_rect(top_bar, ui.scale).contains_point(vec2(600.0, 500.0)));
+}
+
+#[test]
 fn worm_completion_summary_names_the_resources_consumed() {
     let data = GameData::load().unwrap();
     let mut session = GameSession::new(&data, 42);

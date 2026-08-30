@@ -318,6 +318,7 @@ impl Game {
                         help_open: self.help_open,
                         paused: self.paused,
                         save_exists: self.save_exists,
+                        touch_position: self.touch_tap,
                     },
                 );
                 end_virtual_ui_frame();

@@ -40,6 +40,9 @@ pub struct HudOptions {
     pub help_open: bool,
     pub paused: bool,
     pub save_exists: bool,
+    /// Touch release in logical screen coordinates, when the gesture was a
+    /// tap. It keeps world-click suppression aligned with touch UI hits.
+    pub touch_position: Option<Vec2>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -84,6 +87,11 @@ pub fn draw(
 ) -> HudFrame {
     let mut actions = Vec::new();
     let mouse = ui.mouse_position();
+    // A touch release may not update macroquad's mouse position. Use the
+    // semantic touch point when deciding whether the release belongs to HUD
+    // chrome, otherwise a button can fire and the same contact can fall
+    // through to a world action underneath it.
+    let interaction_point = interaction_point(ui, mouse, options.touch_position);
 
     let top_bar = Rect::new(12.0, 12.0, LOGICAL_WIDTH - 24.0, 48.0);
     let food_panel = Rect::new(12.0, 66.0, PANEL_W, 184.0);
@@ -170,9 +178,11 @@ pub fn draw(
         || worm_up
         || colony_failure.is_some()
         || options.help_open
-        || tutorial_panel.is_some_and(|r| panel_input_rect(r, ui.scale).contains_point(mouse))
-        || panel_input_rect(objective_panel, ui.scale).contains_point(mouse)
-        || inspect_panel.is_some_and(|r| panel_input_rect(r, ui.scale).contains_point(mouse))
+        || tutorial_panel
+            .is_some_and(|r| panel_input_rect(r, ui.scale).contains_point(interaction_point))
+        || panel_input_rect(objective_panel, ui.scale).contains_point(interaction_point)
+        || inspect_panel
+            .is_some_and(|r| panel_input_rect(r, ui.scale).contains_point(interaction_point))
         || [
             top_bar_input_rect(top_bar, ui.scale),
             panel_input_rect(food_panel, ui.scale),
@@ -180,7 +190,7 @@ pub fn draw(
             panel_input_rect(tools_panel, ui.scale),
         ]
         .iter()
-        .any(|r| r.contains_point(mouse));
+        .any(|r| r.contains_point(interaction_point));
 
     HudFrame {
         actions,
@@ -272,6 +282,12 @@ fn panel_input_rect(panel: Rect, ui_scale: f32) -> Rect {
         panel.w + margin * 2.0,
         panel.h + margin * 2.0,
     )
+}
+
+fn interaction_point(ui: &VirtualUi, mouse: Vec2, touch_position: Option<Vec2>) -> Vec2 {
+    touch_position
+        .and_then(|position| ui.screen_to_ui_checked(position))
+        .unwrap_or(mouse)
 }
 
 #[cfg(test)]
