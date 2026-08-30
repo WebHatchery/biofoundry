@@ -266,7 +266,7 @@ fn recovery_guide_body(session: &GameSession, data: &GameData) -> String {
 
 /// A one-line legend for the in-world status badges, in a thin strip along
 /// the bottom of the world view (shown only while a node is stalled).
-pub(super) fn draw_status_legend() {
+pub(super) fn draw_status_legend(session: &GameSession, data: &GameData) {
     use crate::ui::legibility::BuildingStatus as St;
     let strip = Rect::new(280.0, LOGICAL_HEIGHT - 30.0, LOGICAL_WIDTH - 292.0, 24.0);
     draw_surface(
@@ -282,11 +282,18 @@ pub(super) fn draw_status_legend() {
         (St::Exhausted, Color::new(0.60, 0.60, 0.66, 1.0)),
         (St::RouteInactive, Color::new(0.70, 0.62, 0.85, 1.0)),
         (St::ExpeditionPaused, Color::new(0.95, 0.72, 0.35, 1.0)),
+        (St::ExpeditionNeedsFood, Color::new(0.95, 0.55, 0.20, 1.0)),
+        (St::ExpeditionHoldFull, Color::new(0.92, 0.32, 0.26, 1.0)),
         (St::WasteOverflow, Color::new(0.65, 0.85, 0.35, 1.0)),
     ];
     let mut lx = strip.x + 12.0;
     let cy = strip.y + strip.h * 0.5;
     for (status, color) in items {
+        if !session.buildings.iter().any(|building| {
+            crate::ui::legibility::building_status(session, data, building) == Some(status)
+        }) {
+            continue;
+        }
         draw_circle(lx, cy, 7.5, Color::new(0.08, 0.08, 0.10, 0.92));
         crate::ui::warren::draw_status_glyph(vec2(lx, cy), 6.0, status, color);
         let label = status.label();

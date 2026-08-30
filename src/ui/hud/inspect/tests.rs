@@ -292,11 +292,45 @@ fn paused_outpost_reports_its_manual_scouting_state() {
     session.ensure_outpost(pos);
     session.worm_awake = true;
     session.outposts[0].active = true;
+    session.outposts[0].crew.push(session.creatures[0].id);
     session.outposts[0].expedition_paused = true;
 
     assert_eq!(
         inspect_status(&session, &data, session.building_at(pos).unwrap()),
         ("Scouting paused", dark::WARNING)
+    );
+}
+
+#[test]
+fn staffed_outpost_reports_food_and_hold_blockers() {
+    let data = GameData::load().expect("embedded game data");
+    let mut session = GameSession::new(&data, 18);
+    let pos = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(pos, _)| session.can_place_building(*pos))
+        .map(|(pos, _)| pos)
+        .expect("a walkable outpost location");
+    session.buildings.push(Building::new("outpost", pos));
+    session.ensure_outpost(pos);
+    session.worm_awake = true;
+    session.outposts[0].active = true;
+    session.outposts[0].crew.push(session.creatures[0].id);
+
+    assert_eq!(
+        inspect_status(&session, &data, session.building_at(pos).unwrap()),
+        ("Needs scout food", dark::WARNING)
+    );
+
+    session.outposts[0].cargo.insert(Good::CookedFood, 1);
+    session.outposts[0].cargo.insert(
+        Good::Ore,
+        data.balance.outpost_storage_cap.saturating_sub(1),
+    );
+    assert_eq!(
+        inspect_status(&session, &data, session.building_at(pos).unwrap()),
+        ("Outpost hold full", dark::NEGATIVE)
     );
 }
 

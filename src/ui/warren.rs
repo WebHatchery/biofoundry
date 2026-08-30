@@ -138,6 +138,8 @@ fn draw_status_badge(pos: TilePos, ts: f32, status: crate::ui::legibility::Build
         St::AwaitingHaul => Color::new(0.40, 0.80, 0.92, 1.0),
         St::RouteInactive => Color::new(0.70, 0.62, 0.85, 1.0),
         St::ExpeditionPaused => Color::new(0.95, 0.72, 0.35, 1.0),
+        St::ExpeditionNeedsFood => Color::new(0.95, 0.55, 0.20, 1.0),
+        St::ExpeditionHoldFull => Color::new(0.92, 0.32, 0.26, 1.0),
         St::WasteOverflow => Color::new(0.65, 0.85, 0.35, 1.0),
     };
     draw_status_glyph(vec2(bx, by), r, status, color);
@@ -199,6 +201,20 @@ pub(super) fn draw_status_glyph(
             draw_line(bx - s * 0.35, by - s, bx - s * 0.35, by + s, 2.0, color);
             draw_line(bx + s * 0.35, by - s, bx + s * 0.35, by + s, 2.0, color);
         }
+        // Scout food low: an empty down-triangle, matching starvation.
+        St::ExpeditionNeedsFood => draw_triangle(
+            vec2(bx, by + s),
+            vec2(bx - s, by - s * 0.7),
+            vec2(bx + s, by - s * 0.7),
+            color,
+        ),
+        // Outpost full: a full up-triangle, matching a backed-up output.
+        St::ExpeditionHoldFull => draw_triangle(
+            vec2(bx, by - s),
+            vec2(bx - s, by + s * 0.7),
+            vec2(bx + s, by + s * 0.7),
+            color,
+        ),
         St::WasteOverflow => {
             draw_circle(bx, by, s, color);
             draw_circle(bx, by, s * 0.35, Color::new(0.12, 0.18, 0.08, 1.0));

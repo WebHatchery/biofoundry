@@ -582,11 +582,7 @@ pub(super) fn draw_inspect_panel(
                     }
                     y += 36.0;
                     if cargo == 0 && crew == 0 && !loadable_payload {
-                        line(
-                            "No cargo or crew ready at the warren",
-                            dark::WARNING,
-                            &mut y,
-                        );
+                        line("No payload ready at warren", dark::WARNING, &mut y);
                     }
                 } else if active {
                     line("Awaiting the worm's awakening", dark::TEXT_DIM, &mut y);

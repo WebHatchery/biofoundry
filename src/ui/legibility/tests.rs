@@ -215,6 +215,7 @@ fn loaded_inactive_outpost_keeps_a_route_status_on_the_map() {
 #[test]
 fn paused_outpost_keeps_a_distinct_map_status() {
     let (data, mut session) = boot();
+    session.worm_awake = true;
     let pos = session
         .world
         .tiles
@@ -225,6 +226,7 @@ fn paused_outpost_keeps_a_distinct_map_status() {
     session.buildings.push(Building::new("outpost", pos));
     session.ensure_outpost(pos);
     session.outposts[0].active = true;
+    session.outposts[0].crew.push(session.creatures[0].id);
     session.outposts[0].expedition_paused = true;
 
     assert_eq!(
@@ -232,6 +234,39 @@ fn paused_outpost_keeps_a_distinct_map_status() {
         Some(BuildingStatus::ExpeditionPaused)
     );
     assert_eq!(BuildingStatus::ExpeditionPaused.label(), "Scouting paused");
+}
+
+#[test]
+fn staffed_outpost_exposes_food_and_hold_blockers_on_the_map() {
+    let (data, mut session) = boot();
+    session.worm_awake = true;
+    let pos = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(p, t)| t.walkable() && session.can_place_building(*p))
+        .map(|(p, _)| p)
+        .unwrap();
+    session.buildings.push(Building::new("outpost", pos));
+    session.ensure_outpost(pos);
+    session.outposts[0].active = true;
+    let crew_id = session.creatures[0].id;
+    session.outposts[0].crew.push(crew_id);
+
+    assert_eq!(
+        building_status(&session, &data, session.building_at(pos).unwrap()),
+        Some(BuildingStatus::ExpeditionNeedsFood)
+    );
+
+    session.outposts[0].cargo.insert(Good::CookedFood, 1);
+    session.outposts[0].cargo.insert(
+        Good::Ore,
+        data.balance.outpost_storage_cap.saturating_sub(1),
+    );
+    assert_eq!(
+        building_status(&session, &data, session.building_at(pos).unwrap()),
+        Some(BuildingStatus::ExpeditionHoldFull)
+    );
 }
 
 #[test]

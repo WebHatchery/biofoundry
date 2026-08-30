@@ -52,6 +52,10 @@ pub enum BuildingStatus {
     RouteInactive,
     /// An awakened remote route whose scouting has been paused by the player.
     ExpeditionPaused,
+    /// A staffed remote route that needs more cooked food before scouting.
+    ExpeditionNeedsFood,
+    /// A remote cargo hold that needs a return trip before scouting can continue.
+    ExpeditionHoldFull,
     /// Spoiled stores are accumulating faster than they are cleaned.
     WasteOverflow,
 }
@@ -73,6 +77,8 @@ impl BuildingStatus {
             BuildingStatus::AwaitingHaul => "Awaiting haul",
             BuildingStatus::RouteInactive => "Route inactive",
             BuildingStatus::ExpeditionPaused => "Scouting paused",
+            BuildingStatus::ExpeditionNeedsFood => "Scout food low",
+            BuildingStatus::ExpeditionHoldFull => "Outpost full",
             BuildingStatus::WasteOverflow => "Waste accumulating",
         }
     }
@@ -177,14 +183,25 @@ pub fn building_status(
         {
             Some(BuildingStatus::RouteInactive)
         }
-        "outpost"
-            if session
-                .outposts
-                .iter()
-                .find(|o| o.pos == pos)
-                .is_some_and(|o| o.active && o.expedition_paused) =>
-        {
-            Some(BuildingStatus::ExpeditionPaused)
+        "outpost" => {
+            let outpost = session.outposts.iter().find(|o| o.pos == pos)?;
+            if !session.worm_awake {
+                return None;
+            }
+            match crate::simulation::outposts::expedition_state(outpost, data) {
+                crate::simulation::outposts::ExpeditionState::Paused => {
+                    Some(BuildingStatus::ExpeditionPaused)
+                }
+                crate::simulation::outposts::ExpeditionState::NeedsFood { .. } => {
+                    Some(BuildingStatus::ExpeditionNeedsFood)
+                }
+                crate::simulation::outposts::ExpeditionState::HoldFull => {
+                    Some(BuildingStatus::ExpeditionHoldFull)
+                }
+                crate::simulation::outposts::ExpeditionState::Inactive
+                | crate::simulation::outposts::ExpeditionState::NoCrew
+                | crate::simulation::outposts::ExpeditionState::Scouting { .. } => None,
+            }
         }
         _ => None,
     }

@@ -151,8 +151,21 @@ pub(super) fn inspect_status(
                 }
                 return ("Route inactive", dark::WARNING);
             }
-            if outpost.expedition_paused {
-                return ("Scouting paused", dark::WARNING);
+            if session.worm_awake {
+                match crate::simulation::outposts::expedition_state(outpost, data) {
+                    crate::simulation::outposts::ExpeditionState::Paused => {
+                        return ("Scouting paused", dark::WARNING);
+                    }
+                    crate::simulation::outposts::ExpeditionState::NeedsFood { .. } => {
+                        return ("Needs scout food", dark::WARNING);
+                    }
+                    crate::simulation::outposts::ExpeditionState::HoldFull => {
+                        return ("Outpost hold full", dark::NEGATIVE);
+                    }
+                    crate::simulation::outposts::ExpeditionState::Inactive
+                    | crate::simulation::outposts::ExpeditionState::NoCrew
+                    | crate::simulation::outposts::ExpeditionState::Scouting { .. } => {}
+                }
             }
             if !session.worm_awake {
                 return ("Route active", dark::POSITIVE);

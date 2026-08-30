@@ -127,7 +127,7 @@ pub fn draw(
         .iter()
         .any(|b| crate::ui::legibility::building_status(session, data, b).is_some())
     {
-        overlays::draw_status_legend();
+        overlays::draw_status_legend(session, data);
     }
 
     let victory_up = session.won && !session.victory_shown;
