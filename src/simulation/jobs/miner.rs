@@ -28,7 +28,9 @@ pub(super) fn tick_miner(
         Task::Idle => decide_miner(creature, session, data, claims),
         Task::GoMine(mine) => {
             // Arrived at the Mine tile: take the post if it's still valid.
-            let ready = creature.tile() == mine
+            let claim_count = claims.get(&mine).copied().unwrap_or(0);
+            let ready = claim_count <= mine_slots(data)
+                && creature.tile() == mine
                 && session
                     .building_at(mine)
                     .is_some_and(|b| b.kind == "mine" && b.reserve > 0.0);
@@ -151,18 +153,13 @@ fn release_mine(claims: &mut MineClaims, mine: TilePos) {
 
 /// Nearest Mine with a free slot and ore left in the deposit, reachable
 /// from the miner's tile.
-fn nearest_open_mine(
+pub(super) fn nearest_open_mine(
     creature: &Creature,
     session: &GameSession,
     data: &GameData,
     claims: &MineClaims,
 ) -> Option<TilePos> {
-    let slots = data
-        .buildings
-        .get("mine")
-        .and_then(|d| d.workstation.as_ref())
-        .map(|w| w.slots)
-        .unwrap_or(0);
+    let slots = mine_slots(data);
     let from = creature.tile();
     let mut mines: Vec<TilePos> = session
         .buildings_of("mine")
@@ -175,4 +172,12 @@ fn nearest_open_mine(
         .into_iter()
         .take(6)
         .find(|p| from == *p || nav::find_path(session, from, *p).is_some())
+}
+
+fn mine_slots(data: &GameData) -> u32 {
+    data.buildings
+        .get("mine")
+        .and_then(|d| d.workstation.as_ref())
+        .map(|w| w.slots)
+        .unwrap_or(0)
 }
