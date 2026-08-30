@@ -300,7 +300,8 @@ fn grant_unlocks(session: &mut GameSession, data: &GameData, report: &mut WildRe
 }
 
 /// Session-wide counter lookup: progression counters plus economy stats.
-fn counter_value(session: &GameSession, name: &str) -> u32 {
+/// The UI uses the same lookup so locked gates can show live progress.
+pub fn counter_value(session: &GameSession, name: &str) -> u32 {
     match name {
         "ingots_forged" => session.economy.ingots_forged,
         "ore_delivered_total" => session.economy.ore_delivered_total,

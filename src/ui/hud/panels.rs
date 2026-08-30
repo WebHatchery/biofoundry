@@ -5,7 +5,7 @@ use crate::data::GameData;
 use crate::simulation::{self, food};
 use crate::state::creatures::Job;
 use crate::state::GameSession;
-use crate::ui::hud::requirements::unlock_requirement;
+use crate::ui::hud::requirements::unlock_requirement_progress;
 use crate::ui::hud::widgets::{hud_button, panel_style};
 use crate::ui::hud::HudSprites;
 use crate::ui::{UiAction, UiMode, LOGICAL_WIDTH};
@@ -465,7 +465,7 @@ pub(super) fn draw_jobs_panel(
     }
     for (label, unlock_id) in [("Slime", "slime_janitor"), ("Bat", "bat_courier")] {
         if !session.unlocked.contains(unlock_id) {
-            if let Some(requirement) = unlock_requirement(data, unlock_id) {
+            if let Some(requirement) = unlock_requirement_progress(session, data, unlock_id) {
                 locked_actions.push(format!("{label} → {requirement}"));
             }
         }
@@ -599,7 +599,8 @@ pub(super) fn draw_tools_panel(
             };
             if !unlocked {
                 if let Some(unlock_id) = def.requires_unlock.as_deref() {
-                    if let Some(requirement) = unlock_requirement(data, unlock_id) {
+                    if let Some(requirement) = unlock_requirement_progress(session, data, unlock_id)
+                    {
                         locked_requirements.push(format!("{short} → {requirement}"));
                     }
                 }
