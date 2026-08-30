@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-31
-**Source revision:** `0c45b3f`
+**Source revision:** `47df848`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -38,7 +38,7 @@ automated simulation results into first-time-player evidence.
 | Multi-route failure visibility | Pass (focused evidence) | Reopening one failed Outpost now clears only that route's failure; the global route warning remains visible while any other Outpost still needs recovery, including when a healthy second route starts a transit. This keeps the top-bar warning consistent with the per-route inspection state as remote routes multiply. |
 | Loaded route failure visibility | Pass (focused and published build evidence) | Installing a save now reconciles each persisted Outpost failure with the global top-bar warning, repairing a missing banner and clearing a stale one. The route records remain authoritative across refresh and load boundaries. |
 | Loaded Outpost record recovery | Pass (focused and published build evidence) | Loading a structurally valid legacy session now recreates a missing route record for every placed Outpost before HUD and remote-crew reconciliation. The repaired route starts inactive at the matching tile, restores Routes ledger availability, and is ready to persist on the next normal Save. |
-| Loaded session integrity validation | Pass (focused and published build evidence) | Current-version, migrated primary, and backup saves are checked before installation for valid map storage, non-overlapping world objects, known content IDs, safe actor/task positions, unique roster IDs, bounded remote cargo and crew, and finite simulation values. To-Outpost transit is checked against both the stored destination hold and its arriving payload. The current-version toolkit fast path now receives the same game-owned validation as migrated saves; invalid shapes enter the existing quarantine/backup recovery flow instead of poisoning the live Warren. |
+| Loaded session integrity validation | Pass (focused and published build evidence) | Current-version, migrated primary, and backup saves are checked before installation for valid map storage, non-overlapping world objects, known content IDs, safe actor/task positions, unique roster IDs, bounded remote cargo and crew, valid transit timing, and finite simulation values. To-Outpost transit is checked against both the stored destination hold and its arriving payload, and a transit cannot exist before the worm awakens. The current-version toolkit fast path now receives the same game-owned validation as migrated saves; invalid shapes enter the existing quarantine/backup recovery flow instead of poisoning the live Warren. |
 | Backup-only load recovery | Pass (focused and published build evidence) | If a primary slot is missing while its conventional `_backup` survives, `Load` now validates the backup, restores the primary slot, and installs the recovered Warren; if the restore write is rejected, the valid backup remains playable and the player is told to use Save. The focused recovery-path coverage and published candidate include this branch, while ordinary Preview Continue remains verified separately. |
 | Backup-only startup recovery | Pass (focused and published build evidence) | Title-screen availability now treats either the primary slot or its conventional `_backup` as a recoverable save. A primary-missing/backup-survives launch can therefore reach `Load` and use the existing backup recovery path instead of incorrectly disabling Continue. |
 | Save failure recovery guidance | Pass (focused and published build evidence) | Manual save failures now say whether the previous checkpoint remains available or no new save was written; autosave failures distinguish an existing checkpoint from a first-save attempt and explain the retry path. The four message states are covered by focused tests and the published candidate; forced browser quota/blocked-storage behavior remains open below. |
@@ -69,7 +69,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 313 unit tests and 2 integration/code-standard
+- `cargo test --all-targets` — 315 unit tests and 2 integration/code-standard
   targets pass,
   including fresh/simulated/remote-transit valid sessions, modal route
   planning, rejected malformed save shapes, and event-history save/load
@@ -190,7 +190,10 @@ automated simulation results into first-time-player evidence.
   checked for arithmetic overflow and hold capacity, including cargo already
   stored at a route and payload currently carried by the worm. The same
   boundary rejects real remote crew over-capacity, including crew already
-  stationed and passengers still arriving at a full route.
+  stationed and passengers still arriving at a full route, and rejects a
+  transit that predates Worm Awakening. The simulation also refunds such an
+  impossible transit rather than delivering it if a state bypasses the load
+  boundary.
   Local-only goods in a remote hold are rejected as unsupported instead of
   creating a route state that the transport actions cannot unload.
 - Outpost route setting persistence — pass; successful route controls now
