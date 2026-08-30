@@ -151,6 +151,10 @@ pub struct GameSession {
     pub tutorial_build_completed: bool,
     #[serde(default)]
     pub outposts: Vec<Outpost>,
+    /// Next Outpost index to inspect for automatic return/resupply work.
+    /// Persisting it keeps multi-route automatic logistics fair across saves.
+    #[serde(default)]
+    pub auto_route_cursor: usize,
     #[serde(default)]
     pub worm_transit: Option<WormTransit>,
     #[serde(default)]
@@ -239,6 +243,7 @@ impl GameSession {
             tutorial_built: false,
             tutorial_build_completed: false,
             outposts: Vec::new(),
+            auto_route_cursor: 0,
             worm_transit: None,
             last_transit_failure: None,
         };

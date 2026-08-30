@@ -5,6 +5,7 @@ use crate::simulation;
 use crate::simulation::outposts;
 use crate::state::creatures::{Good, Job};
 use crate::state::outposts::TransitDirection;
+use crate::state::structures::Building;
 
 #[test]
 fn cargo_only_return_keeps_remote_crew_at_the_outpost() {
@@ -144,4 +145,40 @@ fn auto_resupply_respects_a_manual_expedition_pause() {
     assert_eq!(report.auto_resupply_started, None);
     assert!(session.worm_transit.is_none());
     assert_eq!(session.economy.food, data.balance.worm_feed_reserve + 3.0);
+}
+
+#[test]
+fn automatic_returns_rotate_across_full_outposts() {
+    let (data, mut session, first_pos) = active_outpost(46);
+    let second_pos = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(pos, tile)| tile.walkable() && session.can_place_building(*pos))
+        .map(|(pos, _)| pos)
+        .expect("a second walkable outpost location");
+    session.buildings.push(Building::new("outpost", second_pos));
+    session.ensure_outpost(second_pos);
+    session.outposts[1].active = true;
+    session.outposts[0].auto_return_cargo = true;
+    session.outposts[1].auto_return_cargo = true;
+    let capacity = data.balance.outpost_storage_cap;
+    session.outposts[0].cargo.insert(Good::Ore, capacity);
+    session.outposts[1].cargo.insert(Good::Ore, capacity);
+
+    assert_eq!(
+        outposts::start_auto_return_if_full(&mut session, &data),
+        Some(first_pos)
+    );
+    outposts::tick_transit(
+        &mut session,
+        &data,
+        data.balance.worm_transit_time_sec + 0.1,
+    );
+    session.outposts[0].cargo.insert(Good::Ore, capacity);
+
+    assert_eq!(
+        outposts::start_auto_return_if_full(&mut session, &data),
+        Some(second_pos)
+    );
 }

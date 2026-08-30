@@ -251,23 +251,24 @@ pub fn start_auto_return_if_full(session: &mut GameSession, data: &GameData) -> 
     if session.worm_transit.is_some() {
         return None;
     }
-    let pos = session
-        .outposts
-        .iter()
-        .find(|outpost| {
-            outpost.active
-                && outpost.auto_return_cargo
-                && outpost.cargo_total() >= storage_capacity(outpost, data)
-        })
-        .map(|outpost| outpost.pos)?;
-    start_transit(
+    let index = next_auto_route_index(session, |outpost| {
+        outpost.active
+            && outpost.auto_return_cargo
+            && outpost.cargo_total() >= storage_capacity(outpost, data)
+    })?;
+    let pos = session.outposts[index].pos;
+    if start_transit(
         session,
         data,
         pos,
         TransitDirection::ToShrine,
         TransitPlan::AutoCargoReturn,
-    )
-    .then_some(pos)
+    ) {
+        advance_auto_route_cursor(session, index);
+        Some(pos)
+    } else {
+        None
+    }
 }
 
 /// Start one opt-in food-only trip when stationed scouts need provisions.
@@ -280,33 +281,54 @@ pub fn start_auto_resupply_if_needed(
     if session.worm_transit.is_some() {
         return None;
     }
-    let pos = session
-        .outposts
-        .iter()
-        .find(|outpost| {
-            let food_required = (outpost.crew.len() as u32)
-                .saturating_mul(data.balance.outpost_expedition_food_per_crew);
-            let food_available = outpost.cargo.get(&Good::CookedFood).copied().unwrap_or(0);
-            let food_ready_at_warren = (session.economy.food - data.balance.worm_feed_reserve)
-                .max(0.0)
-                .floor() as u32;
-            outpost.active
-                && outpost.auto_resupply_food
-                && !outpost.expedition_paused
-                && !outpost.crew.is_empty()
-                && outpost.cargo_total() < storage_capacity(outpost, data)
-                && food_available < food_required
-                && food_ready_at_warren > 0
-        })
-        .map(|outpost| outpost.pos)?;
-    start_transit(
+    let index = next_auto_route_index(session, |outpost| {
+        let food_required = (outpost.crew.len() as u32)
+            .saturating_mul(data.balance.outpost_expedition_food_per_crew);
+        let food_available = outpost.cargo.get(&Good::CookedFood).copied().unwrap_or(0);
+        let food_ready_at_warren = (session.economy.food - data.balance.worm_feed_reserve)
+            .max(0.0)
+            .floor() as u32;
+        outpost.active
+            && outpost.auto_resupply_food
+            && !outpost.expedition_paused
+            && !outpost.crew.is_empty()
+            && outpost.cargo_total() < storage_capacity(outpost, data)
+            && food_available < food_required
+            && food_ready_at_warren > 0
+    })?;
+    let pos = session.outposts[index].pos;
+    if start_transit(
         session,
         data,
         pos,
         TransitDirection::ToOutpost,
         TransitPlan::FoodResupply,
-    )
-    .then_some(pos)
+    ) {
+        advance_auto_route_cursor(session, index);
+        Some(pos)
+    } else {
+        None
+    }
+}
+
+fn next_auto_route_index<F>(session: &GameSession, mut eligible: F) -> Option<usize>
+where
+    F: FnMut(&Outpost) -> bool,
+{
+    let route_count = session.outposts.len();
+    if route_count == 0 {
+        return None;
+    }
+    let start = session.auto_route_cursor % route_count;
+    (0..route_count)
+        .map(|offset| (start + offset) % route_count)
+        .find(|&index| eligible(&session.outposts[index]))
+}
+
+fn advance_auto_route_cursor(session: &mut GameSession, served_index: usize) {
+    if !session.outposts.is_empty() {
+        session.auto_route_cursor = (served_index + 1) % session.outposts.len();
+    }
 }
 
 #[derive(Clone, Copy)]
