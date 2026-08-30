@@ -2,7 +2,7 @@
 
 **Milestone:** Playable Warren
 
-**Status:** Planned
+**Status:** Candidate in Preview; live playtest evidence open
 
 **Target experience:** one complete 30–45 minute campaign
 
