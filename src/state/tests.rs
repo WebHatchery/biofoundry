@@ -243,6 +243,28 @@ fn loading_route_ownership_rebuilds_remote_crew_markers() {
 }
 
 #[test]
+fn loading_an_outpost_building_without_a_route_record_repairs_the_record() {
+    let data = GameData::load().unwrap();
+    let mut session = GameSession::new(&data, 6);
+    let outpost_pos = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(pos, _)| session.can_place_building(*pos))
+        .map(|(pos, _)| pos)
+        .expect("fresh warren needs a free outpost tile");
+    session
+        .buildings
+        .push(Building::new("outpost", outpost_pos));
+
+    session.sync_remote_crew_state();
+
+    assert_eq!(session.outposts.len(), 1);
+    assert_eq!(session.outposts[0].pos, outpost_pos);
+    assert!(!session.outposts[0].active);
+}
+
+#[test]
 fn loading_route_ownership_discards_unknown_and_duplicate_crew_ids() {
     let data = GameData::load().unwrap();
     let mut session = GameSession::new(&data, 6);
