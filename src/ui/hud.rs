@@ -21,6 +21,7 @@ use crate::state::GameSession;
 use crate::ui::{HudFrame, UiAction, UiMode, LOGICAL_WIDTH};
 use macroquad::prelude::*;
 use macroquad_toolkit::grid::TilePos;
+use macroquad_toolkit::notifications::LoggedNotification;
 use macroquad_toolkit::prelude::*;
 use macroquad_toolkit::sprite::SpriteAtlas;
 use macroquad_toolkit::ui::MIN_TARGET;
@@ -37,8 +38,10 @@ pub struct HudSprites {
 
 /// Per-frame UI state owned by the game shell rather than the session.
 #[derive(Debug, Clone, Copy, Default)]
-pub struct HudOptions {
+pub struct HudOptions<'a> {
     pub help_open: bool,
+    pub event_log_open: bool,
+    pub event_history: &'a [LoggedNotification],
     pub routes_open: bool,
     pub paused: bool,
     pub save_exists: bool,
@@ -85,7 +88,7 @@ pub fn draw(
     sprites: &HudSprites,
     mode: &UiMode,
     selected: Option<TilePos>,
-    options: HudOptions,
+    options: HudOptions<'_>,
 ) -> HudFrame {
     let mut actions = Vec::new();
     let mouse = ui.mouse_position();
@@ -225,7 +228,11 @@ pub fn draw(
         // The field guide is modal: discard any button intents collected from
         // the HUD underneath and let its Close button be the only action.
         actions.clear();
-        overlays::draw_help_overlay(session, data, mouse, &mut actions);
+        if options.event_log_open {
+            overlays::draw_event_log_overlay(options.event_history, mouse, &mut actions);
+        } else {
+            overlays::draw_help_overlay(session, data, mouse, &mut actions);
+        }
     }
 
     let pointer_over_ui = victory_up

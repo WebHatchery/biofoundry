@@ -502,6 +502,12 @@ impl Game {
             }
             UiAction::ToggleHelp => {
                 self.help_open = !self.help_open;
+                self.event_log_open = false;
+                self.audio.play(Sfx::Select);
+            }
+            UiAction::ToggleEventLog => {
+                self.help_open = true;
+                self.event_log_open = !self.event_log_open;
                 self.audio.play(Sfx::Select);
             }
             UiAction::TogglePause => {

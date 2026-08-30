@@ -91,6 +91,8 @@ pub enum UiAction {
     ToggleSettings,
     /// Open/close the revisitable warren field guide.
     ToggleHelp,
+    /// Open/close the recent-events view from the field guide.
+    ToggleEventLog,
     /// Pause or resume the fixed-timestep simulation while leaving the HUD
     /// and camera interactive.
     TogglePause,

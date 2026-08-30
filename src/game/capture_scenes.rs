@@ -10,6 +10,7 @@ use crate::state::{GameState, StateTransition};
 use macroquad_toolkit::grid::TilePos;
 
 mod endless;
+mod overlays;
 
 /// Seed a named scene for the headless screenshot harness.
 pub(super) fn begin(game: &mut Game, scene: &str) {
@@ -768,28 +769,10 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                 session.worm_awakened_at_tick = Some(session.tick.saturating_sub(12));
             }
         }
-        "help" => {
-            game.transition(StateTransition::StartWarren);
-            game.help_open = true;
-            if let GameState::Warren(session) = &mut game.state {
-                session.tutorial_dismissed = true;
-            }
-        }
-        "pause" => {
-            game.transition(StateTransition::StartWarren);
-            game.paused = true;
-            if let GameState::Warren(session) = &mut game.state {
-                session.tutorial_dismissed = true;
-                session.economy.food = 72.0;
-            }
-        }
-        "collapse" => {
-            game.transition(StateTransition::StartWarren);
-            if let GameState::Warren(session) = &mut game.state {
-                session.tutorial_dismissed = true;
-                session.creatures.clear();
-            }
-        }
+        "help" => overlays::help(game),
+        "event_log" => overlays::event_log(game),
+        "pause" => overlays::pause(game),
+        "collapse" => overlays::collapse(game),
         // "warren" and the harness default "gameplay" boot straight
         // into a fresh session on the config seed.
         _ => game.transition(StateTransition::StartWarren),

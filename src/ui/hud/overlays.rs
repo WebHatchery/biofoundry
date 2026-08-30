@@ -7,6 +7,7 @@ use crate::state::GameSession;
 use crate::ui::hud::widgets::{hud_button, panel_style};
 use crate::ui::{UiAction, LOGICAL_HEIGHT, LOGICAL_WIDTH};
 use macroquad::prelude::*;
+use macroquad_toolkit::notifications::LoggedNotification;
 use macroquad_toolkit::prelude::*;
 use macroquad_toolkit::ui::draw_ui_text_ex;
 
@@ -14,6 +15,8 @@ const INSPECT_HELP_BODY: &str =
     "Tap a building on the map to see its status and controls. Tap an equipment button in the Blacksmith card to queue it; after onboarding, Breeding Pit buttons show specialist benefits. At an awakened Outpost, tap Load order for cargo priority, Crew per run for cargo-only or scout counts, then Load to send food and crew to scout for ore; pause scouting to protect provisions, use the cargo-only return to bring ore home while keeping scouts remote, turn on Auto-return · Cargo only for full holds, or turn on Auto-resupply · Food only when remote scouts need provisions.";
 const OBJECTIVE_HELP_BODY: &str =
     "Read the Objective card for the current campaign milestone and its next requirement. Locked gates name their exact unlock; after the worm wakes, tap Routes to scan every Outpost or inspect one to prepare cargo runs.";
+const FIELD_GUIDE_INTRO: &str =
+    "Everything below has a visible touch or pointer control. Review Recent events when a toast has faded.";
 
 pub(super) fn draw_goal_overlay(
     title: &str,
@@ -181,7 +184,7 @@ pub(super) fn draw_help_overlay(
         TextStyle::new(21.0, dark::TEXT_BRIGHT),
     );
     draw_ui_text_ex(
-        "Everything below has a visible touch or pointer control.",
+        FIELD_GUIDE_INTRO,
         panel.x + 26.0,
         panel.y + 60.0,
         TextStyle::new(15.0, dark::TEXT_DIM).params(),
@@ -245,12 +248,96 @@ pub(super) fn draw_help_overlay(
     }
 
     if hud_button(
+        Rect::new(panel.x + 28.0, panel.bottom() - 48.0, 160.0, 32.0),
+        "Recent events",
+        true,
+        mouse,
+    ) {
+        actions.push(UiAction::ToggleEventLog);
+    }
+    if hud_button(
         Rect::new(
             panel.x + panel.w * 0.5 - 70.0,
             panel.bottom() - 48.0,
             140.0,
             32.0,
         ),
+        "Close",
+        true,
+        mouse,
+    ) {
+        actions.push(UiAction::ToggleHelp);
+    }
+}
+
+/// A bounded, newest-first record of the messages that have guided the run.
+/// Toasts are deliberately transient, but recovery instructions and unlock
+/// notices should remain available while the player decides what to do next.
+pub(super) fn draw_event_log_overlay(
+    history: &[LoggedNotification],
+    mouse: Vec2,
+    actions: &mut Vec<UiAction>,
+) {
+    draw_rectangle(
+        0.0,
+        0.0,
+        LOGICAL_WIDTH,
+        LOGICAL_HEIGHT,
+        Color::new(0.0, 0.0, 0.0, 0.62),
+    );
+    macroquad_toolkit::ui::occlude(Rect::new(0.0, 0.0, LOGICAL_WIDTH, LOGICAL_HEIGHT));
+    let panel = Rect::new(260.0, 118.0, 760.0, 484.0);
+    draw_surface_with_title(
+        panel,
+        Some("Recent Events"),
+        &panel_style(),
+        TextStyle::new(21.0, dark::TEXT_BRIGHT),
+    );
+    draw_ui_text_ex(
+        "Newest first — important changes remain here after their toast fades.",
+        panel.x + 26.0,
+        panel.y + 60.0,
+        TextStyle::new(15.0, dark::TEXT_DIM).params(),
+    );
+
+    let list_x = panel.x + 28.0;
+    let list_y = panel.y + 96.0;
+    let row_height = 31.0;
+    let available_rows = 10;
+    if history.is_empty() {
+        draw_ui_text_ex(
+            "No events yet. Actions and warnings will appear here.",
+            list_x,
+            list_y + 18.0,
+            TextStyle::new(16.0, dark::TEXT).params(),
+        );
+    } else {
+        for (row, event) in history.iter().rev().take(available_rows).enumerate() {
+            let y = list_y + row as f32 * row_height;
+            let color = event.notification_type.color();
+            draw_circle(list_x + 7.0, y + 8.0, 5.0, color);
+            let message =
+                macroquad_toolkit::ui::truncate_text_to_width(&event.message, panel.w - 76.0, 15.0);
+            draw_ui_text_ex(
+                &message,
+                list_x + 22.0,
+                y + 14.0,
+                TextStyle::new(15.0, dark::TEXT).params(),
+            );
+        }
+    }
+
+    let footer_y = panel.bottom() - 48.0;
+    if hud_button(
+        Rect::new(panel.x + 24.0, footer_y, 140.0, 32.0),
+        "Field Guide",
+        true,
+        mouse,
+    ) {
+        actions.push(UiAction::ToggleEventLog);
+    }
+    if hud_button(
+        Rect::new(panel.right() - 164.0, footer_y, 140.0, 32.0),
         "Close",
         true,
         mouse,

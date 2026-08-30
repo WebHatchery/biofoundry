@@ -44,3 +44,8 @@ fn field_guide_points_to_post_campaign_cargo_runs() {
     assert!(INSPECT_HELP_BODY.contains("scout for ore"));
     assert!(INSPECT_HELP_BODY.contains("Auto-resupply · Food only"));
 }
+
+#[test]
+fn field_guide_exposes_the_recent_events_view() {
+    assert!(FIELD_GUIDE_INTRO.contains("Recent events"));
+}

@@ -51,6 +51,8 @@ pub struct Game {
     confirm_new_warren: bool,
     /// The warren field guide is showing.
     help_open: bool,
+    /// The recent event history is showing inside the field guide shell.
+    event_log_open: bool,
     /// Whether the fixed-timestep simulation is paused by the player.
     paused: bool,
     /// A save slot exists, so the menu can offer Continue.
@@ -108,6 +110,7 @@ impl Game {
             settings_open: false,
             confirm_new_warren: false,
             help_open: false,
+            event_log_open: false,
             paused: false,
             save_exists,
             right_press: vec2(0.0, 0.0),
@@ -377,6 +380,8 @@ impl Game {
                     self.selected_building,
                     ui::hud::HudOptions {
                         help_open: self.help_open,
+                        event_log_open: self.event_log_open,
+                        event_history: self.notifications.history(),
                         routes_open: self.routes_open,
                         paused: self.paused,
                         save_exists: self.save_exists,
@@ -427,13 +432,18 @@ impl Game {
         // the lower-right corner. Keep the toast stack anchored there while
         // lifting it clear of the page chrome and shifting it left of the
         // card's footprint.
-        self.notifications.draw_with_config_and_offset(
-            &NotificationRenderConfig {
-                anchor: NotificationAnchor::BottomRight,
-                ..Default::default()
-            },
-            vec2(-250.0, -82.0),
-        );
+        // Modal guides already provide a larger surface for the same
+        // messages. Keep transient toasts behind that surface so they do not
+        // cover its controls or duplicate the recent-events list.
+        if !self.help_open && !self.routes_open {
+            self.notifications.draw_with_config_and_offset(
+                &NotificationRenderConfig {
+                    anchor: NotificationAnchor::BottomRight,
+                    ..Default::default()
+                },
+                vec2(-250.0, -82.0),
+            );
+        }
     }
 
     /// World tile under the mouse cursor, if inside the map.
@@ -524,6 +534,7 @@ impl Game {
             StateTransition::BackToMenu => {
                 self.mode = UiMode::Inspect;
                 self.help_open = false;
+                self.event_log_open = false;
                 self.routes_open = false;
                 self.paused = false;
                 self.confirm_new_warren = false;
