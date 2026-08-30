@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `1618a38`
+**Source revision:** `60fdfa1`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -29,7 +29,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 181 unit tests and 2 integration tests pass.
+- `cargo test --all-targets` — 182 unit tests and 2 integration tests pass.
 - `cargo clippy --all-targets --all-features -- -D warnings` — pass.
 - `publish.ps1` with no parameters — pass; Windows and WebGL packages
   deployed to Preview.
@@ -131,6 +131,9 @@ automated simulation results into first-time-player evidence.
 - Session-boundary reset — loading or starting a Warren clears the previous
   run's pause/help/selection state and famine-warning edge before the new HUD
   becomes active.
+- Tutorial save migration — a save made while the tutorial Farm is still under
+  construction keeps the Food lesson visible after reload; migration only
+  advances that beat after a finished second Farm is present.
 - Modal reading state — goal reports, non-viable recovery, and the Field Guide
   hold the simulation clock while the player reads them and resume only after
   the visible modal action closes or dismisses the screen. Preview smoke check:
