@@ -57,10 +57,15 @@ impl CampaignObjective {
             } else {
                 "Next: activate the Worm Outpost, then send a cargo run.".to_owned()
             };
+            let scouting_hauls: u32 = session
+                .outposts
+                .iter()
+                .map(|outpost| outpost.expeditions_completed)
+                .sum();
             return Self {
                 title: "Campaign complete".to_owned(),
                 progress: format!(
-                    "The Colossal Worm is awake · Cargo runs {}",
+                    "Worm awake · Runs {} · Hauls {scouting_hauls}",
                     session.progress.courier_deliveries
                 ),
                 next,

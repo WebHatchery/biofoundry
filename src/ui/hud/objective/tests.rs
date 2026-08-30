@@ -2,7 +2,7 @@ use super::*;
 use crate::data::GameData;
 use crate::state::creatures::Good;
 use crate::state::creatures::Job;
-use crate::state::outposts::WormTransit;
+use crate::state::outposts::{Outpost, WormTransit};
 use crate::state::structures::{BuildSite, Building};
 use crate::state::GameSession;
 
@@ -133,10 +133,7 @@ fn objective_marks_the_worm_awake_as_complete() {
 
     assert!(objective.complete);
     assert_eq!(objective.ratio, 1.0);
-    assert_eq!(
-        objective.progress,
-        "The Colossal Worm is awake · Cargo runs 0"
-    );
+    assert_eq!(objective.progress, "Worm awake · Runs 0 · Hauls 0");
     assert_eq!(
         objective.next,
         "Next: tap Blacksmith in Build & Dig, then place it on open floor."
@@ -636,10 +633,23 @@ fn completed_objective_counts_successful_cargo_runs() {
 
     let objective = CampaignObjective::current(&session, &data);
 
-    assert_eq!(
-        objective.progress,
-        "The Colossal Worm is awake · Cargo runs 3"
-    );
+    assert_eq!(objective.progress, "Worm awake · Runs 3 · Hauls 0");
+}
+
+#[test]
+fn completed_objective_sums_scouting_hauls_across_outposts() {
+    let (data, mut session) = boot();
+    session.worm_awake = true;
+    session.progress.courier_deliveries = 3;
+    let mut first = Outpost::new(session.spawn_tile());
+    first.expeditions_completed = 2;
+    let mut second = Outpost::new(macroquad_toolkit::grid::TilePos::new(8, 8));
+    second.expeditions_completed = 1;
+    session.outposts = vec![first, second];
+
+    let objective = CampaignObjective::current(&session, &data);
+
+    assert_eq!(objective.progress, "Worm awake · Runs 3 · Hauls 3");
 }
 
 #[test]
