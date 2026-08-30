@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `0b14d15`
+**Source revision:** `a32a8e9`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -22,7 +22,7 @@ automated simulation results into first-time-player evidence.
 | Fresh-tab relaunch and Continue | Pass | A new Preview tab restored the same `00:36` state and objective with visible controls. |
 | Minimum-layout spot check | Pass | The 1200×675 canvas and required HUD remained visible in the 1280×720 Preview viewport. |
 | Public metadata alignment | Pass | The published game page now names the visible touch actions for panning, inspection, tools, Jobs controls, and the post-awakening Endless/Menu choices. |
-| Compact viewport exploration | Follow-up required | At 800×450 the bounded responsive text scale keeps the title, field guide, and Warren HUD clearer while required controls remain on-canvas and responsive; the fixed 1280×720 layout is still dense enough that no release-quality layout pass is claimed below the current target. |
+| Compact viewport exploration | Follow-up required | The hosted Preview smoke path at 800×450 keeps the title, field guide, and Warren HUD on-canvas; the release capture set also verifies that pause, famine, food, raid, transit, and route-failure alerts stay clear of the fixed controls. The fixed 1280×720 layout is still dense enough that no release-quality layout pass is claimed below the current target. |
 | Visible-control smoke path | Pass | A fresh Preview warren advanced through visible New Warren, + zoom, and Farm placement without keyboard input. While the 10-ore construction site was pending, the tutorial correctly remained on `2/5 — Stabilize the Food Grid`; successful placement returned to Inspect instead of creating a second site. This is developer smoke evidence, not a qualifying first-time-player session. |
 | Hosted-page toast safety | Pass | The placement confirmation remained fully readable above and left of the fixed Report a Bug widget in the published Preview. |
 | Active tool marker | Pass | The published Preview renders the selected Dig tool as `> Dig`; the active-tool marker is readable instead of the bundled font's missing-glyph square. |
@@ -31,7 +31,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 192 unit tests and 2 integration tests pass.
+- `cargo test --all-targets` — 194 unit tests and 2 integration tests pass.
 - `cargo clippy --all-targets --all-features -- -D warnings` — pass.
 - `publish.ps1` with no parameters — pass; Windows and WebGL packages
   deployed to Preview.
@@ -46,6 +46,16 @@ automated simulation results into first-time-player evidence.
   when the mouse cursor is elsewhere.
 - Shared toolkit notification-offset tests — 360 tests pass; the hosted-page
   toast offset is opt-in, so existing notification anchors remain unchanged.
+- Compact alert captures — [ui_compact_food_warning.png](../verification/ui_compact_food_warning.png),
+  [ui_compact_raid_food_warning.png](../verification/ui_compact_raid_food_warning.png),
+  [ui_compact_raid_warning.png](../verification/ui_compact_raid_warning.png),
+  and [ui_compact_raid.png](../verification/ui_compact_raid.png) verify the
+  800×450 warning and active-raid labels stop before Pause; the matching
+  [ui_compact_pause.png](../verification/ui_compact_pause.png),
+  [ui_compact_transit.png](../verification/ui_compact_transit.png),
+  [ui_compact_route_failure.png](../verification/ui_compact_route_failure.png),
+  and [ui_compact_famine.png](../verification/ui_compact_famine.png) captures
+  cover the remaining top-bar alerts and the fully readable famine toast.
 - Fixed-seed campaign beats — secure `19.4m`, factory `24.4m`, shrine
   `29.4m`, worm `39.5m`; handoff gaps `5.0 / 5.0 / 10.1m`.
 - Shrine pacing guardrail — the final offering handoff now remains under
