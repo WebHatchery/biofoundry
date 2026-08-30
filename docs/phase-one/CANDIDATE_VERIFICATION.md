@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `ad3490f`
+**Source revision:** `7e05338`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -29,7 +29,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 177 unit tests and 2 integration tests pass.
+- `cargo test --all-targets` — 178 unit tests and 2 integration tests pass.
 - `cargo clippy --all-targets --all-features -- -D warnings` — pass.
 - `publish.ps1` with no parameters — pass; Windows and WebGL packages
   deployed to Preview.
@@ -52,6 +52,9 @@ automated simulation results into first-time-player evidence.
   shows recruit controls labeled with their practical roles and the Engineer
   mine-throughput bonus at the published HUD scale. This improves discoverability
   evidence but does not replace first-time-player testing of optional-system value.
+- Locked-gate progress capture — the refreshed [ui_optional.png](../verification/ui_optional.png)
+  shows current/threshold values for the remaining Build & Dig unlocks, so a
+  locked action communicates both its requirement and how close the warren is.
 - Completion capture — [ui_completion.png](../verification/ui_completion.png)
   shows the Worm Awakened summary naming the food and ingot totals, with visible
   Continue in Endless and Return to Menu choices. The completed Objective also
