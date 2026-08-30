@@ -56,6 +56,18 @@ pub(super) fn draw_inspect_panel(
 
     let (status, status_color) = inspect_status(session, data, building);
     line(&format!("Status · {status}"), status_color, &mut y);
+    if building.kind == "blacksmith"
+        && matches!(
+            crate::ui::legibility::building_status(session, data, building),
+            Some(BuildingStatus::InputStarved)
+        )
+    {
+        line(
+            &blacksmith_input_hint(building, data),
+            dark::WARNING,
+            &mut y,
+        );
+    }
 
     match building.kind.as_str() {
         "mine" => {
@@ -503,6 +515,18 @@ pub(super) fn draw_inspect_panel(
 
 fn blacksmith_queue_available(building: &Building, data: &GameData) -> bool {
     building.orders.len() < data.balance.order_queue_size
+}
+
+fn blacksmith_input_hint(building: &Building, data: &GameData) -> String {
+    let ore_needed = (data.balance.smith_batch_ore as f32 - building.stock(Good::Ore))
+        .max(0.0)
+        .ceil() as u32;
+    if let Some(item) = building.orders.first() {
+        if let Some(equipment) = data.equipment_def(item) {
+            return format!("Needs {ore_needed} ore · next {}", equipment.name);
+        }
+    }
+    format!("Needs {ore_needed} ore · next ingot")
 }
 
 fn local_mine_worker_at(creature: &Creature, pos: TilePos) -> bool {

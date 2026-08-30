@@ -279,6 +279,19 @@ fn blacksmith_queue_reports_when_another_order_can_be_added() {
 }
 
 #[test]
+fn blacksmith_input_hint_names_the_queued_order_and_shortfall() {
+    let data = GameData::load().expect("embedded game data");
+    let mut shop = Building::new("blacksmith", TilePos::new(0, 0));
+    shop.orders.push("iron_pickaxe".to_owned());
+    shop.add_stock(Good::Ore, 1.0);
+
+    assert_eq!(
+        blacksmith_input_hint(&shop, &data),
+        "Needs 1 ore · next Iron Pickaxe"
+    );
+}
+
+#[test]
 fn inspection_staffing_ignores_remote_crew_and_recognizes_assigned_crew() {
     let data = GameData::load().expect("embedded game data");
     let mut session = GameSession::new(&data, 13);
