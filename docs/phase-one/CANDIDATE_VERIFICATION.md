@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-31
-**Source revision:** `4753d76`
+**Source revision:** `e029430`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -55,8 +55,9 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 270 unit tests and 2 integration tests pass,
-  including fresh/simulated valid sessions and rejected malformed save shapes.
+- `cargo test --all-targets` — 271 unit tests and 2 integration tests pass,
+  including fresh/simulated/remote-transit valid sessions and rejected
+  malformed save shapes.
 - `cargo clippy --all-targets --all-features -- -D warnings` — pass.
 - `publish.ps1` with no parameters — pass; Windows and WebGL packages
   deployed to Preview.
