@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `793a9ce`
+**Source revision:** `390919d`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -29,7 +29,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 190 unit tests and 2 integration tests pass.
+- `cargo test --all-targets` — 191 unit tests and 2 integration tests pass.
 - `cargo clippy --all-targets --all-features -- -D warnings` — pass.
 - `publish.ps1` with no parameters — pass; Windows and WebGL packages
   deployed to Preview.
@@ -81,6 +81,10 @@ automated simulation results into first-time-player evidence.
 - Fractional recipe status — focused legibility coverage keeps a Cook Pot's
   `Starved` status aligned with the simulation's rounded-up batch requirement
   when data-driven recipe multipliers produce a fractional amount.
+- Smelter staffing — the refreshed [ui_smelter.png](../verification/ui_smelter.png)
+  identifies the local Salamander as `Salamander stationed` while the den is
+  starved; focused inspection coverage excludes remote Salamanders from that
+  local staffing read.
 - Completion capture — [ui_completion.png](../verification/ui_completion.png)
   shows the Worm Awakened summary naming the food and ingot totals, with visible
   Continue in Endless and Return to Menu choices. The completed Objective also
