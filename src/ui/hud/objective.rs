@@ -53,7 +53,7 @@ impl CampaignObjective {
             {
                 "Next: tap the failed Worm Outpost, then try the cargo run again.".to_owned()
             } else if session.outposts.iter().any(|outpost| outpost.active) {
-                active_outpost_next_step(session, data).to_owned()
+                active_outpost_next_step(session, data)
             } else {
                 "Next: activate the Worm Outpost, then send a cargo run.".to_owned()
             };
@@ -62,11 +62,26 @@ impl CampaignObjective {
                 .iter()
                 .map(|outpost| outpost.expeditions_completed)
                 .sum();
+            let route_upgrades: u32 = session
+                .outposts
+                .iter()
+                .map(|outpost| {
+                    [
+                        outpost.storage_upgraded,
+                        outpost.crew_upgraded,
+                        outpost.survey_upgraded,
+                        outpost.resonator_upgraded,
+                    ]
+                    .into_iter()
+                    .filter(|installed| *installed)
+                    .count() as u32
+                })
+                .sum();
             return Self {
                 title: "Campaign complete".to_owned(),
                 progress: format!(
-                    "Worm awake · Runs {} · Hauls {scouting_hauls}",
-                    session.progress.courier_deliveries
+                    "Worm awake · Runs {} · Hauls {scouting_hauls} · Upgrades {route_upgrades}",
+                    session.progress.courier_deliveries,
                 ),
                 next,
                 ratio: 1.0,
@@ -325,7 +340,7 @@ fn reassignable_job_count(session: &GameSession, data: &GameData, job: Job) -> u
         .count()
 }
 
-fn active_outpost_next_step(session: &GameSession, data: &GameData) -> &'static str {
+fn active_outpost_next_step(session: &GameSession, data: &GameData) -> String {
     let Some(outpost) = session
         .outposts
         .iter()
@@ -364,7 +379,7 @@ fn active_outpost_next_step(session: &GameSession, data: &GameData) -> &'static 
         })
         .or_else(|| session.outposts.iter().find(|outpost| outpost.active))
     else {
-        return "Next: activate the Worm Outpost, then send a cargo run.";
+        return "Next: activate the Worm Outpost, then send a cargo run.".to_owned();
     };
     let has_cargo = outpost.cargo_total() > 0;
     let has_crew = !outpost.crew.is_empty();
@@ -374,7 +389,8 @@ fn active_outpost_next_step(session: &GameSession, data: &GameData) -> &'static 
             && creature.tile() == session.stockpile_pos()
     });
     if !has_cargo && !has_crew && outpost.crew_dispatch_limit == Some(0) && local_crew_ready {
-        return "Next: tap Crew per run on the Outpost, then load scouts from the warren.";
+        return "Next: tap Crew per run on the Outpost, then load scouts from the warren."
+            .to_owned();
     }
     if has_crew {
         match crate::simulation::outposts::expedition_state(outpost, data) {
@@ -382,24 +398,33 @@ fn active_outpost_next_step(session: &GameSession, data: &GameData) -> &'static 
                 if outpost.auto_resupply_food
                     && session.economy.food - data.balance.worm_feed_reserve >= 1.0
                 {
-                    return "Next: let Auto-resupply deliver food to the remote scouts.";
+                    return "Next: let Auto-resupply deliver food to the remote scouts.".to_owned();
                 }
                 if session.economy.food - data.balance.worm_feed_reserve >= 1.0 {
-                    return "Next: tap the active Worm Outpost, then load food for its expedition.";
+                    return "Next: tap the active Worm Outpost, then load food for its expedition."
+                        .to_owned();
                 }
-                return "Next: keep cooked Food above reserve, then load the Outpost expedition.";
+                return "Next: keep cooked Food above reserve, then load the Outpost expedition."
+                    .to_owned();
             }
             crate::simulation::outposts::ExpeditionState::Paused => {
-                return "Next: tap the active Worm Outpost, then Resume scouting.";
+                return "Next: tap the active Worm Outpost, then Resume scouting.".to_owned();
             }
             crate::simulation::outposts::ExpeditionState::Scouting { .. } => {
                 return "Next: let the Outpost expedition finish, then return its ore while keeping the scouts remote."
+                    .to_owned()
             }
             crate::simulation::outposts::ExpeditionState::HoldFull => {
                 return "Next: tap the active Worm Outpost, then return its cargo while keeping the scouts remote."
+                    .to_owned()
             }
             crate::simulation::outposts::ExpeditionState::Inactive
             | crate::simulation::outposts::ExpeditionState::NoCrew => {}
+        }
+    }
+    if !has_cargo && !has_crew {
+        if let Some(hint) = outpost_upgrade_next_step(session, data, outpost) {
+            return hint;
         }
     }
     match (has_cargo, has_crew) {
@@ -415,6 +440,50 @@ fn active_outpost_next_step(session: &GameSession, data: &GameData) -> &'static 
             "Next: keep cargo or crew ready at the warren, then load the active Worm Outpost."
         }
     }
+    .to_owned()
+}
+
+fn outpost_upgrade_next_step(
+    session: &GameSession,
+    data: &GameData,
+    outpost: &crate::state::outposts::Outpost,
+) -> Option<String> {
+    let available = session.economy.ingots_stock;
+    if !outpost.storage_upgraded && available >= data.balance.outpost_upgrade_ingots {
+        return Some(format!(
+            "Next: tap the active Worm Outpost, then Expand hold for {} ingots.",
+            data.balance.outpost_upgrade_ingots
+        ));
+    }
+    if outpost.storage_upgraded
+        && !outpost.crew_upgraded
+        && available >= data.balance.outpost_crew_upgrade_ingots
+    {
+        return Some(format!(
+            "Next: tap the active Worm Outpost, then Expand camp for {} ingots.",
+            data.balance.outpost_crew_upgrade_ingots
+        ));
+    }
+    if outpost.storage_upgraded
+        && outpost.crew_upgraded
+        && !outpost.survey_upgraded
+        && available >= data.balance.outpost_survey_upgrade_ingots
+    {
+        return Some(format!(
+            "Next: tap the active Worm Outpost, then Install survey for {} ingots.",
+            data.balance.outpost_survey_upgrade_ingots
+        ));
+    }
+    if outpost.survey_upgraded
+        && !outpost.resonator_upgraded
+        && available >= data.balance.outpost_resonator_upgrade_ingots
+    {
+        return Some(format!(
+            "Next: tap the active Worm Outpost, then Tune beacon for {} ingots.",
+            data.balance.outpost_resonator_upgrade_ingots
+        ));
+    }
+    None
 }
 
 fn outpost_has_loadable_payload(

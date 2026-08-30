@@ -6,6 +6,8 @@ use crate::state::outposts::{Outpost, WormTransit};
 use crate::state::structures::{BuildSite, Building};
 use crate::state::GameSession;
 
+mod route_upgrades;
+
 fn boot() -> (GameData, GameSession) {
     let data = GameData::load().unwrap();
     let session = GameSession::new(&data, data.config.world_seed);
@@ -151,7 +153,10 @@ fn objective_marks_the_worm_awake_as_complete() {
 
     assert!(objective.complete);
     assert_eq!(objective.ratio, 1.0);
-    assert_eq!(objective.progress, "Worm awake · Runs 0 · Hauls 0");
+    assert_eq!(
+        objective.progress,
+        "Worm awake · Runs 0 · Hauls 0 · Upgrades 0"
+    );
     assert_eq!(
         objective.next,
         "Next: tap Blacksmith in Build & Dig, then place it on open floor."
@@ -707,7 +712,10 @@ fn completed_objective_counts_successful_cargo_runs() {
 
     let objective = CampaignObjective::current(&session, &data);
 
-    assert_eq!(objective.progress, "Worm awake · Runs 3 · Hauls 0");
+    assert_eq!(
+        objective.progress,
+        "Worm awake · Runs 3 · Hauls 0 · Upgrades 0"
+    );
 }
 
 #[test]
@@ -723,7 +731,10 @@ fn completed_objective_sums_scouting_hauls_across_outposts() {
 
     let objective = CampaignObjective::current(&session, &data);
 
-    assert_eq!(objective.progress, "Worm awake · Runs 3 · Hauls 3");
+    assert_eq!(
+        objective.progress,
+        "Worm awake · Runs 3 · Hauls 3 · Upgrades 0"
+    );
 }
 
 #[test]

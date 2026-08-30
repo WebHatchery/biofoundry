@@ -35,6 +35,20 @@ pub(super) struct SurveyUpgradeContext<'a> {
     pub(super) actions: &'a mut Vec<UiAction>,
 }
 
+pub(super) struct RouteUpgradeContext<'a> {
+    pub(super) session: &'a GameSession,
+    pub(super) data: &'a GameData,
+    pub(super) pos: TilePos,
+    pub(super) outpost: Option<&'a Outpost>,
+    pub(super) x: f32,
+    pub(super) width: f32,
+    pub(super) y: &'a mut f32,
+    pub(super) button_height: f32,
+    pub(super) button_step: f32,
+    pub(super) mouse: Vec2,
+    pub(super) actions: &'a mut Vec<UiAction>,
+}
+
 pub(super) fn draw_survey_upgrade_control(context: SurveyUpgradeContext<'_>) {
     let SurveyUpgradeContext {
         session,
@@ -62,6 +76,96 @@ pub(super) fn draw_survey_upgrade_control(context: SurveyUpgradeContext<'_>) {
         actions.push(UiAction::UpgradeOutpostSurvey(pos));
     }
     *y += step;
+}
+
+pub(super) fn draw_resonator_upgrade_control(context: SurveyUpgradeContext<'_>) {
+    let SurveyUpgradeContext {
+        session,
+        data,
+        pos,
+        outpost,
+        rect,
+        y,
+        step,
+        mouse,
+        actions,
+    } = context;
+    if !outpost.is_some_and(|route| route.survey_upgraded && !route.resonator_upgraded) {
+        return;
+    }
+    let upgrade_cost = data.balance.outpost_resonator_upgrade_ingots;
+    if hud_button(
+        Rect::new(rect.x, *y, rect.w, rect.h),
+        &format!("Tune beacon · {upgrade_cost} ingots"),
+        session.economy.ingots_stock >= upgrade_cost,
+        mouse,
+    ) {
+        actions.push(UiAction::UpgradeOutpostResonator(pos));
+    }
+    *y += step;
+}
+
+pub(super) fn draw_route_upgrade_controls(context: RouteUpgradeContext<'_>) {
+    let RouteUpgradeContext {
+        session,
+        data,
+        pos,
+        outpost,
+        x,
+        width,
+        y,
+        button_height,
+        button_step,
+        mouse,
+        actions,
+    } = context;
+    if outpost.is_some_and(|route| !route.storage_upgraded) {
+        let upgrade_cost = data.balance.outpost_upgrade_ingots;
+        if hud_button(
+            Rect::new(x, *y, width, button_height),
+            &format!("Expand hold · {upgrade_cost} ingots"),
+            session.economy.ingots_stock >= upgrade_cost,
+            mouse,
+        ) {
+            actions.push(UiAction::UpgradeOutpost(pos));
+        }
+        *y += button_step;
+    }
+    if outpost.is_some_and(|route| !route.crew_upgraded) {
+        let upgrade_cost = data.balance.outpost_crew_upgrade_ingots;
+        if hud_button(
+            Rect::new(x, *y, width, button_height),
+            &format!("Expand camp · {upgrade_cost} ingots"),
+            session.economy.ingots_stock >= upgrade_cost,
+            mouse,
+        ) {
+            actions.push(UiAction::UpgradeOutpostCrew(pos));
+        }
+        *y += button_step;
+    }
+    let rect = Rect::new(x, 0.0, width, button_height);
+    draw_survey_upgrade_control(SurveyUpgradeContext {
+        session,
+        data,
+        pos,
+        outpost,
+        rect,
+        y,
+        step: button_step,
+        mouse,
+        actions,
+    });
+    draw_resonator_upgrade_control(SurveyUpgradeContext {
+        session,
+        data,
+        pos,
+        outpost,
+        rect,
+        y,
+        step: button_step,
+        mouse,
+        actions,
+    });
 }
 
 /// Keep the route policies and quotas legible on a narrow fixed-resolution
@@ -140,38 +244,16 @@ pub(super) fn draw_compact_route_controls(context: CompactRouteContext<'_>) {
     }
     *y += button_step;
 
-    if outpost.is_some_and(|route| !route.storage_upgraded) {
-        let upgrade_cost = data.balance.outpost_upgrade_ingots;
-        if hud_button(
-            Rect::new(x, *y, panel.w - 28.0, button_height),
-            &format!("Expand hold · {upgrade_cost} ingots"),
-            session.economy.ingots_stock >= upgrade_cost,
-            mouse,
-        ) {
-            actions.push(UiAction::UpgradeOutpost(pos));
-        }
-        *y += button_step;
-    }
-    if outpost.is_some_and(|route| !route.crew_upgraded) {
-        let upgrade_cost = data.balance.outpost_crew_upgrade_ingots;
-        if hud_button(
-            Rect::new(x, *y, panel.w - 28.0, button_height),
-            &format!("Expand camp · {upgrade_cost} ingots"),
-            session.economy.ingots_stock >= upgrade_cost,
-            mouse,
-        ) {
-            actions.push(UiAction::UpgradeOutpostCrew(pos));
-        }
-        *y += button_step;
-    }
-    draw_survey_upgrade_control(SurveyUpgradeContext {
+    draw_route_upgrade_controls(RouteUpgradeContext {
         session,
         data,
         pos,
         outpost,
-        rect: Rect::new(x, 0.0, panel.w - 28.0, button_height),
+        x,
+        width: panel.w - 28.0,
         y,
-        step: button_step,
+        button_height,
+        button_step,
         mouse,
         actions,
     });

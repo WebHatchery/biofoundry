@@ -12,6 +12,7 @@ fn new_outpost_defaults_to_ore_first_loading() {
     assert!(!outpost.storage_upgraded);
     assert!(!outpost.crew_upgraded);
     assert!(!outpost.survey_upgraded);
+    assert!(!outpost.resonator_upgraded);
     assert!(!outpost.auto_return_cargo);
     assert_eq!(outpost.auto_return_label(), "Auto-return · Off");
     assert!(!outpost.auto_resupply_food);
@@ -40,6 +41,16 @@ fn survey_rig_uses_the_larger_configured_yield() {
 }
 
 #[test]
+fn resonance_beacon_uses_the_shorter_configured_cycle() {
+    let mut outpost = Outpost::new(TilePos::new(4, 4));
+    assert_eq!(outpost.expedition_cycle_sec(30.0, 20.0), 30.0);
+
+    outpost.upgrade_resonator();
+    assert_eq!(outpost.expedition_cycle_sec(30.0, 20.0), 20.0);
+    assert_eq!(outpost.expedition_cycle_sec(20.0, 30.0), 20.0);
+}
+
+#[test]
 fn older_outpost_saves_default_the_survey_rig_to_off() {
     let outpost = Outpost::new(TilePos::new(4, 4));
     let mut value = serde_json::to_value(outpost).expect("serialize outpost");
@@ -50,6 +61,19 @@ fn older_outpost_saves_default_the_survey_rig_to_off() {
 
     let restored: Outpost = serde_json::from_value(value).expect("restore legacy outpost");
     assert!(!restored.survey_upgraded);
+}
+
+#[test]
+fn older_outpost_saves_default_the_resonance_beacon_to_off() {
+    let outpost = Outpost::new(TilePos::new(4, 4));
+    let mut value = serde_json::to_value(outpost).expect("serialize outpost");
+    value
+        .as_object_mut()
+        .expect("outpost serializes as an object")
+        .remove("resonator_upgraded");
+
+    let restored: Outpost = serde_json::from_value(value).expect("restore legacy outpost");
+    assert!(!restored.resonator_upgraded);
 }
 
 #[test]

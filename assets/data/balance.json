@@ -89,6 +89,8 @@
   "outpost_upgraded_capacity": 6,
   "outpost_survey_upgrade_ingots": 16,
   "outpost_upgraded_ore_per_crew": 4,
+  "outpost_resonator_upgrade_ingots": 24,
+  "outpost_resonator_cycle_sec": 20.0,
   "worm_transit_time_sec": 18.0,
   "outpost_expedition_cycle_sec": 30.0,
   "outpost_expedition_food_per_crew": 1,

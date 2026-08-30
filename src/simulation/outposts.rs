@@ -108,6 +108,16 @@ pub fn ore_per_crew(outpost: &Outpost, data: &GameData) -> u32 {
     )
 }
 
+/// Return the selected Outpost's current scouting cycle in seconds.
+pub fn expedition_cycle_sec(outpost: &Outpost, data: &GameData) -> f32 {
+    outpost
+        .expedition_cycle_sec(
+            data.balance.outpost_expedition_cycle_sec,
+            data.balance.outpost_resonator_cycle_sec,
+        )
+        .max(0.1)
+}
+
 /// Buy the one-time remote hold expansion for an active awakened route.
 pub fn upgrade_outpost(session: &mut GameSession, data: &GameData, pos: TilePos) -> bool {
     if !session.worm_awake
@@ -195,6 +205,37 @@ pub fn upgrade_outpost_survey(session: &mut GameSession, data: &GameData, pos: T
     }
     session.economy.ingots_stock -= data.balance.outpost_survey_upgrade_ingots;
     session.outposts[index].upgrade_survey();
+    true
+}
+
+/// Install the one-time resonance beacon after the route's survey rig is ready.
+pub fn upgrade_outpost_resonator(session: &mut GameSession, data: &GameData, pos: TilePos) -> bool {
+    if !session.worm_awake
+        || session.worm_transit.is_some()
+        || session
+            .building_at(pos)
+            .is_none_or(|building| building.kind != "outpost")
+    {
+        return false;
+    }
+    session.ensure_outpost(pos);
+    let Some(index) = session
+        .outposts
+        .iter()
+        .position(|outpost| outpost.pos == pos)
+    else {
+        return false;
+    };
+    let outpost = &session.outposts[index];
+    if !outpost.active
+        || !outpost.survey_upgraded
+        || outpost.resonator_upgraded
+        || session.economy.ingots_stock < data.balance.outpost_resonator_upgrade_ingots
+    {
+        return false;
+    }
+    session.economy.ingots_stock -= data.balance.outpost_resonator_upgrade_ingots;
+    session.outposts[index].upgrade_resonator();
     true
 }
 
@@ -287,7 +328,7 @@ pub fn expedition_state(outpost: &Outpost, data: &GameData) -> ExpeditionState {
             available: food_available,
         };
     }
-    let cycle = data.balance.outpost_expedition_cycle_sec.max(0.1);
+    let cycle = expedition_cycle_sec(outpost, data);
     let progress_percent = (outpost.expedition_progress.max(0.0) / cycle * 100.0)
         .floor()
         .clamp(0.0, 100.0) as u32;
@@ -306,13 +347,13 @@ pub fn tick_expeditions(
     if !session.worm_awake {
         return Vec::new();
     }
-    let cycle = data.balance.outpost_expedition_cycle_sec.max(0.1);
     let food_per_crew = data.balance.outpost_expedition_food_per_crew;
     let mut completed = Vec::new();
     for outpost in &mut session.outposts {
         if !outpost.active || outpost.expedition_paused || outpost.crew.is_empty() {
             continue;
         }
+        let cycle = expedition_cycle_sec(outpost, data);
         let crew = outpost.crew.len() as u32;
         let room = storage_capacity(outpost, data).saturating_sub(outpost.cargo_total());
         let food_cost = crew.saturating_mul(food_per_crew);

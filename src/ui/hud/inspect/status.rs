@@ -124,9 +124,17 @@ pub(super) fn outpost_expedition_hint(data: &GameData, outpost: &Outpost) -> Opt
             progress_percent,
             ore_yield,
             food_cost,
-        } => Some(format!(
-            "Expedition {progress_percent}% · +{ore_yield} ore / -{food_cost} food"
-        )),
+        } => {
+            let suffix = if outpost.resonator_upgraded {
+                format!(
+                    "Expedition {progress_percent}% · +{ore_yield}/-{food_cost} food · {:.0}s",
+                    crate::simulation::outposts::expedition_cycle_sec(outpost, data)
+                )
+            } else {
+                format!("Expedition {progress_percent}% · +{ore_yield} ore / -{food_cost} food")
+            };
+            Some(suffix)
+        }
     }
 }
 

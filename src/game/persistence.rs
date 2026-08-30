@@ -478,6 +478,12 @@ pub(super) fn validate_loaded_session(
                 outpost.pos
             ));
         }
+        if outpost.resonator_upgraded && !outpost.survey_upgraded {
+            return Err(format!(
+                "outpost resonance beacon lacks its survey rig at {:?}",
+                outpost.pos
+            ));
+        }
         validate_outpost_cargo(outpost, data)?;
         validate_nonnegative_finite(outpost.expedition_progress, "outpost expedition progress")?;
 

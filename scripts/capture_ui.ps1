@@ -8,7 +8,8 @@
     (BIOFOUNDRY_CAPTURE_*) provided by macroquad_toolkit::capture in
     src/main.rs. Scenes: menu, settings, new_warren_confirm, warren, tutorial_food, tutorial_factory, tutorial_worm, help, event_log, event_log_older, pause, collapse, mine, blacksmith, smelter, cook_pot, kiln, waste, blacksmith_queue_full, equipment, overseer, factory, victory, security_stuck, factory_complete, optional, endless, endless_load_preview, endless_routes, endless_auto_return, endless_auto_resupply, endless_upgrade, endless_upgraded, endless_expedition_paused, endless_expedition_report, endless_forge, endless_empty, endless_failure, route_failure, endless_in_flight, endless_arrived, famine, food_warning, raid_food_warning, raid, raid_warning, breeding, breeding_locked, shrine, worm, unreachable_workstation, completion. Prefix any scene with touch_audit_ (for example touch_audit_endless_routes) to print settled hit-target size and overlap diagnostics.
     The focused Outpost expansion scenes are endless_crew_upgrade,
-    endless_crew_upgraded, endless_survey_upgrade, and endless_survey_upgraded.
+    endless_crew_upgraded, endless_survey_upgrade, endless_survey_upgraded,
+    endless_resonator_upgrade, and endless_resonator_upgraded.
 
 .EXAMPLE
     ./scripts/capture_ui.ps1
@@ -32,7 +33,9 @@ if (-not $PSBoundParameters.ContainsKey("Scenes")) {
         "endless_crew_upgrade",
         "endless_crew_upgraded",
         "endless_survey_upgrade",
-        "endless_survey_upgraded"
+        "endless_survey_upgraded",
+        "endless_resonator_upgrade",
+        "endless_resonator_upgraded"
     )
 }
 $gameDir = Split-Path -Parent $PSScriptRoot

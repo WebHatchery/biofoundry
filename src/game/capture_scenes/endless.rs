@@ -110,6 +110,36 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                 ));
             }
         }
+        "endless_resonator_upgrade" => {
+            super::begin(game, "endless_survey_upgrade");
+            if let GameState::Warren(session) = &mut game.state {
+                session.economy.ingots_stock = game.data.balance.outpost_survey_upgrade_ingots
+                    + game.data.balance.outpost_resonator_upgrade_ingots;
+                if let Some(pos) = session.outposts.last().map(|route| route.pos) {
+                    let _ = simulation::outposts::upgrade_outpost_survey(session, &game.data, pos);
+                }
+            }
+        }
+        "endless_resonator_upgraded" => {
+            begin(game, "endless_resonator_upgrade");
+            let upgraded = if let GameState::Warren(session) = &mut game.state {
+                session
+                    .outposts
+                    .last()
+                    .map(|route| route.pos)
+                    .is_some_and(|pos| {
+                        simulation::outposts::upgrade_outpost_resonator(session, &game.data, pos)
+                    })
+            } else {
+                false
+            };
+            if upgraded {
+                game.notifications.success(format!(
+                    "Resonance beacon tuned · {:.0}s surveys.",
+                    game.data.balance.outpost_resonator_cycle_sec
+                ));
+            }
+        }
         "endless_routes" => {
             super::begin(game, "endless_load_preview");
             if let GameState::Warren(session) = &mut game.state {

@@ -63,6 +63,7 @@ pub enum UiAction {
     UpgradeOutpostCrew(TilePos),
     /// Install the one-time survey rig for an awakened worm route.
     UpgradeOutpostSurvey(TilePos),
+    UpgradeOutpostResonator(TilePos),
     /// Cycle the number of new scouts sent on an awakened worm route.
     CycleOutpostCrew(TilePos),
     /// Pause or resume remote scouting without closing the worm route.

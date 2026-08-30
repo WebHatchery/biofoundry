@@ -23,8 +23,8 @@ mod workstations;
 
 use breeding::{breed_label, breeding_unlock_hint};
 use outpost::{
-    draw_compact_route_controls, draw_survey_upgrade_control, CompactRouteContext,
-    SurveyUpgradeContext,
+    draw_compact_route_controls, draw_route_upgrade_controls, CompactRouteContext,
+    RouteUpgradeContext,
 };
 pub(super) use status::inspect_status;
 use status::{
@@ -690,38 +690,16 @@ pub(super) fn draw_inspect_panel(
                             actions.push(UiAction::CycleOutpostCrew(pos));
                         }
                         y += 26.0;
-                        if outpost.is_some_and(|route| !route.storage_upgraded) {
-                            let upgrade_cost = data.balance.outpost_upgrade_ingots;
-                            if hud_button(
-                                Rect::new(x, y, panel.w - 28.0, 24.0),
-                                &format!("Expand hold · {upgrade_cost} ingots"),
-                                session.economy.ingots_stock >= upgrade_cost,
-                                mouse,
-                            ) {
-                                actions.push(UiAction::UpgradeOutpost(pos));
-                            }
-                            y += 26.0;
-                        }
-                        if outpost.is_some_and(|route| !route.crew_upgraded) {
-                            let upgrade_cost = data.balance.outpost_crew_upgrade_ingots;
-                            if hud_button(
-                                Rect::new(x, y, panel.w - 28.0, 24.0),
-                                &format!("Expand camp · {upgrade_cost} ingots"),
-                                session.economy.ingots_stock >= upgrade_cost,
-                                mouse,
-                            ) {
-                                actions.push(UiAction::UpgradeOutpostCrew(pos));
-                            }
-                            y += 26.0;
-                        }
-                        draw_survey_upgrade_control(SurveyUpgradeContext {
+                        draw_route_upgrade_controls(RouteUpgradeContext {
                             session,
                             data,
                             pos,
                             outpost,
-                            rect: Rect::new(x, 0.0, panel.w - 28.0, 24.0),
+                            x,
+                            width: panel.w - 28.0,
                             y: &mut y,
-                            step: 26.0,
+                            button_height: 24.0,
+                            button_step: 26.0,
                             mouse,
                             actions,
                         });

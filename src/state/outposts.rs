@@ -71,6 +71,9 @@ pub struct Outpost {
     /// Whether this route has installed a rig that improves remote surveys.
     #[serde(default)]
     pub survey_upgraded: bool,
+    /// Whether this route has installed a beacon that shortens survey cycles.
+    #[serde(default)]
+    pub resonator_upgraded: bool,
     /// Automatically return a full hold as cargo-only, keeping remote crew
     /// stationed for the next expedition.
     #[serde(default)]
@@ -99,6 +102,7 @@ impl Outpost {
             storage_upgraded: false,
             crew_upgraded: false,
             survey_upgraded: false,
+            resonator_upgraded: false,
             auto_return_cargo: false,
             auto_resupply_food: false,
             last_failure: None,
@@ -167,6 +171,18 @@ impl Outpost {
 
     pub fn upgrade_survey(&mut self) {
         self.survey_upgraded = true;
+    }
+
+    pub fn expedition_cycle_sec(&self, base_cycle: f32, upgraded_cycle: f32) -> f32 {
+        if self.resonator_upgraded {
+            upgraded_cycle.min(base_cycle)
+        } else {
+            base_cycle
+        }
+    }
+
+    pub fn upgrade_resonator(&mut self) {
+        self.resonator_upgraded = true;
     }
 
     pub fn toggle_auto_return(&mut self) {

@@ -235,6 +235,12 @@ pub struct Balance {
     /// Ore discovered by each scout after a survey rig is installed.
     #[serde(default = "default_outpost_upgraded_ore_per_crew")]
     pub outpost_upgraded_ore_per_crew: u32,
+    /// Ingot cost for the one-time Outpost resonance beacon.
+    #[serde(default = "default_outpost_resonator_upgrade_ingots")]
+    pub outpost_resonator_upgrade_ingots: u32,
+    /// Scouting cycle after a resonance beacon is installed.
+    #[serde(default = "default_outpost_resonator_cycle_sec")]
+    pub outpost_resonator_cycle_sec: f32,
     #[serde(default = "default_worm_transit_time")]
     pub worm_transit_time_sec: f32,
     /// Time for a staffed remote outpost to complete one scouting haul.
@@ -327,6 +333,12 @@ fn default_outpost_survey_upgrade_ingots() -> u32 {
 }
 fn default_outpost_upgraded_ore_per_crew() -> u32 {
     4
+}
+fn default_outpost_resonator_upgrade_ingots() -> u32 {
+    24
+}
+fn default_outpost_resonator_cycle_sec() -> f32 {
+    20.0
 }
 fn default_worm_transit_time() -> f32 {
     18.0

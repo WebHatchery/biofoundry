@@ -66,6 +66,7 @@ fn save_roundtrip_preserves_outpost_dispatch_settings() {
     session.outposts[0].storage_upgraded = true;
     session.outposts[0].crew_upgraded = true;
     session.outposts[0].survey_upgraded = true;
+    session.outposts[0].resonator_upgraded = true;
     session.outposts[0].cargo_priority = CargoPriority::Food;
     session.outposts[0].expedition_paused = true;
     session.outposts[0].auto_return_cargo = true;
@@ -79,6 +80,7 @@ fn save_roundtrip_preserves_outpost_dispatch_settings() {
     assert!(restored.outposts[0].storage_upgraded);
     assert!(restored.outposts[0].crew_upgraded);
     assert!(restored.outposts[0].survey_upgraded);
+    assert!(restored.outposts[0].resonator_upgraded);
     assert_eq!(restored.outposts[0].cargo_priority, CargoPriority::Food);
     assert!(restored.outposts[0].expedition_paused);
     assert!(restored.outposts[0].auto_return_cargo);
@@ -95,6 +97,10 @@ fn save_roundtrip_preserves_outpost_dispatch_settings() {
     assert_eq!(
         crate::simulation::outposts::ore_per_crew(&restored.outposts[0], &data),
         data.balance.outpost_upgraded_ore_per_crew
+    );
+    assert_eq!(
+        crate::simulation::outposts::expedition_cycle_sec(&restored.outposts[0], &data),
+        data.balance.outpost_resonator_cycle_sec
     );
 }
 

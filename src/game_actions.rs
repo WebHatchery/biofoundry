@@ -377,6 +377,34 @@ impl Game {
                     self.autosave_game();
                 }
             }
+            UiAction::UpgradeOutpostResonator(pos) => {
+                let mut upgraded = false;
+                if let GameState::Warren(session) = &mut self.state {
+                    if simulation::outposts::upgrade_outpost_resonator(session, &self.data, pos) {
+                        let cycle = session
+                            .outposts
+                            .iter()
+                            .find(|outpost| outpost.pos == pos)
+                            .map(|outpost| {
+                                simulation::outposts::expedition_cycle_sec(outpost, &self.data)
+                            })
+                            .unwrap_or(self.data.balance.outpost_expedition_cycle_sec);
+                        self.notifications
+                            .success(format!("Resonance beacon tuned · {cycle:.0}s surveys."));
+                        self.audio.play(Sfx::Complete);
+                        upgraded = true;
+                    } else {
+                        self.notifications.warning(format!(
+                            "Install the survey rig first, then spend {} ingots.",
+                            self.data.balance.outpost_resonator_upgrade_ingots
+                        ));
+                        self.audio.play(Sfx::Deny);
+                    }
+                }
+                if upgraded {
+                    self.autosave_game();
+                }
+            }
             UiAction::CycleOutpostCrew(pos) => {
                 let mut route_changed = false;
                 if let GameState::Warren(session) = &mut self.state {

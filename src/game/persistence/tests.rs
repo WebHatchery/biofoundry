@@ -36,3 +36,14 @@ fn loaded_survey_rig_requires_both_logistics_expansions() {
 
     assert!(error.contains("expanded hold and camp"), "{error}");
 }
+
+#[test]
+fn loaded_resonance_beacon_requires_a_survey_rig() {
+    let (data, mut session) = session_with_outpost();
+    session.outposts[0].resonator_upgraded = true;
+
+    let error = validate_loaded_session(&session, &data)
+        .expect_err("a resonance beacon cannot exist before the survey rig");
+
+    assert!(error.contains("survey rig"), "{error}");
+}

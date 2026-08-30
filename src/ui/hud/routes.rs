@@ -225,6 +225,14 @@ fn route_metrics(session: &GameSession, data: &GameData, outpost: &Outpost) -> S
     } else {
         String::new()
     };
+    let resonator_summary = if outpost.resonator_upgraded {
+        format!(
+            " · Cycle {:.0}s",
+            crate::simulation::outposts::expedition_cycle_sec(outpost, data)
+        )
+    } else {
+        String::new()
+    };
     let cargo_summary = format!(
         "Cargo {}/{} · Crew {}/{}{}",
         outpost.cargo_total(),
@@ -233,6 +241,7 @@ fn route_metrics(session: &GameSession, data: &GameData, outpost: &Outpost) -> S
         crate::simulation::outposts::crew_capacity(outpost, data),
         survey_summary
     );
+    let cargo_summary = format!("{cargo_summary}{resonator_summary}");
     match crate::simulation::outposts::expedition_state(outpost, data) {
         crate::simulation::outposts::ExpeditionState::Scouting {
             progress_percent, ..
