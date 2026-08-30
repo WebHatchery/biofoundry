@@ -184,6 +184,14 @@ fn unlock_notice_teaches_how_to_use_new_content() {
         unlock_notice(&data, "Hobgoblin Brood"),
         "Unlocked: Hobgoblin Brood — breed at the Breeding Pit."
     );
+    assert_eq!(
+        unlock_notice(&data, "Slime Janitor"),
+        "Unlocked: Slime Janitor — recruit from Jobs."
+    );
+    assert_eq!(
+        unlock_notice(&data, "Bat Courier"),
+        "Unlocked: Bat Courier — recruit from Jobs."
+    );
 }
 
 #[test]

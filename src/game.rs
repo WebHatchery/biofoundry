@@ -690,7 +690,10 @@ fn unlock_notice(data: &GameData, name: &str) -> String {
             .and_then(|id| data.buildings.get(id))
             .map(|building| format!("build {} from Build & Dig", building.name))
             .unwrap_or_else(|| "available in Build & Dig".to_owned()),
-        "unlock_creature" => "breed at the Breeding Pit".to_owned(),
+        "unlock_creature" => match unlock.id.as_str() {
+            "slime_janitor" | "bat_courier" => "recruit from Jobs".to_owned(),
+            _ => "breed at the Breeding Pit".to_owned(),
+        },
         "guard_dps_mult" => format!("Guards deal +{:.0}% damage", (unlock.value - 1.0) * 100.0),
         "farm_cap_mult" => format!("Farms hold +{:.0}% food", (unlock.value - 1.0) * 100.0),
         _ => unlock.description.trim_end_matches('.').to_owned(),
