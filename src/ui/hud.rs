@@ -44,6 +44,7 @@ pub struct HudOptions<'a> {
     pub event_log_page: usize,
     pub event_history: &'a [LoggedNotification],
     pub routes_open: bool,
+    pub confirm_load: bool,
     pub paused: bool,
     pub save_exists: bool,
     /// Persistent shell warning when the last checkpoint write was rejected.
@@ -127,6 +128,7 @@ pub fn draw(
         ui.scale,
         panels::TopBarState {
             paused: options.paused,
+            save_exists: options.save_exists,
             checkpoint_warning: options.checkpoint_warning,
         },
         &mut actions,
@@ -180,7 +182,8 @@ pub fn draw(
     let worm_up = session.worm_awake && !session.worm_shown;
     let routes_up = options.routes_open && session.worm_awake && !session.outposts.is_empty();
     let colony_failure = colony_failure_reason(session, data);
-    let modal_overlay = colony_failure.is_some() || worm_up || factory_up || victory_up;
+    let modal_overlay =
+        colony_failure.is_some() || options.confirm_load || worm_up || factory_up || victory_up;
     if modal_overlay {
         // Goal and recovery overlays must own the frame's input. Without
         // clearing the HUD intents collected above, a click on a visible
@@ -189,6 +192,8 @@ pub fn draw(
     }
     if let Some(failure) = colony_failure {
         overlays::draw_colony_failure_overlay(failure, options.save_exists, mouse, &mut actions);
+    } else if options.confirm_load {
+        overlays::draw_load_confirmation(mouse, &mut actions);
     } else if worm_up {
         overlays::draw_goal_overlay(
             "The Colossal Worm Awakens",

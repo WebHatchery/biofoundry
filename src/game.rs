@@ -53,6 +53,8 @@ pub struct Game {
     settings_open: bool,
     /// The title menu is confirming replacement of an existing save.
     confirm_new_warren: bool,
+    /// The active Warren is confirming replacement with its last checkpoint.
+    confirm_load: bool,
     /// The warren field guide is showing.
     help_open: bool,
     /// The recent event history is showing inside the field guide shell.
@@ -121,6 +123,7 @@ impl Game {
             last_camera: (vec2(0.0, 0.0), 1.0),
             settings_open: false,
             confirm_new_warren: false,
+            confirm_load: false,
             help_open: false,
             event_log_open: false,
             event_log_page: 0,
@@ -176,6 +179,7 @@ impl Game {
                     &self.data,
                     self.help_open,
                     self.routes_open,
+                    self.confirm_load,
                 )
             {
                 self.accumulator += dt;
@@ -303,12 +307,14 @@ impl Game {
                 self.events.push(UiAction::Save);
             }
             if is_key_pressed(KeyCode::F9) {
-                self.events.push(UiAction::Load);
+                self.events.push(UiAction::RequestLoad);
             }
             if input.escape_pressed {
                 // Escape backs out of a tool first, then to the menu.
                 if self.help_open {
                     self.events.push(UiAction::ToggleHelp);
+                } else if self.confirm_load {
+                    self.events.push(UiAction::CancelLoad);
                 } else if self.mode != UiMode::Inspect {
                     self.mode = self.mode.clone().after_successful_placement();
                 } else {
@@ -406,6 +412,7 @@ impl Game {
                         event_log_page: self.event_log_page,
                         event_history: self.notifications.history(),
                         routes_open: self.routes_open,
+                        confirm_load: self.confirm_load,
                         paused: self.paused,
                         save_exists: self.save_exists,
                         checkpoint_warning: self.checkpoint_warning,
@@ -565,6 +572,7 @@ impl Game {
                 self.routes_open = false;
                 self.paused = false;
                 self.confirm_new_warren = false;
+                self.confirm_load = false;
                 self.state = GameState::Menu;
             }
         }
@@ -637,9 +645,11 @@ fn simulation_blocked_by_modal(
     data: &GameData,
     help_open: bool,
     routes_open: bool,
+    confirm_load: bool,
 ) -> bool {
     help_open
         || routes_open
+        || confirm_load
         || (session.won && !session.victory_shown)
         || (session.factory_complete && !session.factory_shown)
         || (session.worm_awake && !session.worm_shown)

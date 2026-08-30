@@ -54,6 +54,13 @@ fn field_guide_exposes_the_recent_events_view() {
 }
 
 #[test]
+fn active_load_confirmation_names_both_visible_choices_and_the_risk() {
+    assert!(LOAD_CONFIRMATION_TEXT.contains("Load Last Save"));
+    assert!(LOAD_CONFIRMATION_TEXT.contains("Keep Current"));
+    assert!(LOAD_CONFIRMATION_TEXT.contains("discarded"));
+}
+
+#[test]
 fn recent_event_pages_keep_newest_entries_on_the_first_page() {
     assert_eq!(event_log_page_count(0), 1);
     assert_eq!(event_log_page_count(10), 1);

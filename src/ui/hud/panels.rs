@@ -35,6 +35,7 @@ const LOCKED_TOOL_MARKER: &str = "[L]";
 #[derive(Debug, Clone, Copy)]
 pub(super) struct TopBarState<'a> {
     pub(super) paused: bool,
+    pub(super) save_exists: bool,
     pub(super) checkpoint_warning: Option<&'a str>,
 }
 
@@ -281,10 +282,10 @@ pub(super) fn draw_top_bar(
     if hud_button(
         Rect::new(bar.right() - 176.0, chrome_y, 74.0, chrome_height),
         "Load",
-        true,
+        top_bar_state.save_exists,
         mouse,
     ) {
-        actions.push(UiAction::Load);
+        actions.push(UiAction::RequestLoad);
     }
     if hud_button(
         Rect::new(bar.right() - 438.0, chrome_y, 74.0, chrome_height),

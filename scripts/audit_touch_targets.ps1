@@ -21,6 +21,7 @@ param(
         "settings",
         "warren",
         "new_warren_confirm",
+        "load_confirm",
         "help",
         "event_log",
         "event_log_older",

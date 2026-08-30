@@ -35,6 +35,15 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
             game.save_exists = true;
             game.confirm_new_warren = true;
         }
+        "load_confirm" => {
+            game.transition(StateTransition::StartWarren);
+            game.paused = true;
+            game.confirm_load = true;
+            if let GameState::Warren(session) = &mut game.state {
+                session.tutorial_dismissed = true;
+                session.economy.food = 80.0;
+            }
+        }
         "settings" => {
             game.transition(StateTransition::BackToMenu);
             game.settings_open = true;

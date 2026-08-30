@@ -11,6 +11,8 @@ use macroquad_toolkit::notifications::{
     LoggedNotification, NotificationManager, NotificationType, MAX_HISTORY,
 };
 
+mod persistence;
+
 fn session() -> (GameData, GameSession) {
     let data = GameData::load().unwrap();
     let session = GameSession::new(&data, 42);
@@ -410,50 +412,6 @@ fn loaded_session_validation_rejects_overfull_in_flight_cargo() {
 }
 
 #[test]
-fn loaded_session_validation_rejects_in_flight_cargo_that_overfills_stored_hold() {
-    let (data, mut session) = session();
-    let positions: Vec<_> = session
-        .world
-        .tiles
-        .iter_with_pos()
-        .filter(|(pos, tile)| tile.walkable() && session.can_place_building(*pos))
-        .map(|(pos, _)| pos)
-        .take(2)
-        .collect();
-    assert_eq!(
-        positions.len(),
-        2,
-        "transit test needs two free floor tiles"
-    );
-    session
-        .buildings
-        .push(Building::new("worm_shrine", positions[0]));
-    session
-        .buildings
-        .push(Building::new("outpost", positions[1]));
-    session.ensure_outpost(positions[1]);
-    session.worm_awake = true;
-    session.outposts[0].cargo.insert(
-        crate::state::creatures::Good::Ore,
-        data.balance.outpost_storage_cap - 1,
-    );
-    session.worm_transit = Some(WormTransit {
-        outpost: positions[1],
-        direction: TransitDirection::ToOutpost,
-        remaining: 1.0,
-        ore: 2,
-        ingots: 0,
-        food: 0.0,
-        passengers: Vec::new(),
-    });
-
-    let error = validate_loaded_session(&session, &data)
-        .expect_err("stored and in-flight cargo cannot overfill the destination hold");
-
-    assert!(error.contains("when combined with stored cargo"));
-}
-
-#[test]
 fn loaded_session_validation_rejects_overfull_remote_crew() {
     let (data, mut session) = session();
     let positions: Vec<_> = session
@@ -582,26 +540,38 @@ fn goal_modal_holds_the_simulation_until_the_report_is_dismissed() {
     let (data, mut session) = session();
     session.won = true;
 
-    assert!(simulation_blocked_by_modal(&session, &data, false, false));
+    assert!(simulation_blocked_by_modal(
+        &session, &data, false, false, false
+    ));
 
     session.victory_shown = true;
     session.factory_complete = true;
-    assert!(simulation_blocked_by_modal(&session, &data, false, false));
+    assert!(simulation_blocked_by_modal(
+        &session, &data, false, false, false
+    ));
 
     session.factory_shown = true;
     session.worm_awake = true;
-    assert!(simulation_blocked_by_modal(&session, &data, false, false));
+    assert!(simulation_blocked_by_modal(
+        &session, &data, false, false, false
+    ));
 
     session.worm_shown = true;
-    assert!(!simulation_blocked_by_modal(&session, &data, false, false));
+    assert!(!simulation_blocked_by_modal(
+        &session, &data, false, false, false
+    ));
 }
 
 #[test]
 fn field_guide_pauses_a_viable_warren_while_open() {
     let (data, session) = session();
 
-    assert!(simulation_blocked_by_modal(&session, &data, true, false));
-    assert!(!simulation_blocked_by_modal(&session, &data, false, false));
+    assert!(simulation_blocked_by_modal(
+        &session, &data, true, false, false
+    ));
+    assert!(!simulation_blocked_by_modal(
+        &session, &data, false, false, false
+    ));
 }
 
 #[test]
@@ -610,8 +580,12 @@ fn route_ledger_pauses_an_awakened_warren_while_open() {
     session.worm_awake = true;
     session.worm_shown = true;
 
-    assert!(simulation_blocked_by_modal(&session, &data, false, true));
-    assert!(!simulation_blocked_by_modal(&session, &data, false, false));
+    assert!(simulation_blocked_by_modal(
+        &session, &data, false, true, false
+    ));
+    assert!(!simulation_blocked_by_modal(
+        &session, &data, false, false, false
+    ));
 }
 
 #[test]
@@ -652,7 +626,21 @@ fn non_viable_recovery_stops_the_remaining_specialists() {
     session.creatures.clear();
     session.spawn_creature(&data, "overseer", Job::Idle);
 
-    assert!(simulation_blocked_by_modal(&session, &data, false, false));
+    assert!(simulation_blocked_by_modal(
+        &session, &data, false, false, false
+    ));
+}
+
+#[test]
+fn active_load_confirmation_holds_the_simulation_until_a_choice() {
+    let (data, session) = session();
+
+    assert!(simulation_blocked_by_modal(
+        &session, &data, false, false, true
+    ));
+    assert!(!simulation_blocked_by_modal(
+        &session, &data, false, false, false
+    ));
 }
 
 #[test]

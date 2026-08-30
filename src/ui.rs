@@ -91,6 +91,10 @@ pub enum UiAction {
     /// Queue an equipment craft (item id) at the blacksmith at this tile.
     QueueOrder(TilePos, String),
     Save,
+    /// Ask for confirmation before replacing the active Warren with a save.
+    RequestLoad,
+    /// Close the active-run load confirmation without loading.
+    CancelLoad,
     Load,
     /// Open/close the settings panel on the title menu.
     ToggleSettings,

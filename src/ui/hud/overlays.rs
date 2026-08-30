@@ -17,6 +17,8 @@ const OBJECTIVE_HELP_BODY: &str =
     "Read the Objective card for the current milestone. Locked gates name their exact unlock; after the worm wakes, tap Routes for every Outpost. The card tracks Charter hauls and reward.";
 const FIELD_GUIDE_INTRO: &str =
     "Everything below has a visible touch or pointer control. Review Recent events when a toast has faded; use Older or Newer to browse further.";
+pub(super) const LOAD_CONFIRMATION_TEXT: &str =
+    "Load the last saved Warren? Any work since that checkpoint will be discarded.\n\nChoose Load Last Save to restore it, or Keep Current to continue this run.";
 const EVENTS_PER_PAGE: usize = 10;
 
 pub(super) fn draw_goal_overlay(
@@ -157,6 +159,53 @@ fn colony_failure_body(failure: ColonyFailure, save_exists: bool) -> &'static st
         (ColonyFailure::GuardHandoff, false) => {
             "No reassignable workers remain, so this warren cannot staff the Guard post or advance onboarding.\n\nStart a new warren to begin again."
         }
+    }
+}
+
+/// Protect an active run from an accidental top-bar Load click. Recovery
+/// overlays still use the direct Load action because they already explain why
+/// the current Warren cannot continue.
+pub(super) fn draw_load_confirmation(mouse: Vec2, actions: &mut Vec<UiAction>) {
+    draw_rectangle(
+        0.0,
+        0.0,
+        LOGICAL_WIDTH,
+        LOGICAL_HEIGHT,
+        Color::new(0.0, 0.0, 0.0, 0.62),
+    );
+    macroquad_toolkit::ui::occlude(Rect::new(0.0, 0.0, LOGICAL_WIDTH, LOGICAL_HEIGHT));
+    let panel = Rect::new(LOGICAL_WIDTH * 0.5 - 260.0, 250.0, 520.0, 210.0);
+    draw_surface_with_title(
+        panel,
+        Some("Load the Last Save?"),
+        &panel_style(),
+        TextStyle::new(20.0, dark::TEXT_BRIGHT),
+    );
+    draw_text_block(
+        LOAD_CONFIRMATION_TEXT,
+        panel.x + 20.0,
+        panel.y + 58.0,
+        panel.w - 40.0,
+        92.0,
+        16.0,
+        4.0,
+        dark::TEXT,
+    );
+    if hud_button(
+        Rect::new(panel.x + 24.0, panel.bottom() - 52.0, 220.0, 36.0),
+        "Load Last Save",
+        true,
+        mouse,
+    ) {
+        actions.push(UiAction::Load);
+    }
+    if hud_button(
+        Rect::new(panel.x + 276.0, panel.bottom() - 52.0, 220.0, 36.0),
+        "Keep Current",
+        true,
+        mouse,
+    ) {
+        actions.push(UiAction::CancelLoad);
     }
 }
 

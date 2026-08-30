@@ -577,6 +577,21 @@ impl Game {
                 }
             }
             UiAction::Save => self.save_game(),
+            UiAction::RequestLoad => {
+                if matches!(&self.state, GameState::Warren(_)) && self.save_exists {
+                    self.confirm_load = true;
+                    self.audio.play(Sfx::Select);
+                } else if matches!(&self.state, GameState::Warren(_)) {
+                    self.notifications.warning("No saved warren is available.");
+                    self.audio.play(Sfx::Deny);
+                } else {
+                    self.load_game();
+                }
+            }
+            UiAction::CancelLoad => {
+                self.confirm_load = false;
+                self.audio.play(Sfx::Select);
+            }
             UiAction::Load => self.load_game(),
             UiAction::ToggleSettings => {
                 self.settings_open = !self.settings_open;
