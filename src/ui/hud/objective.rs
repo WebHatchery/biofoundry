@@ -19,39 +19,43 @@ impl CampaignObjective {
     /// Derive the current milestone without mutating the simulation.
     pub fn current(session: &GameSession, data: &GameData) -> Self {
         if session.worm_awake {
-            let next = if !session.unlocked.contains("worm_transit") {
-                "Next: keep forging ingots to unlock Worm Transit."
+            let next: String = if !session.unlocked.contains("worm_transit") {
+                endless_forge_next_step(session, data)
             } else if let Some(transit) = session.worm_transit.as_ref() {
                 match transit.direction {
                     TransitDirection::ToOutpost => {
                         "Next: wait for the worm to reach the outpost, then inspect its cargo."
+                            .to_owned()
                     }
                     TransitDirection::ToShrine => {
                         "Next: wait for the worm to reach the shrine, then plan the next run."
+                            .to_owned()
                     }
                 }
             } else if session.buildings_of("outpost").next().is_none() {
-                "Next: build a Worm Outpost and send cargo through the awakened route."
+                "Next: build a Worm Outpost and send cargo through the awakened route.".to_owned()
             } else if session.outposts.iter().any(|outpost| {
                 !outpost.active && (outpost.cargo_total() > 0 || !outpost.crew.is_empty())
             }) {
                 "Next: tap the loaded Worm Outpost, then tap Activate route to return its payload."
+                    .to_owned()
             } else if session
                 .outposts
                 .iter()
                 .any(|outpost| outpost.last_failure.is_some() && !outpost.active)
             {
                 "Next: tap the failed Worm Outpost, then tap Activate route before sending cargo."
+                    .to_owned()
             } else if session
                 .outposts
                 .iter()
                 .any(|outpost| outpost.last_failure.is_some())
             {
-                "Next: tap the failed Worm Outpost, then try the cargo run again."
+                "Next: tap the failed Worm Outpost, then try the cargo run again.".to_owned()
             } else if session.outposts.iter().any(|outpost| outpost.active) {
-                active_outpost_next_step(session, data)
+                active_outpost_next_step(session, data).to_owned()
             } else {
-                "Next: activate the Worm Outpost, then send a cargo run."
+                "Next: activate the Worm Outpost, then send a cargo run.".to_owned()
             };
             return Self {
                 title: "Campaign complete".to_owned(),
@@ -59,7 +63,7 @@ impl CampaignObjective {
                     "The Colossal Worm is awake · Cargo runs {}",
                     session.progress.courier_deliveries
                 ),
-                next: next.to_owned(),
+                next,
                 ratio: 1.0,
                 complete: true,
             };
@@ -169,6 +173,38 @@ impl CampaignObjective {
             complete: false,
         }
     }
+}
+
+fn endless_forge_next_step(session: &GameSession, data: &GameData) -> String {
+    if session.buildings_of("blacksmith").next().is_none() {
+        return "Next: tap Blacksmith in Build & Dig, then place it on open floor.".to_owned();
+    }
+    if !session.buildings_of("mine").any(|mine| mine.reserve > 0.0) {
+        return "Next: tap Mine in Build & Dig, then place a new Mine on open floor.".to_owned();
+    }
+    if session.job_count(Job::Smith) == 0 {
+        return format!(
+            "Next: {}.",
+            job_assignment_action_hint(
+                session,
+                data,
+                Job::Smith,
+                &[Job::Miner, Job::Carrier, Job::Cook, Job::Guard]
+            )
+        );
+    }
+    if session.job_count(Job::Carrier) == 0 {
+        return format!(
+            "Next: {}.",
+            job_assignment_action_hint(
+                session,
+                data,
+                Job::Carrier,
+                &[Job::Miner, Job::Cook, Job::Guard, Job::Smith]
+            )
+        );
+    }
+    "Next: keep the Blacksmith supplied while it forges ingots to unlock Worm Transit.".to_owned()
 }
 
 fn shrine_build_requirement(session: &GameSession, data: &GameData) -> (String, String) {

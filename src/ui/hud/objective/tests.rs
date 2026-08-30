@@ -139,7 +139,87 @@ fn objective_marks_the_worm_awake_as_complete() {
     );
     assert_eq!(
         objective.next,
-        "Next: keep forging ingots to unlock Worm Transit."
+        "Next: tap Blacksmith in Build & Dig, then place it on open floor."
+    );
+}
+
+#[test]
+fn awakened_objective_recovers_an_exhausted_mine_before_promising_more_ingots() {
+    let (data, mut session) = boot();
+    session.worm_awake = true;
+    let mine = session.buildings_of("mine").next().unwrap().pos;
+    session.building_at_mut(mine).unwrap().reserve = 0.0;
+
+    let objective = CampaignObjective::current(&session, &data);
+
+    assert_eq!(
+        objective.next,
+        "Next: tap Blacksmith in Build & Dig, then place it on open floor."
+    );
+
+    let blacksmith = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(pos, _)| session.can_place_building(*pos))
+        .map(|(pos, _)| pos)
+        .unwrap();
+    session
+        .buildings
+        .push(Building::new("blacksmith", blacksmith));
+
+    let objective = CampaignObjective::current(&session, &data);
+    assert_eq!(
+        objective.next,
+        "Next: tap Mine in Build & Dig, then place a new Mine on open floor."
+    );
+}
+
+#[test]
+fn awakened_objective_names_the_visible_smith_recovery() {
+    let (data, mut session) = boot();
+    session.worm_awake = true;
+    let blacksmith = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(pos, _)| session.can_place_building(*pos))
+        .map(|(pos, _)| pos)
+        .unwrap();
+    session
+        .buildings
+        .push(Building::new("blacksmith", blacksmith));
+
+    let objective = CampaignObjective::current(&session, &data);
+
+    assert_eq!(
+        objective.next,
+        "Next: tap − beside Miner, then + beside Smith in Jobs."
+    );
+}
+
+#[test]
+fn awakened_objective_names_the_visible_carrier_recovery() {
+    let (data, mut session) = boot();
+    session.worm_awake = true;
+    let blacksmith = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(pos, _)| session.can_place_building(*pos))
+        .map(|(pos, _)| pos)
+        .unwrap();
+    session
+        .buildings
+        .push(Building::new("blacksmith", blacksmith));
+    session.creatures.clear();
+    session.spawn_creature(&data, "goblin", Job::Smith);
+
+    let objective = CampaignObjective::current(&session, &data);
+
+    assert_eq!(
+        objective.next,
+        "Next: tap − beside Smith, then + beside Carrier in Jobs."
     );
 }
 
