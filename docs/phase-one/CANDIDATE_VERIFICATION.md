@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `e54afdf`
+**Source revision:** `741043d`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -229,6 +229,8 @@ automated simulation results into first-time-player evidence.
   construction is pending, and names the current pressure recovery controls;
   the completed Farm is now the handoff into the Factory lesson. The Food and
   Factory cards no longer promise a fixed Miner or Idle-based reassignment.
+  The expanded tutorial card keeps the final recovery instruction above Skip;
+  the Food, Factory, and Worm beats remain readable in an 800×450 probe.
 - Tutorial completion guard — focused coverage confirms that completing an
   unrelated building cannot satisfy the Farm-construction lesson; the lesson
   now waits for the player-built second Farm.
