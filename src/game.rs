@@ -17,7 +17,7 @@ use macroquad_toolkit::input::TouchGesture;
 use macroquad_toolkit::notifications::{
     NotificationAnchor, NotificationManager, NotificationRenderConfig,
 };
-use macroquad_toolkit::persistence::slot_exists;
+use macroquad_toolkit::persistence::{slot_backup_exists, slot_exists};
 use macroquad_toolkit::prelude::{begin_virtual_ui_frame, dark, end_virtual_ui_frame, InputState};
 
 mod capture_scenes;
@@ -31,7 +31,8 @@ mod tests;
 #[cfg(test)]
 use persistence::{
     migrate_tutorial_progress, missing_save_notice, no_saved_slot_available,
-    non_viable_save_notice, save_failure_notice, should_restore_missing_primary,
+    non_viable_save_notice, save_failure_notice, save_slot_available,
+    should_restore_missing_primary,
 };
 
 pub struct Game {
@@ -99,7 +100,10 @@ impl Game {
         let camera = Camera2D::with_config(vec2(0.0, 0.0), 1.0, input::camera_config(&data, 1.0));
         let mut audio = Audio::load().await;
         audio.load_settings(&data.config.game_name);
-        let save_exists = slot_exists(&data.config.game_name, &data.config.save_slot);
+        let save_exists = persistence::save_slot_available(
+            slot_exists(&data.config.game_name, &data.config.save_slot),
+            slot_backup_exists(&data.config.game_name, &data.config.save_slot),
+        );
 
         Self {
             data,

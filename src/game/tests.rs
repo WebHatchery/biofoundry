@@ -95,6 +95,13 @@ fn missing_primary_save_uses_a_surviving_backup() {
 }
 
 #[test]
+fn startup_continue_stays_available_for_a_backup_only_save() {
+    assert!(save_slot_available(true, false));
+    assert!(save_slot_available(false, true));
+    assert!(!save_slot_available(false, false));
+}
+
+#[test]
 fn missing_save_clears_a_stale_continue_indicator() {
     assert!(no_saved_slot_available(false, false));
     assert!(!no_saved_slot_available(false, true));

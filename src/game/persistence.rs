@@ -234,8 +234,14 @@ pub(super) fn should_restore_missing_primary(primary_exists: bool, backup_exists
     !primary_exists && backup_exists
 }
 
+/// Whether the title screen should offer Continue. A surviving backup is a
+/// recoverable save even when the primary slot disappeared between launches.
+pub(super) fn save_slot_available(primary_exists: bool, backup_exists: bool) -> bool {
+    primary_exists || backup_exists
+}
+
 pub(super) fn no_saved_slot_available(primary_exists: bool, backup_exists: bool) -> bool {
-    !primary_exists && !backup_exists
+    !save_slot_available(primary_exists, backup_exists)
 }
 
 pub(super) fn missing_save_notice(error: &str) -> String {
