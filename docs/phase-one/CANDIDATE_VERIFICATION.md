@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `a17e584`
+**Source revision:** `7629745`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -31,7 +31,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 199 unit tests and 2 integration tests pass.
+- `cargo test --all-targets` — 200 unit tests and 2 integration tests pass.
 - `cargo clippy --all-targets --all-features -- -D warnings` — pass.
 - `publish.ps1` with no parameters — pass; Windows and WebGL packages
   deployed to Preview.
@@ -205,6 +205,10 @@ automated simulation results into first-time-player evidence.
 - Locked specialist labels — focused inspection coverage keeps unavailable
   breeding choices readable as `[L]` instead of the bundled font's missing
   glyph.
+- Locked specialist progress — [ui_breeding_locked.png](../verification/ui_breeding_locked.png)
+  shows each unavailable breeding choice with its exact forge requirement and
+  live progress, while the refreshed [ui_breeding.png](../verification/ui_breeding.png)
+  keeps the unlocked specialist benefits and costs readable.
 - Factory tutorial capture — [ui_tutorial_factory.png](../verification/ui_tutorial_factory.png)
   makes the intended interaction explicit: inspect the existing Mine, place the
   Blacksmith, and when no eligible Idle worker is available, tap `−` by the
