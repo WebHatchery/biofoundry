@@ -108,14 +108,16 @@ pub(in crate::ui::hud) fn draw_food_grid_panel(
     );
     y += 20.0;
     draw_ui_text_ex(
-        &format!(
-            "Ore banked {} · delivered {}/{}",
-            session.economy.ore_stock,
-            session.economy.ore_delivered_total,
-            data.balance.win_ore_delivered
-        ),
+        &resource_bank_line(session.economy.ore_stock, session.economy.ingots_stock),
         x,
         y,
         TextStyle::new(14.0, dark::TEXT).params(),
     );
 }
+
+fn resource_bank_line(ore: u32, ingots: u32) -> String {
+    format!("Ore banked {ore} · ingots {ingots}")
+}
+
+#[cfg(test)]
+mod tests;
