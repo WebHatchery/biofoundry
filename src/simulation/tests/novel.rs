@@ -217,6 +217,20 @@ fn worm_transit_moves_cargo_and_recovers_when_route_fails() {
 }
 
 #[test]
+fn reactivating_a_failed_route_clears_the_global_failure_banner() {
+    let (_data, mut session, outpost_pos) = active_outpost(160);
+    session.outposts[0].active = false;
+    session.outposts[0].last_failure = Some("The worm route collapsed.".to_owned());
+    session.last_transit_failure =
+        Some("Transit failed because the outpost was inactive.".to_owned());
+
+    assert!(outposts::activate_outpost(&mut session, outpost_pos));
+    assert!(session.outposts[0].active);
+    assert!(session.outposts[0].last_failure.is_none());
+    assert!(session.last_transit_failure.is_none());
+}
+
+#[test]
 fn worm_transit_accepts_food_only_and_returns_crew_without_cargo() {
     let (data, mut food_session, outpost_pos) = active_outpost(17);
     food_session.creatures.clear();

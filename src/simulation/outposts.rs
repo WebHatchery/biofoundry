@@ -13,16 +13,19 @@ pub fn activate_outpost(session: &mut GameSession, pos: TilePos) -> bool {
         return false;
     }
     session.ensure_outpost(pos);
-    session
-        .outposts
-        .iter_mut()
-        .find(|o| o.pos == pos)
-        .map(|o| {
-            o.active = !o.active;
-            o.last_failure = None;
-            true
-        })
-        .unwrap_or(false)
+    let Some(outpost) = session.outposts.iter_mut().find(|o| o.pos == pos) else {
+        return false;
+    };
+    let was_inactive = !outpost.active;
+    outpost.active = !outpost.active;
+    outpost.last_failure = None;
+    if was_inactive {
+        // The player has acknowledged the failed route and reopened it.
+        // Clear the global banner too, otherwise the top bar reports a stale
+        // failure until a new transit happens to launch.
+        session.last_transit_failure = None;
+    }
+    true
 }
 
 pub fn start_to_outpost(session: &mut GameSession, data: &GameData, pos: TilePos) -> bool {
