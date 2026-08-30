@@ -28,8 +28,18 @@ fn route_network_summary_reports_the_whole_warren_network() {
 
     assert_eq!(
         route_network_summary(&session, &data),
-        "Routes 2 · Active 1 · Held cargo 5 · Remote crew 2 · Ore scouted 9 · Attention 2"
+        "Routes 2 · Active 1 · Held cargo 5 · Remote crew 2 · Ore scouted 9 · Charter 0/3 · +12 ingots · Attention 2"
     );
+}
+
+#[test]
+fn route_network_summary_confirms_a_claimed_charter() {
+    let data = GameData::load().expect("embedded game data");
+    let mut session = GameSession::new(&data, 42);
+    session.outpost_charter_claimed = true;
+    session.outposts.push(Outpost::new(TilePos::new(4, 4)));
+
+    assert!(route_network_summary(&session, &data).contains("Charter complete"));
 }
 
 #[test]

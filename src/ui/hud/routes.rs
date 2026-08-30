@@ -175,14 +175,31 @@ fn route_network_summary(session: &GameSession, data: &GameData) -> String {
         .iter()
         .filter(|outpost| route_needs_attention(outpost, data))
         .count();
+    let charter = charter_summary(session, data);
     format!(
-        "Routes {} · Active {} · Held cargo {} · Remote crew {} · Ore scouted {} · Attention {}",
+        "Routes {} · Active {} · Held cargo {} · Remote crew {} · Ore scouted {} · {} · Attention {}",
         session.outposts.len(),
         active,
         held_cargo,
         remote_crew,
         scouted_ore,
+        charter,
         attention
+    )
+}
+
+fn charter_summary(session: &GameSession, data: &GameData) -> String {
+    let goal = data.balance.outpost_charter_haul_goal;
+    if session.outpost_charter_claimed {
+        return "Charter complete".to_owned();
+    }
+    if goal == 0 {
+        return "Charter unavailable".to_owned();
+    }
+    let completed = crate::simulation::outposts::total_expeditions(session).min(goal);
+    format!(
+        "Charter {completed}/{goal} · +{} ingots",
+        data.balance.outpost_charter_reward_ingots
     )
 }
 

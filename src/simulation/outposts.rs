@@ -120,11 +120,9 @@ pub fn expedition_cycle_sec(outpost: &Outpost, data: &GameData) -> f32 {
 
 /// Return the aggregate completed scouting hauls across all routes.
 pub fn total_expeditions(session: &GameSession) -> u32 {
-    session
-        .outposts
-        .iter()
-        .map(|outpost| outpost.expeditions_completed)
-        .sum()
+    session.outposts.iter().fold(0, |total, outpost| {
+        total.saturating_add(outpost.expeditions_completed)
+    })
 }
 
 /// Award the one-time Worm Road Charter when its haul target is met.
