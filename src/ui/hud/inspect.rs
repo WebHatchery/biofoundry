@@ -481,10 +481,26 @@ pub(super) fn draw_inspect_panel(
                 &mut y,
             );
             if active && session.worm_awake {
-                if let Some(expedition_hint) =
-                    outpost.and_then(|route| outpost_expedition_hint(data, route))
-                {
-                    line(&expedition_hint, dark::TEXT_DIM, &mut y);
+                if let Some(route) = outpost {
+                    line(
+                        &format!(
+                            "Scouted ore {} · Hauls {}",
+                            route.ore_scouted, route.expeditions_completed
+                        ),
+                        dark::TEXT_DIM,
+                        &mut y,
+                    );
+                }
+                let in_transit = session
+                    .worm_transit
+                    .as_ref()
+                    .is_some_and(|transit| transit.outpost == pos);
+                if !in_transit {
+                    if let Some(expedition_hint) =
+                        outpost.and_then(|route| outpost_expedition_hint(data, route))
+                    {
+                        line(&expedition_hint, dark::TEXT_DIM, &mut y);
+                    }
                 }
             }
             if let Some(transit) = session.worm_transit.as_ref() {

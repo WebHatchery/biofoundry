@@ -558,6 +558,8 @@ fn staffed_outpost_scouting_consumes_food_and_stores_remote_ore() {
     assert_eq!(session.outposts[0].cargo.get(&Good::CookedFood), Some(&2));
     assert_eq!(session.outposts[0].cargo.get(&Good::Ore), Some(&6));
     assert_eq!(session.outposts[0].expedition_progress, 0.0);
+    assert_eq!(session.outposts[0].expeditions_completed, 1);
+    assert_eq!(session.outposts[0].ore_scouted, 6);
 }
 
 #[test]
@@ -677,6 +679,8 @@ fn simulation_reports_arrival_after_a_cargo_run_completes() {
 fn in_flight_worm_transit_survives_a_save_roundtrip() {
     let (data, mut session, outpost_pos) = active_outpost(21);
     session.outposts[0].cargo_priority = CargoPriority::Food;
+    session.outposts[0].expeditions_completed = 3;
+    session.outposts[0].ore_scouted = 18;
     session.economy.ore_stock = 3;
     assert!(outposts::start_to_outpost(&mut session, &data, outpost_pos));
 
@@ -693,4 +697,6 @@ fn in_flight_worm_transit_survives_a_save_roundtrip() {
     );
     assert!(restored.outposts[0].active);
     assert_eq!(restored.outposts[0].cargo_priority, CargoPriority::Food);
+    assert_eq!(restored.outposts[0].expeditions_completed, 3);
+    assert_eq!(restored.outposts[0].ore_scouted, 18);
 }

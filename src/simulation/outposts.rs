@@ -172,6 +172,8 @@ pub fn tick_expeditions(
         let ore = crew.saturating_mul(ore_per_crew).min(room);
         add_cargo(outpost, Good::Ore, ore);
         outpost.expedition_progress -= cycle;
+        outpost.expeditions_completed = outpost.expeditions_completed.saturating_add(1);
+        outpost.ore_scouted = outpost.ore_scouted.saturating_add(ore);
         completed.push(ExpeditionCompletion {
             outpost: outpost.pos,
             ore,

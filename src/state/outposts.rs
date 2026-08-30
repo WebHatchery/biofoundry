@@ -51,6 +51,12 @@ pub struct Outpost {
     /// Seconds accumulated toward the next remote scouting haul.
     #[serde(default)]
     pub expedition_progress: f32,
+    /// Number of completed scouting hauls at this remote route.
+    #[serde(default)]
+    pub expeditions_completed: u32,
+    /// Lifetime ore returned by this route's scouting expeditions.
+    #[serde(default)]
+    pub ore_scouted: u32,
     #[serde(default)]
     pub last_failure: Option<String>,
 }
@@ -65,6 +71,8 @@ impl Outpost {
             crew: Vec::new(),
             expedition_paused: false,
             expedition_progress: 0.0,
+            expeditions_completed: 0,
+            ore_scouted: 0,
             last_failure: None,
         }
     }
