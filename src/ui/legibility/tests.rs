@@ -134,7 +134,28 @@ fn trough_waste_and_inactive_outpost_are_visible_states() {
     session.ensure_outpost(outpost_pos);
     assert_eq!(
         building_status(&session, &data, session.building_at(outpost_pos).unwrap()),
-        Some(BuildingStatus::InputStarved)
+        Some(BuildingStatus::RouteInactive)
+    );
+}
+
+#[test]
+fn loaded_inactive_outpost_keeps_a_route_status_on_the_map() {
+    let data = GameData::load().unwrap();
+    let mut session = GameSession::new(&data, 45);
+    let pos = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(p, t)| t.walkable() && session.can_place_building(*p))
+        .map(|(p, _)| p)
+        .unwrap();
+    session.buildings.push(Building::new("outpost", pos));
+    session.ensure_outpost(pos);
+    session.outposts[0].cargo.insert(Good::Ore, 3);
+
+    assert_eq!(
+        building_status(&session, &data, session.building_at(pos).unwrap()),
+        Some(BuildingStatus::RouteInactive)
     );
 }
 

@@ -48,6 +48,8 @@ pub enum BuildingStatus {
     Exhausted,
     /// A Farm sitting at its storage cap, idle until a carrier drains it.
     AwaitingHaul,
+    /// A remote route that is turned off and needs activation before use.
+    RouteInactive,
     /// Spoiled stores are accumulating faster than they are cleaned.
     WasteOverflow,
 }
@@ -61,6 +63,7 @@ impl BuildingStatus {
             BuildingStatus::OutputFull => "Backed up",
             BuildingStatus::Exhausted => "Exhausted",
             BuildingStatus::AwaitingHaul => "Awaiting haul",
+            BuildingStatus::RouteInactive => "Route inactive",
             BuildingStatus::WasteOverflow => "Waste accumulating",
         }
     }
@@ -161,7 +164,7 @@ pub fn building_status(
                 .find(|o| o.pos == pos)
                 .is_some_and(|o| !o.active) =>
         {
-            Some(BuildingStatus::InputStarved)
+            Some(BuildingStatus::RouteInactive)
         }
         _ => None,
     }
