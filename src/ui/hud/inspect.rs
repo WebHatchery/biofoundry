@@ -62,6 +62,8 @@ pub(super) fn draw_inspect_panel(
     ) {
         let input_hint = match building.kind.as_str() {
             "blacksmith" => Some(blacksmith_input_hint(building, data)),
+            "cook_pot" => Some(cook_pot_input_hint(building, data)),
+            "kiln" => Some(kiln_input_hint()),
             "smelter" => Some(smelter_input_hint(building, data)),
             _ => None,
         };
@@ -545,6 +547,16 @@ fn smelter_input_hint(building: &Building, data: &GameData) -> String {
         missing.push(format!("{charcoal_needed} charcoal"));
     }
     format!("Needs {}", missing.join(" + "))
+}
+
+fn cook_pot_input_hint(building: &Building, data: &GameData) -> String {
+    let batch = data.balance.cook_batch_mushrooms as f32 * data.balance.raw_recipe_multiplier;
+    let mushrooms_needed = (batch - building.stock(Good::Mushroom)).max(0.0).ceil() as u32;
+    format!("Needs {mushrooms_needed} mushrooms")
+}
+
+fn kiln_input_hint() -> String {
+    "Needs 1 wood".to_owned()
 }
 
 fn local_mine_worker_at(creature: &Creature, pos: TilePos) -> bool {

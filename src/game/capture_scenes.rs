@@ -184,6 +184,50 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                 }
             }
         }
+        "cook_pot" => {
+            game.transition(StateTransition::StartWarren);
+            if let GameState::Warren(session) = &mut game.state {
+                // Keep a cook stationed at an empty pot so the critical-path
+                // recovery line names the mushrooms needed for one batch.
+                session.tutorial_dismissed = true;
+                session.economy.food = 80.0;
+                session.creatures.clear();
+                let spawn = session.spawn_tile();
+                let spot = session
+                    .world
+                    .tiles
+                    .iter_with_pos()
+                    .filter(|(pos, _)| session.can_place_building(*pos))
+                    .map(|(pos, _)| pos)
+                    .min_by_key(|p| (p.manhattan_distance(&spawn), p.x, p.y));
+                if let Some(spot) = spot {
+                    session.buildings.push(Building::new("cook_pot", spot));
+                    session.spawn_creature(&game.data, "goblin", Job::Cook);
+                    game.selected_building = Some(spot);
+                }
+            }
+        }
+        "kiln" => {
+            game.transition(StateTransition::StartWarren);
+            if let GameState::Warren(session) = &mut game.state {
+                // The kiln is autonomous, so an empty wood buffer is enough
+                // to expose its next required input in the inspection card.
+                session.tutorial_dismissed = true;
+                session.economy.food = 80.0;
+                let spawn = session.spawn_tile();
+                let spot = session
+                    .world
+                    .tiles
+                    .iter_with_pos()
+                    .filter(|(pos, _)| session.can_place_building(*pos))
+                    .map(|(pos, _)| pos)
+                    .min_by_key(|p| (p.manhattan_distance(&spawn), p.x, p.y));
+                if let Some(spot) = spot {
+                    session.buildings.push(Building::new("kiln", spot));
+                    game.selected_building = Some(spot);
+                }
+            }
+        }
         "equipment" => {
             game.transition(StateTransition::StartWarren);
             if let GameState::Warren(session) = &mut game.state {

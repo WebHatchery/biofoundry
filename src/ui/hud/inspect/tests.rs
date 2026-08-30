@@ -306,6 +306,22 @@ fn smelter_input_hint_names_each_missing_material() {
 }
 
 #[test]
+fn kitchen_input_hints_name_the_missing_material() {
+    let data = GameData::load().expect("embedded game data");
+    let pot = Building::new("cook_pot", TilePos::new(0, 0));
+
+    assert_eq!(
+        cook_pot_input_hint(&pot, &data),
+        format!(
+            "Needs {} mushrooms",
+            (data.balance.cook_batch_mushrooms as f32 * data.balance.raw_recipe_multiplier).ceil()
+                as u32
+        )
+    );
+    assert_eq!(kiln_input_hint(), "Needs 1 wood");
+}
+
+#[test]
 fn inspection_staffing_ignores_remote_crew_and_recognizes_assigned_crew() {
     let data = GameData::load().expect("embedded game data");
     let mut session = GameSession::new(&data, 13);
