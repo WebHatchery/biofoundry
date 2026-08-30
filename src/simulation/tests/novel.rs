@@ -8,6 +8,7 @@ use crate::state::structures::Building;
 use macroquad_toolkit::grid::TilePos;
 
 mod cargo_return;
+mod transit_failures;
 
 fn active_outpost(
     seed: u64,

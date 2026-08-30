@@ -187,6 +187,14 @@ fn auto_resupply_notice_names_the_food_only_transit() {
 }
 
 #[test]
+fn transit_failure_notice_points_to_route_recovery() {
+    assert_eq!(
+        transit_failure_notice(),
+        "The worm route failed — tap the outpost, then reactivate the route before trying again."
+    );
+}
+
+#[test]
 fn transit_completion_notice_names_mixed_payloads() {
     let completion = TransitCompletion {
         direction: TransitDirection::ToShrine,

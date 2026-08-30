@@ -46,6 +46,10 @@ pub struct TickReport {
     /// Outpost that automatically started a food-only resupply this tick.
     pub auto_resupply_started: Option<TilePos>,
     pub transit_completed: Option<TransitCompletion>,
+    /// Outpost whose in-flight transit failed and was safely recovered this
+    /// tick. This is separate from the persisted failure banner so the game
+    /// can announce the event and autosave it exactly once.
+    pub transit_failed: Option<TilePos>,
     pub wild: wildlife::WildReport,
 }
 
@@ -109,7 +113,13 @@ pub fn tick(session: &mut GameSession, data: &GameData) -> TickReport {
     let expedition_completed = outposts::tick_expeditions(session, data, dt);
     let auto_return_started = outposts::start_auto_return_if_full(session, data);
     let auto_resupply_started = outposts::start_auto_resupply_if_needed(session, data);
+    let transit_target = session.worm_transit.as_ref().map(|transit| transit.outpost);
     let transit_completed = outposts::tick_transit(session, data, dt);
+    let transit_failed = transit_target.filter(|_| {
+        session.worm_transit.is_none()
+            && transit_completed.is_none()
+            && session.last_transit_failure.is_some()
+    });
 
     let mut won_this_tick = false;
     if !session.won
@@ -175,6 +185,7 @@ pub fn tick(session: &mut GameSession, data: &GameData) -> TickReport {
         auto_return_started,
         auto_resupply_started,
         transit_completed,
+        transit_failed,
         wild,
     }
 }

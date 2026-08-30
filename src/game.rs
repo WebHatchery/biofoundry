@@ -183,6 +183,11 @@ impl Game {
                         self.notifications.info(auto_resupply_notice());
                         self.audio.play(Sfx::Select);
                     }
+                    if report.transit_failed.is_some() {
+                        safe_beat_reached = true;
+                        self.notifications.danger(transit_failure_notice());
+                        self.audio.play(Sfx::Deny);
+                    }
                     if let Some(completion) = report.transit_completed {
                         safe_beat_reached = true;
                         self.notifications
@@ -538,6 +543,10 @@ fn auto_return_notice() -> &'static str {
 
 fn auto_resupply_notice() -> &'static str {
     "Outpost scouts need food — a food-only resupply is on its way."
+}
+
+fn transit_failure_notice() -> &'static str {
+    "The worm route failed — tap the outpost, then reactivate the route before trying again."
 }
 
 fn warren_secured_notice(session: &GameSession) -> &'static str {
