@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `79bd8a9`
+**Source revision:** `3985839`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -29,7 +29,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 184 unit tests and 2 integration tests pass.
+- `cargo test --all-targets` — 185 unit tests and 2 integration tests pass.
 - `cargo clippy --all-targets --all-features -- -D warnings` — pass.
 - `publish.ps1` with no parameters — pass; Windows and WebGL packages
   deployed to Preview.
@@ -61,6 +61,10 @@ automated simulation results into first-time-player evidence.
 - Raw ingredient ledger — the Food Grid now shows the raw mushroom total beside
   production and labels the reserve as cooked food; focused simulation coverage
   keeps the displayed raw mirror aligned with post-spoilage stock.
+- Blacksmith input stall — [ui_blacksmith.png](../verification/ui_blacksmith.png)
+  shows a staffed smith with an unpaid Iron Pickaxe queued, `Ore 0`, and the
+  visible `Status · Starved` recovery state; focused UI coverage keeps a paid
+  order nominal while exposing the missing-ore stall.
 - Completion capture — [ui_completion.png](../verification/ui_completion.png)
   shows the Worm Awakened summary naming the food and ingot totals, with visible
   Continue in Endless and Return to Menu choices. The completed Objective also
