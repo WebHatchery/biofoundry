@@ -145,9 +145,10 @@ pub fn building_status(
             if !staffed_at(session, pos, Job::Cook) {
                 return Some(BuildingStatus::NoWorker);
             }
-            if building.stock(Good::Mushroom)
-                < data.balance.cook_batch_mushrooms as f32 * data.balance.raw_recipe_multiplier
-            {
+            let batch = (data.balance.cook_batch_mushrooms as f32
+                * data.balance.raw_recipe_multiplier)
+                .ceil();
+            if building.stock(Good::Mushroom) < batch {
                 return Some(BuildingStatus::InputStarved);
             }
             None

@@ -137,6 +137,25 @@ fn cook_pot_reads_missing_cook_then_missing_mushrooms() {
 }
 
 #[test]
+fn cook_pot_status_rounds_fractional_recipe_batches_like_the_simulation() {
+    let (mut data, mut session) = boot();
+    data.balance.raw_recipe_multiplier = 1.5;
+    let pot = session.buildings_of("cook_pot").next().unwrap().pos;
+    session.creatures.clear();
+    session.spawn_creature(&data, "goblin", Job::Cook);
+    session.creatures.last_mut().unwrap().task = Task::GoCook(pot);
+    session
+        .building_at_mut(pot)
+        .unwrap()
+        .add_stock(Good::Mushroom, 2.5);
+
+    assert_eq!(
+        building_status(&session, &data, session.building_at(pot).unwrap()),
+        Some(BuildingStatus::InputStarved)
+    );
+}
+
+#[test]
 fn trough_waste_and_inactive_outpost_are_visible_states() {
     let data = GameData::load().unwrap();
     let mut session = GameSession::new(&data, 44);
