@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `e8930a5`
+**Source revision:** `98cf833`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -29,10 +29,12 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 173 unit tests and 2 integration tests pass.
+- `cargo test --all-targets` — 174 unit tests and 2 integration tests pass.
 - `cargo clippy --all-targets --all-features -- -D warnings` — pass.
 - `publish.ps1` with no parameters — pass; Windows and WebGL packages
   deployed to Preview.
+- Camera drag release guard — focused input coverage keeps a claimed mouse
+  drag from selecting a map tile or activating a HUD control on release.
 - Shared toolkit notification-offset tests — 360 tests pass; the hosted-page
   toast offset is opt-in, so existing notification anchors remain unchanged.
 - Fixed-seed campaign beats — secure `19.4m`, factory `24.4m`, shrine
