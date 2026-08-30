@@ -11,6 +11,7 @@ fn new_outpost_defaults_to_ore_first_loading() {
     assert_eq!(outpost.crew_dispatch_limit, None);
     assert!(!outpost.storage_upgraded);
     assert!(!outpost.crew_upgraded);
+    assert!(!outpost.survey_upgraded);
     assert!(!outpost.auto_return_cargo);
     assert_eq!(outpost.auto_return_label(), "Auto-return · Off");
     assert!(!outpost.auto_resupply_food);
@@ -26,6 +27,29 @@ fn crew_capacity_expansion_uses_the_larger_configured_capacity() {
     outpost.upgrade_crew_capacity();
     assert_eq!(outpost.crew_capacity(4, 6), 6);
     assert_eq!(outpost.crew_capacity(6, 4), 6);
+}
+
+#[test]
+fn survey_rig_uses_the_larger_configured_yield() {
+    let mut outpost = Outpost::new(TilePos::new(4, 4));
+    assert_eq!(outpost.survey_ore_per_crew(3, 4), 3);
+
+    outpost.upgrade_survey();
+    assert_eq!(outpost.survey_ore_per_crew(3, 4), 4);
+    assert_eq!(outpost.survey_ore_per_crew(4, 3), 4);
+}
+
+#[test]
+fn older_outpost_saves_default_the_survey_rig_to_off() {
+    let outpost = Outpost::new(TilePos::new(4, 4));
+    let mut value = serde_json::to_value(outpost).expect("serialize outpost");
+    value
+        .as_object_mut()
+        .expect("outpost serializes as an object")
+        .remove("survey_upgraded");
+
+    let restored: Outpost = serde_json::from_value(value).expect("restore legacy outpost");
+    assert!(!restored.survey_upgraded);
 }
 
 #[test]

@@ -127,7 +127,9 @@ pub(super) fn begin(game: &mut Game, scene: &str) -> bool {
         | "endless_upgrade"
         | "endless_upgraded"
         | "endless_crew_upgrade"
-        | "endless_crew_upgraded" => {
+        | "endless_crew_upgraded"
+        | "endless_survey_upgrade"
+        | "endless_survey_upgraded" => {
             super::endless::begin(game, scene);
             true
         }

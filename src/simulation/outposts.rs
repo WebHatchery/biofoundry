@@ -100,6 +100,14 @@ pub fn crew_capacity(outpost: &Outpost, data: &GameData) -> u32 {
     )
 }
 
+/// Return the ore yield of one scout on the selected Outpost's next haul.
+pub fn ore_per_crew(outpost: &Outpost, data: &GameData) -> u32 {
+    outpost.survey_ore_per_crew(
+        data.balance.outpost_expedition_ore_per_crew,
+        data.balance.outpost_upgraded_ore_per_crew,
+    )
+}
+
 /// Buy the one-time remote hold expansion for an active awakened route.
 pub fn upgrade_outpost(session: &mut GameSession, data: &GameData, pos: TilePos) -> bool {
     if !session.worm_awake
@@ -155,6 +163,38 @@ pub fn upgrade_outpost_crew(session: &mut GameSession, data: &GameData, pos: Til
     }
     session.economy.ingots_stock -= data.balance.outpost_crew_upgrade_ingots;
     session.outposts[index].upgrade_crew_capacity();
+    true
+}
+
+/// Install the one-time survey rig after the route's hold and camp are ready.
+pub fn upgrade_outpost_survey(session: &mut GameSession, data: &GameData, pos: TilePos) -> bool {
+    if !session.worm_awake
+        || session.worm_transit.is_some()
+        || session
+            .building_at(pos)
+            .is_none_or(|building| building.kind != "outpost")
+    {
+        return false;
+    }
+    session.ensure_outpost(pos);
+    let Some(index) = session
+        .outposts
+        .iter()
+        .position(|outpost| outpost.pos == pos)
+    else {
+        return false;
+    };
+    let outpost = &session.outposts[index];
+    if !outpost.active
+        || !outpost.storage_upgraded
+        || !outpost.crew_upgraded
+        || outpost.survey_upgraded
+        || session.economy.ingots_stock < data.balance.outpost_survey_upgrade_ingots
+    {
+        return false;
+    }
+    session.economy.ingots_stock -= data.balance.outpost_survey_upgrade_ingots;
+    session.outposts[index].upgrade_survey();
     true
 }
 
@@ -253,7 +293,7 @@ pub fn expedition_state(outpost: &Outpost, data: &GameData) -> ExpeditionState {
         .clamp(0.0, 100.0) as u32;
     ExpeditionState::Scouting {
         progress_percent,
-        ore_yield: crew.saturating_mul(data.balance.outpost_expedition_ore_per_crew),
+        ore_yield: crew.saturating_mul(ore_per_crew(outpost, data)),
         food_cost: food_required,
     }
 }
@@ -268,7 +308,6 @@ pub fn tick_expeditions(
     }
     let cycle = data.balance.outpost_expedition_cycle_sec.max(0.1);
     let food_per_crew = data.balance.outpost_expedition_food_per_crew;
-    let ore_per_crew = data.balance.outpost_expedition_ore_per_crew;
     let mut completed = Vec::new();
     for outpost in &mut session.outposts {
         if !outpost.active || outpost.expedition_paused || outpost.crew.is_empty() {
@@ -286,7 +325,7 @@ pub fn tick_expeditions(
             continue;
         }
         take_cargo(outpost, Good::CookedFood, food_cost);
-        let ore = crew.saturating_mul(ore_per_crew).min(room);
+        let ore = crew.saturating_mul(ore_per_crew(outpost, data)).min(room);
         add_cargo(outpost, Good::Ore, ore);
         outpost.expedition_progress -= cycle;
         outpost.expeditions_completed = outpost.expeditions_completed.saturating_add(1);

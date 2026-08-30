@@ -1,4 +1,4 @@
-//! Capture-only scenes for the post-campaign Outpost hold upgrade.
+//! Capture-only scenes for post-campaign Outpost upgrades and route feedback.
 
 use super::super::Game;
 use crate::simulation;
@@ -74,6 +74,39 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                 game.notifications.success(format!(
                     "Outpost camp expanded to {} crew.",
                     game.data.balance.outpost_upgraded_capacity
+                ));
+            }
+        }
+        "endless_survey_upgrade" => {
+            super::begin(game, "endless_load_preview");
+            if let GameState::Warren(session) = &mut game.state {
+                session.economy.ingots_stock = game.data.balance.outpost_upgrade_ingots
+                    + game.data.balance.outpost_crew_upgrade_ingots
+                    + game.data.balance.outpost_survey_upgrade_ingots;
+                if let Some(pos) = session.outposts.last().map(|route| route.pos) {
+                    let _ = simulation::outposts::upgrade_outpost(session, &game.data, pos);
+                    let _ = simulation::outposts::upgrade_outpost_crew(session, &game.data, pos);
+                    session.economy.ingots_stock = game.data.balance.outpost_survey_upgrade_ingots;
+                }
+            }
+        }
+        "endless_survey_upgraded" => {
+            begin(game, "endless_survey_upgrade");
+            let upgraded = if let GameState::Warren(session) = &mut game.state {
+                session
+                    .outposts
+                    .last()
+                    .map(|route| route.pos)
+                    .is_some_and(|pos| {
+                        simulation::outposts::upgrade_outpost_survey(session, &game.data, pos)
+                    })
+            } else {
+                false
+            };
+            if upgraded {
+                game.notifications.success(format!(
+                    "Survey rig online · {}/scout.",
+                    game.data.balance.outpost_upgraded_ore_per_crew
                 ));
             }
         }

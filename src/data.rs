@@ -229,6 +229,12 @@ pub struct Balance {
     /// Crew capacity of an Outpost after its camp is expanded.
     #[serde(default = "default_outpost_upgraded_capacity")]
     pub outpost_upgraded_capacity: u32,
+    /// Ingot cost for the one-time Outpost survey rig.
+    #[serde(default = "default_outpost_survey_upgrade_ingots")]
+    pub outpost_survey_upgrade_ingots: u32,
+    /// Ore discovered by each scout after a survey rig is installed.
+    #[serde(default = "default_outpost_upgraded_ore_per_crew")]
+    pub outpost_upgraded_ore_per_crew: u32,
     #[serde(default = "default_worm_transit_time")]
     pub worm_transit_time_sec: f32,
     /// Time for a staffed remote outpost to complete one scouting haul.
@@ -315,6 +321,12 @@ fn default_outpost_crew_upgrade_ingots() -> u32 {
 }
 fn default_outpost_upgraded_capacity() -> u32 {
     6
+}
+fn default_outpost_survey_upgrade_ingots() -> u32 {
+    16
+}
+fn default_outpost_upgraded_ore_per_crew() -> u32 {
+    4
 }
 fn default_worm_transit_time() -> f32 {
     18.0

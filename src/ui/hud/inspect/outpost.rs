@@ -23,6 +23,47 @@ pub(super) struct CompactRouteContext<'a> {
     pub(super) actions: &'a mut Vec<UiAction>,
 }
 
+pub(super) struct SurveyUpgradeContext<'a> {
+    pub(super) session: &'a GameSession,
+    pub(super) data: &'a GameData,
+    pub(super) pos: TilePos,
+    pub(super) outpost: Option<&'a Outpost>,
+    pub(super) rect: Rect,
+    pub(super) y: &'a mut f32,
+    pub(super) step: f32,
+    pub(super) mouse: Vec2,
+    pub(super) actions: &'a mut Vec<UiAction>,
+}
+
+pub(super) fn draw_survey_upgrade_control(context: SurveyUpgradeContext<'_>) {
+    let SurveyUpgradeContext {
+        session,
+        data,
+        pos,
+        outpost,
+        rect,
+        y,
+        step,
+        mouse,
+        actions,
+    } = context;
+    if !outpost.is_some_and(|route| {
+        route.storage_upgraded && route.crew_upgraded && !route.survey_upgraded
+    }) {
+        return;
+    }
+    let upgrade_cost = data.balance.outpost_survey_upgrade_ingots;
+    if hud_button(
+        Rect::new(rect.x, *y, rect.w, rect.h),
+        &format!("Install survey · {upgrade_cost} ingots"),
+        session.economy.ingots_stock >= upgrade_cost,
+        mouse,
+    ) {
+        actions.push(UiAction::UpgradeOutpostSurvey(pos));
+    }
+    *y += step;
+}
+
 /// Keep the route policies and quotas legible on a narrow fixed-resolution
 /// canvas by pairing the two cycling control groups while leaving primary
 /// return, scouting, upgrade, and load actions full width.
@@ -123,6 +164,17 @@ pub(super) fn draw_compact_route_controls(context: CompactRouteContext<'_>) {
         }
         *y += button_step;
     }
+    draw_survey_upgrade_control(SurveyUpgradeContext {
+        session,
+        data,
+        pos,
+        outpost,
+        rect: Rect::new(x, 0.0, panel.w - 28.0, button_height),
+        y,
+        step: button_step,
+        mouse,
+        actions,
+    });
     if crew > 0
         && hud_button(
             Rect::new(x, *y, panel.w - 28.0, button_height),

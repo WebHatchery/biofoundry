@@ -68,6 +68,9 @@ pub struct Outpost {
     /// Whether this route has purchased its expanded remote camp.
     #[serde(default)]
     pub crew_upgraded: bool,
+    /// Whether this route has installed a rig that improves remote surveys.
+    #[serde(default)]
+    pub survey_upgraded: bool,
     /// Automatically return a full hold as cargo-only, keeping remote crew
     /// stationed for the next expedition.
     #[serde(default)]
@@ -95,6 +98,7 @@ impl Outpost {
             crew_dispatch_limit: None,
             storage_upgraded: false,
             crew_upgraded: false,
+            survey_upgraded: false,
             auto_return_cargo: false,
             auto_resupply_food: false,
             last_failure: None,
@@ -151,6 +155,18 @@ impl Outpost {
 
     pub fn upgrade_crew_capacity(&mut self) {
         self.crew_upgraded = true;
+    }
+
+    pub fn survey_ore_per_crew(&self, base_yield: u32, upgraded_yield: u32) -> u32 {
+        if self.survey_upgraded {
+            upgraded_yield.max(base_yield)
+        } else {
+            base_yield
+        }
+    }
+
+    pub fn upgrade_survey(&mut self) {
+        self.survey_upgraded = true;
     }
 
     pub fn toggle_auto_return(&mut self) {

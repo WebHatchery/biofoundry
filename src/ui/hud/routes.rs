@@ -217,12 +217,21 @@ fn route_metrics(session: &GameSession, data: &GameData, outpost: &Outpost) -> S
         );
     }
 
+    let survey_summary = if outpost.survey_upgraded {
+        format!(
+            " · Yield {}/scout",
+            crate::simulation::outposts::ore_per_crew(outpost, data)
+        )
+    } else {
+        String::new()
+    };
     let cargo_summary = format!(
-        "Cargo {}/{} · Crew {}/{}",
+        "Cargo {}/{} · Crew {}/{}{}",
         outpost.cargo_total(),
         crate::simulation::outposts::storage_capacity(outpost, data),
         outpost.crew.len(),
-        crate::simulation::outposts::crew_capacity(outpost, data)
+        crate::simulation::outposts::crew_capacity(outpost, data),
+        survey_summary
     );
     match crate::simulation::outposts::expedition_state(outpost, data) {
         crate::simulation::outposts::ExpeditionState::Scouting {

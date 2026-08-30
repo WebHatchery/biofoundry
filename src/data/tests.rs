@@ -72,6 +72,8 @@ fn balance_values_are_playable() {
     assert!(b.outpost_upgraded_storage_cap > b.outpost_storage_cap);
     assert!(b.outpost_crew_upgrade_ingots > 0);
     assert!(b.outpost_upgraded_capacity > b.outpost_capacity);
+    assert!(b.outpost_survey_upgrade_ingots > b.outpost_crew_upgrade_ingots);
+    assert!(b.outpost_upgraded_ore_per_crew > b.outpost_expedition_ore_per_crew);
     assert!(b.win_ore_delivered > 0);
     assert!(b.win_food_surplus > b.start_food);
     assert!(b.food_warning_sec > 0.0);

@@ -31,6 +31,7 @@ automated simulation results into first-time-player evidence.
 | Endless expedition feedback | Pass (focused and capture evidence) | A completed remote haul now reports its ore gain and food cost through the visible notification system and marks the haul as a safe-beat autosave, so progress is communicated and survives a refresh without keeping the inspection card open. Each Outpost persists its completed-haul count and lifetime ore gathered in the inspection card, while the completed-campaign Objective keeps aggregate `Runs` and `Hauls` visible across the Endless loop. |
 | Endless Outpost hold expansion | Pass (focused and capture evidence) | An active awakened route can spend 8 banked ingots once to expand its remote hold from 12 to 20 slots. The inspection card exposes the visible `Expand hold · 8 ingots` control, shows the upgraded `Cargo 6/20` capacity, and keeps transit, scouting, load-preview, full-hold, and Objective room calculations aligned. |
 | Endless Outpost camp expansion | Pass (focused and capture evidence) | An active awakened route can spend 12 banked ingots once to expand its remote camp from 4 to 6 crew. The inspection card exposes `Expand camp · 12 ingots`, dynamic capacity flows through dispatch, transit validation, remote-room pressure, and the route ledger, and legacy saves keep the base capacity. Refreshed [ui_endless_crew_upgrade.png](../verification/ui_endless_crew_upgrade.png) and [ui_endless_crew_upgraded.png](../verification/ui_endless_crew_upgraded.png) captures show the purchase and expanded route. |
+| Endless Outpost survey rig | Pass (focused and capture evidence) | A route with both the expanded hold and camp can spend 16 banked ingots once to install a survey rig, raising the expedition yield from 3 to 4 ore per scout. The inspection card and route ledger expose the yield, the expedition forecast and completion use the upgraded value, and legacy routes retain the base yield. Refreshed [ui_endless_survey_upgrade.png](../verification/ui_endless_survey_upgrade.png) and [ui_endless_survey_upgraded.png](../verification/ui_endless_survey_upgraded.png) captures show the gated purchase and success toast. |
 | Endless crew dispatch quota | Pass (focused and capture evidence) | An awakened Outpost exposes the visible `Crew per run · Auto` control, which cycles through cargo-only and bounded scout counts. Legacy saves keep automatic dispatch, while cargo-only loads can deliver provisions without borrowing local workers; the Objective names the control when that setting blocks an otherwise-ready scouting payload. Refreshed [ui_endless_load_preview.png](../verification/ui_endless_load_preview.png), [ui_endless_upgrade.png](../verification/ui_endless_upgrade.png), and [ui_endless_upgraded.png](../verification/ui_endless_upgraded.png) captures keep the route controls readable. |
 | Endless cargo-only returns | Pass (focused and capture evidence) | A staffed Outpost exposes `Send N cargo · keep crew` beside the normal full return, so a completed haul can come home without recalling the remote scouts. The route keeps those scouts assigned for another expedition, the departure notice explains the choice, and the Objective/field guide describe the remote-team outcome. Refreshed [ui_endless.png](../verification/ui_endless.png), [ui_endless_expedition_report.png](../verification/ui_endless_expedition_report.png), and [ui_endless_upgraded.png](../verification/ui_endless_upgraded.png) captures keep both return paths readable. |
 | Endless automatic cargo returns | Pass (focused and capture evidence) | An awakened Outpost exposes the persisted `Auto-return · Off` / `Auto-return · Cargo only` policy. When an opted-in hold reaches capacity, the fixed-step simulation starts one cargo-only return, preserves the remote scouts and one configured expedition's food when other cargo creates room, and returns provisions too when they alone fill the hold so the route can resupply. It emits a departure notice and autosaves the safe beat; later routes wait for the global worm transit. Refreshed [ui_endless_auto_return.png](../verification/ui_endless_auto_return.png) shows the enabled policy beside the manual return and scouting controls. Live Preview route interaction remains unclaimed because the resumed developer save has not yet reached the Outpost unlock. |
@@ -131,6 +132,15 @@ automated simulation results into first-time-player evidence.
   shows the enabled `Expand camp · 12 ingots` control, while
   [ui_endless_crew_upgraded.png](../verification/ui_endless_crew_upgraded.png)
   shows `Crew 2/6` and the success toast.
+- Endless Outpost survey rig — pass; a route with both logistics expansions can
+  purchase the save-compatible 16-ingot survey rig once, raising each scout's
+  data-driven haul from 3 to 4 ore. The expedition forecast, completion report,
+  route ledger, and inspection card all reuse the upgraded yield, while old
+  routes default to the original output. The focused simulation, persistence,
+  and UI coverage passes; refreshed
+  [ui_endless_survey_upgrade.png](../verification/ui_endless_survey_upgrade.png)
+  and [ui_endless_survey_upgraded.png](../verification/ui_endless_survey_upgraded.png)
+  captures keep the gated control and success toast readable at 800×450.
 - Endless crew dispatch quota — pass; a save-compatible optional quota keeps
   older routes on automatic dispatch, cycles the visible control through
   cargo-only and bounded scout counts, and limits new passengers in transit.
@@ -375,6 +385,12 @@ automated simulation results into first-time-player evidence.
   upgrade, while
   [ui_endless_crew_upgraded.png](../verification/ui_endless_crew_upgraded.png)
   shows the resulting `Crew 2/6` capacity and success toast.
+- Survey rig captures —
+  [ui_endless_survey_upgrade.png](../verification/ui_endless_survey_upgrade.png)
+  shows the fully expanded route's `Install survey · 16 ingots` control and
+  `+8 ore / -2 food` forecast, while
+  [ui_endless_survey_upgraded.png](../verification/ui_endless_survey_upgraded.png)
+  shows `Survey rig online · 4/scout.` and the same route after installation.
 - Automatic return policy capture —
   [ui_endless_auto_return.png](../verification/ui_endless_auto_return.png)
   shows `Auto-return · Cargo only` enabled while the manual cargo-only return,

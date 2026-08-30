@@ -22,7 +22,10 @@ mod status;
 mod workstations;
 
 use breeding::{breed_label, breeding_unlock_hint};
-use outpost::{draw_compact_route_controls, CompactRouteContext};
+use outpost::{
+    draw_compact_route_controls, draw_survey_upgrade_control, CompactRouteContext,
+    SurveyUpgradeContext,
+};
 pub(super) use status::inspect_status;
 use status::{
     local_mine_staffed_at, local_mine_worker_at, mine_staffing_label,
@@ -711,6 +714,17 @@ pub(super) fn draw_inspect_panel(
                             }
                             y += 26.0;
                         }
+                        draw_survey_upgrade_control(SurveyUpgradeContext {
+                            session,
+                            data,
+                            pos,
+                            outpost,
+                            rect: Rect::new(x, 0.0, panel.w - 28.0, 24.0),
+                            y: &mut y,
+                            step: 26.0,
+                            mouse,
+                            actions,
+                        });
                         if crew > 0
                             && hud_button(
                                 Rect::new(x, y, panel.w - 28.0, 24.0),

@@ -13,6 +13,8 @@ use macroquad_toolkit::persistence::{
 };
 use std::collections::HashSet;
 
+#[cfg(test)]
+mod tests;
 mod validation;
 
 use validation::{
@@ -467,6 +469,12 @@ pub(super) fn validate_loaded_session(
         {
             return Err(format!(
                 "outpost record has no matching building at {:?}",
+                outpost.pos
+            ));
+        }
+        if outpost.survey_upgraded && (!outpost.storage_upgraded || !outpost.crew_upgraded) {
+            return Err(format!(
+                "outpost survey rig lacks its expanded hold and camp at {:?}",
                 outpost.pos
             ));
         }
