@@ -3,6 +3,7 @@
 use super::Game;
 use crate::simulation;
 use crate::state::creatures::{Good, Job};
+use crate::state::outposts::CargoPriority;
 use crate::state::structures::Building;
 use crate::state::world::Tile;
 use crate::state::{GameState, StateTransition};
@@ -552,6 +553,20 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                         }
                     }
                     game.selected_building = Some(outpost);
+                }
+            }
+        }
+        "endless_load_preview" => {
+            begin(game, "endless");
+            game.paused = true;
+            if let GameState::Warren(session) = &mut game.state {
+                session.economy.ore_stock = 6;
+                session.economy.ingots_stock = 5;
+                session.economy.food = game.data.balance.worm_feed_reserve + 4.0;
+                if let Some(route) = session.outposts.last_mut() {
+                    route.cargo.clear();
+                    route.cargo.insert(Good::Ore, 2);
+                    route.cargo_priority = CargoPriority::Ingots;
                 }
             }
         }

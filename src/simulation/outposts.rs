@@ -38,6 +38,56 @@ pub fn start_to_shrine(session: &mut GameSession, data: &GameData, pos: TilePos)
     start_transit(session, data, pos, TransitDirection::ToShrine)
 }
 
+/// The cargo that the next outbound run will put in an Outpost hold.
+///
+/// This is intentionally a small value type shared by the route action and
+/// its inspection preview, so the player sees the same result the simulation
+/// will execute after tapping the load button.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct CargoLoad {
+    pub ore: u32,
+    pub ingots: u32,
+    pub food: u32,
+}
+
+impl CargoLoad {
+    pub fn total(self) -> u32 {
+        self.ore
+            .saturating_add(self.ingots)
+            .saturating_add(self.food)
+    }
+}
+
+pub fn preview_outbound_cargo(
+    outpost: &Outpost,
+    capacity: u32,
+    ore_available: u32,
+    ingots_available: u32,
+    food_available: u32,
+) -> CargoLoad {
+    let mut room = capacity.saturating_sub(outpost.cargo_total());
+    let mut load = CargoLoad {
+        ore: 0,
+        ingots: 0,
+        food: 0,
+    };
+    for kind in priority_order(outpost.cargo_priority) {
+        let available = match kind {
+            CargoKind::Ore => ore_available,
+            CargoKind::Ingots => ingots_available,
+            CargoKind::Food => food_available,
+        };
+        let take = available.min(room);
+        match kind {
+            CargoKind::Ore => load.ore = take,
+            CargoKind::Ingots => load.ingots = take,
+            CargoKind::Food => load.food = take,
+        }
+        room -= take;
+    }
+    load
+}
+
 fn start_transit(
     session: &mut GameSession,
     data: &GameData,
@@ -58,17 +108,21 @@ fn start_transit(
     }
     let cap = data.balance.outpost_storage_cap;
     let (ore, ingots, food) = match direction {
-        TransitDirection::ToOutpost => load_cargo(
-            outpost,
-            cap,
-            session.economy.ore_stock,
-            session.economy.ingots_stock,
+        TransitDirection::ToOutpost => {
             // Remote cargo is stored in whole units; leave any fractional
             // food behind instead of charging it and truncating it at arrival.
-            (session.economy.food - data.balance.worm_feed_reserve)
+            let food_available = (session.economy.food - data.balance.worm_feed_reserve)
                 .max(0.0)
-                .floor() as u32,
-        ),
+                .floor() as u32;
+            let load = preview_outbound_cargo(
+                outpost,
+                cap,
+                session.economy.ore_stock,
+                session.economy.ingots_stock,
+                food_available,
+            );
+            (load.ore, load.ingots, load.food as f32)
+        }
         TransitDirection::ToShrine => (
             *outpost.cargo.get(&Good::Ore).unwrap_or(&0),
             *outpost.cargo.get(&Good::Ingot).unwrap_or(&0),
@@ -127,36 +181,6 @@ fn start_transit(
     });
     session.last_transit_failure = None;
     true
-}
-
-/// Fill an outbound hold according to the player's selected priority. Food
-/// has already been reduced to the amount above the protected local reserve.
-fn load_cargo(
-    outpost: &Outpost,
-    capacity: u32,
-    ore_available: u32,
-    ingots_available: u32,
-    food_available: u32,
-) -> (u32, u32, f32) {
-    let mut room = capacity.saturating_sub(outpost.cargo_total());
-    let mut ore = 0;
-    let mut ingots = 0;
-    let mut food = 0;
-    for kind in priority_order(outpost.cargo_priority) {
-        let available = match kind {
-            CargoKind::Ore => ore_available,
-            CargoKind::Ingots => ingots_available,
-            CargoKind::Food => food_available,
-        };
-        let take = available.min(room);
-        match kind {
-            CargoKind::Ore => ore = take,
-            CargoKind::Ingots => ingots = take,
-            CargoKind::Food => food = take,
-        }
-        room -= take;
-    }
-    (ore, ingots, food as f32)
 }
 
 #[derive(Clone, Copy)]

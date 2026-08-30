@@ -464,6 +464,46 @@ fn outpost_cargo_priority_labels_are_player_readable() {
 }
 
 #[test]
+fn outpost_load_hint_previews_the_selected_priority_and_reserve() {
+    let data = GameData::load().expect("embedded game data");
+    let mut session = GameSession::new(&data, 34);
+    let pos = TilePos::new(4, 4);
+    let mut outpost = crate::state::outposts::Outpost::new(pos);
+    outpost.cargo_priority = CargoPriority::Ingots;
+    session.economy.ore_stock = 10;
+    session.economy.ingots_stock = 10;
+    session.economy.food = data.balance.worm_feed_reserve + 10.0;
+
+    assert_eq!(
+        outpost_load_hint(&session, &data, &outpost).as_deref(),
+        Some("Ore 2 · Ingots 10 · Food 0")
+    );
+
+    outpost.cargo_priority = CargoPriority::Food;
+    assert_eq!(
+        outpost_load_hint(&session, &data, &outpost).as_deref(),
+        Some("Ore 2 · Ingots 0 · Food 10")
+    );
+}
+
+#[test]
+fn full_outpost_load_hint_explains_the_disabled_load_action() {
+    let data = GameData::load().expect("embedded game data");
+    let mut session = GameSession::new(&data, 35);
+    let pos = TilePos::new(4, 4);
+    let mut outpost = crate::state::outposts::Outpost::new(pos);
+    outpost
+        .cargo
+        .insert(Good::Ore, data.balance.outpost_storage_cap);
+    session.economy.ore_stock = 4;
+
+    assert_eq!(
+        outpost_load_hint(&session, &data, &outpost).as_deref(),
+        Some("Cargo hold full · return to shrine")
+    );
+}
+
+#[test]
 fn in_flight_payload_summary_names_cargo_and_crew() {
     let transit = WormTransit {
         outpost: TilePos::new(4, 4),

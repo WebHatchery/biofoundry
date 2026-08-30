@@ -2,7 +2,7 @@
 
 use crate::data::GameData;
 use crate::state::creatures::{Creature, Job, Task};
-use crate::state::outposts::{TransitDirection, WormTransit};
+use crate::state::outposts::{Outpost, TransitDirection, WormTransit};
 use crate::state::structures::Building;
 use crate::state::GameSession;
 use crate::ui::legibility::{advanced_systems_unlocked, BuildingStatus};
@@ -66,6 +66,33 @@ pub(super) fn outpost_return_label(cargo: u32, crew: usize) -> String {
         (true, false) => format!("Send {cargo} cargo to shrine"),
         (false, true) => format!("Send {crew} crew to shrine"),
         (false, false) => "No cargo or crew to return".to_owned(),
+    }
+}
+
+pub(super) fn outpost_load_hint(
+    session: &GameSession,
+    data: &GameData,
+    outpost: &Outpost,
+) -> Option<String> {
+    let food_available = (session.economy.food - data.balance.worm_feed_reserve)
+        .max(0.0)
+        .floor() as u32;
+    let load = crate::simulation::outposts::preview_outbound_cargo(
+        outpost,
+        data.balance.outpost_storage_cap,
+        session.economy.ore_stock,
+        session.economy.ingots_stock,
+        food_available,
+    );
+    if load.total() > 0 {
+        Some(format!(
+            "Ore {} · Ingots {} · Food {}",
+            load.ore, load.ingots, load.food
+        ))
+    } else if outpost.cargo_total() >= data.balance.outpost_storage_cap {
+        Some("Cargo hold full · return to shrine".to_owned())
+    } else {
+        None
     }
 }
 

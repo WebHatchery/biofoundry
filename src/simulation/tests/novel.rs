@@ -488,6 +488,39 @@ fn worm_transit_fills_the_hold_in_the_selected_cargo_order() {
 }
 
 #[test]
+fn cargo_preview_matches_the_next_transit_and_respects_existing_cargo() {
+    let (data, mut session, outpost_pos) = active_outpost(27);
+    session.creatures.clear();
+    session.economy.ore_stock = 9;
+    session.economy.ingots_stock = 9;
+    session.economy.food = data.balance.worm_feed_reserve + 9.0;
+    session.outposts[0].cargo.insert(Good::Ore, 5);
+    session.outposts[0].cargo_priority = CargoPriority::Food;
+
+    let preview = outposts::preview_outbound_cargo(
+        &session.outposts[0],
+        data.balance.outpost_storage_cap,
+        session.economy.ore_stock,
+        session.economy.ingots_stock,
+        (session.economy.food - data.balance.worm_feed_reserve).floor() as u32,
+    );
+    assert_eq!(
+        preview,
+        outposts::CargoLoad {
+            ore: 0,
+            ingots: 0,
+            food: 7
+        }
+    );
+
+    assert!(outposts::start_to_outpost(&mut session, &data, outpost_pos));
+    let transit = session.worm_transit.as_ref().expect("cargo is in transit");
+    assert_eq!(transit.ore, preview.ore);
+    assert_eq!(transit.ingots, preview.ingots);
+    assert_eq!(transit.food, preview.food as f32);
+}
+
+#[test]
 fn simulation_reports_arrival_after_a_cargo_run_completes() {
     let (data, mut session, outpost_pos) = active_outpost(22);
     session.economy.ore_stock = 1;
