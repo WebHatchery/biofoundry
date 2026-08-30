@@ -526,6 +526,8 @@ impl Game {
         match transition {
             StateTransition::StartWarren => {
                 let session = GameSession::new(&self.data, self.data.config.world_seed);
+                self.notifications.clear();
+                self.notifications.clear_history();
                 self.reset_camera_for(&session);
                 self.reset_session_view_state();
                 self.state = GameState::Warren(Box::new(session));

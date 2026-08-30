@@ -5,6 +5,7 @@ use crate::data::GameData;
 use crate::state::creatures::{Job, Task};
 use crate::state::{GameSession, GameState};
 use crate::ui::UiMode;
+use macroquad_toolkit::notifications::{LoggedNotification, NotificationManager, MAX_HISTORY};
 use macroquad_toolkit::persistence::{
     load_from_slot_with_migration, quarantine_slot, restore_slot_backup,
     save_to_slot_with_version_and_backup, slot_backup_exists, slot_exists,
@@ -50,10 +51,12 @@ impl Game {
         }
     }
 
-    fn persist_current_session(&self) -> Result<(), String> {
-        let GameState::Warren(session) = &self.state else {
+    fn persist_current_session(&mut self) -> Result<(), String> {
+        let history = self.notifications.history().to_vec();
+        let GameState::Warren(session) = &mut self.state else {
             return Err("no active Warren".to_owned());
         };
+        session.event_history = history;
         let config = &self.data.config;
         save_to_slot_with_version_and_backup(
             &config.game_name,
@@ -93,6 +96,7 @@ impl Game {
 
     fn install_loaded_session(&mut self, session: GameSession) {
         let mut session = session;
+        restore_notification_history(&mut self.notifications, &session.event_history);
         session.sync_remote_crew_state();
         crate::simulation::outposts::sync_transit_failure_banner(&mut session);
         self.reset_camera_for(&session);
@@ -170,6 +174,22 @@ impl Game {
             }
         }
     }
+}
+
+/// Rehydrate only the manager's non-timed history. Loading a save should not
+/// replay every old toast over the Warren, but the Field Guide must still be
+/// able to review those messages after a refresh or relaunch.
+pub(super) fn restore_notification_history(
+    notifications: &mut NotificationManager,
+    history: &[LoggedNotification],
+) {
+    notifications.clear();
+    notifications.clear_history();
+    let first = history.len().saturating_sub(MAX_HISTORY);
+    for event in history.iter().skip(first) {
+        notifications.push_with_duration(event.message.clone(), event.notification_type, 0.0);
+    }
+    notifications.update(0.0);
 }
 
 /// Reject saves that deserialize into a shape the simulation cannot safely

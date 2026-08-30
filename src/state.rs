@@ -15,6 +15,7 @@ pub mod world;
 use crate::data::{Balance, GameData};
 use creatures::{Creature, Job};
 use macroquad_toolkit::grid::TilePos;
+use macroquad_toolkit::notifications::LoggedNotification;
 use macroquad_toolkit::rng::SeededRng;
 use outposts::{Outpost, WormTransit};
 use serde::{Deserialize, Serialize};
@@ -159,6 +160,9 @@ pub struct GameSession {
     pub worm_transit: Option<WormTransit>,
     #[serde(default)]
     pub last_transit_failure: Option<String>,
+    /// Bounded player-facing notices carried across save/load boundaries.
+    #[serde(default)]
+    pub event_history: Vec<LoggedNotification>,
 }
 
 impl GameSession {
@@ -246,6 +250,7 @@ impl GameSession {
             auto_route_cursor: 0,
             worm_transit: None,
             last_transit_failure: None,
+            event_history: Vec::new(),
         };
 
         for _ in 0..balance.start_miners {

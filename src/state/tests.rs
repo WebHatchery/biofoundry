@@ -1,6 +1,7 @@
 use super::*;
 use crate::data::GameData;
 use crate::state::creatures::Task;
+use macroquad_toolkit::notifications::{LoggedNotification, NotificationType};
 
 #[test]
 fn session_boots_from_config() {
@@ -16,6 +17,21 @@ fn session_boots_from_config() {
     assert!(!session.patch_regrow.is_empty());
     assert!(!session.vein_ore.is_empty());
     assert!(session.economy.food > 0.0);
+}
+
+#[test]
+fn event_history_survives_session_serialization() {
+    let data = GameData::load().unwrap();
+    let mut session = GameSession::new(&data, 42);
+    session.event_history = vec![LoggedNotification {
+        message: "A saved warning remains reviewable.".to_owned(),
+        notification_type: NotificationType::Warning,
+    }];
+
+    let encoded = serde_json::to_value(&session).unwrap();
+    let restored: GameSession = serde_json::from_value(encoded).unwrap();
+
+    assert_eq!(restored.event_history, session.event_history);
 }
 
 #[test]

@@ -20,6 +20,7 @@ automated simulation results into first-time-player evidence.
 | Menu exit without manual Save | Pass | A fresh Preview warren left through visible Menu without Save; Continue restored the run at `00:01` with the opening tutorial intact. |
 | Refresh and Continue | Pass | Reload returned to the title screen with Continue enabled; Continue restored `00:36` and showed `Warren loaded.`. |
 | Fresh-tab relaunch and Continue | Pass | A new Preview tab restored the same `00:36` state and objective with visible controls. |
+| Saved event history across refresh | Pass | On the published Preview, a fresh Warren was paused, saved, returned to the title through visible Menu, and restored after a page refresh through Continue; Recent Events retained the earlier `Simulation paused` and `Warren saved.` entries alongside the new `Warren loaded.` entry. |
 | Current WebGL refresh recovery | Pass | On the published `1827d8f` Preview, a fresh Warren was saved through the visible controls, returned to the title with Menu, and restored after page refresh through Continue; the run retained tutorial `2/5 — Stabilize the Food Grid` and showed `Warren loaded.`. |
 | Fresh WebGL campaign completion and Endless continuation | Pass (developer evidence) | A fresh Preview run used pointer controls through New Warren, zoom, map placement, Jobs reassignment, raid recovery, Blacksmith production, Shrine offerings, and the authored `The Colossal Worm Awakens` completion dialog. `Continue in Endless` opened the awakened-worm loop with a state-aware recovery objective and locked Pit/Outpost gates. This is repeatable developer evidence, not a qualifying first-time-player session. |
 | Packaged Windows launch and save recovery | Pass | The optimized `biofoundry.exe` launched from the current published Windows package after the stale prior test instance was isolated. Visible Continue restored the saved warren at `00:01` with the opening tutorial and `Warren loaded.`. Earlier packaged checks also covered Skip, zoom, Save, and Load; full packaged campaign completion and Endless continuation remain open below. |
@@ -50,7 +51,7 @@ automated simulation results into first-time-player evidence.
 | Compact viewport exploration | Pass with follow-up | The hosted Preview smoke path at 800×450 keeps the title, field guide, and Warren HUD on-canvas; capture probes at 800×450, 1024×576, 1280×720, and 1440×900 keep the Food/Factory/Worm tutorial cards, Blacksmith queue controls, Shrine pause control, completion choices, and Endless outpost actions visible without clipping or overlap. The compact branch now gives the high-frequency top-bar, Jobs, Build & Dig, Outpost, Blacksmith, Breeding Pit, and Shrine controls larger visual affordances, and the refreshed warning captures keep their messages clear of that row. Representative [ui_compact_warren.png](../verification/ui_compact_warren.png), [ui_compact_blacksmith.png](../verification/ui_compact_blacksmith.png), [ui_compact_breeding.png](../verification/ui_compact_breeding.png), [ui_compact_shrine.png](../verification/ui_compact_shrine.png), [ui_compact_endless_load_preview.png](../verification/ui_compact_endless_load_preview.png), and [ui_compact_endless_upgraded.png](../verification/ui_compact_endless_upgraded.png) captures preserve the responsive states. Additional 800×450 probes keep specialist actions and locked-progress lines visible. Remaining text density and first-time-player comprehension still require human validation. |
 | Visible-control smoke path | Pass | A fresh full-screen Preview warren advanced through visible New Warren, + zoom, direct map drag, map-tap inspection (`Stockpile`), valid Farm placement, `− Miner`/`+ Carrier` reassignment, Pause/Resume, Help/Close, Save, and Load without keyboard input. Invalid placement also returned the readable `Can't build there.` notice. The Load round-trip restored the saved `04:45` state with the 10-ore construction site, 2 Miner/2 Carrier staffing, and tutorial `2/5 — Stabilize the Food Grid`; successful placement returned to Inspect instead of creating a second site. This is developer smoke evidence, not a qualifying first-time-player session. |
 | Packaged HUD recovery controls | Pass | A fresh full-screen Preview run changed Settings volume with visible `−`/`+` controls, opened and closed the Field Guide while paused, and resumed the warren with the same visible HUD and tutorial state. This confirms the modal guide leaves the underlying Warren controls recoverable by pointer; it does not replace the still-open full-campaign evidence. |
-| Recent event recovery log | Pass (published capture and Preview) | The visible Field Guide now opens a newest-first Recent Events view backed by the bounded notification history. Published Preview verification opened the guide, tapped `Recent events`, and reviewed the retained `Warren loaded.` message; the modal kept both `Field Guide` and `Close` actions available. |
+| Recent event recovery log | Pass (published capture and Preview) | The visible Field Guide now opens a newest-first Recent Events view backed by the bounded notification history. Published Preview verification opened the guide after a refresh and reviewed persisted `Simulation paused`, `Warren saved.`, and `Warren loaded.` messages; the modal kept both `Field Guide` and `Close` actions available. |
 | Hosted-page toast safety | Pass | The placement confirmation remained fully readable above and left of the fixed Report a Bug widget in the published Preview. |
 | Active tool marker | Pass | The published Preview renders the selected Dig tool as `> Dig`; the active-tool marker is readable instead of the bundled font's missing-glyph square. |
 | Locked tool marker | Pass | The published Preview renders the locked Shrine control as `Shrine [L]`; its exact `forge 20 ingots` prerequisite remains visible below the buttons. |
@@ -58,9 +59,10 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 280 unit tests and 2 integration tests pass,
+- `cargo test --all-targets` — 283 unit tests and 2 integration tests pass,
   including fresh/simulated/remote-transit valid sessions, modal route
-  planning, and rejected malformed save shapes.
+  planning, rejected malformed save shapes, and event-history save/load
+  coverage.
 - `cargo clippy --all-targets --all-features -- -D warnings` — pass.
 - `publish.ps1` with no parameters — pass; Windows and WebGL packages
   deployed to Preview.
@@ -506,6 +508,10 @@ automated simulation results into first-time-player evidence.
   [ui_event_log.png](../verification/ui_event_log.png); the compact
   [ui_compact_event_log.png](../verification/ui_compact_event_log.png) probe
   keeps the same review and close actions on-canvas.
+- Persistent notification history — pass; `GameSession` carries the bounded
+  event log with a serde default for older saves, save/autosave checkpoints
+  copy the live history, and load rehydrates review history without replaying
+  old toasts. Starting a genuinely new Warren clears the previous run's log.
 - Shared security guidance — the victory report, raid banner, and persistent
   Objective now use the same eligibility-aware action hint, including the
   visible `in Jobs` destination and the specialist-only `free a worker`

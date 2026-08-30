@@ -5,6 +5,7 @@ use crate::state::creatures::Job;
 use crate::state::outposts::{ExpeditionCompletion, TransitCompletion, TransitDirection};
 use crate::state::structures::{BuildSite, Building};
 use crate::state::GameSession;
+use macroquad_toolkit::notifications::{LoggedNotification, NotificationManager, NotificationType};
 
 fn session() -> (GameData, GameSession) {
     let data = GameData::load().unwrap();
@@ -97,6 +98,26 @@ fn loaded_session_validation_accepts_a_fresh_warren() {
     let (data, session) = session();
 
     validate_loaded_session(&session, &data).expect("fresh session should be loadable");
+}
+
+#[test]
+fn notification_history_rehydrates_without_replaying_old_toasts() {
+    let mut manager = NotificationManager::new();
+    let history = vec![
+        LoggedNotification {
+            message: "The warren is secure.".to_owned(),
+            notification_type: NotificationType::Success,
+        },
+        LoggedNotification {
+            message: "Food is low.".to_owned(),
+            notification_type: NotificationType::Warning,
+        },
+    ];
+
+    super::persistence::restore_notification_history(&mut manager, &history);
+
+    assert_eq!(manager.history(), history.as_slice());
+    assert!(manager.is_empty());
 }
 
 #[test]
