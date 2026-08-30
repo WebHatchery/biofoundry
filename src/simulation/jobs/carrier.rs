@@ -165,7 +165,8 @@ fn choose_carrier_work(
     let food = session.economy.food;
     let bal = &data.balance;
     if food < bal.carrier_food_reserve {
-        if try_farm_haul(creature, session)
+        if try_food_expansion_chain(creature, session, data)
+            || try_farm_haul(creature, session)
             || (species.id != "bat_courier" && try_patch_forage(creature, session))
         {
             return;
@@ -192,6 +193,39 @@ fn choose_carrier_work(
             send_to(creature, session, pot, Task::DeliverTo(pot));
         }
     }
+}
+
+/// A pending Farm is food infrastructure, not discretionary industry. Keep
+/// one carrier moving its ore through the construction site during a crisis;
+/// otherwise the reserve-first rule can leave the mine backed up while the
+/// player's recommended food expansion waits indefinitely.
+fn try_food_expansion_chain(
+    creature: &mut Creature,
+    session: &mut GameSession,
+    data: &GameData,
+) -> bool {
+    let farm_waiting = session
+        .build_sites
+        .iter()
+        .any(|site| site.kind == "farm" && site.remaining() > 0);
+    if !farm_waiting {
+        return false;
+    }
+
+    if session.economy.ore_stock > 0 && ore_wanted(session, data) > 0 {
+        send_to(
+            creature,
+            session,
+            session.stockpile_pos(),
+            Task::GoPickupOre,
+        );
+        return true;
+    }
+
+    // If the stockpile is empty, free the mine buffer so the same carrier can
+    // bring the ore home on its next pass. Other industry remains shed below
+    // the food reserve.
+    try_mine_drain(creature, session)
 }
 
 /// Haul from a stocked Farm to a pot. The farm is the reliable near source;

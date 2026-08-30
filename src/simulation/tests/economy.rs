@@ -147,6 +147,112 @@ fn food_crisis_does_not_start_industry_haul() {
     assert_eq!(carrier.task, Task::Idle);
 }
 
+/// A player-placed Farm is the exception to crisis load-shedding: the
+/// carrier must move its construction ore so the recommended food recovery
+/// cannot wait behind the same reserve it is meant to improve.
+#[test]
+fn food_crisis_keeps_farm_expansion_moving_from_stockpile() {
+    use crate::state::creatures::Task;
+    use crate::state::structures::BuildSite;
+    use crate::state::world::Tile;
+
+    let (data, mut session) = boot(19);
+    session.economy.food = data.balance.carrier_food_reserve - 1.0;
+    session.economy.ore_stock = 10;
+    let site = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(pos, tile)| {
+            **tile == Tile::Floor
+                && session.can_place_building(*pos)
+                && *pos != session.spawn_tile()
+        })
+        .map(|(pos, _)| pos)
+        .unwrap();
+    session.build_sites.push(BuildSite {
+        kind: "farm".to_owned(),
+        pos: site,
+        ore_needed: 10,
+        ore_delivered: 0,
+    });
+
+    let stockpile = session.stockpile_pos();
+    let carrier = session
+        .creatures
+        .iter_mut()
+        .find(|c| c.job == Job::Carrier)
+        .unwrap();
+    carrier.x = stockpile.x as f32 + 0.5;
+    carrier.y = stockpile.y as f32 + 0.5;
+    carrier.task = Task::Idle;
+    carrier.path.clear();
+
+    tick(&mut session, &data);
+
+    let carrier = session
+        .creatures
+        .iter()
+        .find(|c| c.job == Job::Carrier)
+        .unwrap();
+    assert_eq!(carrier.task, Task::GoPickupOre);
+}
+
+/// A farm expansion also frees a backed-up Mine when no ore has reached the
+/// stockpile yet, preserving the food-crisis escape route end to end.
+#[test]
+fn food_crisis_farm_expansion_drains_the_mine_buffer() {
+    use crate::state::creatures::{Good, Task};
+    use crate::state::structures::BuildSite;
+    use crate::state::world::Tile;
+
+    let (data, mut session) = boot(20);
+    session.economy.food = data.balance.carrier_food_reserve - 1.0;
+    let farm = session.buildings_of("farm").next().unwrap().pos;
+    session.building_at_mut(farm).unwrap().stocks.clear();
+    let mine = session.buildings_of("mine").next().unwrap().pos;
+    session
+        .building_at_mut(mine)
+        .unwrap()
+        .add_stock(Good::Ore, 5.0);
+    let site = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(pos, tile)| {
+            **tile == Tile::Floor
+                && session.can_place_building(*pos)
+                && *pos != session.spawn_tile()
+        })
+        .map(|(pos, _)| pos)
+        .unwrap();
+    session.build_sites.push(BuildSite {
+        kind: "farm".to_owned(),
+        pos: site,
+        ore_needed: 10,
+        ore_delivered: 0,
+    });
+
+    let carrier = session
+        .creatures
+        .iter_mut()
+        .find(|c| c.job == Job::Carrier)
+        .unwrap();
+    carrier.x = mine.x as f32 + 0.5;
+    carrier.y = mine.y as f32 + 0.5;
+    carrier.task = Task::Idle;
+    carrier.path.clear();
+
+    tick(&mut session, &data);
+
+    let carrier = session
+        .creatures
+        .iter()
+        .find(|c| c.job == Job::Carrier)
+        .unwrap();
+    assert_eq!(carrier.task, Task::GoFetch(mine));
+}
+
 /// Buying the beetle trades banked ore for hauling capacity.
 #[test]
 fn beetle_purchase_spends_ore_and_spawns_hauler() {
