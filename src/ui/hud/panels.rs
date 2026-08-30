@@ -88,7 +88,7 @@ pub(super) fn draw_top_bar(
     } else if session.last_transit_failure.is_some() {
         draw_ui_text_ex(
             if compact {
-                "ROUTE FAILED — inspect outpost"
+                "ROUTE FAILED — tap Outpost"
             } else {
                 "WORM ROUTE FAILED — inspect the outpost"
             },
@@ -215,8 +215,10 @@ pub(super) fn draw_top_bar(
         );
     }
 
+    let chrome_y = if compact { bar.y + 4.0 } else { bar.y + 8.0 };
+    let chrome_height = if compact { 40.0 } else { 32.0 };
     if hud_button(
-        Rect::new(bar.right() - 96.0, bar.y + 8.0, 84.0, 32.0),
+        Rect::new(bar.right() - 96.0, chrome_y, 84.0, chrome_height),
         "Menu",
         true,
         mouse,
@@ -224,7 +226,7 @@ pub(super) fn draw_top_bar(
         actions.push(UiAction::BackToMenu);
     }
     if hud_button(
-        Rect::new(bar.right() - 512.0, bar.y + 8.0, 74.0, 32.0),
+        Rect::new(bar.right() - 512.0, chrome_y, 74.0, chrome_height),
         if paused { "Resume" } else { "Pause" },
         true,
         mouse,
@@ -248,7 +250,7 @@ pub(super) fn draw_top_bar(
         actions.push(UiAction::ZoomCamera(1));
     }
     if hud_button(
-        Rect::new(bar.right() - 254.0, bar.y + 8.0, 74.0, 32.0),
+        Rect::new(bar.right() - 254.0, chrome_y, 74.0, chrome_height),
         "Save",
         true,
         mouse,
@@ -256,7 +258,7 @@ pub(super) fn draw_top_bar(
         actions.push(UiAction::Save);
     }
     if hud_button(
-        Rect::new(bar.right() - 176.0, bar.y + 8.0, 74.0, 32.0),
+        Rect::new(bar.right() - 176.0, chrome_y, 74.0, chrome_height),
         "Load",
         true,
         mouse,
@@ -264,7 +266,7 @@ pub(super) fn draw_top_bar(
         actions.push(UiAction::Load);
     }
     if hud_button(
-        Rect::new(bar.right() - 438.0, bar.y + 8.0, 74.0, 32.0),
+        Rect::new(bar.right() - 438.0, chrome_y, 74.0, chrome_height),
         "Help",
         true,
         mouse,
@@ -274,7 +276,7 @@ pub(super) fn draw_top_bar(
     if session.worm_awake
         && !session.outposts.is_empty()
         && hud_button(
-            Rect::new(bar.right() - 606.0, bar.y + 8.0, 74.0, 32.0),
+            Rect::new(bar.right() - 606.0, chrome_y, 74.0, chrome_height),
             "Routes",
             true,
             mouse,
@@ -290,6 +292,7 @@ pub(super) fn draw_jobs_panel(
     sprites: &HudSprites,
     panel: Rect,
     mouse: Vec2,
+    ui_scale: f32,
     actions: &mut Vec<UiAction>,
 ) {
     draw_surface_with_title(
@@ -302,6 +305,9 @@ pub(super) fn draw_jobs_panel(
     let idle_reassignable = reassignable_job_count(session, data, Job::Idle);
     let x = panel.x + 14.0;
     let mut y = panel.y + 44.0;
+    let compact = compact_top_bar(ui_scale);
+    let job_button_height = if compact { 30.0 } else { 26.0 };
+    let job_row_step = if compact { 36.0 } else { 32.0 };
 
     let raid_warning = session.raid_active || session.raid_in <= data.balance.raid_warning_sec;
     for job in [Job::Miner, Job::Carrier, Job::Cook, Job::Smith, Job::Guard] {
@@ -322,7 +328,7 @@ pub(super) fn draw_jobs_panel(
         );
         let reassignable = reassignable_job_count(session, data, job);
         if hud_button(
-            Rect::new(x + 130.0, y, 34.0, 26.0),
+            Rect::new(x + 130.0, y, 34.0, job_button_height),
             "-",
             reassignable > 0,
             mouse,
@@ -330,7 +336,7 @@ pub(super) fn draw_jobs_panel(
             actions.push(UiAction::Unassign(job));
         }
         if hud_button(
-            Rect::new(x + 172.0, y, 34.0, 26.0),
+            Rect::new(x + 172.0, y, 34.0, job_button_height),
             "+",
             idle_reassignable > 0,
             mouse,
@@ -345,7 +351,7 @@ pub(super) fn draw_jobs_panel(
                 TextStyle::new(11.0, dark::WARNING).params(),
             );
         }
-        y += 32.0;
+        y += job_row_step;
     }
 
     sprites.draw_job(Job::Idle, vec2(x + 9.0, y + 13.0));
@@ -378,8 +384,10 @@ pub(super) fn draw_jobs_panel(
         .filter(|c| c.species == "bat_courier")
         .count();
     let half = (panel.w - 36.0) / 2.0;
+    let specialist_height = if compact { 34.0 } else { 30.0 };
+    let specialist_step = if compact { 38.0 } else { 34.0 };
     if hud_button(
-        Rect::new(x, y, half, 30.0),
+        Rect::new(x, y, half, specialist_height),
         &optional_support_label("beetle", data.balance.beetle_ore_cost),
         session.economy.ore_stock >= data.balance.beetle_ore_cost,
         mouse,
@@ -388,16 +396,16 @@ pub(super) fn draw_jobs_panel(
     }
     let has_den = session.buildings_of("smelter").next().is_some();
     if hud_button(
-        Rect::new(x + half + 8.0, y, half, 30.0),
+        Rect::new(x + half + 8.0, y, half, specialist_height),
         &format!("Salam. forge ({})", data.balance.salamander_ore_cost),
         has_den && session.economy.ore_stock >= data.balance.salamander_ore_cost,
         mouse,
     ) {
         actions.push(UiAction::AttractSalamander);
     }
-    y += 34.0;
+    y += specialist_step;
     if hud_button(
-        Rect::new(x, y, half, 30.0),
+        Rect::new(x, y, half, specialist_height),
         optional_specialist_label("slime_janitor", janitors > 0),
         session.unlocked.contains("slime_janitor") && janitors == 0,
         mouse,
@@ -405,14 +413,14 @@ pub(super) fn draw_jobs_panel(
         actions.push(UiAction::AttractSlimeJanitor);
     }
     if hud_button(
-        Rect::new(x + half + 8.0, y, half, 30.0),
+        Rect::new(x + half + 8.0, y, half, specialist_height),
         optional_specialist_label("bat_courier", couriers > 0),
         session.unlocked.contains("bat_courier") && couriers == 0,
         mouse,
     ) {
         actions.push(UiAction::AttractBatCourier);
     }
-    y += 32.0;
+    y += specialist_step;
     let engineers = session
         .creatures
         .iter()
@@ -510,6 +518,7 @@ pub(super) fn draw_tools_panel(
     panel: Rect,
     mode: &UiMode,
     mouse: Vec2,
+    ui_scale: f32,
     actions: &mut Vec<UiAction>,
 ) {
     draw_surface_with_title(
@@ -523,6 +532,9 @@ pub(super) fn draw_tools_panel(
     let mut y = panel.y + 28.0;
     let w = panel.w - 28.0;
     let cell = (w - 16.0) / 3.0;
+    let compact = compact_top_bar(ui_scale);
+    let tool_button_height = if compact { 30.0 } else { 22.0 };
+    let tool_row_step = if compact { 34.0 } else { 26.0 };
 
     // Build buttons, two per row: label is the short name + cost. Locked
     // kinds stay visible but disabled (progression is discoverable).
@@ -554,16 +566,26 @@ pub(super) fn draw_tools_panel(
                 }
             }
             let bx = x + (cell + 8.0) * i as f32;
-            if hud_button(Rect::new(bx, y, cell, 22.0), &label, unlocked, mouse) {
+            if hud_button(
+                Rect::new(bx, y, cell, tool_button_height),
+                &label,
+                unlocked,
+                mouse,
+            ) {
                 actions.push(UiAction::SetMode(UiMode::Build((*id).clone())));
             }
         }
-        y += 26.0;
+        y += tool_row_step;
     }
 
     let dig_active = *mode == UiMode::Dig;
     let dig_label = format!("{}Dig", active_tool_marker(dig_active));
-    if hud_button(Rect::new(x, y, cell, 22.0), &dig_label, true, mouse) {
+    if hud_button(
+        Rect::new(x, y, cell, tool_button_height),
+        &dig_label,
+        true,
+        mouse,
+    ) {
         actions.push(UiAction::SetMode(UiMode::Dig));
     }
     // Show pending construction so hauling progress is visible.

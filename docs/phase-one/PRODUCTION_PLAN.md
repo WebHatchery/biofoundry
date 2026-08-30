@@ -36,8 +36,10 @@ physical keyboard or right mouse button.
 - [ ] Verify all overlays, inspection actions, placement, digging, job changes,
   crafting, shrine controls, and completion choices with tap/click.
 - [x] Test UI hit targets and overlap at the supported minimum viewport. The
-  settled 800×450 audit sweep reports no grown-target ambiguity; compact visual
-  density remains a human-readability follow-up.
+  settled 800×450 audit sweep reports no grown-target ambiguity, and the
+  compact branch gives the high-frequency top-bar, Jobs, and Build & Dig
+  controls larger visual affordances; inspection-card density remains a
+  human-readability follow-up.
 - [x] Add regression coverage for important UI intents where practical.
 
 **Acceptance:** a pointer/touch-only campaign reaches Worm Awakened and returns
