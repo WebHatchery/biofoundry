@@ -239,3 +239,15 @@ fn locked_tool_marker_uses_font_safe_ascii() {
     assert_eq!(LOCKED_TOOL_MARKER, "[L]");
     assert!(!LOCKED_TOOL_MARKER.contains('🔒'));
 }
+
+#[test]
+fn construction_progress_label_explains_remaining_ore() {
+    assert_eq!(
+        construction_progress_label(1, 10),
+        "Build 1 site · 10 ore left"
+    );
+    assert_eq!(
+        construction_progress_label(2, 18),
+        "Build 2 sites · 18 ore left"
+    );
+}

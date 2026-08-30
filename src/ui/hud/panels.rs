@@ -557,7 +557,7 @@ pub(super) fn draw_tools_panel(
     if !session.build_sites.is_empty() {
         let pending: u32 = session.build_sites.iter().map(|s| s.remaining()).sum();
         draw_ui_text_ex(
-            &format!("{} site(s) · {} ore", session.build_sites.len(), pending),
+            &construction_progress_label(session.build_sites.len(), pending),
             x + cell + 8.0,
             y + 16.0,
             TextStyle::new(13.0, dark::TEXT_DIM).params(),
@@ -587,6 +587,11 @@ fn active_tool_marker(active: bool) -> &'static str {
     } else {
         ""
     }
+}
+
+fn construction_progress_label(site_count: usize, ore_remaining: u32) -> String {
+    let noun = if site_count == 1 { "site" } else { "sites" };
+    format!("Build {site_count} {noun} · {ore_remaining} ore left")
 }
 
 fn is_core_building(id: &str) -> bool {
