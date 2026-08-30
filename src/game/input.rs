@@ -78,18 +78,19 @@ impl Game {
     }
 }
 
-pub(super) fn tile_at_screen(
+/// Resolve a world-space point to a valid map tile.
+pub(super) fn tile_at_world(
     session: &GameSession,
     data: &GameData,
-    screen: Vec2,
+    world: Vec2,
 ) -> Option<TilePos> {
     let tile_size = data.config.tile_size;
     if !tile_size.is_finite() || tile_size <= 0.0 {
         return None;
     }
     let tile = TilePos::new(
-        (screen.x / tile_size).floor() as i32,
-        (screen.y / tile_size).floor() as i32,
+        (world.x / tile_size).floor() as i32,
+        (world.y / tile_size).floor() as i32,
     );
     session.world.tiles.is_valid(tile).then_some(tile)
 }

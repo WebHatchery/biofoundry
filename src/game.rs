@@ -291,9 +291,10 @@ impl Game {
             }
             GameState::Warren(session) => {
                 let hover = self.hover_tile(session);
-                let touch_tap = self
-                    .touch_tap
-                    .and_then(|screen| input::tile_at_screen(session, &self.data, screen));
+                let touch_tap = self.touch_tap.and_then(|screen| {
+                    let world = self.camera.screen_to_world(screen);
+                    input::tile_at_world(session, &self.data, world)
+                });
 
                 self.camera.begin();
                 ui::warren::draw_world(
@@ -366,7 +367,7 @@ impl Game {
 
     /// World tile under the mouse cursor, if inside the map.
     fn hover_tile(&self, session: &GameSession) -> Option<TilePos> {
-        input::tile_at_screen(
+        input::tile_at_world(
             session,
             &self.data,
             self.camera.screen_to_world(mouse_position().into()),
