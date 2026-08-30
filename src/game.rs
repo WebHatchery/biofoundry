@@ -516,6 +516,22 @@ impl Game {
         // Don't let the reset itself count as "the player looked around".
         self.last_camera = (self.camera.target, self.camera.zoom);
     }
+
+    /// Center the map on a building selected through a HUD shortcut while
+    /// preserving the camera's configured world bounds.
+    pub(super) fn focus_camera_on_tile(&mut self, tile: TilePos) {
+        if let Some(center) = tile_world_center(tile, self.data.config.tile_size) {
+            self.camera.pan(center - self.camera.target);
+        }
+    }
+}
+
+fn tile_world_center(tile: TilePos, tile_size: f32) -> Option<Vec2> {
+    if !tile_size.is_finite() || tile_size <= 0.0 {
+        return None;
+    }
+    let (x, y) = tile.to_f32();
+    Some(vec2((x + 0.5) * tile_size, (y + 0.5) * tile_size))
 }
 
 fn simulation_blocked_by_modal(

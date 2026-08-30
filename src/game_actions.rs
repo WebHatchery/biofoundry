@@ -200,6 +200,7 @@ impl Game {
                     GameState::Warren(session) if session.building_at(pos).is_some()
                 );
                 if selected {
+                    self.focus_camera_on_tile(pos);
                     self.selected_building = Some(pos);
                     self.routes_open = false;
                     self.mode = UiMode::Inspect;

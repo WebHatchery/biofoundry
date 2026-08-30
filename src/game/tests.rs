@@ -220,6 +220,16 @@ fn route_ledger_pauses_an_awakened_warren_while_open() {
 }
 
 #[test]
+fn route_ledger_focus_uses_the_center_of_the_selected_tile() {
+    assert_eq!(
+        tile_world_center(TilePos::new(4, 7), 32.0),
+        Some(vec2(144.0, 240.0))
+    );
+    assert_eq!(tile_world_center(TilePos::new(4, 7), 0.0), None);
+    assert_eq!(tile_world_center(TilePos::new(4, 7), f32::NAN), None);
+}
+
+#[test]
 fn progression_events_are_safe_autosave_beats() {
     let mut report = simulation::TickReport::default();
     assert!(!progression_reaches_safe_beat(&report));
