@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `57c26f1`
+**Source revision:** `23c7462`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -34,6 +34,7 @@ automated simulation results into first-time-player evidence.
 | Endless automatic Outpost resupply | Pass (focused and capture evidence) | An awakened Outpost exposes the persisted `Auto-resupply · Off` / `Auto-resupply · Food only` policy. When staffed remote scouts need provisions, the fixed-step simulation starts a food-only transit from the home reserve without dispatching more crew; a manually paused expedition is left untouched. The departure notice, Objective, and field guide name the automatic behavior. Refreshed [ui_endless_auto_resupply.png](../verification/ui_endless_auto_resupply.png) shows the shortage state, enabled policy, and visible recovery controls. Live Preview route interaction remains unclaimed because the resumed developer save has not yet reached the Outpost unlock. |
 | Endless transit failure recovery | Pass (focused and published build evidence) | If an in-flight worm route is deactivated, the simulation restores its payload, records the failed Outpost, and emits a one-shot transit-failure event. The game turns that event into a visible danger notification with the exact recovery action and treats it as a safe-beat autosave, so a refresh cannot erase the route's recovered state. |
 | Multi-route failure visibility | Pass (focused evidence) | Reopening one failed Outpost now clears only that route's failure; the global route warning remains visible while any other Outpost still needs recovery. This keeps the top-bar warning consistent with the per-route inspection state as remote routes multiply. |
+| Loaded route failure visibility | Pass (focused and published build evidence) | Installing a save now reconciles each persisted Outpost failure with the global top-bar warning, repairing a missing banner and clearing a stale one. The route records remain authoritative across refresh and load boundaries. |
 | Outpost route setting persistence | Pass (focused and published build evidence) | Successful route activation, cargo-order changes, crew quotas, scouting pause/resume, and automatic return/resupply policy changes now write an autosave immediately. A refresh after changing a route control therefore preserves the player's recovery or logistics decision instead of waiting for a later transit or expedition beat. |
 | Worm Shrine offering policy persistence | Pass (focused and published build evidence) | The visible Pause/Resume offerings control now autosaves immediately after a successful toggle, so protecting the reserve remains in force across refreshes instead of silently restarting the Shrine draw. Invalid targets do not write a checkpoint. |
 | Direct player decision persistence | Pass (focused and published build evidence) | Successful job reassignment, specialist recruitment, breeding, Blacksmith queueing, tutorial skip, milestone-report dismissal, building placement, and dig designation now write an immediate autosave. Failed or duplicate actions do not write, and the refreshed save roundtrip covers the persisted job, queue, map, and decision flags. |
@@ -52,7 +53,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 263 unit tests and 2 integration tests pass.
+- `cargo test --all-targets` — 264 unit tests and 2 integration tests pass.
 - `cargo clippy --all-targets --all-features -- -D warnings` — pass.
 - `publish.ps1` with no parameters — pass; Windows and WebGL packages
   deployed to Preview.
@@ -145,6 +146,10 @@ automated simulation results into first-time-player evidence.
 - Multi-route failure visibility — pass; reopening one failed Outpost no
   longer hides an unresolved failure on another route. Focused coverage keeps
   the global banner and per-route failure records aligned.
+- Loaded route failure visibility — pass; loading a session now derives the
+  global route warning from persisted per-Outpost failure records, repairing a
+  missing banner and clearing a stale one. Focused recovery coverage verifies
+  both load-boundary states, and the published Preview includes the update.
 - Outpost route setting persistence — pass; successful route controls now
   trigger immediate autosaves, and the save-roundtrip coverage includes cargo
   priority and scouting pause alongside dispatch and automatic logistics
