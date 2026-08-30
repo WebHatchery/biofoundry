@@ -311,7 +311,7 @@ pub(super) fn draw_jobs_panel(
     let has_den = session.buildings_of("smelter").next().is_some();
     if hud_button(
         Rect::new(x + half + 8.0, y, half, 30.0),
-        &format!("Salam. bulk ({})", data.balance.salamander_ore_cost),
+        &format!("Salam. forge ({})", data.balance.salamander_ore_cost),
         has_den && session.economy.ore_stock >= data.balance.salamander_ore_cost,
         mouse,
     ) {
@@ -388,9 +388,9 @@ pub(super) fn draw_jobs_panel(
 
 fn optional_specialist_label(species: &str, posted: bool) -> &'static str {
     match (species, posted) {
-        ("slime_janitor", false) => "Slime · waste",
+        ("slime_janitor", false) => "Slime · clean",
         ("slime_janitor", true) => "Slime · posted",
-        ("bat_courier", false) => "Bat ×8",
+        ("bat_courier", false) => "Bat · 8 cargo",
         ("bat_courier", true) => "Bat · posted",
         _ => "Specialist",
     }
