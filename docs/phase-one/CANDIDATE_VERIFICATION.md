@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `790493c`
+**Source revision:** `a3fb885`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -57,7 +57,8 @@ automated simulation results into first-time-player evidence.
   Smith, and missing Carrier instead of promising more ingots without a viable
   production chain. Refreshed [ui_worm.png](../verification/ui_worm.png) and
   [ui_completion.png](../verification/ui_completion.png) captures show the
-  Blacksmith recovery prompt.
+  Blacksmith recovery prompt, while [ui_endless_forge.png](../verification/ui_endless_forge.png)
+  shows live `37/60` Worm Transit progress once the chain is viable.
 - Project-local capture wrapper — pass; `scripts/capture_ui.ps1` now forwards
   viewport sizing and release/visible capture options to the shared toolkit,
   and its 800×450 completion/Endless path was exercised successfully.
