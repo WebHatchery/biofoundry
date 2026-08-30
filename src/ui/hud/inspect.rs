@@ -496,7 +496,9 @@ pub(super) fn draw_inspect_panel(
                 ) {
                     actions.push(UiAction::ActivateOutpost(pos));
                 }
-                y += 28.0;
+                // Leave a full text-line gap before recovery copy so the
+                // baseline cannot crowd the button's lower border.
+                y += 36.0;
                 if !active && (cargo > 0 || crew > 0) {
                     line("Reactivate route to return payload", dark::WARNING, &mut y);
                 }
@@ -520,7 +522,7 @@ pub(super) fn draw_inspect_panel(
                     ) {
                         actions.push(UiAction::TransitToOutpost(pos));
                     }
-                    y += 28.0;
+                    y += 36.0;
                     if cargo == 0 && crew == 0 && !loadable_payload {
                         line(
                             "No cargo or crew ready at the warren",
