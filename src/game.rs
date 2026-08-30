@@ -30,8 +30,8 @@ mod tests;
 
 #[cfg(test)]
 use persistence::{
-    migrate_tutorial_progress, non_viable_save_notice, save_failure_notice,
-    should_restore_missing_primary,
+    migrate_tutorial_progress, missing_save_notice, no_saved_slot_available,
+    non_viable_save_notice, save_failure_notice, should_restore_missing_primary,
 };
 
 pub struct Game {

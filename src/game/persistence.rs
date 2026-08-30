@@ -141,7 +141,12 @@ impl Game {
             return;
         }
         if !primary_exists {
-            self.notifications.warning(format!("Load failed: {error}"));
+            if no_saved_slot_available(primary_exists, backup_exists) {
+                self.save_exists = false;
+                self.notifications.danger(missing_save_notice(&error));
+            } else {
+                self.notifications.warning(format!("Load failed: {error}"));
+            }
             return;
         }
 
@@ -223,6 +228,14 @@ impl Game {
 
 pub(super) fn should_restore_missing_primary(primary_exists: bool, backup_exists: bool) -> bool {
     !primary_exists && backup_exists
+}
+
+pub(super) fn no_saved_slot_available(primary_exists: bool, backup_exists: bool) -> bool {
+    !primary_exists && !backup_exists
+}
+
+pub(super) fn missing_save_notice(error: &str) -> String {
+    format!("Load failed — no saved warren is available: {error}. Use New Warren to begin again.")
 }
 
 pub(super) fn save_failure_notice(autosave: bool, had_existing_save: bool, error: &str) -> String {
