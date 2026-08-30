@@ -24,6 +24,8 @@ use macroquad_toolkit::prelude::*;
 use macroquad_toolkit::ui::{draw_ui_text_ex, format_mmss};
 
 const OBJECTIVE_PANEL: Rect = Rect::new(548.0, 72.0, 370.0, 128.0);
+const TUTORIAL_PANEL_HEIGHT: f32 = 168.0;
+const TUTORIAL_BODY_HEIGHT: f32 = 94.0;
 const LOCKED_TOOL_MARKER: &str = "[L]";
 
 pub(super) fn draw_top_bar(
@@ -669,7 +671,7 @@ pub(super) fn draw_tutorial_panel(
     let step = crate::tutorial::current_step(session, data)?;
     let (done, total) = crate::tutorial::progress(session, data);
 
-    let panel = Rect::new(LOGICAL_WIDTH - 342.0, 72.0, 330.0, 128.0);
+    let panel = Rect::new(LOGICAL_WIDTH - 342.0, 72.0, 330.0, TUTORIAL_PANEL_HEIGHT);
     draw_surface_with_title(
         panel,
         Some(&format!("Tutorial {}/{} — {}", done + 1, total, step.title)),
@@ -683,7 +685,7 @@ pub(super) fn draw_tutorial_panel(
         panel.x + 14.0,
         panel.y + 42.0,
         panel.w - 28.0,
-        56.0,
+        TUTORIAL_BODY_HEIGHT,
         14.0,
         4.0,
         dark::TEXT,
