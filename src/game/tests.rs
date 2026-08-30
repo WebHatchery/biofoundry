@@ -110,6 +110,44 @@ fn loaded_session_validation_accepts_a_simulated_warren() {
 }
 
 #[test]
+fn loaded_session_validation_accepts_remote_transit_states() {
+    let (data, mut session) = session();
+    let positions: Vec<_> = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .filter(|(pos, tile)| tile.walkable() && session.can_place_building(*pos))
+        .map(|(pos, _)| pos)
+        .take(2)
+        .collect();
+    assert_eq!(positions.len(), 2, "route test needs two free floor tiles");
+    session
+        .buildings
+        .push(Building::new("worm_shrine", positions[0]));
+    session
+        .buildings
+        .push(Building::new("outpost", positions[1]));
+    session.ensure_outpost(positions[1]);
+    session.worm_awake = true;
+    session.outposts[0].active = true;
+    session.economy.ore_stock = 2;
+
+    assert!(crate::simulation::outposts::start_to_outpost(
+        &mut session,
+        &data,
+        positions[1]
+    ));
+    validate_loaded_session(&session, &data).expect("in-flight route should be loadable");
+
+    crate::simulation::outposts::tick_transit(
+        &mut session,
+        &data,
+        data.balance.worm_transit_time_sec + 0.1,
+    );
+    validate_loaded_session(&session, &data).expect("arrived remote crew should be loadable");
+}
+
+#[test]
 fn loaded_session_validation_rejects_broken_grid_storage() {
     let (data, mut session) = session();
     session.world.tiles.width -= 1;
