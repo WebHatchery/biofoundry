@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-31
-**Source revision:** `284515b`
+**Source revision:** `278d369`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -63,7 +63,8 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 292 unit tests and 2 integration tests pass,
+- `cargo test --all-targets` — 293 unit tests and 2 integration/code-standard
+  targets pass,
   including fresh/simulated/remote-transit valid sessions, modal route
   planning, rejected malformed save shapes, and event-history save/load
   compatibility coverage.
@@ -259,9 +260,9 @@ automated simulation results into first-time-player evidence.
   shows remaining food/ingot offerings, minimum feed time, and the automatic
   offering state in the final-demand card.
 - Optional support capture — [ui_optional.png](../verification/ui_optional.png)
-  shows recruit controls labeled with their practical actions (`Beetle haul`,
-  `Salam. forge`,
-  `Slime · clean`, and `Bat · 8 cargo`) plus the Engineer mine-throughput bonus
+  shows active local support as `Beetle x1 haul` and `Salam x1 forge`, while
+  the still-available `Slime · clean` and `Bat · 8 cargo` recruit controls name
+  their practical actions. The Engineer mine-throughput bonus remains visible
   at the published HUD scale. This improves discoverability evidence but does
   not replace first-time-player testing of optional-system value.
 - Breeding feedback — successful Hobgoblin, Overseer, and Engineer choices now
