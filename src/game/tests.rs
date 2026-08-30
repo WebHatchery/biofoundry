@@ -385,6 +385,7 @@ fn loaded_session_validation_rejects_overfull_in_flight_cargo() {
         .buildings
         .push(Building::new("outpost", positions[1]));
     session.ensure_outpost(positions[1]);
+    session.worm_awake = true;
     session.worm_transit = Some(WormTransit {
         outpost: positions[1],
         direction: TransitDirection::ToOutpost,
@@ -424,6 +425,7 @@ fn loaded_session_validation_rejects_in_flight_cargo_that_overfills_stored_hold(
         .buildings
         .push(Building::new("outpost", positions[1]));
     session.ensure_outpost(positions[1]);
+    session.worm_awake = true;
     session.outposts[0].cargo.insert(
         crate::state::creatures::Good::Ore,
         data.balance.outpost_storage_cap - 1,
@@ -500,6 +502,7 @@ fn loaded_session_validation_rejects_arriving_crew_that_overfills_remote_capacit
         .buildings
         .push(Building::new("outpost", positions[1]));
     session.ensure_outpost(positions[1]);
+    session.worm_awake = true;
     let capacity = data.balance.outpost_capacity as usize;
     session.outposts[0].crew = session
         .creatures
@@ -526,6 +529,45 @@ fn loaded_session_validation_rejects_arriving_crew_that_overfills_remote_capacit
         .expect_err("arriving crew cannot overfill the destination outpost");
 
     assert!(error.contains("worm transit crew exceeds"));
+}
+
+#[test]
+fn loaded_session_validation_rejects_transit_before_worm_awakened() {
+    let (data, mut session) = session();
+    let positions: Vec<_> = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .filter(|(pos, tile)| tile.walkable() && session.can_place_building(*pos))
+        .map(|(pos, _)| pos)
+        .take(2)
+        .collect();
+    assert_eq!(
+        positions.len(),
+        2,
+        "transit test needs two free floor tiles"
+    );
+    session
+        .buildings
+        .push(Building::new("worm_shrine", positions[0]));
+    session
+        .buildings
+        .push(Building::new("outpost", positions[1]));
+    session.ensure_outpost(positions[1]);
+    session.worm_transit = Some(WormTransit {
+        outpost: positions[1],
+        direction: TransitDirection::ToOutpost,
+        remaining: 1.0,
+        ore: 1,
+        ingots: 0,
+        food: 0.0,
+        passengers: Vec::new(),
+    });
+
+    let error = validate_loaded_session(&session, &data)
+        .expect_err("transit cannot exist before the worm awakens");
+
+    assert!(error.contains("before the worm awakens"));
 }
 
 #[test]

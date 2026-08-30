@@ -94,3 +94,32 @@ fn syncing_loaded_routes_repairs_and_clears_the_global_failure_banner() {
     outposts::sync_transit_failure_banner(&mut session);
     assert!(session.last_transit_failure.is_none());
 }
+
+#[test]
+fn asleep_worm_recovers_an_impossible_transit_without_delivering_it() {
+    let (data, mut session, outpost_pos) = active_outpost(51);
+    session.worm_awake = false;
+    session.economy.ore_stock = 0;
+    assert!(!outposts::start_to_outpost(
+        &mut session,
+        &data,
+        outpost_pos
+    ));
+
+    session.worm_transit = Some(crate::state::outposts::WormTransit {
+        outpost: outpost_pos,
+        direction: crate::state::outposts::TransitDirection::ToOutpost,
+        remaining: 1.0,
+        ore: 2,
+        ingots: 0,
+        food: 0.0,
+        passengers: Vec::new(),
+    });
+
+    assert!(
+        outposts::tick_transit(&mut session, &data, data.balance.worm_transit_time_sec).is_none()
+    );
+    assert!(session.worm_transit.is_none());
+    assert_eq!(session.economy.ore_stock, 2);
+    assert!(session.last_transit_failure.is_some());
+}

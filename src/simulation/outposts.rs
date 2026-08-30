@@ -505,10 +505,11 @@ pub fn tick_transit(
     dt: f32,
 ) -> Option<TransitCompletion> {
     let mut transit = session.worm_transit.take()?;
-    if !session
-        .outposts
-        .iter()
-        .any(|o| o.pos == transit.outpost && o.active)
+    if !session.worm_awake
+        || !session
+            .outposts
+            .iter()
+            .any(|o| o.pos == transit.outpost && o.active)
     {
         recover_failed_transit(session, transit);
         return None;

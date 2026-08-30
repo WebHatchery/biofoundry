@@ -487,6 +487,9 @@ pub(super) fn validate_loaded_session(
         outpost_crew_counts.push((outpost.pos, crew_count));
     }
     if let Some(transit) = &session.worm_transit {
+        if !session.worm_awake {
+            return Err("worm transit exists before the worm awakens".to_owned());
+        }
         let Some(outpost) = session
             .outposts
             .iter()
