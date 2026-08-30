@@ -656,6 +656,11 @@ fn simulation_blocked_by_modal(
         || (!session.worm_awake && session.is_non_viable(data))
 }
 
+fn clear_replacement_confirmations(confirm_new_warren: &mut bool, confirm_load: &mut bool) {
+    *confirm_new_warren = false;
+    *confirm_load = false;
+}
+
 fn progression_reaches_safe_beat(report: &simulation::TickReport) -> bool {
     report.wild.raid_survived
         || report.wild.captured > 0

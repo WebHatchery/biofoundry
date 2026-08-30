@@ -44,6 +44,16 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                 session.economy.food = 80.0;
             }
         }
+        "load_confirm_resolved" => {
+            game.transition(StateTransition::StartWarren);
+            game.confirm_load = true;
+            let loaded = match &game.state {
+                GameState::Warren(session) => session.as_ref().clone(),
+                GameState::Menu => return,
+            };
+            game.install_loaded_session(loaded);
+            game.notifications.success("Warren loaded.");
+        }
         "settings" => {
             game.transition(StateTransition::BackToMenu);
             game.settings_open = true;

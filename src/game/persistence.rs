@@ -88,6 +88,11 @@ impl Game {
     }
 
     pub(super) fn load_game(&mut self) {
+        // A confirmed load consumes the modal before storage work begins. If
+        // the slot is damaged or unavailable, the error notification must be
+        // readable over the live Warren rather than leaving the player trapped
+        // behind a stale confirmation overlay.
+        self.confirm_load = false;
         let slot = self.data.config.save_slot.clone();
         match self.load_session_from_slot(&slot) {
             Ok(session) => {
@@ -124,7 +129,7 @@ impl Game {
         validate_loaded_session_boundary(session, &self.data)
     }
 
-    fn install_loaded_session(&mut self, session: GameSession) {
+    pub(super) fn install_loaded_session(&mut self, session: GameSession) {
         let mut session = session;
         restore_notification_history(&mut self.notifications, &session.event_history);
         session.event_history = self.notifications.history().to_vec();
@@ -146,7 +151,10 @@ impl Game {
         self.event_log_page = 0;
         self.routes_open = false;
         self.paused = false;
-        self.confirm_new_warren = false;
+        super::clear_replacement_confirmations(
+            &mut self.confirm_new_warren,
+            &mut self.confirm_load,
+        );
         self.selected_building = None;
         self.mouse_pan_start = None;
         self.mouse_camera_claimed = false;

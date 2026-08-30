@@ -644,6 +644,17 @@ fn active_load_confirmation_holds_the_simulation_until_a_choice() {
 }
 
 #[test]
+fn session_boundary_clears_both_replacement_confirmations() {
+    let mut confirm_new_warren = true;
+    let mut confirm_load = true;
+
+    clear_replacement_confirmations(&mut confirm_new_warren, &mut confirm_load);
+
+    assert!(!confirm_new_warren);
+    assert!(!confirm_load);
+}
+
+#[test]
 fn secure_threshold_notice_waits_for_the_guard_handoff() {
     let (_data, mut session) = session();
 
