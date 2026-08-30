@@ -2,6 +2,7 @@
 //! creatures in camera space. Pure view — reads the session and draws.
 
 mod buildings;
+mod routes;
 mod sprites;
 
 use crate::data::GameData;
@@ -25,6 +26,7 @@ pub fn draw_world(
 ) {
     draw_tiles(session, sprites, tile_size);
     draw_dig_marks(session, tile_size);
+    routes::draw_route_links(session, data, tile_size);
     for building in &session.buildings {
         buildings::draw(session, data, sprites, building, tile_size);
         if let Some(status) = crate::ui::legibility::building_status(session, data, building) {
