@@ -46,6 +46,11 @@ automated simulation results into first-time-player evidence.
 - Project-local capture wrapper — pass; `scripts/capture_ui.ps1` now forwards
   viewport sizing and release/visible capture options to the shared toolkit,
   and its 800×450 completion/Endless path was exercised successfully.
+- Native release critical-scene capture — pass; the optimized project binary
+  captured completion, Endless outpost, Shrine, and Blacksmith at 800×450.
+  Completion choices and outpost actions stayed visible, while the Shrine and
+  Blacksmith panels remained readable without clipping or overlap. This is
+  packaged-native evidence; WebGL completion/endless evidence remains open.
 - Camera drag release guard — focused input coverage keeps a claimed mouse
   drag from selecting a map tile or activating a HUD control on release.
 - Touch map taps — focused input coverage and the explicit gesture path keep a
