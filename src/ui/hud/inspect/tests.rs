@@ -292,6 +292,20 @@ fn blacksmith_input_hint_names_the_queued_order_and_shortfall() {
 }
 
 #[test]
+fn smelter_input_hint_names_each_missing_material() {
+    let data = GameData::load().expect("embedded game data");
+    let mut smelter = Building::new("smelter", TilePos::new(0, 0));
+
+    assert_eq!(
+        smelter_input_hint(&smelter, &data),
+        "Needs 1 ore + 1 charcoal"
+    );
+
+    smelter.add_stock(Good::Ore, data.balance.smelt_batch_ore as f32);
+    assert_eq!(smelter_input_hint(&smelter, &data), "Needs 1 charcoal");
+}
+
+#[test]
 fn inspection_staffing_ignores_remote_crew_and_recognizes_assigned_crew() {
     let data = GameData::load().expect("embedded game data");
     let mut session = GameSession::new(&data, 13);

@@ -56,17 +56,18 @@ pub(super) fn draw_inspect_panel(
 
     let (status, status_color) = inspect_status(session, data, building);
     line(&format!("Status · {status}"), status_color, &mut y);
-    if building.kind == "blacksmith"
-        && matches!(
-            crate::ui::legibility::building_status(session, data, building),
-            Some(BuildingStatus::InputStarved)
-        )
-    {
-        line(
-            &blacksmith_input_hint(building, data),
-            dark::WARNING,
-            &mut y,
-        );
+    if matches!(
+        crate::ui::legibility::building_status(session, data, building),
+        Some(BuildingStatus::InputStarved)
+    ) {
+        let input_hint = match building.kind.as_str() {
+            "blacksmith" => Some(blacksmith_input_hint(building, data)),
+            "smelter" => Some(smelter_input_hint(building, data)),
+            _ => None,
+        };
+        if let Some(input_hint) = input_hint {
+            line(&input_hint, dark::WARNING, &mut y);
+        }
     }
 
     match building.kind.as_str() {
@@ -527,6 +528,23 @@ fn blacksmith_input_hint(building: &Building, data: &GameData) -> String {
         }
     }
     format!("Needs {ore_needed} ore · next ingot")
+}
+
+fn smelter_input_hint(building: &Building, data: &GameData) -> String {
+    let ore_needed = (data.balance.smelt_batch_ore as f32 - building.stock(Good::Ore))
+        .max(0.0)
+        .ceil() as u32;
+    let charcoal_needed = (data.balance.smelt_batch_charcoal - building.stock(Good::Charcoal))
+        .max(0.0)
+        .ceil() as u32;
+    let mut missing = Vec::new();
+    if ore_needed > 0 {
+        missing.push(format!("{ore_needed} ore"));
+    }
+    if charcoal_needed > 0 {
+        missing.push(format!("{charcoal_needed} charcoal"));
+    }
+    format!("Needs {}", missing.join(" + "))
 }
 
 fn local_mine_worker_at(creature: &Creature, pos: TilePos) -> bool {

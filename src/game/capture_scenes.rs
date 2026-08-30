@@ -159,6 +159,31 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                 game.selected_building = session.buildings_of("blacksmith").next().map(|b| b.pos);
             }
         }
+        "smelter" => {
+            game.transition(StateTransition::StartWarren);
+            if let GameState::Warren(session) = &mut game.state {
+                // Keep the living furnace staffed while withholding both
+                // batch inputs, so the inspection card demonstrates the
+                // actionable starvation wording at the published scale.
+                session.tutorial_dismissed = true;
+                session.economy.food = 80.0;
+                session.economy.ore_stock = 0;
+                session.creatures.clear();
+                let spawn = session.spawn_tile();
+                let spot = session
+                    .world
+                    .tiles
+                    .iter_with_pos()
+                    .filter(|(pos, _)| session.can_place_building(*pos))
+                    .map(|(pos, _)| pos)
+                    .min_by_key(|p| (p.manhattan_distance(&spawn), p.x, p.y));
+                if let Some(spot) = spot {
+                    session.buildings.push(Building::new("smelter", spot));
+                    session.spawn_creature(&game.data, "salamander", Job::Smelter);
+                    game.selected_building = Some(spot);
+                }
+            }
+        }
         "equipment" => {
             game.transition(StateTransition::StartWarren);
             if let GameState::Warren(session) = &mut game.state {
