@@ -174,46 +174,62 @@ fn transit_completion_notice_names_mixed_payloads() {
 
 #[test]
 fn unlock_notice_teaches_how_to_use_new_content() {
-    let (data, _session) = session();
+    let (data, session) = session();
 
     assert_eq!(
-        unlock_notice(&data, "Beetle Breeding Pit"),
+        unlock_notice(&data, &session, "Beetle Breeding Pit"),
+        "Unlocked: Beetle Breeding Pit — available in Build & Dig after onboarding."
+    );
+    assert_eq!(
+        unlock_notice(&data, &session, "Hobgoblin Brood"),
+        "Unlocked: Hobgoblin Brood — breed at the Breeding Pit after onboarding."
+    );
+    assert_eq!(
+        unlock_notice(&data, &session, "Slime Janitor"),
+        "Unlocked: Slime Janitor — recruit from Jobs after onboarding."
+    );
+    assert_eq!(
+        unlock_notice(&data, &session, "Bat Courier"),
+        "Unlocked: Bat Courier — recruit from Jobs after onboarding."
+    );
+}
+
+#[test]
+fn unlock_notice_switches_to_visible_optional_controls_after_onboarding() {
+    let (data, mut session) = session();
+    session.won = true;
+    session.creatures[0].job = Job::Guard;
+
+    assert_eq!(
+        unlock_notice(&data, &session, "Beetle Breeding Pit"),
         "Unlocked: Beetle Breeding Pit — build Breeding Pit from Build & Dig."
     );
     assert_eq!(
-        unlock_notice(&data, "Hobgoblin Brood"),
-        "Unlocked: Hobgoblin Brood — breed at the Breeding Pit."
-    );
-    assert_eq!(
-        unlock_notice(&data, "Slime Janitor"),
+        unlock_notice(&data, &session, "Slime Janitor"),
         "Unlocked: Slime Janitor — recruit from Jobs."
-    );
-    assert_eq!(
-        unlock_notice(&data, "Bat Courier"),
-        "Unlocked: Bat Courier — recruit from Jobs."
     );
 }
 
 #[test]
 fn unlock_notice_teaches_passive_benefits() {
-    let (data, _session) = session();
+    let (data, session) = session();
 
     assert_eq!(
-        unlock_notice(&data, "Hardened Guards"),
+        unlock_notice(&data, &session, "Hardened Guards"),
         "Unlocked: Hardened Guards — Guards deal +50% damage."
     );
     assert_eq!(
-        unlock_notice(&data, "Preservation Techniques"),
+        unlock_notice(&data, &session, "Preservation Techniques"),
         "Unlocked: Preservation Techniques — Farms hold +50% food."
     );
 }
 
 #[test]
 fn unlock_notice_keeps_unknown_names_safe() {
-    let (data, _session) = session();
+    let (data, session) = session();
 
     assert_eq!(
-        unlock_notice(&data, "Future discovery"),
+        unlock_notice(&data, &session, "Future discovery"),
         "Unlocked: Future discovery"
     );
 }

@@ -192,7 +192,8 @@ impl Game {
                         self.audio.play(Sfx::Deny);
                     }
                     for name in &report.wild.unlocked {
-                        self.notifications.success(unlock_notice(&self.data, name));
+                        self.notifications
+                            .success(unlock_notice(&self.data, session, name));
                         self.audio.play(Sfx::Complete);
                     }
                     if report.wild.bred_beetle {
@@ -678,7 +679,7 @@ fn warren_secured_notice(session: &GameSession) -> &'static str {
     }
 }
 
-fn unlock_notice(data: &GameData, name: &str) -> String {
+fn unlock_notice(data: &GameData, session: &GameSession, name: &str) -> String {
     let Some(unlock) = data.unlocks.iter().find(|unlock| unlock.name == name) else {
         return format!("Unlocked: {name}");
     };
@@ -687,19 +688,39 @@ fn unlock_notice(data: &GameData, name: &str) -> String {
         "unlock_building" => unlock
             .building
             .as_deref()
-            .and_then(|id| data.buildings.get(id))
-            .map(|building| format!("build {} from Build & Dig", building.name))
+            .and_then(|id| data.buildings.get(id).map(|building| (id, building)))
+            .map(|(id, building)| {
+                if advanced_building_hidden(session, id) {
+                    "available in Build & Dig after onboarding".to_owned()
+                } else {
+                    format!("build {} from Build & Dig", building.name)
+                }
+            })
             .unwrap_or_else(|| "available in Build & Dig".to_owned()),
-        "unlock_creature" => match unlock.id.as_str() {
-            "slime_janitor" | "bat_courier" => "recruit from Jobs".to_owned(),
-            _ => "breed at the Breeding Pit".to_owned(),
-        },
+        "unlock_creature" => {
+            let route = match unlock.id.as_str() {
+                "slime_janitor" | "bat_courier" => "recruit from Jobs",
+                _ => "breed at the Breeding Pit",
+            };
+            if crate::ui::legibility::advanced_systems_unlocked(session) {
+                route.to_owned()
+            } else {
+                format!("{route} after onboarding")
+            }
+        }
         "guard_dps_mult" => format!("Guards deal +{:.0}% damage", (unlock.value - 1.0) * 100.0),
         "farm_cap_mult" => format!("Farms hold +{:.0}% food", (unlock.value - 1.0) * 100.0),
         _ => unlock.description.trim_end_matches('.').to_owned(),
     };
 
     format!("Unlocked: {} — {detail}.", unlock.name)
+}
+
+fn advanced_building_hidden(session: &GameSession, building_id: &str) -> bool {
+    !matches!(
+        building_id,
+        "blacksmith" | "cook_pot" | "farm" | "mine" | "worm_shrine"
+    ) && !crate::ui::legibility::advanced_systems_unlocked(session)
 }
 
 /// Reconcile the old seven-step tutorial index with the current five-beat
