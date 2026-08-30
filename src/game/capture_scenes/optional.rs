@@ -1,7 +1,7 @@
 //! Capture scene for optional support specialists and their active benefits.
 
 use crate::game::Game;
-use crate::state::creatures::Job;
+use crate::state::creatures::{Good, Job, Task};
 use crate::state::structures::Building;
 use crate::state::{GameState, StateTransition};
 
@@ -31,8 +31,19 @@ pub(super) fn begin(game: &mut Game) {
             .find(|(pos, _)| session.can_place_building(*pos))
             .map(|(pos, _)| pos);
         if let Some(spot) = smelter_spot {
-            session.buildings.push(Building::new("smelter", spot));
+            let mut smelter = Building::new("smelter", spot);
+            smelter.add_stock(Good::Ore, 1.0);
+            smelter.add_stock(Good::Charcoal, 1.0);
+            session.buildings.push(smelter);
             session.spawn_creature(&game.data, "salamander", Job::Smelter);
+            if let Some(salamander) = session.creatures.last_mut() {
+                salamander.x = spot.x as f32 + 0.5;
+                salamander.y = spot.y as f32 + 0.5;
+                salamander.task = Task::Smelting {
+                    den: spot,
+                    remaining: game.data.balance.smelt_batch_time_sec,
+                };
+            }
         }
     }
 }
