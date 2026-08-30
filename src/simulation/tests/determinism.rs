@@ -84,6 +84,17 @@ fn save_roundtrip_preserves_outpost_dispatch_settings() {
     );
 }
 
+#[test]
+fn save_roundtrip_preserves_shrine_feeding_pause() {
+    let (_data, mut session) = boot_on_config_seed();
+    session.worm_feeding_paused = true;
+
+    let json = serde_json::to_string(&session).expect("serialize");
+    let restored: GameSession = serde_json::from_str(&json).expect("deserialize");
+
+    assert!(restored.worm_feeding_paused);
+}
+
 /// Full-session serde roundtrip: a loaded save simulates identically
 /// to the original.
 #[test]

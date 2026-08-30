@@ -156,18 +156,23 @@ impl Game {
                 }
             }
             UiAction::ToggleShrineFeeding(pos) => {
+                let mut shrine_changed = false;
                 if let GameState::Warren(session) = &mut self.state {
                     if session
                         .building_at(pos)
                         .is_some_and(|b| b.kind == "worm_shrine")
                     {
                         session.worm_feeding_paused = !session.worm_feeding_paused;
+                        shrine_changed = true;
                         self.notifications.info(if session.worm_feeding_paused {
                             "Shrine offerings paused."
                         } else {
                             "Shrine offerings resumed."
                         });
                     }
+                }
+                if shrine_changed {
+                    self.autosave_game();
                 }
             }
             UiAction::ActivateOutpost(pos) => {
