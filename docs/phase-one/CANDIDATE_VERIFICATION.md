@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-31
-**Source revision:** `3362a48`
+**Source revision:** `0b3d35a`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -49,7 +49,7 @@ automated simulation results into first-time-player evidence.
 | Multi-route objective ordering | Pass (focused evidence) | If several active Worm Outposts are present, the completed-campaign Objective prioritizes a route with cargo or crew ready, then a route that can be loaded, before an empty active route. This keeps the next visible instruction actionable as the existing outpost activity scales. |
 | Minimum-layout spot check | Pass | The 1200×675 canvas and required HUD remained visible in the 1280×720 Preview viewport. |
 | Public metadata alignment | Pass | The published game page now names the visible touch actions for panning, inspection, tools, Jobs controls, optional specialist recruitment, awakened Outpost cargo runs, optional automatic cargo-only returns and food-only resupply, and the post-awakening Endless/Menu choices. |
-| Compact viewport exploration | Pass with follow-up | The hosted Preview smoke path at 800×450 keeps the title, field guide, and Warren HUD on-canvas; capture probes at 800×450, 1024×576, 1280×720, and 1440×900 keep the Food/Factory/Worm tutorial cards, Blacksmith queue controls, Shrine pause control, completion choices, and Endless outpost actions visible without clipping or overlap. The compact branch now gives the high-frequency top-bar, Jobs, Build & Dig, Outpost, Blacksmith, Breeding Pit, and Shrine controls larger visual affordances, and the refreshed warning captures keep their messages clear of that row. Representative [ui_compact_warren.png](../verification/ui_compact_warren.png), [ui_compact_blacksmith.png](../verification/ui_compact_blacksmith.png), [ui_compact_breeding.png](../verification/ui_compact_breeding.png), [ui_compact_shrine.png](../verification/ui_compact_shrine.png), [ui_compact_endless_load_preview.png](../verification/ui_compact_endless_load_preview.png), and [ui_compact_endless_upgraded.png](../verification/ui_compact_endless_upgraded.png) captures preserve the responsive states. Additional 800×450 probes keep specialist actions and locked-progress lines visible. Remaining text density and first-time-player comprehension still require human validation. |
+| Compact viewport exploration | Pass with follow-up | The hosted Preview smoke path at 800×450 keeps the title, field guide, and Warren HUD on-canvas; capture probes at 800×450, 1024×576, 1280×720, and 1440×900 keep the Food/Factory/Worm tutorial cards, Blacksmith queue controls, Shrine pause control, completion choices, and Endless outpost actions visible without clipping or overlap. The compact branch now gives the high-frequency top-bar, Jobs, Build & Dig, Outpost, Blacksmith, Breeding Pit, and Shrine controls larger visual affordances, and the refreshed warning captures keep their messages clear of that row. Representative [ui_compact_warren.png](../verification/ui_compact_warren.png), [ui_compact_blacksmith.png](../verification/ui_compact_blacksmith.png), [ui_compact_breeding.png](../verification/ui_compact_breeding.png), [ui_compact_shrine.png](../verification/ui_compact_shrine.png), [ui_compact_endless_load_preview.png](../verification/ui_compact_endless_load_preview.png), and [ui_compact_endless_upgraded.png](../verification/ui_compact_endless_upgraded.png) captures preserve the responsive states. The compact Blacksmith and Breeding Pit follow-up now uses 36-pixel action targets with 40-pixel spacing; remaining text density and first-time-player comprehension still require human validation. |
 | Visible-control smoke path | Pass | A fresh full-screen Preview warren advanced through visible New Warren, + zoom, direct map drag, map-tap inspection (`Stockpile`), valid Farm placement, `− Miner`/`+ Carrier` reassignment, Pause/Resume, Help/Close, Save, and Load without keyboard input. Invalid placement also returned the readable `Can't build there.` notice. The Load round-trip restored the saved `04:45` state with the 10-ore construction site, 2 Miner/2 Carrier staffing, and tutorial `2/5 — Stabilize the Food Grid`; successful placement returned to Inspect instead of creating a second site. This is developer smoke evidence, not a qualifying first-time-player session. |
 | Packaged HUD recovery controls | Pass | A fresh full-screen Preview run changed Settings volume with visible `−`/`+` controls, opened and closed the Field Guide while paused, and resumed the warren with the same visible HUD and tutorial state. This confirms the modal guide leaves the underlying Warren controls recoverable by pointer; it does not replace the still-open full-campaign evidence. |
 | Recent event recovery log | Pass (published capture and Preview) | The visible Field Guide now opens a newest-first Recent Events view backed by the bounded notification history. Published Preview verification opened the guide after a refresh and reviewed persisted `Simulation paused`, `Warren saved.`, and `Warren loaded.` messages; the modal kept both `Field Guide` and `Close` actions available. |
@@ -61,7 +61,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 289 unit tests and 2 integration tests pass,
+- `cargo test --all-targets` — 290 unit tests and 2 integration tests pass,
   including fresh/simulated/remote-transit valid sessions, modal route
   planning, rejected malformed save shapes, and event-history save/load
   compatibility coverage.
@@ -212,9 +212,10 @@ automated simulation results into first-time-player evidence.
   warm. Enabled controls are measured, modal occlusion removes covered HUD
   controls, and the sweep reports no grown-target overlap. The compact branch
   now draws the top-bar controls at 40 logical pixels and the Jobs, Build & Dig,
-  and Outpost route controls at 30 logical pixels or more; crafting and
-  specialist cards still report smaller visual controls, keeping first-time-
-  player readability as an honest human follow-up.
+  Outpost route, Blacksmith, and Breeding Pit controls at 30 logical pixels or
+  more; the craft and specialist cards report 36-pixel drawn targets with no
+  grown-target overlap. Remaining text density and first-time-player
+  comprehension remain honest human follow-ups.
 - Native release critical-scene capture — pass; the optimized project binary
   captured completion, Endless outpost, Shrine, and Blacksmith at 800×450.
   Completion choices and outpost actions stayed visible, while the Shrine and
