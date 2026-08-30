@@ -22,6 +22,7 @@ param(
         "warren",
         "new_warren_confirm",
         "load_confirm",
+        "menu_save_guard",
         "help",
         "event_log",
         "event_log_older",

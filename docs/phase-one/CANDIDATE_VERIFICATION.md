@@ -48,6 +48,7 @@ automated simulation results into first-time-player evidence.
 | Save failure recovery guidance | Pass (focused and published build evidence) | Manual save failures now say whether the previous checkpoint remains available or no new save was written; autosave failures distinguish an existing checkpoint from a first-save attempt and explain the retry path. A persistent top-bar `SAVE FAILED` banner keeps the recovery state beside the visible Save control until a successful save or load. Backup restore-write failures preserve the valid backup as a Continue source and use a persistent `RECOVERY FAILED · tap Save` repair banner. The message states and banner labels are covered by focused tests; refreshed [ui_save_failure.png](../verification/ui_save_failure.png), [ui_save_failure_first_save.png](../verification/ui_save_failure_first_save.png), and [ui_save_recovery_failure.png](../verification/ui_save_recovery_failure.png) captures show the compact recovery states. Forced browser quota/blocked-storage behavior remains open below. |
 | Load availability reconciliation | Pass (focused and published build evidence) | If Load finds neither the primary slot nor its backup, the title screen now disables the stale Continue action and reports that no saved warren is available, with a visible New Warren recovery path. A successful Load also re-enables Continue when startup or an earlier recovery had marked the slot unavailable. Startup now recognizes a surviving backup as available, while damaged-save recovery remains unchanged. |
 | Active-run load confirmation | Pass (focused and capture evidence) | The active Warren Load control now opens a visible `Load Last Save` / `Keep Current` confirmation before replacing the live run, names that post-checkpoint work would be discarded, and pauses simulation while the choice is open. Confirmed loads clear the modal before installing the saved session, including the failed-load path, so the player is never trapped behind stale confirmation UI. Title-screen Continue and non-viable recovery retain their direct Load actions; refreshed [ui_load_confirm.png](../verification/ui_load_confirm.png), [ui_compact_load_confirm.png](../verification/ui_compact_load_confirm.png), [ui_load_confirm_resolved.png](../verification/ui_load_confirm_resolved.png), and [ui_compact_load_confirm_resolved.png](../verification/ui_compact_load_confirm_resolved.png) captures keep the prompt and resolved state readable. |
+| Menu exit checkpoint guard | Pass (focused and published build evidence) | Leaving a viable Warren through the visible Menu now requires its automatic checkpoint to succeed. If storage rejects that write, the live Warren stays open with the existing `SAVE FAILED` recovery banner and a direct instruction to use Save, so a first-save failure cannot silently discard the run. A viable Warren still exits normally after a successful autosave; non-viable recovery keeps its existing direct Load/New Warren choices. The refreshed [ui_menu_save_guard.png](../verification/ui_menu_save_guard.png) and [ui_compact_menu_save_guard.png](../verification/ui_compact_menu_save_guard.png) captures keep the recovery instruction readable at normal and compact scales. |
 | Outpost route setting persistence | Pass (focused and published build evidence) | Successful route activation, cargo-order changes, crew quotas, scouting pause/resume, and automatic return/resupply policy changes now write an autosave immediately. A refresh after changing a route control therefore preserves the player's recovery or logistics decision instead of waiting for a later transit or expedition beat. |
 | Worm Shrine offering policy persistence | Pass (focused and published build evidence) | The visible Pause/Resume offerings control now autosaves immediately after a successful toggle, so protecting the reserve remains in force across refreshes instead of silently restarting the Shrine draw. Invalid targets do not write a checkpoint. |
 | Direct player decision persistence | Pass (focused and published build evidence) | Successful job reassignment, specialist recruitment, breeding, Blacksmith queueing, tutorial skip, milestone-report dismissal, building placement, and dig designation now write an immediate autosave. Failed or duplicate actions do not write, and the refreshed save roundtrip covers the persisted job, queue, map, and decision flags. |
@@ -79,7 +80,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 354 unit tests and 2 integration/code-standard
+- `cargo test --all-targets` — 355 unit tests and 2 integration/code-standard
   targets pass,
   including fresh/simulated/remote-transit valid sessions, modal route
   planning, rejected malformed save shapes, and event-history save/load
@@ -259,6 +260,14 @@ automated simulation results into first-time-player evidence.
   and compact [ui_compact_load_confirm_resolved.png](../verification/ui_compact_load_confirm_resolved.png)
   captures show the restored Warren and `Warren loaded.` feedback without the
   modal remaining on screen.
+- Menu exit checkpoint guard — pass; a viable Warren now remains active when
+  its required Menu autosave is rejected, leaving the visible Save control and
+  the `SAVE FAILED` banner available for repair instead of discarding the live
+  run. The refreshed [ui_menu_save_guard.png](../verification/ui_menu_save_guard.png)
+  and [ui_compact_menu_save_guard.png](../verification/ui_compact_menu_save_guard.png)
+  captures show the compact `Menu held — tap Save before leaving.` guidance.
+  Successful checkpoints still transition to the title screen, while
+  non-viable recovery retains its existing direct choices.
 - Worm Shrine offering policy persistence — pass; a successful visible
   Pause/Resume offerings action now triggers an immediate autosave, and the
   save-roundtrip coverage preserves the pause flag. The published Preview

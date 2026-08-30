@@ -34,8 +34,12 @@ impl Game {
                     &self.state,
                     GameState::Warren(session) if !session.is_non_viable(&self.data)
                 );
-                if should_autosave {
-                    self.autosave_game();
+                let autosave_succeeded = !should_autosave || self.autosave_game();
+                if !menu_exit_allowed_after_autosave(should_autosave, autosave_succeeded) {
+                    self.notifications
+                        .danger("Menu held — tap Save before leaving.");
+                    self.audio.play(Sfx::Deny);
+                    return;
                 }
                 self.transition(StateTransition::BackToMenu);
             }
@@ -650,6 +654,10 @@ impl Game {
             UiAction::ExitGame => macroquad::miniquad::window::quit(),
         }
     }
+}
+
+fn menu_exit_allowed_after_autosave(should_autosave: bool, autosave_succeeded: bool) -> bool {
+    !should_autosave || autosave_succeeded
 }
 
 fn transit_departure_notice(direction: TransitDirection) -> &'static str {

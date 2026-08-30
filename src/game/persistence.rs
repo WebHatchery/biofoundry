@@ -54,20 +54,22 @@ impl Game {
 
     /// Persist a campaign milestone or direct player decision without
     /// interrupting the player's flow.
-    pub(super) fn autosave_game(&mut self) {
+    pub(super) fn autosave_game(&mut self) -> bool {
         if matches!(&self.state, GameState::Warren(session) if session.is_non_viable(&self.data)) {
-            return;
+            return false;
         }
         let had_existing_save = self.save_exists;
         match self.persist_current_session() {
             Ok(()) => {
                 self.save_exists = true;
                 self.checkpoint_warning = None;
+                true
             }
             Err(err) => {
                 self.checkpoint_warning = Some(save_failure_banner(had_existing_save));
                 self.notifications
-                    .warning(save_failure_notice(true, had_existing_save, &err))
+                    .warning(save_failure_notice(true, had_existing_save, &err));
+                false
             }
         }
     }

@@ -612,6 +612,13 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
             game.save_exists = false;
             game.checkpoint_warning = Some(super::persistence::save_failure_banner(false));
         }
+        "menu_save_guard" => {
+            begin(game, "warren");
+            game.save_exists = false;
+            game.checkpoint_warning = Some(super::persistence::save_failure_banner(false));
+            game.notifications
+                .danger("Menu held — tap Save before leaving.");
+        }
         "save_recovery_failure" => {
             begin(game, "warren");
             game.checkpoint_warning = Some(super::persistence::save_recovery_failure_banner());

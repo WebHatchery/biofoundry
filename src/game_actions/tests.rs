@@ -82,3 +82,10 @@ fn outpost_expedition_notice_names_the_resulting_scouting_state() {
         "Outpost scouting resumed."
     );
 }
+
+#[test]
+fn menu_exit_requires_a_successful_checkpoint_for_a_viable_warren() {
+    assert!(menu_exit_allowed_after_autosave(false, false));
+    assert!(menu_exit_allowed_after_autosave(true, true));
+    assert!(!menu_exit_allowed_after_autosave(true, false));
+}
