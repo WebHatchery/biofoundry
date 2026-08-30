@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
-**Date:** 2026-08-30  
-**Source revision:** `9ad9418`
+**Date:** 2026-08-31
+**Source revision:** `4753d76`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -35,6 +35,7 @@ automated simulation results into first-time-player evidence.
 | Endless transit failure recovery | Pass (focused and published build evidence) | If an in-flight worm route is deactivated, the simulation restores its payload, records the failed Outpost, and emits a one-shot transit-failure event. The game turns that event into a visible danger notification with the exact recovery action and treats it as a safe-beat autosave, so a refresh cannot erase the route's recovered state. |
 | Multi-route failure visibility | Pass (focused evidence) | Reopening one failed Outpost now clears only that route's failure; the global route warning remains visible while any other Outpost still needs recovery. This keeps the top-bar warning consistent with the per-route inspection state as remote routes multiply. |
 | Loaded route failure visibility | Pass (focused and published build evidence) | Installing a save now reconciles each persisted Outpost failure with the global top-bar warning, repairing a missing banner and clearing a stale one. The route records remain authoritative across refresh and load boundaries. |
+| Loaded session integrity validation | Pass (focused and published build evidence) | Migrated primary and backup saves are checked before installation for valid map storage, non-overlapping world objects, known content IDs, safe actor/task positions, unique roster IDs, and finite simulation values. Invalid shapes enter the existing quarantine/backup recovery flow instead of poisoning the live Warren. |
 | Outpost route setting persistence | Pass (focused and published build evidence) | Successful route activation, cargo-order changes, crew quotas, scouting pause/resume, and automatic return/resupply policy changes now write an autosave immediately. A refresh after changing a route control therefore preserves the player's recovery or logistics decision instead of waiting for a later transit or expedition beat. |
 | Worm Shrine offering policy persistence | Pass (focused and published build evidence) | The visible Pause/Resume offerings control now autosaves immediately after a successful toggle, so protecting the reserve remains in force across refreshes instead of silently restarting the Shrine draw. Invalid targets do not write a checkpoint. |
 | Direct player decision persistence | Pass (focused and published build evidence) | Successful job reassignment, specialist recruitment, breeding, Blacksmith queueing, tutorial skip, milestone-report dismissal, building placement, and dig designation now write an immediate autosave. Failed or duplicate actions do not write, and the refreshed save roundtrip covers the persisted job, queue, map, and decision flags. |
@@ -54,7 +55,8 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 265 unit tests and 2 integration tests pass.
+- `cargo test --all-targets` — 270 unit tests and 2 integration tests pass,
+  including fresh/simulated valid sessions and rejected malformed save shapes.
 - `cargo clippy --all-targets --all-features -- -D warnings` — pass.
 - `publish.ps1` with no parameters — pass; Windows and WebGL packages
   deployed to Preview.
