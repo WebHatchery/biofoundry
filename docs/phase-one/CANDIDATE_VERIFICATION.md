@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-30  
-**Source revision:** `71b0acd`
+**Source revision:** `ad3490f`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -29,7 +29,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 176 unit tests and 2 integration tests pass.
+- `cargo test --all-targets` — 177 unit tests and 2 integration tests pass.
 - `cargo clippy --all-targets --all-features -- -D warnings` — pass.
 - `publish.ps1` with no parameters — pass; Windows and WebGL packages
   deployed to Preview.
@@ -88,6 +88,10 @@ automated simulation results into first-time-player evidence.
   lifetime spoiled food, so the Slime Janitor no longer depends on a janitor
   having already processed waste; focused simulation coverage confirms the
   unlock crosses naturally before any janitor exists.
+- Spoiled-store visibility — the map badge and inspection status now flag
+  waste on Farms and Cook Pots as well as Feeding Troughs, so the cleanup
+  target remains visible before the Slime Janitor is recruited; focused UI
+  coverage exercises a spoiled Farm.
 - Local Engineer summary — the Jobs panel now distinguishes Engineers working
   in the warren from Engineers posted remotely, so the Mine bonus is not shown
   as locally active when the specialist is away; focused UI coverage exercises
