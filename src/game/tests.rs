@@ -138,6 +138,7 @@ fn save_failure_notice_keeps_recovery_state_explicit() {
 fn save_failure_banner_keeps_the_checkpoint_action_visible() {
     assert_eq!(save_failure_banner(true), "SAVE FAILED · checkpoint safe");
     assert_eq!(save_failure_banner(false), "SAVE FAILED · tap Save");
+    assert_eq!(save_recovery_failure_banner(), "RECOVERY FAILED · tap Save");
 }
 
 #[test]

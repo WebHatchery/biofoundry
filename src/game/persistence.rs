@@ -197,13 +197,17 @@ impl Game {
                 Ok(_) => {
                     self.install_loaded_session(session);
                     self.save_exists = true;
+                    self.checkpoint_warning = None;
                     self.notifications.warning(format!(
                         "Primary save was damaged; preserved it as {quarantine} and restored the previous safe save."
                     ));
                 }
                 Err(restore_error) => {
                     self.install_loaded_session(session);
-                    self.save_exists = false;
+                    // The validated backup is still a usable Continue source
+                    // even when storage rejects recreating the primary slot.
+                    self.save_exists = true;
+                    self.checkpoint_warning = Some(save_recovery_failure_banner());
                     self.notifications.warning(format!(
                         "Primary save was damaged; loaded the safe backup, but could not restore it ({restore_error}). Use Save now."
                     ));
@@ -229,12 +233,16 @@ impl Game {
                 Ok(_) => {
                     self.install_loaded_session(session);
                     self.save_exists = true;
+                    self.checkpoint_warning = None;
                     self.notifications
                         .warning("Primary save was missing; restored the previous safe save.");
                 }
                 Err(restore_error) => {
                     self.install_loaded_session(session);
-                    self.save_exists = false;
+                    // Keep Continue available because the backup remains
+                    // valid; the banner asks the player to repair the primary.
+                    self.save_exists = true;
+                    self.checkpoint_warning = Some(save_recovery_failure_banner());
                     self.notifications.warning(format!(
                         "Primary save was missing; loaded the safe backup, but could not restore it ({restore_error}). Use Save now."
                     ));
@@ -292,6 +300,13 @@ pub(super) fn save_failure_banner(had_existing_save: bool) -> &'static str {
     } else {
         "SAVE FAILED · tap Save"
     }
+}
+
+/// Persistent banner for a valid backup that loaded but could not recreate
+/// the primary slot. Continue remains available through the backup, while
+/// Save is the visible repair action.
+pub(super) fn save_recovery_failure_banner() -> &'static str {
+    "RECOVERY FAILED · tap Save"
 }
 
 /// Rehydrate only the manager's non-timed history. Loading a save should not

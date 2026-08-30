@@ -593,6 +593,10 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
             game.save_exists = false;
             game.checkpoint_warning = Some(super::persistence::save_failure_banner(false));
         }
+        "save_recovery_failure" => {
+            begin(game, "warren");
+            game.checkpoint_warning = Some(super::persistence::save_recovery_failure_banner());
+        }
         "help" => overlays::help(game),
         "event_log" => overlays::event_log(game),
         "event_log_older" => overlays::event_log_older(game),
