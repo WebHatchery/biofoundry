@@ -53,6 +53,8 @@ pub struct Game {
     help_open: bool,
     /// The recent event history is showing inside the field guide shell.
     event_log_open: bool,
+    /// Zero is the newest page; larger values reveal older event history.
+    event_log_page: usize,
     /// Whether the fixed-timestep simulation is paused by the player.
     paused: bool,
     /// A save slot exists, so the menu can offer Continue.
@@ -111,6 +113,7 @@ impl Game {
             confirm_new_warren: false,
             help_open: false,
             event_log_open: false,
+            event_log_page: 0,
             paused: false,
             save_exists,
             right_press: vec2(0.0, 0.0),
@@ -381,6 +384,7 @@ impl Game {
                     ui::hud::HudOptions {
                         help_open: self.help_open,
                         event_log_open: self.event_log_open,
+                        event_log_page: self.event_log_page,
                         event_history: self.notifications.history(),
                         routes_open: self.routes_open,
                         paused: self.paused,
@@ -537,6 +541,7 @@ impl Game {
                 self.mode = UiMode::Inspect;
                 self.help_open = false;
                 self.event_log_open = false;
+                self.event_log_page = 0;
                 self.routes_open = false;
                 self.paused = false;
                 self.confirm_new_warren = false;

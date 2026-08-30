@@ -771,6 +771,7 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
         }
         "help" => overlays::help(game),
         "event_log" => overlays::event_log(game),
+        "event_log_older" => overlays::event_log_older(game),
         "pause" => overlays::pause(game),
         "collapse" => overlays::collapse(game),
         // "warren" and the harness default "gameplay" boot straight

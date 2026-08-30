@@ -16,7 +16,8 @@ const INSPECT_HELP_BODY: &str =
 const OBJECTIVE_HELP_BODY: &str =
     "Read the Objective card for the current campaign milestone and its next requirement. Locked gates name their exact unlock; after the worm wakes, tap Routes to scan every Outpost or inspect one to prepare cargo runs.";
 const FIELD_GUIDE_INTRO: &str =
-    "Everything below has a visible touch or pointer control. Review Recent events when a toast has faded.";
+    "Everything below has a visible touch or pointer control. Review Recent events when a toast has faded; use Older or Newer to browse further.";
+const EVENTS_PER_PAGE: usize = 10;
 
 pub(super) fn draw_goal_overlay(
     title: &str,
@@ -275,6 +276,7 @@ pub(super) fn draw_help_overlay(
 /// notices should remain available while the player decides what to do next.
 pub(super) fn draw_event_log_overlay(
     history: &[LoggedNotification],
+    page: usize,
     mouse: Vec2,
     actions: &mut Vec<UiAction>,
 ) {
@@ -287,14 +289,17 @@ pub(super) fn draw_event_log_overlay(
     );
     macroquad_toolkit::ui::occlude(Rect::new(0.0, 0.0, LOGICAL_WIDTH, LOGICAL_HEIGHT));
     let panel = Rect::new(260.0, 118.0, 760.0, 484.0);
+    let page_count = event_log_page_count(history.len());
+    let page = page.min(page_count.saturating_sub(1));
+    let title = format!("Recent Events · {}/{}", page + 1, page_count);
     draw_surface_with_title(
         panel,
-        Some("Recent Events"),
+        Some(&title),
         &panel_style(),
         TextStyle::new(21.0, dark::TEXT_BRIGHT),
     );
     draw_ui_text_ex(
-        "Newest first — important changes remain here after their toast fades.",
+        "Newest first — use Older or Newer to browse the saved history.",
         panel.x + 26.0,
         panel.y + 60.0,
         TextStyle::new(15.0, dark::TEXT_DIM).params(),
@@ -303,8 +308,8 @@ pub(super) fn draw_event_log_overlay(
     let list_x = panel.x + 28.0;
     let list_y = panel.y + 96.0;
     let row_height = 31.0;
-    let available_rows = 10;
-    if history.is_empty() {
+    let (page_start, page_end) = event_log_page_bounds(history.len(), page);
+    if page_start == page_end {
         draw_ui_text_ex(
             "No events yet. Actions and warnings will appear here.",
             list_x,
@@ -312,7 +317,7 @@ pub(super) fn draw_event_log_overlay(
             TextStyle::new(16.0, dark::TEXT).params(),
         );
     } else {
-        for (row, event) in history.iter().rev().take(available_rows).enumerate() {
+        for (row, event) in history[page_start..page_end].iter().rev().enumerate() {
             let y = list_y + row as f32 * row_height;
             let color = event.notification_type.color();
             draw_circle(list_x + 7.0, y + 8.0, 5.0, color);
@@ -337,6 +342,22 @@ pub(super) fn draw_event_log_overlay(
         actions.push(UiAction::ToggleEventLog);
     }
     if hud_button(
+        Rect::new(panel.x + 196.0, footer_y, 104.0, 32.0),
+        "Older",
+        page + 1 < page_count,
+        mouse,
+    ) {
+        actions.push(UiAction::EventLogOlder);
+    }
+    if hud_button(
+        Rect::new(panel.x + 308.0, footer_y, 104.0, 32.0),
+        "Newer",
+        page > 0,
+        mouse,
+    ) {
+        actions.push(UiAction::EventLogNewer);
+    }
+    if hud_button(
         Rect::new(panel.right() - 164.0, footer_y, 140.0, 32.0),
         "Close",
         true,
@@ -344,6 +365,15 @@ pub(super) fn draw_event_log_overlay(
     ) {
         actions.push(UiAction::ToggleHelp);
     }
+}
+
+fn event_log_page_count(history_len: usize) -> usize {
+    history_len.div_ceil(EVENTS_PER_PAGE).max(1)
+}
+
+fn event_log_page_bounds(history_len: usize, page: usize) -> (usize, usize) {
+    let page_end = history_len.saturating_sub(page.saturating_mul(EVENTS_PER_PAGE));
+    (page_end.saturating_sub(EVENTS_PER_PAGE), page_end)
 }
 
 fn recovery_guide_body(session: &GameSession, data: &GameData) -> String {

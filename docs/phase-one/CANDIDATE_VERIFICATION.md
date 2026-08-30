@@ -52,6 +52,7 @@ automated simulation results into first-time-player evidence.
 | Visible-control smoke path | Pass | A fresh full-screen Preview warren advanced through visible New Warren, + zoom, direct map drag, map-tap inspection (`Stockpile`), valid Farm placement, `− Miner`/`+ Carrier` reassignment, Pause/Resume, Help/Close, Save, and Load without keyboard input. Invalid placement also returned the readable `Can't build there.` notice. The Load round-trip restored the saved `04:45` state with the 10-ore construction site, 2 Miner/2 Carrier staffing, and tutorial `2/5 — Stabilize the Food Grid`; successful placement returned to Inspect instead of creating a second site. This is developer smoke evidence, not a qualifying first-time-player session. |
 | Packaged HUD recovery controls | Pass | A fresh full-screen Preview run changed Settings volume with visible `−`/`+` controls, opened and closed the Field Guide while paused, and resumed the warren with the same visible HUD and tutorial state. This confirms the modal guide leaves the underlying Warren controls recoverable by pointer; it does not replace the still-open full-campaign evidence. |
 | Recent event recovery log | Pass (published capture and Preview) | The visible Field Guide now opens a newest-first Recent Events view backed by the bounded notification history. Published Preview verification opened the guide after a refresh and reviewed persisted `Simulation paused`, `Warren saved.`, and `Warren loaded.` messages; the modal kept both `Field Guide` and `Close` actions available. |
+| Recent event history paging | Pass (published Preview, capture, and compact touch audit) | The bounded log exposes visible `Older` and `Newer` controls when more than ten notices exist, labels the current page, keeps the newest page as the default, and resets to that page when reopened or crossing a session boundary. Published Preview verification generated twelve visible Pause/Resume notices, tapped `Older` to reveal the earlier saved entries on page `2/2`, then tapped `Newer` to return to page `1/2`. The [ui_event_log_older.png](../verification/ui_event_log_older.png) and compact [ui_compact_event_log_older.png](../verification/ui_compact_event_log_older.png) captures show the older page; the 800×450 audit reports no grown-target overlap. |
 | Hosted-page toast safety | Pass | The placement confirmation remained fully readable above and left of the fixed Report a Bug widget in the published Preview. |
 | Active tool marker | Pass | The published Preview renders the selected Dig tool as `> Dig`; the active-tool marker is readable instead of the bundled font's missing-glyph square. |
 | Locked tool marker | Pass | The published Preview renders the locked Shrine control as `Shrine [L]`; its exact `forge 20 ingots` prerequisite remains visible below the buttons. |
@@ -512,6 +513,13 @@ automated simulation results into first-time-player evidence.
   event log with a serde default for older saves, save/autosave checkpoints
   copy the live history, and load rehydrates review history without replaying
   old toasts. Starting a genuinely new Warren clears the previous run's log.
+- Reviewable notification history — pass; the Recent Events modal pages the
+  full bounded history in ten-entry slices, keeps the first page newest-first,
+  and exposes visible Older/Newer controls only when another page exists.
+  Refreshed [ui_event_log_older.png](../verification/ui_event_log_older.png) and
+  [ui_compact_event_log_older.png](../verification/ui_compact_event_log_older.png)
+  captures show the older-page recovery path, and the published Preview
+  roundtrip exercised Older then Newer with visible controls.
 - Shared security guidance — the victory report, raid banner, and persistent
   Objective now use the same eligibility-aware action hint, including the
   visible `in Jobs` destination and the specialist-only `free a worker`

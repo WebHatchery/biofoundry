@@ -93,6 +93,10 @@ pub enum UiAction {
     ToggleHelp,
     /// Open/close the recent-events view from the field guide.
     ToggleEventLog,
+    /// Review an older page of the bounded recent-event history.
+    EventLogOlder,
+    /// Return toward the newest page of the bounded recent-event history.
+    EventLogNewer,
     /// Pause or resume the fixed-timestep simulation while leaving the HUD
     /// and camera interactive.
     TogglePause,

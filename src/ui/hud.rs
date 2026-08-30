@@ -41,6 +41,7 @@ pub struct HudSprites {
 pub struct HudOptions<'a> {
     pub help_open: bool,
     pub event_log_open: bool,
+    pub event_log_page: usize,
     pub event_history: &'a [LoggedNotification],
     pub routes_open: bool,
     pub paused: bool,
@@ -229,7 +230,12 @@ pub fn draw(
         // the HUD underneath and let its Close button be the only action.
         actions.clear();
         if options.event_log_open {
-            overlays::draw_event_log_overlay(options.event_history, mouse, &mut actions);
+            overlays::draw_event_log_overlay(
+                options.event_history,
+                options.event_log_page,
+                mouse,
+                &mut actions,
+            );
         } else {
             overlays::draw_help_overlay(session, data, mouse, &mut actions);
         }

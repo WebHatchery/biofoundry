@@ -26,6 +26,22 @@ pub(super) fn event_log(game: &mut Game) {
         .success("The Colossal Worm awakens — the endless route is open.");
 }
 
+pub(super) fn event_log_older(game: &mut Game) {
+    event_log(game);
+    for notice in [
+        "Raid held — the warren still stands.",
+        "The Mine is waiting for a carrier.",
+        "Farm construction completed.",
+        "The food forecast is recovering.",
+        "A new route note was saved.",
+        "The Blacksmith needs a Smith.",
+        "A captured beetle was housed.",
+    ] {
+        game.notifications.info(notice);
+    }
+    game.event_log_page = 1;
+}
+
 pub(super) fn pause(game: &mut Game) {
     game.transition(StateTransition::StartWarren);
     game.paused = true;

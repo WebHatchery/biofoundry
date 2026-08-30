@@ -49,3 +49,14 @@ fn field_guide_points_to_post_campaign_cargo_runs() {
 fn field_guide_exposes_the_recent_events_view() {
     assert!(FIELD_GUIDE_INTRO.contains("Recent events"));
 }
+
+#[test]
+fn recent_event_pages_keep_newest_entries_on_the_first_page() {
+    assert_eq!(event_log_page_count(0), 1);
+    assert_eq!(event_log_page_count(10), 1);
+    assert_eq!(event_log_page_count(11), 2);
+    assert_eq!(event_log_page_bounds(25, 0), (15, 25));
+    assert_eq!(event_log_page_bounds(25, 1), (5, 15));
+    assert_eq!(event_log_page_bounds(25, 2), (0, 5));
+    assert_eq!(event_log_page_bounds(5, 9), (0, 0));
+}

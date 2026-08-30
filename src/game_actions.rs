@@ -508,6 +508,17 @@ impl Game {
             UiAction::ToggleEventLog => {
                 self.help_open = true;
                 self.event_log_open = !self.event_log_open;
+                if self.event_log_open {
+                    self.event_log_page = 0;
+                }
+                self.audio.play(Sfx::Select);
+            }
+            UiAction::EventLogOlder => {
+                self.event_log_page = self.event_log_page.saturating_add(1);
+                self.audio.play(Sfx::Select);
+            }
+            UiAction::EventLogNewer => {
+                self.event_log_page = self.event_log_page.saturating_sub(1);
                 self.audio.play(Sfx::Select);
             }
             UiAction::TogglePause => {
