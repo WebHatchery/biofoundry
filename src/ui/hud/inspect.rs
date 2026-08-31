@@ -82,7 +82,7 @@ pub(super) fn draw_inspect_panel(
     // buttons, and the breeding pit its breed buttons — both taller.
     let height = match building.kind.as_str() {
         "blacksmith" if compact => {
-            124.0 + data.equipment.len().div_ceil(2) as f32 * inspect_button_step
+            124.0 + blacksmith_recipe_rows(data.equipment.len()) as f32 * inspect_button_step
         }
         "blacksmith" => 194.0 + data.equipment.len() as f32 * inspect_button_step,
         "breeding_pit" => {
@@ -738,6 +738,10 @@ fn inspection_button_metrics(kind: &str, compact: bool, equipment_count: usize) 
     } else {
         (24.0, 26.0)
     }
+}
+
+fn blacksmith_recipe_rows(equipment_count: usize) -> usize {
+    equipment_count.div_ceil(2)
 }
 
 #[cfg(test)]

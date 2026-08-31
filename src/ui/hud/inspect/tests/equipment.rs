@@ -1,4 +1,7 @@
-use super::super::{blacksmith_equipment_label, equipment_lock_label, inspection_button_metrics};
+use super::super::{
+    blacksmith_equipment_label, blacksmith_recipe_rows, equipment_lock_label,
+    inspection_button_metrics,
+};
 use crate::data::GameData;
 
 #[test]
@@ -66,4 +69,12 @@ fn compact_blacksmith_grid_keeps_recipe_buttons_tall_enough_to_read() {
         inspection_button_metrics("blacksmith", false, 8),
         (24.0, 26.0)
     );
+}
+
+#[test]
+fn compact_blacksmith_grid_rounds_odd_recipe_catalogues_up_to_a_full_row() {
+    assert_eq!(blacksmith_recipe_rows(0), 0);
+    assert_eq!(blacksmith_recipe_rows(1), 1);
+    assert_eq!(blacksmith_recipe_rows(12), 6);
+    assert_eq!(blacksmith_recipe_rows(13), 7);
 }
