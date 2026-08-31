@@ -144,6 +144,7 @@ pub(super) fn begin(game: &mut Game, scene: &str) -> bool {
         | "endless_relay_awarded"
         | "endless_signal_cache"
         | "endless_signal_cache_awarded"
+        | "endless_signal_cache_haul"
         | "endless_wormbone_drill" => {
             super::endless::begin(game, scene);
             true

@@ -1,8 +1,9 @@
 //! Capture-only scenes for post-campaign Outpost upgrades and route feedback.
 
-use super::super::Game;
+use super::super::{format_expedition_completion, Game};
 use crate::simulation;
 use crate::state::creatures::{Good, Job};
+use crate::state::outposts::ExpeditionCompletion;
 use crate::state::structures::Building;
 use crate::state::GameState;
 
@@ -334,6 +335,32 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                             game.data.balance.outpost_signal_cache_ingots_per_haul
                         ));
                     }
+                }
+            }
+            game.paused = true;
+        }
+        "endless_signal_cache_haul" => {
+            begin(game, "endless_signal_cache");
+            game.notifications.clear();
+            if let GameState::Warren(session) = &mut game.state {
+                if let Some(route) = session.outposts.first_mut() {
+                    let ore = 2 * game.data.balance.outpost_deep_survey_ore_per_crew;
+                    let ingots = game.data.balance.outpost_signal_cache_ingots_per_haul;
+                    route.cargo.clear();
+                    route.cargo.insert(Good::Ore, ore);
+                    route.cargo.insert(Good::Ingot, ingots);
+                    route.signal_cache_upgraded = true;
+                    route.expeditions_completed = 4;
+                    route.ore_scouted = ore * route.expeditions_completed;
+                    route.signal_cache_ingots = ingots;
+                    game.notifications.success(format_expedition_completion(
+                        ExpeditionCompletion {
+                            outpost: route.pos,
+                            ore,
+                            ingots,
+                            food_spent: 2,
+                        },
+                    ));
                 }
             }
             game.paused = true;

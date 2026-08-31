@@ -291,4 +291,5 @@ fn signal_cache_requires_relay_and_pays_for_each_real_haul() {
         session.outposts[0].cargo.get(&Good::Ingot),
         Some(&data.balance.outpost_signal_cache_ingots_per_haul)
     );
+    assert_eq!(session.outposts[0].signal_cache_ingots, completed[0].ingots);
 }

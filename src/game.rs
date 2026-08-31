@@ -386,7 +386,7 @@ impl Game {
         // Preserve readable text when the fixed 1280x720 layout is letterboxed
         // into a smaller browser canvas. The toolkit keeps this bounded so the
         // established candidate scale remains unchanged at the design size.
-        macroquad_toolkit::ui::set_ui_text_scale_for_screen(
+        let ui_text_scale = macroquad_toolkit::ui::set_ui_text_scale_for_screen(
             ui::LOGICAL_WIDTH,
             ui::LOGICAL_HEIGHT,
             1.25,
@@ -497,6 +497,11 @@ impl Game {
             self.notifications.draw_with_config_and_offset(
                 &NotificationRenderConfig {
                     anchor: NotificationAnchor::BottomRight,
+                    // Notifications are already positioned in screen space.
+                    // Counter the logical HUD's readability multiplier so a
+                    // compact canvas does not enlarge the toast text past
+                    // its fixed screen-space row width.
+                    font_size: 16.0 / ui_text_scale,
                     ..Default::default()
                 },
                 vec2(-250.0, -82.0),

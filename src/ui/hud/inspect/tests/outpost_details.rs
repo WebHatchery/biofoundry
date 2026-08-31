@@ -53,6 +53,23 @@ fn signal_cache_outpost_hint_keeps_the_expedition_line_compact() {
 }
 
 #[test]
+fn signal_cache_summary_reports_rate_and_accumulated_earnings() {
+    let data = GameData::load().expect("embedded game data");
+    let mut outpost = crate::state::outposts::Outpost::new(TilePos::new(4, 4));
+    outpost.signal_cache_upgraded = true;
+    outpost.signal_cache_ingots = 3;
+
+    assert_eq!(
+        outpost_signal_cache_summary(&outpost, &data, false).as_deref(),
+        Some("Signal cache · +1/haul · Kept 3")
+    );
+    assert_eq!(
+        outpost_signal_cache_summary(&outpost, &data, true).as_deref(),
+        Some("Cache +1/haul · Kept 3")
+    );
+}
+
+#[test]
 fn in_flight_payload_summary_names_cargo_and_crew() {
     let transit = WormTransit {
         outpost: TilePos::new(4, 4),

@@ -20,12 +20,23 @@ pub(super) fn outpost_archive_summary(session: &GameSession, data: &GameData) ->
     ))
 }
 
-pub(super) fn outpost_signal_cache_summary(outpost: &Outpost, data: &GameData) -> Option<String> {
+pub(super) fn outpost_signal_cache_summary(
+    outpost: &Outpost,
+    data: &GameData,
+    compact: bool,
+) -> Option<String> {
     outpost.signal_cache_upgraded.then(|| {
-        format!(
-            "Signal cache · +{} ingot/haul",
-            data.balance.outpost_signal_cache_ingots_per_haul
-        )
+        if compact {
+            format!(
+                "Cache +{}/haul · Kept {}",
+                data.balance.outpost_signal_cache_ingots_per_haul, outpost.signal_cache_ingots
+            )
+        } else {
+            format!(
+                "Signal cache · +{}/haul · Kept {}",
+                data.balance.outpost_signal_cache_ingots_per_haul, outpost.signal_cache_ingots
+            )
+        }
     })
 }
 

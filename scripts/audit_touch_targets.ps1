@@ -33,7 +33,8 @@ param(
         "endless_load_preview",
         "endless_routes",
         "endless_signal_cache",
-        "endless_signal_cache_awarded"
+        "endless_signal_cache_awarded",
+        "endless_signal_cache_haul"
     ),
     [int]$WindowWidth = 1280,
     [int]$WindowHeight = 720,

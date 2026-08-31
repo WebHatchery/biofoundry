@@ -272,6 +272,7 @@ pub fn tick_expeditions(
         outpost.expedition_progress -= cycle;
         outpost.expeditions_completed = outpost.expeditions_completed.saturating_add(1);
         outpost.ore_scouted = outpost.ore_scouted.saturating_add(ore);
+        outpost.signal_cache_ingots = outpost.signal_cache_ingots.saturating_add(ingots);
         completed.push(ExpeditionCompletion {
             outpost: outpost.pos,
             ore,

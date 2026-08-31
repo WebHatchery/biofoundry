@@ -15,6 +15,7 @@ fn new_outpost_defaults_to_ore_first_loading() {
     assert!(!outpost.resonator_upgraded);
     assert!(!outpost.deep_survey_upgraded);
     assert!(!outpost.signal_cache_upgraded);
+    assert_eq!(outpost.signal_cache_ingots, 0);
     assert!(!outpost.auto_return_cargo);
     assert_eq!(outpost.auto_return_label(), "Auto-return · Off");
     assert!(!outpost.auto_resupply_food);
@@ -99,9 +100,27 @@ fn older_outpost_saves_default_signal_cache_to_off() {
         .as_object_mut()
         .expect("outpost serializes as an object")
         .remove("signal_cache_upgraded");
+    value
+        .as_object_mut()
+        .expect("outpost serializes as an object")
+        .remove("signal_cache_ingots");
 
     let restored: Outpost = serde_json::from_value(value).expect("restore legacy outpost");
     assert!(!restored.signal_cache_upgraded);
+    assert_eq!(restored.signal_cache_ingots, 0);
+}
+
+#[test]
+fn signal_cache_earnings_survive_a_save_roundtrip() {
+    let mut outpost = Outpost::new(TilePos::new(4, 4));
+    outpost.signal_cache_upgraded = true;
+    outpost.signal_cache_ingots = 7;
+
+    let encoded = serde_json::to_string(&outpost).expect("serialize outpost");
+    let restored: Outpost = serde_json::from_str(&encoded).expect("restore outpost");
+
+    assert!(restored.signal_cache_upgraded);
+    assert_eq!(restored.signal_cache_ingots, 7);
 }
 
 #[test]
