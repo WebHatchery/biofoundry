@@ -6,7 +6,7 @@ fn archive_wayfinder_unlock_notice_points_to_the_blacksmith() {
 
     assert_eq!(
         unlock_notice(&data, &session, "Archive Wayfinder"),
-        "Unlocked: Archive Wayfinder — queue it at the Blacksmith."
+        "Unlocked: Archive Wayfinder — tap Archive Wayfinder at the Blacksmith."
     );
 }
 
@@ -16,7 +16,7 @@ fn resonance_forging_unlock_notice_points_to_the_blacksmith() {
 
     assert_eq!(
         unlock_notice(&data, &session, "Resonance Forging"),
-        "Unlocked: Resonance Forging — queue it at the Blacksmith."
+        "Unlocked: Resonance Forging — tap Resonance Forging at the Blacksmith."
     );
 }
 

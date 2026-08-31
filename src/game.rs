@@ -751,17 +751,22 @@ fn unlock_notice(data: &GameData, session: &GameSession, name: &str) -> String {
                 if advanced_building_hidden(session, id) {
                     "available in Build & Dig after onboarding".to_owned()
                 } else {
-                    format!("build {} from Build & Dig", building.name)
+                    format!("tap {} in Build & Dig", building.name)
                 }
             })
             .unwrap_or_else(|| "available in Build & Dig".to_owned()),
         "unlock_creature" => {
             let route = match unlock.id.as_str() {
-                "slime_janitor" | "bat_courier" => "recruit from Jobs",
-                _ => "breed at the Breeding Pit",
+                "slime_janitor" => "tap Slime in Jobs".to_owned(),
+                "bat_courier" => "tap Bat in Jobs".to_owned(),
+                _ => data
+                    .species
+                    .get(&unlock.id)
+                    .map(|species| format!("tap {} in the Breeding Pit", species.name))
+                    .unwrap_or_else(|| "tap the specialist button in the Breeding Pit".to_owned()),
             };
             if crate::ui::legibility::advanced_systems_unlocked(session) {
-                route.to_owned()
+                route
             } else {
                 format!("{route} after onboarding")
             }
@@ -775,7 +780,7 @@ fn unlock_notice(data: &GameData, session: &GameSession, name: &str) -> String {
             "Breeding Pits hatch {:.0}% sooner",
             (1.0 - unlock.value) * 100.0
         ),
-        "unlock_equipment" => "queue it at the Blacksmith".to_owned(),
+        "unlock_equipment" => format!("tap {} at the Blacksmith", unlock.name),
         _ => unlock.description.trim_end_matches('.').to_owned(),
     };
 

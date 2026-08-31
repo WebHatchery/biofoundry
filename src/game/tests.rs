@@ -731,15 +731,15 @@ fn unlock_notice_teaches_how_to_use_new_content() {
     );
     assert_eq!(
         unlock_notice(&data, &session, "Hobgoblin Brood"),
-        "Unlocked: Hobgoblin Brood — breed at the Breeding Pit after onboarding."
+        "Unlocked: Hobgoblin Brood — tap Hobgoblin in the Breeding Pit after onboarding."
     );
     assert_eq!(
         unlock_notice(&data, &session, "Slime Janitor"),
-        "Unlocked: Slime Janitor — recruit from Jobs after onboarding."
+        "Unlocked: Slime Janitor — tap Slime in Jobs after onboarding."
     );
     assert_eq!(
         unlock_notice(&data, &session, "Bat Courier"),
-        "Unlocked: Bat Courier — recruit from Jobs after onboarding."
+        "Unlocked: Bat Courier — tap Bat in Jobs after onboarding."
     );
 }
 
@@ -751,11 +751,11 @@ fn unlock_notice_switches_to_visible_optional_controls_after_onboarding() {
 
     assert_eq!(
         unlock_notice(&data, &session, "Beetle Breeding Pit"),
-        "Unlocked: Beetle Breeding Pit — build Breeding Pit from Build & Dig."
+        "Unlocked: Beetle Breeding Pit — tap Breeding Pit in Build & Dig."
     );
     assert_eq!(
         unlock_notice(&data, &session, "Slime Janitor"),
-        "Unlocked: Slime Janitor — recruit from Jobs."
+        "Unlocked: Slime Janitor — tap Slime in Jobs."
     );
 }
 

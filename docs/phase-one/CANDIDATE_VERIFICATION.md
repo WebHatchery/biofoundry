@@ -877,6 +877,11 @@ automated simulation results into first-time-player evidence.
   state-aware rule as the tutorial and victory report: it only says onboarding
   is complete after a Guard exists, otherwise it directs the player to assign
   one. Focused game coverage exercises both messages.
+- Unlock notice controls — optional unlock toasts now name the visible action
+  destination: Build & Dig building buttons, Slime/Bat in Jobs, the matching
+  specialist in the Breeding Pit, or the newly unlocked recipe at the
+  Blacksmith. Pre-onboarding notices still explain that advanced controls will
+  appear after the security handoff.
 - Objective security handoff — the persistent Objective now stays on
   `Finish the security handoff` with `Guard 0/1` after the food/ore threshold,
   and names the same visible `−` then `+ Guard` sequence until the handoff is
