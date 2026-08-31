@@ -278,6 +278,26 @@ fn jobs_panel_names_dig_as_the_crowding_recovery() {
 
     let pressure = workforce_pressure_label(&session, &data).expect("crowding warning");
     assert!(pressure.starts_with("Crowded · work −"));
+    assert!(pressure.contains("morale 100%"));
+    assert!(pressure.ends_with(" · tap Dig"));
+}
+
+#[test]
+fn jobs_panel_reports_morale_loss_alongside_crowding_pressure() {
+    let data = GameData::load().expect("embedded game data");
+    let mut session = GameSession::new(&data, 7);
+    session.creatures.clear();
+    let capacity = session.local_warren_capacity(&data);
+    for _ in 0..capacity + 8 {
+        session.spawn_creature(&data, "goblin", Job::Idle);
+    }
+    for creature in &mut session.creatures {
+        creature.morale = 0.72;
+    }
+
+    let pressure = workforce_pressure_label(&session, &data).expect("crowding warning");
+
+    assert!(pressure.contains("morale 72%"));
     assert!(pressure.ends_with(" · tap Dig"));
 }
 

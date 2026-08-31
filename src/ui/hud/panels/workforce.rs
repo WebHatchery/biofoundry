@@ -31,5 +31,15 @@ pub(super) fn workforce_pressure_label(session: &GameSession, data: &GameData) -
     let work_penalty =
         ((session.overcrowding_ratio(data) - 1.0) * data.balance.overcrowding_work_penalty * 100.0)
             .clamp(0.0, 65.0);
-    Some(format!("Crowded · work −{work_penalty:.0}% · tap Dig"))
+    let morale = session
+        .creatures
+        .iter()
+        .filter(|creature| !creature.is_remote())
+        .map(|creature| creature.morale.clamp(0.0, 1.0))
+        .sum::<f32>()
+        / local.max(1) as f32
+        * 100.0;
+    Some(format!(
+        "Crowded · work −{work_penalty:.0}% · morale {morale:.0}% · tap Dig"
+    ))
 }
