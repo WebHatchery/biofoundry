@@ -77,6 +77,18 @@ fn equipment_loads_with_valid_job_affinities() {
         hammer.value < smiths_hammer.value,
         "the Charter reward should shorten smithing time"
     );
+    let blade = data
+        .equipment_def("wormbone_guard_blade")
+        .expect("Wormbone Guard Blade exists");
+    let guard_blade = data
+        .equipment_def("guard_blade")
+        .expect("guard blade exists");
+    assert_eq!(blade.job, "guard");
+    assert_eq!(blade.requires_unlock.as_deref(), Some("outpost_charter"));
+    assert!(
+        blade.value > guard_blade.value,
+        "the Charter reward should improve guard damage"
+    );
     // Every item targets a real, gear-wearing job.
     for eq in &data.equipment {
         assert!(

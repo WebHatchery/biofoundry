@@ -145,3 +145,29 @@ fn charter_hammer_shortens_a_blacksmith_craft() {
         task => panic!("expected a shortened craft task, got {task:?}"),
     }
 }
+
+#[test]
+fn charter_blade_replaces_a_weaker_guard_tool() {
+    let (data, mut session, _) = super::novel::active_outpost(168);
+    session.outpost_charter_claimed = true;
+    let guard = session
+        .creatures
+        .first_mut()
+        .expect("the fixture has a worker");
+    guard.job = Job::Guard;
+    guard.equipment = Some("guard_blade".to_owned());
+    session
+        .economy
+        .gear_stock
+        .insert("wormbone_guard_blade".to_owned(), 1);
+
+    simulation::tick(&mut session, &data);
+
+    let guard = session
+        .creatures
+        .iter()
+        .find(|creature| creature.job == Job::Guard)
+        .unwrap();
+    assert_eq!(guard.equipment.as_deref(), Some("wormbone_guard_blade"));
+    assert_eq!(session.economy.gear_stock.get("guard_blade"), Some(&1));
+}

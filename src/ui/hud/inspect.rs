@@ -62,7 +62,7 @@ pub(super) fn draw_inspect_panel(
     // chrome. Give their compact cards a little more vertical breathing room
     // so a player can target the action and read its benefit at 800×450.
     let (inspect_button_height, inspect_button_step) =
-        inspection_button_metrics(&building.kind, compact);
+        inspection_button_metrics(&building.kind, compact, data.equipment.len());
 
     // The blacksmith panel carries the production-order queue and craft
     // buttons, and the breeding pit its breed buttons — both taller.
@@ -766,8 +766,10 @@ pub(super) fn draw_inspect_panel(
     Some(panel)
 }
 
-fn inspection_button_metrics(kind: &str, compact: bool) -> (f32, f32) {
-    if compact && matches!(kind, "blacksmith" | "breeding_pit") {
+fn inspection_button_metrics(kind: &str, compact: bool, equipment_count: usize) -> (f32, f32) {
+    if compact && kind == "blacksmith" && equipment_count >= 8 {
+        (34.0, 38.0)
+    } else if compact && matches!(kind, "blacksmith" | "breeding_pit") {
         (36.0, 40.0)
     } else if !compact && kind == "breeding_pit" {
         (38.0, 42.0)

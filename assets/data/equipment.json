@@ -57,5 +57,14 @@
     "effect": "smith_time_mult",
     "value": 0.6,
     "requires_unlock": "outpost_charter"
+  },
+  {
+    "id": "wormbone_guard_blade",
+    "name": "Wormbone Guard Blade",
+    "job": "guard",
+    "cost_ingots": 10,
+    "effect": "guard_dps_mult",
+    "value": 2.0,
+    "requires_unlock": "outpost_charter"
   }
 ]
