@@ -179,6 +179,17 @@ fn loaded_circuit_and_encore_flags_require_their_predecessors() {
 }
 
 #[test]
+fn loaded_chorus_requires_a_cleared_wormsong_circuit() {
+    let (data, mut session) = session_with_outpost();
+    session.outpost_chorus_claimed = true;
+
+    let error = validate_loaded_session(&session, &data)
+        .expect_err("a Chorus cannot exist before the Circuit claim");
+
+    assert!(error.contains("Chorus exists before"), "{error}");
+}
+
+#[test]
 fn loaded_encore_progress_accepts_a_consistent_claimed_cycle() {
     let (data, mut session) = session_with_outpost();
     session.outpost_concord_claimed = true;

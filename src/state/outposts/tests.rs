@@ -16,6 +16,7 @@ fn new_outpost_defaults_to_ore_first_loading() {
     assert!(!outpost.deep_survey_upgraded);
     assert!(!outpost.signal_cache_upgraded);
     assert_eq!(outpost.signal_cache_ingots, 0);
+    assert_eq!(outpost.chorus_ingots, 0);
     assert!(!outpost.waypoint_upgraded);
     assert!(!outpost.auto_return_cargo);
     assert_eq!(outpost.auto_return_label(), "Auto-return · Off");
@@ -159,6 +160,19 @@ fn signal_cache_earnings_survive_a_save_roundtrip() {
 
     assert!(restored.signal_cache_upgraded);
     assert_eq!(restored.signal_cache_ingots, 7);
+}
+
+#[test]
+fn older_outpost_saves_default_chorus_earnings_to_zero() {
+    let outpost = Outpost::new(TilePos::new(4, 4));
+    let mut value = serde_json::to_value(outpost).expect("serialize outpost");
+    value
+        .as_object_mut()
+        .expect("outpost serializes as an object")
+        .remove("chorus_ingots");
+
+    let restored: Outpost = serde_json::from_value(value).expect("restore legacy outpost");
+    assert_eq!(restored.chorus_ingots, 0);
 }
 
 #[test]

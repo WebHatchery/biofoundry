@@ -481,6 +481,9 @@ fn charter_guidance(session: &GameSession, data: &GameData) -> Option<String> {
         if let Some(guidance) = circuit_contract_guidance(session, data) {
             return Some(guidance);
         }
+        if let Some(guidance) = chorus_contract_guidance(session, data) {
+            return Some(guidance);
+        }
         if let Some(guidance) = encore_contract_guidance(session, data) {
             return Some(guidance);
         }
@@ -599,6 +602,24 @@ fn encore_contract_guidance(session: &GameSession, data: &GameData) -> Option<St
         "Next: keep a complete Wormsong crew scouting · Encore {progress}/{} boosted hauls · +{} ingots.",
         data.balance.outpost_encore_haul_goal,
         data.balance.outpost_encore_reward_ingots
+    ))
+}
+
+fn chorus_contract_guidance(session: &GameSession, data: &GameData) -> Option<String> {
+    if !session.outpost_circuit_claimed
+        || session.outpost_chorus_claimed
+        || data.balance.outpost_chorus_route_goal == 0
+    {
+        return None;
+    }
+    let (complete_routes, active_routes) =
+        crate::simulation::outposts::outpost_chorus_progress(session, data);
+    Some(format!(
+        "Next: keep {} active routes carrying complete Wormsong crews for the Wormsong Chorus · {complete_routes}/{} complete routes · {active_routes} active routes · +{} ingots and +{} ingot/haul.",
+        data.balance.outpost_chorus_route_goal,
+        data.balance.outpost_chorus_route_goal,
+        data.balance.outpost_chorus_reward_ingots,
+        data.balance.outpost_chorus_ingots_per_haul
     ))
 }
 

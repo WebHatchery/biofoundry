@@ -94,6 +94,12 @@ fn validate_balance(data: &GameData) -> Result<(), String> {
     if balance.outpost_encore_haul_goal == 0 || balance.outpost_encore_reward_ingots == 0 {
         return Err("outpost Wormsong Encore goal and reward must be positive".to_owned());
     }
+    if balance.outpost_chorus_route_goal < 3
+        || balance.outpost_chorus_reward_ingots <= balance.outpost_circuit_reward_ingots
+        || balance.outpost_chorus_ingots_per_haul == 0
+    {
+        return Err("outpost Wormsong Chorus goal, reward, and payload must be valid".to_owned());
+    }
     if balance.outpost_signal_cache_upgrade_ingots == 0
         || balance.outpost_signal_cache_ingots_per_haul == 0
     {

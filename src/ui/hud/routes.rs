@@ -44,6 +44,7 @@ pub(super) fn draw_route_overview(
     let concord_summary = concord_contract_summary(session, data);
     let circuit_summary = circuit_contract_summary(session, data);
     let encore_summary = encore_contract_summary(session, data);
+    let chorus_summary = chorus_contract_summary(session, data);
     let transit_summary = worm_transit_summary(session);
     let summary_lines = 2
         + relay_summary.is_some() as u32
@@ -52,6 +53,7 @@ pub(super) fn draw_route_overview(
         + concord_summary.is_some() as u32
         + circuit_summary.is_some() as u32
         + encore_summary.is_some() as u32
+        + chorus_summary.is_some() as u32
         + transit_summary.is_some() as u32;
     let summary_extra = summary_lines as f32 * 18.0;
     let route_rows = session.outposts.len().div_ceil(column_count).max(1);
@@ -144,6 +146,15 @@ pub(super) fn draw_route_overview(
         summary_y += 18.0;
     }
     if let Some(summary) = encore_summary {
+        draw_ui_text_ex(
+            &summary,
+            panel.x + 24.0,
+            summary_y,
+            TextStyle::new(13.0, dark::POSITIVE).params(),
+        );
+        summary_y += 18.0;
+    }
+    if let Some(summary) = chorus_summary {
         draw_ui_text_ex(
             &summary,
             panel.x + 24.0,
@@ -314,8 +325,18 @@ fn route_network_summary(session: &GameSession, data: &GameData) -> String {
     } else {
         String::new()
     };
+    let chorus_ingots: u32 = session
+        .outposts
+        .iter()
+        .map(|outpost| outpost.chorus_ingots)
+        .sum();
+    let chorus_summary = if chorus_ingots > 0 {
+        format!(" · Chorus kept {chorus_ingots}")
+    } else {
+        String::new()
+    };
     format!(
-        "Routes {} · Active {} · Held cargo {} · Remote crew {} · Ore scouted {} · {} · Attention {}{}",
+        "Routes {} · Active {} · Held cargo {} · Remote crew {} · Ore scouted {} · {} · Attention {}{}{}",
         session.outposts.len(),
         active,
         held_cargo,
@@ -323,7 +344,8 @@ fn route_network_summary(session: &GameSession, data: &GameData) -> String {
         scouted_ore,
         charter,
         attention,
-        cache_summary
+        cache_summary,
+        chorus_summary
     )
 }
 
@@ -478,6 +500,31 @@ fn encore_contract_summary(session: &GameSession, data: &GameData) -> Option<Str
     Some(format!(
         "Wormsong Encore · {progress}/{} boosted hauls · +{} ingots",
         data.balance.outpost_encore_haul_goal, data.balance.outpost_encore_reward_ingots
+    ))
+}
+
+fn chorus_contract_summary(session: &GameSession, data: &GameData) -> Option<String> {
+    if !session.outpost_circuit_claimed || data.balance.outpost_chorus_route_goal == 0 {
+        return None;
+    }
+    let (complete_routes, active_routes) =
+        crate::simulation::outposts::outpost_chorus_progress(session, data);
+    if session.outpost_chorus_claimed {
+        return Some(format!(
+            "Wormsong Chorus complete · {} complete routes · +{} ingot/haul · Kept {}",
+            data.balance.outpost_chorus_route_goal,
+            data.balance.outpost_chorus_ingots_per_haul,
+            session
+                .outposts
+                .iter()
+                .map(|outpost| outpost.chorus_ingots)
+                .sum::<u32>()
+        ));
+    }
+    Some(format!(
+        "Wormsong Chorus · {complete_routes}/{} complete routes · {active_routes} active routes · +{} ingots",
+        data.balance.outpost_chorus_route_goal,
+        data.balance.outpost_chorus_reward_ingots
     ))
 }
 

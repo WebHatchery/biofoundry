@@ -187,6 +187,9 @@ pub struct GameSession {
     /// Number of repeatable Wormsong Encore rewards already claimed.
     #[serde(default)]
     pub outpost_encore_claims: u32,
+    /// Whether the one-time three-route Wormsong Chorus reward was claimed.
+    #[serde(default)]
+    pub outpost_chorus_claimed: bool,
     #[serde(default)]
     pub worm_transit: Option<WormTransit>,
     #[serde(default)]
@@ -289,6 +292,7 @@ impl GameSession {
             outpost_circuit_claimed: false,
             outpost_concord_hauls: 0,
             outpost_encore_claims: 0,
+            outpost_chorus_claimed: false,
             worm_transit: None,
             last_transit_failure: None,
             event_history: Vec::new(),

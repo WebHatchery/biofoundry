@@ -2,7 +2,10 @@
 
 use super::encore;
 use super::{add_cargo, route_storage_capacity, take_cargo};
-use super::{route_expedition_cycle_sec, route_expedition_ore, route_signal_cache_ingots};
+use super::{
+    route_chorus_ingots, route_expedition_cycle_sec, route_expedition_ore,
+    route_signal_cache_ingots,
+};
 use crate::data::GameData;
 use crate::state::creatures::Good;
 use crate::state::outposts::ExpeditionCompletion;
@@ -34,11 +37,17 @@ pub fn tick_expeditions(
         }
         let ore = route_expedition_ore(session, data, &snapshot).min(room);
         let remaining_room = room.saturating_sub(ore);
-        let ingots = if snapshot.signal_cache_upgraded {
-            route_signal_cache_ingots(session, data, &snapshot).min(remaining_room)
+        let signal_cache_ingots = if snapshot.signal_cache_upgraded {
+            route_signal_cache_ingots(session, data, &snapshot)
         } else {
             0
         };
+        let chorus_ingots = route_chorus_ingots(session, data, &snapshot);
+        let ingots = signal_cache_ingots
+            .saturating_add(chorus_ingots)
+            .min(remaining_room);
+        let delivered_signal_cache = signal_cache_ingots.min(ingots);
+        let delivered_chorus = chorus_ingots.min(ingots.saturating_sub(delivered_signal_cache));
         let outpost = &mut session.outposts[index];
         outpost.expedition_progress = (outpost.expedition_progress.max(0.0) + dt).min(cycle);
         if outpost.expedition_progress < cycle {
@@ -50,7 +59,10 @@ pub fn tick_expeditions(
         outpost.expedition_progress -= cycle;
         outpost.expeditions_completed = outpost.expeditions_completed.saturating_add(1);
         outpost.ore_scouted = outpost.ore_scouted.saturating_add(ore);
-        outpost.signal_cache_ingots = outpost.signal_cache_ingots.saturating_add(ingots);
+        outpost.signal_cache_ingots = outpost
+            .signal_cache_ingots
+            .saturating_add(delivered_signal_cache);
+        outpost.chorus_ingots = outpost.chorus_ingots.saturating_add(delivered_chorus);
         completed.push(ExpeditionCompletion {
             outpost: outpost.pos,
             ore,

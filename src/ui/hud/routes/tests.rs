@@ -119,6 +119,32 @@ fn encore_summary_reports_boosted_haul_progress_and_repeat_claims() {
 }
 
 #[test]
+fn chorus_summary_reports_network_progress_and_live_payoff() {
+    let data = GameData::load().expect("embedded game data");
+    let mut session = GameSession::new(&data, 65);
+    session.worm_awake = true;
+    session.outpost_circuit_claimed = true;
+    session.outposts = (0..3)
+        .map(|index| {
+            let mut route = Outpost::new(TilePos::new(4 + index * 2, 4));
+            route.active = true;
+            route
+        })
+        .collect();
+
+    let summary = chorus_contract_summary(&session, &data).expect("Chorus should be visible");
+    assert!(summary.contains("0/3 complete routes"), "{summary}");
+    assert!(summary.contains("3 active routes"), "{summary}");
+    assert!(summary.contains("+80 ingots"), "{summary}");
+
+    session.outpost_chorus_claimed = true;
+    session.outposts[0].chorus_ingots = 2;
+    let summary = chorus_contract_summary(&session, &data).expect("claimed Chorus summary");
+    assert!(summary.contains("Wormsong Chorus complete"), "{summary}");
+    assert!(summary.contains("Kept 2"), "{summary}");
+}
+
+#[test]
 fn route_network_summary_confirms_a_claimed_charter() {
     let data = GameData::load().expect("embedded game data");
     let mut session = GameSession::new(&data, 42);

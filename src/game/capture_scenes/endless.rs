@@ -9,6 +9,7 @@ use crate::state::GameState;
 use macroquad_toolkit::grid::TilePos;
 
 mod remote_specialists;
+mod wormsong_chorus;
 mod wormsong_circuit;
 mod wormsong_concord;
 mod wormsong_encore;
@@ -33,6 +34,9 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
         }
         "endless_wormsong_encore" => wormsong_encore::begin(game),
         "endless_wormsong_encore_awarded" => wormsong_encore::award(game),
+        "endless_wormsong_chorus" => wormsong_chorus::begin(game),
+        "endless_wormsong_chorus_awarded" => wormsong_chorus::award(game),
+        "endless_wormsong_chorus_haul" => wormsong_chorus::haul(game),
         "endless_wormsong_encore_inspect" => {
             wormsong_encore::begin(game);
             game.routes_open = false;

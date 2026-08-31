@@ -45,6 +45,9 @@ pub(super) fn validate_outpost_milestones(
     if session.outpost_circuit_claimed && !session.outpost_concord_claimed {
         return Err("Wormsong Circuit exists before the Concord claim".to_owned());
     }
+    if session.outpost_chorus_claimed && !session.outpost_circuit_claimed {
+        return Err("Wormsong Chorus exists before the Circuit claim".to_owned());
+    }
     if session.outpost_encore_claims > 0 && !session.outpost_circuit_claimed {
         return Err("Wormsong Encore claims exist before the Circuit claim".to_owned());
     }

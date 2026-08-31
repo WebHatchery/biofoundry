@@ -11,6 +11,7 @@ mod auto_load;
 mod auto_priority;
 mod capacity;
 mod cargo_return;
+mod chorus;
 mod engineering;
 mod remote_specialists;
 mod study;

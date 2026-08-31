@@ -7,6 +7,7 @@ use crate::state::structures::{BuildSite, Building};
 use crate::state::GameSession;
 
 mod charter;
+mod chorus;
 mod route_upgrades;
 
 fn boot() -> (GameData, GameSession) {

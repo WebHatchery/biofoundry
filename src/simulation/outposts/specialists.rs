@@ -131,6 +131,37 @@ pub fn route_signal_cache_ingots(session: &GameSession, data: &GameData, outpost
         .saturating_add(wormsong_route_bonus(session, data, outpost).ingots)
 }
 
+/// Count active routes that currently carry every Wormsong voice.
+pub fn complete_wormsong_route_count(session: &GameSession, data: &GameData) -> u32 {
+    session
+        .outposts
+        .iter()
+        .filter(|outpost| {
+            outpost.active && wormsong_route_bonus(session, data, outpost).has_all_roles()
+        })
+        .count() as u32
+}
+
+/// Whether this route is part of a currently sustained three-route Chorus.
+/// The reward is deliberately live: withdrawing one voice pauses the extra
+/// haul until the network is whole again.
+pub fn chorus_route_active(session: &GameSession, data: &GameData, outpost: &Outpost) -> bool {
+    session.outpost_chorus_claimed
+        && data.balance.outpost_chorus_route_goal > 0
+        && complete_wormsong_route_count(session, data) >= data.balance.outpost_chorus_route_goal
+        && outpost.active
+        && wormsong_route_bonus(session, data, outpost).has_all_roles()
+}
+
+/// Total Chorus ingots returned by this route's next haul.
+pub fn route_chorus_ingots(session: &GameSession, data: &GameData, outpost: &Outpost) -> u32 {
+    if chorus_route_active(session, data, outpost) {
+        data.balance.outpost_chorus_ingots_per_haul
+    } else {
+        0
+    }
+}
+
 /// A compact explanation of the active remote effects for the route card.
 pub fn route_bonus_summary(
     session: &GameSession,
@@ -166,6 +197,10 @@ pub fn route_bonus_summary(
             "concord +{} ore/-{:.0}s",
             concord_ore, concord_cycle
         ));
+    }
+    let chorus_ingots = route_chorus_ingots(session, data, outpost);
+    if chorus_ingots > 0 {
+        effects.push(format!("chorus +{} ingot/haul", chorus_ingots));
     }
     if compact {
         let compact_effects = effects

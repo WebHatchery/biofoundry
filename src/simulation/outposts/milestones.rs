@@ -1,7 +1,7 @@
 use crate::data::GameData;
 use crate::state::GameSession;
 
-use super::specialists::wormsong_route_bonus;
+use super::specialists::{complete_wormsong_route_count, wormsong_route_bonus};
 
 /// Return the aggregate completed scouting hauls across all routes.
 pub fn total_expeditions(session: &GameSession) -> u32 {
@@ -303,5 +303,44 @@ pub fn claim_outpost_circuit(session: &mut GameSession, data: &GameData) -> bool
         .economy
         .ingots_stock
         .saturating_add(data.balance.outpost_circuit_reward_ingots);
+    true
+}
+
+/// Return the live progress for the optional three-route Wormsong Chorus.
+/// Unlike Circuit, this contract is evaluated against complete routes rather
+/// than distinct voices spread across the network.
+pub fn outpost_chorus_progress(session: &GameSession, data: &GameData) -> (u32, u32) {
+    let active_routes = session
+        .outposts
+        .iter()
+        .filter(|outpost| outpost.active)
+        .count() as u32;
+    if !session.worm_awake || !session.outpost_circuit_claimed {
+        return (0, active_routes);
+    }
+    (complete_wormsong_route_count(session, data), active_routes)
+}
+
+/// Award the optional Chorus once three complete active routes sing together.
+/// The route bonus remains live after the claim, so breaking one crew pauses
+/// the extra ingot until the network is whole again.
+pub fn claim_outpost_chorus(session: &mut GameSession, data: &GameData) -> bool {
+    if session.outpost_chorus_claimed
+        || !session.worm_awake
+        || !session.outpost_circuit_claimed
+        || data.balance.outpost_chorus_route_goal == 0
+        || data.balance.outpost_chorus_reward_ingots == 0
+    {
+        return false;
+    }
+    let (complete_routes, _) = outpost_chorus_progress(session, data);
+    if complete_routes < data.balance.outpost_chorus_route_goal {
+        return false;
+    }
+    session.outpost_chorus_claimed = true;
+    session.economy.ingots_stock = session
+        .economy
+        .ingots_stock
+        .saturating_add(data.balance.outpost_chorus_reward_ingots);
     true
 }

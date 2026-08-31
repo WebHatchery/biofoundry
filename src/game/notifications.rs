@@ -114,6 +114,14 @@ pub(super) fn announce_outpost_milestones(
         ));
         audio.play(Sfx::Complete);
     }
+    if report.outpost_chorus_awarded {
+        awarded = true;
+        notifications.success(format!(
+            "Chorus · +{} ingots · 3 routes linked.",
+            data.balance.outpost_chorus_reward_ingots,
+        ));
+        audio.play(Sfx::Complete);
+    }
     awarded
 }
 

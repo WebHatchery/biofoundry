@@ -80,19 +80,36 @@ pub(super) fn outpost_signal_cache_summary(
     data: &GameData,
     compact: bool,
 ) -> Option<String> {
-    outpost.signal_cache_upgraded.then(|| {
+    let chorus = if outpost.chorus_ingots > 0 {
         if compact {
+            format!(" · Chorus {}", outpost.chorus_ingots)
+        } else {
+            format!(" · Chorus kept {}", outpost.chorus_ingots)
+        }
+    } else {
+        String::new()
+    };
+    if outpost.signal_cache_upgraded {
+        Some(if compact {
             format!(
-                "Cache +{}/haul · Kept {}",
+                "Cache +{}/haul · Kept {}{chorus}",
                 data.balance.outpost_signal_cache_ingots_per_haul, outpost.signal_cache_ingots
             )
         } else {
             format!(
-                "Signal cache · +{}/haul · Kept {}",
+                "Signal cache · +{}/haul · Kept {}{chorus}",
                 data.balance.outpost_signal_cache_ingots_per_haul, outpost.signal_cache_ingots
             )
-        }
-    })
+        })
+    } else if outpost.chorus_ingots > 0 {
+        Some(if compact {
+            format!("Chorus {}", outpost.chorus_ingots)
+        } else {
+            format!("Chorus kept {}", outpost.chorus_ingots)
+        })
+    } else {
+        None
+    }
 }
 
 pub(super) fn outpost_waypoint_summary(

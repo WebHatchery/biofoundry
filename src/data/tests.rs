@@ -200,6 +200,9 @@ fn balance_values_are_playable() {
     assert!(b.outpost_circuit_reward_ingots > b.outpost_concord_reward_ingots);
     assert!(b.outpost_encore_haul_goal > 0);
     assert!(b.outpost_encore_reward_ingots > 0);
+    assert!(b.outpost_chorus_route_goal >= 3);
+    assert!(b.outpost_chorus_reward_ingots > b.outpost_circuit_reward_ingots);
+    assert!(b.outpost_chorus_ingots_per_haul > 0);
     assert!(b.outpost_signal_cache_upgrade_ingots > b.outpost_relay_reward_ingots);
     assert!(b.outpost_signal_cache_ingots_per_haul > 0);
     assert!(b.outpost_waypoint_upgrade_ingots > b.outpost_signal_cache_upgrade_ingots);

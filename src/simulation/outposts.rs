@@ -17,13 +17,14 @@ mod upgrades;
 pub use encore::{claim_outpost_encore, outpost_encore_progress};
 pub use expeditions::tick_expeditions;
 pub use milestones::{
-    claim_outpost_archive, claim_outpost_charter, claim_outpost_circuit, claim_outpost_concord,
-    claim_outpost_convoy, claim_outpost_muster, claim_outpost_relay, outpost_archive_progress,
-    outpost_circuit_progress, outpost_concord_progress, outpost_convoy_progress,
-    outpost_muster_progress, outpost_relay_progress, total_expeditions,
+    claim_outpost_archive, claim_outpost_charter, claim_outpost_chorus, claim_outpost_circuit,
+    claim_outpost_concord, claim_outpost_convoy, claim_outpost_muster, claim_outpost_relay,
+    outpost_archive_progress, outpost_chorus_progress, outpost_circuit_progress,
+    outpost_concord_progress, outpost_convoy_progress, outpost_muster_progress,
+    outpost_relay_progress, total_expeditions,
 };
 pub use specialists::{
-    route_bonus_summary, route_expedition_cycle_sec, route_expedition_ore,
+    route_bonus_summary, route_chorus_ingots, route_expedition_cycle_sec, route_expedition_ore,
     route_signal_cache_ingots, route_storage_capacity, wormsong_route_bonus,
 };
 pub use upgrades::{
