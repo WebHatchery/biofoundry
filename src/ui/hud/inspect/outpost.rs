@@ -10,6 +10,10 @@ use macroquad_toolkit::grid::TilePos;
 use macroquad_toolkit::prelude::*;
 use macroquad_toolkit::ui::draw_ui_text_ex;
 
+mod compact_controls;
+
+use compact_controls::{draw_compact_route_return_controls, draw_compact_route_upgrade_controls};
+
 pub(super) fn outpost_archive_summary(session: &GameSession, data: &GameData) -> Option<String> {
     if !session.outpost_charter_claimed || data.balance.outpost_archive_haul_goal == 0 {
         return None;
@@ -432,6 +436,9 @@ pub(super) fn draw_route_upgrade_controls(context: RouteUpgradeContext<'_>) {
     });
 }
 
+/// Pair the two return choices on a narrow card when both cargo and crew are
+/// remote. A single full-width choice remains for cargo-only or crew-only
+/// payloads, so the action still explains exactly what will travel home.
 /// Keep the route policies and quotas legible on a narrow fixed-resolution
 /// canvas by pairing the two cycling control groups while leaving primary
 /// return, scouting, upgrade, and load actions full width.
@@ -450,6 +457,20 @@ pub(super) fn draw_compact_route_controls(context: CompactRouteContext<'_>) {
         mouse,
         actions,
     } = context;
+    draw_compact_route_return_controls(CompactRouteContext {
+        session,
+        data,
+        pos,
+        outpost,
+        panel,
+        x,
+        y: &mut *y,
+        crew,
+        button_height,
+        button_step,
+        mouse,
+        actions: &mut *actions,
+    });
     let column_width = (panel.w - 36.0) * 0.5;
     let second_column_x = x + column_width + 8.0;
     let auto_return_label = if outpost.is_some_and(|route| route.auto_return_cargo) {
@@ -523,7 +544,7 @@ pub(super) fn draw_compact_route_controls(context: CompactRouteContext<'_>) {
     }
     *y += button_step;
 
-    draw_route_upgrade_controls(RouteUpgradeContext {
+    draw_compact_route_upgrade_controls(RouteUpgradeContext {
         session,
         data,
         pos,

@@ -28,7 +28,7 @@ use breeding::{breed_button_label, breeding_unlock_hint};
 use outpost::outpost_archive_summary;
 use outpost::{
     draw_compact_route_controls, draw_full_route_controls, outpost_signal_cache_summary,
-    outpost_waypoint_summary, CompactRouteContext, FullRouteContext,
+    outpost_waypoint_summary, FullRouteContext,
 };
 use rooms::draw_rest_hollow_inspection;
 pub(super) use status::inspect_status;
@@ -110,10 +110,11 @@ pub(super) fn draw_inspect_panel(
     let x = panel.x + 14.0;
     let mut y = panel.y + 50.0;
     let outpost_button_height = if compact { 30.0 } else { 24.0 };
-    let outpost_button_step = if compact { 34.0 } else { 26.0 };
+    let outpost_button_step = if compact { 30.0 } else { 26.0 };
+    let line_step = if compact { 16.0 } else { 20.0 };
     let line = |text: &str, color: Color, y: &mut f32| {
         draw_ui_text_ex(text, x, *y, TextStyle::new(14.0, color).params());
-        *y += 20.0;
+        *y += line_step;
     };
 
     let (status, status_color) = inspect_status(session, data, building);
@@ -668,7 +669,7 @@ pub(super) fn draw_inspect_panel(
                 }
                 // Leave a full text-line gap before recovery copy so the
                 // baseline cannot crowd the button's lower border.
-                y += if compact { 38.0 } else { 32.0 };
+                y += if compact { 34.0 } else { 32.0 };
                 if !active && (cargo > 0 || crew > 0) {
                     line("Reactivate route to return payload", dark::WARNING, &mut y);
                 }
@@ -682,32 +683,8 @@ pub(super) fn draw_inspect_panel(
                         crew_cap,
                         crew_dispatch_limit,
                     );
-                    let return_label = outpost_return_label(cargo, crew);
-                    if hud_button(
-                        Rect::new(x, y, panel.w - 28.0, outpost_button_height),
-                        &return_label,
-                        cargo > 0 || crew > 0,
-                        mouse,
-                    ) {
-                        actions.push(UiAction::TransitToShrine(pos));
-                    }
-                    y += if compact { outpost_button_step } else { 24.0 };
-                    if cargo > 0
-                        && crew > 0
-                        && hud_button(
-                            Rect::new(x, y, panel.w - 28.0, outpost_button_height),
-                            &outpost_cargo_only_return_label(cargo),
-                            true,
-                            mouse,
-                        )
-                    {
-                        actions.push(UiAction::TransitCargoToShrine(pos));
-                    }
-                    if cargo > 0 && crew > 0 {
-                        y += if compact { outpost_button_step } else { 26.0 };
-                    }
                     if compact {
-                        draw_compact_route_controls(CompactRouteContext {
+                        draw_compact_route_controls(outpost::CompactRouteContext {
                             session,
                             data,
                             pos,
@@ -722,6 +699,30 @@ pub(super) fn draw_inspect_panel(
                             actions,
                         });
                     } else {
+                        let return_label = outpost_return_label(cargo, crew);
+                        if hud_button(
+                            Rect::new(x, y, panel.w - 28.0, outpost_button_height),
+                            &return_label,
+                            cargo > 0 || crew > 0,
+                            mouse,
+                        ) {
+                            actions.push(UiAction::TransitToShrine(pos));
+                        }
+                        y += 24.0;
+                        if cargo > 0
+                            && crew > 0
+                            && hud_button(
+                                Rect::new(x, y, panel.w - 28.0, outpost_button_height),
+                                &outpost_cargo_only_return_label(cargo),
+                                true,
+                                mouse,
+                            )
+                        {
+                            actions.push(UiAction::TransitCargoToShrine(pos));
+                        }
+                        if cargo > 0 && crew > 0 {
+                            y += 26.0;
+                        }
                         draw_full_route_controls(FullRouteContext {
                             session,
                             data,

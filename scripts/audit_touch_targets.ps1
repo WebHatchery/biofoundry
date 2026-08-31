@@ -50,7 +50,10 @@ param(
         "endless_wormsong_circuit_awarded",
         "endless_wormsong_encore",
         "endless_wormsong_encore_awarded",
-        "endless_wormsong_encore_inspect"
+        "endless_wormsong_encore_inspect",
+        "endless_wormsong_chorus",
+        "endless_wormsong_chorus_awarded",
+        "endless_wormsong_chorus_haul"
     ),
     [int]$WindowWidth = 1280,
     [int]$WindowHeight = 720,
