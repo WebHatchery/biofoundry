@@ -172,6 +172,9 @@ pub struct GameSession {
     /// Number of repeatable Worm Road Convoy contracts already rewarded.
     #[serde(default)]
     pub outpost_convoy_claims: u32,
+    /// Number of repeatable post-Convoy Worm Road Muster contracts rewarded.
+    #[serde(default)]
+    pub outpost_muster_claims: u32,
     #[serde(default)]
     pub worm_transit: Option<WormTransit>,
     #[serde(default)]
@@ -269,6 +272,7 @@ impl GameSession {
             outpost_archive_claims: 0,
             outpost_relay_claimed: false,
             outpost_convoy_claims: 0,
+            outpost_muster_claims: 0,
             worm_transit: None,
             last_transit_failure: None,
             event_history: Vec::new(),

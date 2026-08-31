@@ -40,10 +40,12 @@ pub(super) fn draw_route_overview(
     let column_count = route_column_count(session.outposts.len());
     let relay_summary = relay_contract_summary(session, data);
     let convoy_summary = convoy_contract_summary(session, data);
+    let muster_summary = muster_contract_summary(session, data);
     let transit_summary = worm_transit_summary(session);
     let summary_lines = 2
         + relay_summary.is_some() as u32
         + convoy_summary.is_some() as u32
+        + muster_summary.is_some() as u32
         + transit_summary.is_some() as u32;
     let summary_extra = summary_lines as f32 * 18.0;
     let route_rows = session.outposts.len().div_ceil(column_count).max(1);
@@ -100,6 +102,15 @@ pub(super) fn draw_route_overview(
         summary_y += 18.0;
     }
     if let Some(summary) = convoy_summary {
+        draw_ui_text_ex(
+            &summary,
+            panel.x + 24.0,
+            summary_y,
+            TextStyle::new(13.0, dark::POSITIVE).params(),
+        );
+        summary_y += 18.0;
+    }
+    if let Some(summary) = muster_summary {
         draw_ui_text_ex(
             &summary,
             panel.x + 24.0,
@@ -351,6 +362,33 @@ fn convoy_contract_summary(session: &GameSession, data: &GameData) -> Option<Str
         data.balance.outpost_convoy_route_goal,
         data.balance.outpost_convoy_haul_goal,
         data.balance.outpost_convoy_reward_ingots
+    ))
+}
+
+fn muster_contract_summary(session: &GameSession, data: &GameData) -> Option<String> {
+    if !session.outpost_relay_claimed
+        || session.outpost_convoy_claims == 0
+        || data.balance.outpost_muster_route_goal == 0
+        || data.balance.outpost_muster_haul_goal == 0
+    {
+        return None;
+    }
+    if session.outpost_muster_claims > 0 {
+        return Some(format!(
+            "Worm Road Muster · {} cleared · next {}/{} hauls · +{} ingots",
+            session.outpost_muster_claims,
+            crate::simulation::outposts::outpost_muster_progress(session, data).1,
+            data.balance.outpost_muster_haul_goal,
+            data.balance.outpost_muster_reward_ingots
+        ));
+    }
+    let (active_routes, completed_hauls) =
+        crate::simulation::outposts::outpost_muster_progress(session, data);
+    Some(format!(
+        "Worm Road Muster · {active_routes}/{} routes · {completed_hauls}/{} hauls · +{} ingots",
+        data.balance.outpost_muster_route_goal,
+        data.balance.outpost_muster_haul_goal,
+        data.balance.outpost_muster_reward_ingots
     ))
 }
 

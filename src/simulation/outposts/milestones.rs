@@ -151,3 +151,61 @@ pub fn claim_outpost_convoy(session: &mut GameSession, data: &GameData) -> u32 {
         .saturating_add(contracts.saturating_mul(data.balance.outpost_convoy_reward_ingots));
     contracts
 }
+
+/// Return progress for the repeatable post-Convoy Worm Road Muster. The
+/// first cleared Convoy establishes the baseline; later scouting hauls count
+/// toward Muster pages even when another Convoy is cleared in parallel.
+pub fn outpost_muster_progress(session: &GameSession, data: &GameData) -> (u32, u32) {
+    let active_routes = session
+        .outposts
+        .iter()
+        .filter(|outpost| outpost.active)
+        .count() as u32;
+    let goal = data.balance.outpost_muster_haul_goal;
+    if !session.outpost_relay_claimed || session.outpost_convoy_claims == 0 || goal == 0 {
+        return (active_routes, 0);
+    }
+    let post_convoy_hauls = total_expeditions(session)
+        .saturating_sub(data.balance.outpost_relay_haul_goal)
+        .saturating_sub(data.balance.outpost_convoy_haul_goal);
+    let claimed_hauls = session.outpost_muster_claims.saturating_mul(goal);
+    (
+        active_routes,
+        post_convoy_hauls.saturating_sub(claimed_hauls).min(goal),
+    )
+}
+
+/// Reward every newly completed Worm Road Muster once the network can hold
+/// the required number of active routes. Muster progress is intentionally
+/// independent from the repeatable Convoy claim counter.
+pub fn claim_outpost_muster(session: &mut GameSession, data: &GameData) -> u32 {
+    let route_goal = data.balance.outpost_muster_route_goal;
+    let haul_goal = data.balance.outpost_muster_haul_goal;
+    if !session.worm_awake
+        || !session.outpost_relay_claimed
+        || session.outpost_convoy_claims == 0
+        || route_goal == 0
+        || haul_goal == 0
+        || data.balance.outpost_muster_reward_ingots == 0
+    {
+        return 0;
+    }
+    let (active_routes, _) = outpost_muster_progress(session, data);
+    if active_routes < route_goal {
+        return 0;
+    }
+    let post_convoy_hauls = total_expeditions(session)
+        .saturating_sub(data.balance.outpost_relay_haul_goal)
+        .saturating_sub(data.balance.outpost_convoy_haul_goal);
+    let completed_musters = post_convoy_hauls / haul_goal;
+    let musters = completed_musters.saturating_sub(session.outpost_muster_claims);
+    if musters == 0 {
+        return 0;
+    }
+    session.outpost_muster_claims = session.outpost_muster_claims.saturating_add(musters);
+    session.economy.ingots_stock = session
+        .economy
+        .ingots_stock
+        .saturating_add(musters.saturating_mul(data.balance.outpost_muster_reward_ingots));
+    musters
+}

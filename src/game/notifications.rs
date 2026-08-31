@@ -64,6 +64,23 @@ pub(super) fn announce_outpost_milestones(
         ));
         audio.play(Sfx::Complete);
     }
+    if report.outpost_muster_awarded > 0 {
+        awarded = true;
+        let reward = report
+            .outpost_muster_awarded
+            .saturating_mul(data.balance.outpost_muster_reward_ingots);
+        notifications.success(format!(
+            "Worm Road Muster · +{} ingots · {} network muster{} held.",
+            reward,
+            report.outpost_muster_awarded,
+            if report.outpost_muster_awarded == 1 {
+                ""
+            } else {
+                "s"
+            }
+        ));
+        audio.play(Sfx::Complete);
+    }
     awarded
 }
 

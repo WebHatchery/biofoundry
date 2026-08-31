@@ -10,6 +10,7 @@ mod crafting;
 mod determinism;
 mod economy;
 mod mining;
+mod muster;
 mod novel;
 mod waypoint;
 mod wild;

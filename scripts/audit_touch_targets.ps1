@@ -39,6 +39,8 @@ param(
         "endless_signal_cache_haul",
         "endless_convoy",
         "endless_convoy_awarded",
+        "endless_muster",
+        "endless_muster_awarded",
         "endless_waypoint",
         "endless_waypoint_awarded"
     ),

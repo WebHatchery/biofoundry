@@ -393,6 +393,69 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
             game.routes_open = true;
             game.paused = true;
         }
+        "endless_muster" => {
+            super::begin(game, "endless_routes");
+            game.notifications.clear();
+            game.routes_open = true;
+            game.paused = true;
+            if let GameState::Warren(session) = &mut game.state {
+                session.outpost_charter_claimed = true;
+                session.outpost_archive_claims = 1;
+                session.outpost_relay_claimed = true;
+                session.outpost_convoy_claims = 1;
+                session.outpost_muster_claims = 0;
+                session.economy.ingots_stock = 0;
+                let route_goal = game.data.balance.outpost_muster_route_goal as usize;
+                while session.outposts.len() < route_goal {
+                    let existing: Vec<TilePos> =
+                        session.outposts.iter().map(|route| route.pos).collect();
+                    let pos = session
+                        .world
+                        .tiles
+                        .iter_with_pos()
+                        .find(|(pos, tile)| {
+                            tile.walkable()
+                                && session.can_place_building(*pos)
+                                && !existing.contains(pos)
+                        })
+                        .map(|(pos, _)| pos);
+                    let Some(pos) = pos else { break };
+                    session.buildings.push(Building::new("outpost", pos));
+                    session.ensure_outpost(pos);
+                }
+                let total_hauls = game
+                    .data
+                    .balance
+                    .outpost_relay_haul_goal
+                    .saturating_add(game.data.balance.outpost_convoy_haul_goal)
+                    .saturating_add(game.data.balance.outpost_muster_haul_goal)
+                    .saturating_sub(1);
+                for (index, route) in session.outposts.iter_mut().enumerate() {
+                    route.active = index < route_goal;
+                    route.expedition_paused = true;
+                    route.cargo.clear();
+                    route.crew.clear();
+                    route.expeditions_completed = if index == 0 { total_hauls } else { 0 };
+                }
+                game.selected_building = session.outposts.first().map(|route| route.pos);
+            }
+        }
+        "endless_muster_awarded" => {
+            begin(game, "endless_muster");
+            if let GameState::Warren(session) = &mut game.state {
+                if let Some(route) = session.outposts.first_mut() {
+                    route.expeditions_completed = route.expeditions_completed.saturating_add(1);
+                }
+                if simulation::outposts::claim_outpost_muster(session, &game.data) > 0 {
+                    game.notifications.success(format!(
+                        "Worm Road Muster · +{} ingots · network muster held.",
+                        game.data.balance.outpost_muster_reward_ingots
+                    ));
+                }
+            }
+            game.routes_open = true;
+            game.paused = true;
+        }
         "endless_waypoint" => {
             begin(game, "endless_convoy_awarded");
             game.notifications.clear();

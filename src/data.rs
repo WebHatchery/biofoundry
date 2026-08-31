@@ -278,6 +278,15 @@ pub struct Balance {
     /// Ingots awarded for each completed Convoy contract.
     #[serde(default = "default_outpost_convoy_reward_ingots")]
     pub outpost_convoy_reward_ingots: u32,
+    /// Active Worm routes required for each repeatable post-Convoy Muster.
+    #[serde(default = "default_outpost_muster_route_goal")]
+    pub outpost_muster_route_goal: u32,
+    /// Completed scouting hauls required for each post-Convoy Muster.
+    #[serde(default = "default_outpost_muster_haul_goal")]
+    pub outpost_muster_haul_goal: u32,
+    /// Ingots awarded for each completed Worm Road Muster.
+    #[serde(default = "default_outpost_muster_reward_ingots")]
+    pub outpost_muster_reward_ingots: u32,
     /// Ingot cost for the post-Relay Signal Cache route upgrade.
     #[serde(default = "default_outpost_signal_cache_upgrade_ingots")]
     pub outpost_signal_cache_upgrade_ingots: u32,
@@ -424,6 +433,15 @@ fn default_outpost_convoy_haul_goal() -> u32 {
 }
 fn default_outpost_convoy_reward_ingots() -> u32 {
     24
+}
+fn default_outpost_muster_route_goal() -> u32 {
+    4
+}
+fn default_outpost_muster_haul_goal() -> u32 {
+    16
+}
+fn default_outpost_muster_reward_ingots() -> u32 {
+    32
 }
 fn default_outpost_signal_cache_upgrade_ingots() -> u32 {
     28

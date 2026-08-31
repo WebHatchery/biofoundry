@@ -1,4 +1,5 @@
 use super::*;
+use crate::state::creatures::Good;
 use crate::state::structures::Building;
 
 #[test]
@@ -73,4 +74,39 @@ fn completed_objective_guides_the_route_upgrade_ladder_when_funded() {
     assert!(CampaignObjective::current(&session, &data)
         .progress
         .contains("Upgrades 7"));
+}
+
+#[test]
+fn completed_objective_guides_the_next_network_muster_after_convoy() {
+    let (data, mut session) = boot();
+    session.worm_awake = true;
+    session.unlocked.insert("worm_transit".to_owned());
+    session.outpost_charter_claimed = true;
+    session.outpost_archive_claims = 1;
+    session.outpost_relay_claimed = true;
+    session.outpost_convoy_claims = 1;
+    let pos = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(pos, _)| session.can_place_building(*pos))
+        .map(|(pos, _)| pos)
+        .expect("a route location");
+    session.buildings.push(Building::new("outpost", pos));
+    session.ensure_outpost(pos);
+    session.outposts[0].active = true;
+    session.outposts[0].crew.push(1);
+    session.outposts[0].cargo.insert(Good::CookedFood, 1);
+    session.outposts[0].expeditions_completed =
+        data.balance.outpost_relay_haul_goal + data.balance.outpost_convoy_haul_goal + 5;
+
+    let objective = CampaignObjective::current(&session, &data);
+
+    assert!(
+        objective.next.contains("Worm Road Muster"),
+        "{}",
+        objective.next
+    );
+    assert!(objective.next.contains("1/4 active routes"));
+    assert!(objective.next.contains("5/16 hauls"));
 }

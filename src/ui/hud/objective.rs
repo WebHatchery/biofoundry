@@ -471,6 +471,9 @@ fn charter_guidance(session: &GameSession, data: &GameData) -> Option<String> {
         if let Some(guidance) = relay_contract_guidance(session, data) {
             return Some(guidance);
         }
+        if let Some(guidance) = muster_contract_guidance(session, data) {
+            return Some(guidance);
+        }
         if let Some(guidance) = convoy_contract_guidance(session, data) {
             return Some(guidance);
         }
@@ -520,6 +523,24 @@ fn convoy_contract_guidance(session: &GameSession, data: &GameData) -> Option<St
         data.balance.outpost_convoy_route_goal,
         data.balance.outpost_convoy_haul_goal,
         data.balance.outpost_convoy_reward_ingots
+    ))
+}
+
+fn muster_contract_guidance(session: &GameSession, data: &GameData) -> Option<String> {
+    if !session.outpost_relay_claimed
+        || session.outpost_convoy_claims == 0
+        || data.balance.outpost_muster_route_goal == 0
+        || data.balance.outpost_muster_haul_goal == 0
+    {
+        return None;
+    }
+    let (active_routes, completed_hauls) =
+        crate::simulation::outposts::outpost_muster_progress(session, data);
+    Some(format!(
+        "Next: run the Worm Road Muster · {active_routes}/{} active routes · {completed_hauls}/{} hauls · +{} ingots.",
+        data.balance.outpost_muster_route_goal,
+        data.balance.outpost_muster_haul_goal,
+        data.balance.outpost_muster_reward_ingots
     ))
 }
 

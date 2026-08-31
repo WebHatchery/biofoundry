@@ -150,6 +150,43 @@ fn convoy_summary_confirms_a_claimed_contract() {
 }
 
 #[test]
+fn muster_summary_reports_live_network_progress() {
+    let data = GameData::load().expect("embedded game data");
+    let mut session = GameSession::new(&data, 55);
+    session.outpost_relay_claimed = true;
+    session.outpost_convoy_claims = 1;
+    let mut routes = Vec::new();
+    for index in 0..3 {
+        let mut route = Outpost::new(TilePos::new(4 + index * 2, 4));
+        route.active = true;
+        routes.push(route);
+    }
+    routes[0].expeditions_completed =
+        data.balance.outpost_relay_haul_goal + data.balance.outpost_convoy_haul_goal + 5;
+    session.outposts = routes;
+
+    let summary = muster_contract_summary(&session, &data).expect("Muster should be visible");
+
+    assert!(summary.contains("3/4 routes"), "{summary}");
+    assert!(summary.contains("5/16 hauls"), "{summary}");
+    assert!(summary.contains("+32 ingots"), "{summary}");
+}
+
+#[test]
+fn muster_summary_confirms_claimed_contracts() {
+    let data = GameData::load().expect("embedded game data");
+    let mut session = GameSession::new(&data, 56);
+    session.outpost_relay_claimed = true;
+    session.outpost_convoy_claims = 1;
+    session.outpost_muster_claims = 2;
+
+    let summary = muster_contract_summary(&session, &data).expect("Muster should be visible");
+
+    assert!(summary.contains("2 cleared"), "{summary}");
+    assert!(summary.contains("next 0/16 hauls"), "{summary}");
+}
+
+#[test]
 fn route_network_summary_counts_active_blockers_as_attention() {
     let data = GameData::load().expect("embedded game data");
     let mut session = GameSession::new(&data, 42);

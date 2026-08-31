@@ -13,8 +13,9 @@ mod milestones;
 mod upgrades;
 
 pub use milestones::{
-    claim_outpost_archive, claim_outpost_charter, claim_outpost_convoy, claim_outpost_relay,
-    outpost_archive_progress, outpost_convoy_progress, outpost_relay_progress, total_expeditions,
+    claim_outpost_archive, claim_outpost_charter, claim_outpost_convoy, claim_outpost_muster,
+    claim_outpost_relay, outpost_archive_progress, outpost_convoy_progress,
+    outpost_muster_progress, outpost_relay_progress, total_expeditions,
 };
 pub use upgrades::{
     upgrade_outpost, upgrade_outpost_crew, upgrade_outpost_deep_survey, upgrade_outpost_resonator,

@@ -186,6 +186,8 @@ pub(super) fn begin(game: &mut Game, scene: &str) -> bool {
         | "endless_relay_awarded"
         | "endless_convoy"
         | "endless_convoy_awarded"
+        | "endless_muster"
+        | "endless_muster_awarded"
         | "endless_waypoint"
         | "endless_waypoint_awarded"
         | "endless_waypoint_in_flight"

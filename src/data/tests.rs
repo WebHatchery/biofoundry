@@ -145,6 +145,9 @@ fn balance_values_are_playable() {
     assert!(b.outpost_convoy_route_goal > b.outpost_relay_route_goal);
     assert!(b.outpost_convoy_haul_goal > b.outpost_relay_haul_goal);
     assert!(b.outpost_convoy_reward_ingots > b.outpost_relay_reward_ingots);
+    assert!(b.outpost_muster_route_goal > b.outpost_convoy_route_goal);
+    assert!(b.outpost_muster_haul_goal > b.outpost_convoy_haul_goal);
+    assert!(b.outpost_muster_reward_ingots > b.outpost_convoy_reward_ingots);
     assert!(b.outpost_signal_cache_upgrade_ingots > b.outpost_relay_reward_ingots);
     assert!(b.outpost_signal_cache_ingots_per_haul > 0);
     assert!(b.outpost_waypoint_upgrade_ingots > b.outpost_signal_cache_upgrade_ingots);
@@ -210,4 +213,15 @@ fn content_validation_rejects_a_disabled_convoy_contract() {
         .validate()
         .expect_err("a zero-reward Convoy should be rejected");
     assert!(error.contains("convoy"));
+}
+
+#[test]
+fn content_validation_rejects_a_muster_that_does_not_raise_the_network_bar() {
+    let mut data = GameData::load().unwrap();
+    data.balance.outpost_muster_route_goal = data.balance.outpost_convoy_route_goal;
+
+    let error = data
+        .validate()
+        .expect_err("a Muster should raise the route requirement");
+    assert!(error.contains("Muster"));
 }
