@@ -1,6 +1,7 @@
 use super::*;
 use crate::data::GameData;
 use crate::state::creatures::{Good, Task};
+use crate::state::outposts::AutoRoutePriority;
 use crate::state::structures::Building;
 use macroquad_toolkit::notifications::{LoggedNotification, NotificationType};
 
@@ -61,6 +62,21 @@ fn saves_from_before_outpost_charter_load_unclaimed() {
     let restored: GameSession = serde_json::from_value(encoded).unwrap();
 
     assert!(!restored.outpost_charter_claimed);
+}
+
+#[test]
+fn saves_from_before_automatic_route_priority_load_return_first() {
+    let data = GameData::load().unwrap();
+    let session = GameSession::new(&data, 42);
+    let mut encoded = serde_json::to_value(&session).unwrap();
+    encoded
+        .as_object_mut()
+        .unwrap()
+        .remove("auto_route_priority");
+
+    let restored: GameSession = serde_json::from_value(encoded).unwrap();
+
+    assert_eq!(restored.auto_route_priority, AutoRoutePriority::Return);
 }
 
 #[test]

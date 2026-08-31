@@ -8,6 +8,7 @@ use crate::state::structures::Building;
 use macroquad_toolkit::grid::TilePos;
 
 mod auto_load;
+mod auto_priority;
 mod capacity;
 mod cargo_return;
 mod engineering;

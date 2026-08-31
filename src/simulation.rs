@@ -18,7 +18,7 @@ mod tests;
 
 use crate::data::GameData;
 use crate::state::creatures::Creature;
-use crate::state::outposts::{ExpeditionCompletion, TransitCompletion};
+use crate::state::outposts::{AutoRoutePriority, ExpeditionCompletion, TransitCompletion};
 use crate::state::GameSession;
 use macroquad_toolkit::grid::TilePos;
 
@@ -124,9 +124,28 @@ pub fn tick(session: &mut GameSession, data: &GameData) -> TickReport {
     let outpost_archive_awarded = outposts::claim_outpost_archive(session, data);
     let outpost_relay_awarded = outposts::claim_outpost_relay(session, data);
     let outpost_convoy_awarded = outposts::claim_outpost_convoy(session, data);
-    let auto_return_started = outposts::start_auto_return_if_full(session, data);
-    let auto_resupply_started = outposts::start_auto_resupply_if_needed(session, data);
-    let auto_load_started = outposts::start_auto_load_if_ready(session, data);
+    let mut auto_return_started = None;
+    let mut auto_resupply_started = None;
+    let mut auto_load_started = None;
+    for priority in session.auto_route_priority.order() {
+        let started = match priority {
+            AutoRoutePriority::Return => {
+                auto_return_started = outposts::start_auto_return_if_full(session, data);
+                auto_return_started
+            }
+            AutoRoutePriority::Resupply => {
+                auto_resupply_started = outposts::start_auto_resupply_if_needed(session, data);
+                auto_resupply_started
+            }
+            AutoRoutePriority::Load => {
+                auto_load_started = outposts::start_auto_load_if_ready(session, data);
+                auto_load_started
+            }
+        };
+        if started.is_some() {
+            break;
+        }
+    }
     let transit_target = session.worm_transit.as_ref().map(|transit| transit.outpost);
     let transit_completed = outposts::tick_transit(session, data, dt);
     let transit_failed = transit_target.filter(|_| {

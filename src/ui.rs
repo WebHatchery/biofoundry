@@ -92,6 +92,8 @@ pub enum UiAction {
     SetMode(UiMode),
     /// Open or close the post-awakening route ledger.
     ToggleRoutes,
+    /// Cycle the global automatic route policy order in the route ledger.
+    CycleAutoRoutePriority,
     /// Select a building from a HUD shortcut such as the route ledger.
     SelectBuilding(TilePos),
     /// The player clicked this world tile with the active tool.

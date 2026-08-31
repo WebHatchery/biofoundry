@@ -17,7 +17,7 @@ use creatures::{Creature, Job};
 use macroquad_toolkit::grid::TilePos;
 use macroquad_toolkit::notifications::LoggedNotification;
 use macroquad_toolkit::rng::SeededRng;
-use outposts::{Outpost, WormTransit};
+use outposts::{AutoRoutePriority, Outpost, WormTransit};
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 use structures::{BuildSite, Building};
@@ -152,10 +152,14 @@ pub struct GameSession {
     pub tutorial_build_completed: bool,
     #[serde(default)]
     pub outposts: Vec<Outpost>,
-    /// Next Outpost index to inspect for automatic return/resupply work.
+    /// Next Outpost index to inspect for automatic route work.
     /// Persisting it keeps multi-route automatic logistics fair across saves.
     #[serde(default)]
     pub auto_route_cursor: usize,
+    /// Which automatic route policy gets the shared Worm first when several
+    /// routes are ready.
+    #[serde(default)]
+    pub auto_route_priority: AutoRoutePriority,
     /// Whether the one-time Worm Road Charter reward has been claimed.
     #[serde(default)]
     pub outpost_charter_claimed: bool,
@@ -260,6 +264,7 @@ impl GameSession {
             tutorial_build_completed: false,
             outposts: Vec::new(),
             auto_route_cursor: 0,
+            auto_route_priority: AutoRoutePriority::default(),
             outpost_charter_claimed: false,
             outpost_archive_claims: 0,
             outpost_relay_claimed: false,

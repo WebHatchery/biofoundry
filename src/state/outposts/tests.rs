@@ -27,6 +27,28 @@ fn new_outpost_defaults_to_ore_first_loading() {
 }
 
 #[test]
+fn automatic_route_priority_cycles_through_the_shared_worm_order() {
+    assert_eq!(AutoRoutePriority::default(), AutoRoutePriority::Return);
+    assert_eq!(AutoRoutePriority::Return.label(), "Return first");
+    assert_eq!(
+        AutoRoutePriority::Return.next(),
+        AutoRoutePriority::Resupply
+    );
+    assert_eq!(AutoRoutePriority::Resupply.label(), "Food first");
+    assert_eq!(AutoRoutePriority::Resupply.next(), AutoRoutePriority::Load);
+    assert_eq!(AutoRoutePriority::Load.label(), "Load first");
+    assert_eq!(AutoRoutePriority::Load.next(), AutoRoutePriority::Return);
+    assert_eq!(
+        AutoRoutePriority::Load.order(),
+        [
+            AutoRoutePriority::Load,
+            AutoRoutePriority::Return,
+            AutoRoutePriority::Resupply
+        ]
+    );
+}
+
+#[test]
 fn crew_capacity_expansion_uses_the_larger_configured_capacity() {
     let mut outpost = Outpost::new(TilePos::new(4, 4));
     assert_eq!(outpost.crew_capacity(4, 6), 4);

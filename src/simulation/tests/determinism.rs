@@ -3,7 +3,7 @@
 
 use super::*;
 use crate::state::creatures::Job;
-use crate::state::outposts::CargoPriority;
+use crate::state::outposts::{AutoRoutePriority, CargoPriority};
 use crate::state::structures::{BuildSite, Building};
 
 #[test]
@@ -76,6 +76,7 @@ fn save_roundtrip_preserves_outpost_dispatch_settings() {
     session.outposts[0].auto_resupply_food = true;
     session.outposts[0].auto_load = true;
     session.auto_route_cursor = 1;
+    session.auto_route_priority = AutoRoutePriority::Load;
     session.outpost_charter_claimed = true;
     session.outpost_archive_claims = 2;
     session.outpost_relay_claimed = true;
@@ -98,6 +99,7 @@ fn save_roundtrip_preserves_outpost_dispatch_settings() {
     assert!(restored.outposts[0].auto_resupply_food);
     assert!(restored.outposts[0].auto_load);
     assert_eq!(restored.auto_route_cursor, 1);
+    assert_eq!(restored.auto_route_priority, AutoRoutePriority::Load);
     assert!(restored.outpost_charter_claimed);
     assert_eq!(restored.outpost_archive_claims, 2);
     assert!(restored.outpost_relay_claimed);

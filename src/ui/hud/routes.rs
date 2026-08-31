@@ -41,7 +41,8 @@ pub(super) fn draw_route_overview(
     let relay_summary = relay_contract_summary(session, data);
     let convoy_summary = convoy_contract_summary(session, data);
     let transit_summary = worm_transit_summary(session);
-    let summary_lines = relay_summary.is_some() as u32
+    let summary_lines = 1
+        + relay_summary.is_some() as u32
         + convoy_summary.is_some() as u32
         + transit_summary.is_some() as u32;
     let summary_extra = summary_lines as f32 * 18.0;
@@ -67,6 +68,21 @@ pub(super) fn draw_route_overview(
         TextStyle::new(14.0, dark::TEXT_DIM).params(),
     );
     let mut summary_y = panel.y + 76.0;
+    draw_ui_text_ex(
+        &format!("Auto dispatch · {}", session.auto_route_priority.label()),
+        panel.x + 24.0,
+        summary_y,
+        TextStyle::new(13.0, dark::TEXT).params(),
+    );
+    if hud_button(
+        Rect::new(panel.right() - 164.0, summary_y - 22.0, 140.0, 32.0),
+        "Cycle order",
+        true,
+        mouse,
+    ) {
+        actions.push(UiAction::CycleAutoRoutePriority);
+    }
+    summary_y += 18.0;
     if let Some(summary) = relay_summary {
         draw_ui_text_ex(
             &summary,

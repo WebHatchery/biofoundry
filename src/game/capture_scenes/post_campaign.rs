@@ -3,7 +3,7 @@
 use super::super::{format_expedition_completion, Game};
 use crate::simulation;
 use crate::state::creatures::Good;
-use crate::state::outposts::CargoPriority;
+use crate::state::outposts::{AutoRoutePriority, CargoPriority};
 use crate::state::structures::Building;
 use crate::state::{GameState, StateTransition};
 use macroquad_toolkit::grid::TilePos;
@@ -133,6 +133,16 @@ pub(super) fn begin(game: &mut Game, scene: &str) -> bool {
                         }
                     }
                 }
+            }
+            true
+        }
+        "endless_auto_priority" => {
+            begin(game, "endless_routes");
+            game.notifications.clear();
+            game.routes_open = true;
+            game.paused = true;
+            if let GameState::Warren(session) = &mut game.state {
+                session.auto_route_priority = AutoRoutePriority::Load;
             }
             true
         }

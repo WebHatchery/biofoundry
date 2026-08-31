@@ -201,6 +201,23 @@ impl Game {
                     self.routes_open = false;
                 }
             }
+            UiAction::CycleAutoRoutePriority => {
+                let mut route_changed = false;
+                if let GameState::Warren(session) = &mut self.state {
+                    if session.worm_awake && !session.outposts.is_empty() {
+                        session.auto_route_priority = session.auto_route_priority.next();
+                        route_changed = true;
+                        self.notifications.info(format!(
+                            "Automatic route order: {}.",
+                            session.auto_route_priority.label()
+                        ));
+                        self.audio.play(Sfx::Select);
+                    }
+                }
+                if route_changed {
+                    self.autosave_game();
+                }
+            }
             UiAction::SelectBuilding(pos) => {
                 let selected = matches!(
                     &self.state,

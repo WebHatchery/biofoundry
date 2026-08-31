@@ -34,6 +34,42 @@ impl CargoPriority {
     }
 }
 
+/// Which automatic route job gets the shared Worm first when more than one
+/// policy is ready. The default preserves the original return-first behavior.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub enum AutoRoutePriority {
+    #[default]
+    Return,
+    Resupply,
+    Load,
+}
+
+impl AutoRoutePriority {
+    pub fn next(self) -> Self {
+        match self {
+            Self::Return => Self::Resupply,
+            Self::Resupply => Self::Load,
+            Self::Load => Self::Return,
+        }
+    }
+
+    pub fn label(self) -> &'static str {
+        match self {
+            Self::Return => "Return first",
+            Self::Resupply => "Food first",
+            Self::Load => "Load first",
+        }
+    }
+
+    pub fn order(self) -> [Self; 3] {
+        match self {
+            Self::Return => [Self::Return, Self::Resupply, Self::Load],
+            Self::Resupply => [Self::Resupply, Self::Load, Self::Return],
+            Self::Load => [Self::Load, Self::Return, Self::Resupply],
+        }
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Outpost {
     pub pos: TilePos,
