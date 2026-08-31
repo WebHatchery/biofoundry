@@ -419,6 +419,17 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
             game.routes_open = false;
             game.paused = true;
         }
+        "endless_waypoint_in_flight" => {
+            begin(game, "endless_waypoint_awarded");
+            game.notifications.clear();
+            if let GameState::Warren(session) = &mut game.state {
+                if let Some(route) = session.outposts.first_mut() {
+                    route.cargo.insert(Good::Ore, 2);
+                    let pos = route.pos;
+                    let _ = simulation::outposts::start_to_shrine(session, &game.data, pos);
+                }
+            }
+        }
         "endless_signal_cache" => {
             begin(game, "endless_relay");
             game.notifications.clear();

@@ -38,7 +38,7 @@ pub(super) fn draw_route_links(session: &GameSession, data: &GameData, tile_size
         {
             let fraction = transit_route_fraction(
                 transit.remaining,
-                data.balance.worm_transit_time_sec,
+                transit_total_sec(outpost, data),
                 transit.direction,
             );
             let pulse = route_point(shrine_center, outpost_center, fraction);
@@ -57,6 +57,10 @@ pub(super) fn draw_route_links(session: &GameSession, data: &GameData, tile_size
             );
         }
     }
+}
+
+fn transit_total_sec(outpost: &crate::state::outposts::Outpost, data: &GameData) -> f32 {
+    crate::simulation::outposts::transit_time_sec(outpost, data)
 }
 
 fn tile_center(pos: TilePos, tile_size: f32) -> Vec2 {

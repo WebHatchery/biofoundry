@@ -1,4 +1,6 @@
 use super::*;
+use crate::data::GameData;
+use crate::state::outposts::Outpost;
 
 #[test]
 fn outbound_transit_pulse_starts_at_the_shrine_and_reaches_the_outpost() {
@@ -44,4 +46,24 @@ fn route_pulse_progress_clamps_malformed_remaining_time() {
 fn route_point_interpolates_between_shrine_and_outpost() {
     let point = route_point(vec2(10.0, 20.0), vec2(30.0, 60.0), 0.25);
     assert_eq!(point, vec2(15.0, 30.0));
+}
+
+#[test]
+fn waypoint_route_pulse_uses_the_shorter_transit_time() {
+    let data = GameData::load().expect("embedded game data");
+    let mut outpost = Outpost::new(TilePos::new(4, 4));
+    outpost.waypoint_upgraded = true;
+
+    assert_eq!(
+        transit_total_sec(&outpost, &data),
+        data.balance.outpost_waypoint_transit_time_sec
+    );
+    assert_eq!(
+        transit_route_fraction(
+            data.balance.outpost_waypoint_transit_time_sec,
+            transit_total_sec(&outpost, &data),
+            TransitDirection::ToOutpost,
+        ),
+        0.0
+    );
 }
