@@ -516,7 +516,8 @@ pub struct UnlockDef {
     pub name: String,
     pub description: String,
     /// Which session counter drives this (for example
-    /// "beetles_captured" or "outpost_archive_claims").
+    /// "beetles_captured", "outpost_archive_claims", or
+    /// "outpost_muster_claims").
     pub counter: String,
     pub threshold: u32,
     /// "unlock_building", "unlock_equipment", "guard_dps_mult",
@@ -536,7 +537,7 @@ pub struct EquipmentDef {
     /// Job affinity: only a creature of this job equips and benefits.
     pub job: String,
     pub cost_ingots: u32,
-    /// "mine_speed_mult", "carry_bonus", "smith_time_mult",
+    /// "mine_speed_mult", "carry_bonus", "smith_time_mult", or
     /// "guard_dps_mult".
     pub effect: String,
     pub value: f32,

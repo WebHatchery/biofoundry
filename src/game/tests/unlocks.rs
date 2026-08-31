@@ -11,6 +11,16 @@ fn archive_wayfinder_unlock_notice_points_to_the_blacksmith() {
 }
 
 #[test]
+fn resonance_forging_unlock_notice_points_to_the_blacksmith() {
+    let (data, session) = session();
+
+    assert_eq!(
+        unlock_notice(&data, &session, "Resonance Forging"),
+        "Unlocked: Resonance Forging — queue it at the Blacksmith."
+    );
+}
+
+#[test]
 fn adaptive_haulers_unlock_notice_names_the_biological_payoff() {
     let (data, session) = session();
 

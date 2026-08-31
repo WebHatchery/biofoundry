@@ -630,6 +630,44 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                 }
             }
         }
+        "endless_muster_harness" => {
+            begin(game, "endless_wormbone_drill");
+            game.notifications.clear();
+            game.paused = true;
+            let mut focus_pos = None;
+            if let GameState::Warren(session) = &mut game.state {
+                session.outpost_muster_claims = 1;
+                session.unlocked.insert("archive_wayfinder".to_owned());
+                session.unlocked.insert("resonance_forging".to_owned());
+                let blacksmith_pos = session
+                    .buildings
+                    .iter()
+                    .find(|building| building.kind == "blacksmith")
+                    .map(|building| building.pos);
+                if let Some(pos) = blacksmith_pos {
+                    if let Some(blacksmith) = session.building_at_mut(pos) {
+                        blacksmith.orders.clear();
+                        blacksmith.stocks.clear();
+                    }
+                    session.economy.ingots_stock = game
+                        .data
+                        .equipment_def("wormsong_harness")
+                        .map(|equipment| equipment.cost_ingots)
+                        .unwrap_or(22);
+                    let _ = session.queue_equipment_order(
+                        &game.data,
+                        pos,
+                        "wormsong_harness".to_owned(),
+                        game.data.balance.order_queue_size,
+                    );
+                    game.selected_building = Some(pos);
+                    focus_pos = Some(pos);
+                }
+            }
+            if let Some(pos) = focus_pos {
+                game.focus_camera_on_tile(pos);
+            }
+        }
         "endless_routes" => {
             super::begin(game, "endless_load_preview");
             if let GameState::Warren(session) = &mut game.state {

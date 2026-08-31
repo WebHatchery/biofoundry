@@ -308,6 +308,7 @@ pub fn counter_value(session: &GameSession, name: &str) -> u32 {
         "ore_delivered_total" => session.economy.ore_delivered_total,
         "waste_processed" => session.progress.waste_processed,
         "outpost_archive_claims" => session.outpost_archive_claims,
+        "outpost_muster_claims" => session.outpost_muster_claims,
         other => session.progress.counter(other),
     }
 }

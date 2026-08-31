@@ -65,6 +65,40 @@ fn archive_wayfinder_replaces_a_weaker_carrier_tool() {
 }
 
 #[test]
+fn first_muster_unlocks_and_replaces_the_archive_carrier_tool() {
+    let (data, mut session, _) = super::novel::active_outpost(181);
+    let carrier_index = session
+        .creatures
+        .iter()
+        .position(|creature| creature.job == Job::Carrier)
+        .expect("the active-outpost fixture has a carrier");
+    session.outpost_muster_claims = 1;
+    session.unlocked.insert("archive_wayfinder".to_owned());
+    session
+        .economy
+        .gear_stock
+        .insert("wormsong_harness".to_owned(), 1);
+
+    let report = simulation::tick(&mut session, &data);
+
+    assert!(report
+        .wild
+        .unlocked
+        .iter()
+        .any(|name| name == "Resonance Forging"));
+    assert!(session.unlocked.contains("resonance_forging"));
+    assert_eq!(session.creatures[carrier_index].equipment, None);
+    let stockpile = session.stockpile_pos();
+    let carrier = &mut session.creatures[carrier_index];
+    carrier.x = stockpile.x as f32 + 0.5;
+    carrier.y = stockpile.y as f32 + 0.5;
+    carrier.clear_task();
+    simulation::tick(&mut session, &data);
+    let carrier = &session.creatures[carrier_index];
+    assert_eq!(carrier.equipment.as_deref(), Some("wormsong_harness"));
+}
+
+#[test]
 fn relay_contract_needs_two_active_routes_and_rewards_once() {
     let (data, mut session, _) = super::novel::active_outpost(173);
     session.outpost_charter_claimed = true;

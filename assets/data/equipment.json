@@ -75,5 +75,14 @@
     "effect": "carry_bonus",
     "value": 4.0,
     "requires_unlock": "archive_wayfinder"
+  },
+  {
+    "id": "wormsong_harness",
+    "name": "Wormsong Harness",
+    "job": "carrier",
+    "cost_ingots": 22,
+    "effect": "carry_bonus",
+    "value": 6.0,
+    "requires_unlock": "resonance_forging"
   }
 ]

@@ -42,7 +42,8 @@ param(
         "endless_muster",
         "endless_muster_awarded",
         "endless_waypoint",
-        "endless_waypoint_awarded"
+        "endless_waypoint_awarded",
+        "endless_muster_harness"
     ),
     [int]$WindowWidth = 1280,
     [int]$WindowHeight = 720,

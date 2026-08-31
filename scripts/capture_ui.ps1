@@ -16,7 +16,7 @@
     endless_convoy, endless_convoy_awarded, endless_muster, endless_muster_awarded,
     endless_waypoint, endless_waypoint_awarded, endless_waypoint_in_flight,
     endless_signal_cache, endless_signal_cache_awarded,
-    endless_signal_cache_haul, and endless_wormbone_drill.
+    endless_signal_cache_haul, endless_wormbone_drill, and endless_muster_harness.
 
     The explicit `crowding` scene demonstrates the Jobs-panel recovery guidance.
 
@@ -70,7 +70,8 @@ if (-not $PSBoundParameters.ContainsKey("Scenes")) {
         "endless_signal_cache",
         "endless_signal_cache_awarded",
         "endless_signal_cache_haul",
-        "endless_wormbone_drill"
+        "endless_wormbone_drill",
+        "endless_muster_harness"
     )
 }
 $gameDir = Split-Path -Parent $PSScriptRoot

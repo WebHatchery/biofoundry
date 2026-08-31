@@ -69,6 +69,9 @@ pub(super) fn draw_inspect_panel(
     // The blacksmith panel carries the production-order queue and craft
     // buttons, and the breeding pit its breed buttons — both taller.
     let height = match building.kind.as_str() {
+        "blacksmith" if compact && data.equipment.len() >= 10 => {
+            154.0 + data.equipment.len() as f32 * inspect_button_step
+        }
         "blacksmith" => 194.0 + data.equipment.len() as f32 * inspect_button_step,
         "breeding_pit" => {
             if compact {
@@ -748,7 +751,9 @@ pub(super) fn draw_inspect_panel(
 }
 
 fn inspection_button_metrics(kind: &str, compact: bool, equipment_count: usize) -> (f32, f32) {
-    if compact && kind == "blacksmith" && equipment_count >= 8 {
+    if compact && kind == "blacksmith" && equipment_count >= 10 {
+        (30.0, 32.0)
+    } else if compact && kind == "blacksmith" && equipment_count >= 8 {
         (34.0, 38.0)
     } else if compact && matches!(kind, "blacksmith" | "breeding_pit") {
         (36.0, 40.0)

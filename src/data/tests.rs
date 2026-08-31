@@ -101,6 +101,21 @@ fn equipment_loads_with_valid_job_affinities() {
         wayfinder.value > frame.value,
         "the first Archive page should improve hauling"
     );
+    let harness = data
+        .equipment_def("wormsong_harness")
+        .expect("Wormsong Harness exists");
+    assert_eq!(harness.job, "carrier");
+    assert_eq!(
+        harness.requires_unlock.as_deref(),
+        Some("resonance_forging")
+    );
+    assert!(
+        harness.value > wayfinder.value,
+        "the first Muster should improve the carrier tier"
+    );
+    assert!(data.unlocks.iter().any(
+        |unlock| unlock.id == "resonance_forging" && unlock.counter == "outpost_muster_claims"
+    ));
     // Every item targets a real, gear-wearing job.
     for eq in &data.equipment {
         assert!(

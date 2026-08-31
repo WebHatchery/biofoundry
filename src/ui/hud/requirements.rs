@@ -26,6 +26,14 @@ pub(super) fn unlock_requirement(data: &GameData, id: &str) -> Option<String> {
             };
             format!("log {} {noun}", unlock.threshold)
         }
+        "outpost_muster_claims" => {
+            let noun = if unlock.threshold == 1 {
+                "Worm Road Muster"
+            } else {
+                "Worm Road Musters"
+            };
+            format!("hold {} {noun}", unlock.threshold)
+        }
         _ => return None,
     };
     Some(phrase)

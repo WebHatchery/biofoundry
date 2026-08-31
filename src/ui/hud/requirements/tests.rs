@@ -22,6 +22,10 @@ fn unlocks_explain_the_action_and_threshold() {
         unlock_requirement(&data, "archive_wayfinder").as_deref(),
         Some("log 1 Archive page")
     );
+    assert_eq!(
+        unlock_requirement(&data, "resonance_forging").as_deref(),
+        Some("hold 1 Worm Road Muster")
+    );
 }
 
 #[test]
@@ -43,5 +47,10 @@ fn locked_gates_show_live_progress_from_the_simulation_counter() {
     assert_eq!(
         unlock_requirement_progress(&session, &data, "archive_wayfinder").as_deref(),
         Some("log 1 Archive page (0/1)")
+    );
+    session.outpost_muster_claims = 0;
+    assert_eq!(
+        unlock_requirement_progress(&session, &data, "resonance_forging").as_deref(),
+        Some("hold 1 Worm Road Muster (0/1)")
     );
 }

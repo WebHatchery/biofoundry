@@ -123,6 +123,10 @@ fn compact_specialist_cards_use_larger_action_targets() {
         (34.0, 38.0)
     );
     assert_eq!(
+        inspection_button_metrics("blacksmith", true, 10),
+        (30.0, 32.0)
+    );
+    assert_eq!(
         inspection_button_metrics("breeding_pit", true, 0),
         (36.0, 40.0)
     );

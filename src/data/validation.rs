@@ -16,6 +16,7 @@ const UNLOCK_COUNTERS: &[&str] = &[
     "ingots_forged",
     "ore_delivered_total",
     "outpost_archive_claims",
+    "outpost_muster_claims",
 ];
 
 pub(super) fn validate(data: &GameData) -> Result<(), String> {
