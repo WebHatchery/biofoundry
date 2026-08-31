@@ -33,6 +33,7 @@ fn field_guide_explains_breeding_specialists() {
     assert!(INSPECT_HELP_BODY.contains("Breeding Pit"));
     assert!(INSPECT_HELP_BODY.contains("after onboarding"));
     assert!(INSPECT_HELP_BODY.contains("benefits"));
+    assert!(INSPECT_HELP_BODY.contains("Rest Hollow"));
     assert!(INSPECT_HELP_BODY.contains("Load order"));
 }
 

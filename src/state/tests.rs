@@ -291,6 +291,27 @@ fn placement_rules_reject_occupied_and_rock_tiles() {
 }
 
 #[test]
+fn rest_hollow_expands_local_workforce_capacity() {
+    let data = GameData::load().unwrap();
+    let mut session = GameSession::new(&data, 5);
+    let before = session.local_warren_capacity(&data);
+    let spot = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(pos, _)| session.can_place_building(*pos))
+        .map(|(pos, _)| pos)
+        .expect("a free floor tile for a Rest Hollow");
+
+    session.buildings.push(Building::new("rest_hollow", spot));
+
+    assert_eq!(
+        session.local_warren_capacity(&data),
+        before + data.balance.rest_hollow_capacity as usize
+    );
+}
+
+#[test]
 fn placement_rules_reject_an_isolated_floor_pocket() {
     let data = GameData::load().unwrap();
     let mut session = GameSession::new(&data, 6);

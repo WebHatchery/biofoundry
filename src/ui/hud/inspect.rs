@@ -18,6 +18,7 @@ use macroquad_toolkit::ui::draw_ui_text_ex;
 
 mod breeding;
 mod outpost;
+mod rooms;
 mod status;
 mod study;
 mod workstations;
@@ -29,6 +30,7 @@ use outpost::{
     draw_compact_route_controls, draw_full_route_controls, outpost_signal_cache_summary,
     outpost_waypoint_summary, CompactRouteContext, FullRouteContext,
 };
+use rooms::draw_rest_hollow_inspection;
 pub(super) use status::inspect_status;
 #[cfg(test)]
 use status::outpost_expedition_hint;
@@ -223,6 +225,9 @@ pub(super) fn draw_inspect_panel(
                 &mut y,
             );
             line("Carriers haul to the Cook Pot", dark::TEXT_DIM, &mut y);
+        }
+        "rest_hollow" => {
+            draw_rest_hollow_inspection(data, x, &mut y);
         }
         "study_pen" => {
             line(

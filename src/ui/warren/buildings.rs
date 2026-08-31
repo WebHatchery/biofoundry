@@ -31,6 +31,7 @@ pub(super) fn draw(
         "kiln" => draw_kiln(building, x, y, tile_size),
         "smelter" => draw_smelter(building, x, y, tile_size),
         "feeding_trough" => draw_feeding_trough(building, x, y, tile_size),
+        "rest_hollow" => draw_rest_hollow(x, y, tile_size),
         "trap" => draw_trap(x, y, tile_size),
         "study_pen" => draw_study_pen(x, y, tile_size),
         "breeding_pit" => draw_breeding_pit(x, y, tile_size),
@@ -249,6 +250,38 @@ fn draw_feeding_trough(building: &Building, x: f32, y: f32, ts: f32) {
             Color::new(0.84, 0.72, 0.46, 1.0),
         );
     }
+}
+
+fn draw_rest_hollow(x: f32, y: f32, ts: f32) {
+    draw_rectangle(
+        x + 3.0,
+        y + 3.0,
+        ts - 6.0,
+        ts - 6.0,
+        Color::new(0.18, 0.22, 0.28, 1.0),
+    );
+    draw_rectangle_lines(
+        x + 3.0,
+        y + 3.0,
+        ts - 6.0,
+        ts - 6.0,
+        2.0,
+        Color::new(0.52, 0.72, 0.78, 0.95),
+    );
+    draw_ellipse(
+        x + ts * 0.50,
+        y + ts * 0.56,
+        ts * 0.28,
+        ts * 0.14,
+        0.0,
+        Color::new(0.70, 0.55, 0.42, 0.95),
+    );
+    draw_circle(
+        x + ts * 0.72,
+        y + ts * 0.30,
+        ts * 0.07,
+        Color::new(0.92, 0.80, 0.42, 0.95),
+    );
 }
 
 fn draw_trap(x: f32, y: f32, ts: f32) {

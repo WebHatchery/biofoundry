@@ -78,6 +78,7 @@
   "trough_food_cap": 12.0,
   "trough_feed_per_min": 4.0,
   "capacity_tiles_per_creature": 10.0,
+  "rest_hollow_capacity": 6,
   "overcrowding_work_penalty": 0.35,
   "morale_recovery_per_sec": 0.015,
   "morale_desertion_sec": 180.0,

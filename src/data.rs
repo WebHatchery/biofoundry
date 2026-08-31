@@ -207,6 +207,10 @@ pub struct Balance {
     /// One creature per this many usable floor tiles before overcrowding.
     #[serde(default = "default_capacity_tiles")]
     pub capacity_tiles_per_creature: f32,
+    /// Additional local workforce slots supplied by each post-campaign Rest
+    /// Hollow. Unlike Outpost rooms, these slots remain in the warren.
+    #[serde(default = "default_rest_hollow_capacity")]
+    pub rest_hollow_capacity: u32,
     #[serde(default = "default_overcrowding_penalty")]
     pub overcrowding_work_penalty: f32,
     #[serde(default = "default_morale_recovery")]
@@ -383,6 +387,9 @@ fn default_trough_feed_rate() -> f32 {
 }
 fn default_capacity_tiles() -> f32 {
     10.0
+}
+fn default_rest_hollow_capacity() -> u32 {
+    6
 }
 fn default_overcrowding_penalty() -> f32 {
     0.35

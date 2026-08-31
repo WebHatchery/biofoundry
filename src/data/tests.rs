@@ -166,6 +166,7 @@ fn balance_values_are_playable() {
     assert!(b.raw_recipe_multiplier > 0.0);
     assert!(b.cooked_recipe_multiplier > 0.0);
     assert!(b.waste_storage_cap > 0.0);
+    assert!(b.rest_hollow_capacity > 0);
     assert!(b.outpost_capacity > 0);
     assert!(b.outpost_upgrade_ingots > 0);
     assert!(b.outpost_upgraded_storage_cap > b.outpost_storage_cap);

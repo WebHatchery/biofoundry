@@ -79,6 +79,13 @@
     "requires_unlock": "slime_janitor"
   },
   {
+    "id": "rest_hollow",
+    "name": "Rest Hollow",
+    "cost_ore": 24,
+    "buildable": true,
+    "requires_unlock": null
+  },
+  {
     "id": "outpost",
     "name": "Worm Outpost",
     "cost_ore": 30,

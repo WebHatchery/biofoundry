@@ -171,6 +171,9 @@ pub(in crate::ui::hud) fn inspect_status(
     data: &GameData,
     building: &Building,
 ) -> (&'static str, Color) {
+    if building.kind == "rest_hollow" {
+        return ("Providing room", dark::POSITIVE);
+    }
     if building.kind == "study_pen" && session.progress.specimens == 0 {
         return ("Waiting for specimens", dark::WARNING);
     }

@@ -77,6 +77,25 @@ fn empty_study_pen_reports_its_missing_specimens() {
 }
 
 #[test]
+fn rest_hollow_inspection_reports_its_passive_capacity_role() {
+    let data = GameData::load().expect("embedded game data");
+    let mut session = GameSession::new(&data, 8);
+    let pos = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(pos, tile)| tile.walkable() && session.can_place_building(*pos))
+        .map(|(pos, _)| pos)
+        .expect("a walkable Rest Hollow location");
+    session.buildings.push(Building::new("rest_hollow", pos));
+
+    assert_eq!(
+        inspect_status(&session, &data, session.building_at(pos).unwrap()),
+        ("Providing room", dark::POSITIVE)
+    );
+}
+
+#[test]
 fn breeding_labels_explain_specialist_roles() {
     let data = GameData::load().expect("embedded game data");
 

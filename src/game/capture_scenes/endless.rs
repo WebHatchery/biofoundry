@@ -99,6 +99,37 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                 ));
             }
         }
+        "endless_rest_hollow" => {
+            super::begin(game, "endless");
+            game.notifications.clear();
+            game.paused = true;
+            let mut focus_pos = None;
+            if let GameState::Warren(session) = &mut game.state {
+                session.economy.ore_stock = game
+                    .data
+                    .buildings
+                    .get("rest_hollow")
+                    .expect("Rest Hollow capture data")
+                    .cost_ore;
+                let spot = session
+                    .world
+                    .tiles
+                    .iter_with_pos()
+                    .filter(|(pos, _)| session.can_place_building(*pos))
+                    .map(|(pos, _)| pos)
+                    .max_by_key(|pos| {
+                        (pos.manhattan_distance(&session.spawn_tile()), pos.x, pos.y)
+                    });
+                if let Some(spot) = spot {
+                    session.buildings.push(Building::new("rest_hollow", spot));
+                    game.selected_building = Some(spot);
+                    focus_pos = Some(spot);
+                }
+            }
+            if let Some(spot) = focus_pos {
+                game.focus_camera_on_tile(spot);
+            }
+        }
         "endless_crew_upgrade" => {
             super::begin(game, "endless_load_preview");
             if let GameState::Warren(session) = &mut game.state {

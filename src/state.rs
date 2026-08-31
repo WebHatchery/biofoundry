@@ -374,10 +374,9 @@ impl GameSession {
         true
     }
 
-    /// Number of walkable tiles available to workers in the warren itself.
-    /// Number of local workers the warren's walkable floor can support before
-    /// crowding pressure begins. Active outpost rooms are intentionally not
-    /// included: they house remote crew rather than expanding local floor.
+    /// Number of local workers the warren can support before crowding begins.
+    /// Walkable floor supplies the base capacity; post-campaign Rest Hollows
+    /// add dedicated local room without changing route geometry.
     pub fn local_warren_capacity(&self, data: &GameData) -> usize {
         let floor_tiles = self
             .world
@@ -385,7 +384,9 @@ impl GameSession {
             .iter_with_pos()
             .filter(|(_, t)| t.walkable())
             .count() as f32;
-        (floor_tiles / data.balance.capacity_tiles_per_creature).floor() as usize
+        let floor_capacity = (floor_tiles / data.balance.capacity_tiles_per_creature).floor();
+        floor_capacity as usize
+            + self.buildings_of("rest_hollow").count() * data.balance.rest_hollow_capacity as usize
     }
 
     /// Number of usable tiles, plus the rooms remote outposts provide.
