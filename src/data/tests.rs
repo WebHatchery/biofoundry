@@ -45,6 +45,14 @@ fn equipment_loads_with_valid_job_affinities() {
     assert_eq!(pick.job, "miner");
     assert!(pick.cost_ingots > 0);
     assert!(pick.value > 1.0, "a pickaxe should be a speed multiplier");
+    let drill = data
+        .equipment_def("wormbone_drill")
+        .expect("Wormbone Drill exists");
+    assert_eq!(drill.requires_unlock.as_deref(), Some("outpost_charter"));
+    assert!(
+        drill.value > pick.value,
+        "the Charter reward should improve mining"
+    );
     // Every item targets a real, gear-wearing job.
     for eq in &data.equipment {
         assert!(
@@ -106,4 +114,15 @@ fn content_validation_rejects_broken_references() {
         .validate()
         .expect_err("broken content should be rejected");
     assert!(error.contains("missing_building"));
+}
+
+#[test]
+fn content_validation_rejects_broken_equipment_unlocks() {
+    let mut data = GameData::load().unwrap();
+    data.equipment[0].requires_unlock = Some("missing_unlock".to_owned());
+
+    let error = data
+        .validate()
+        .expect_err("broken equipment gates should be rejected");
+    assert!(error.contains("missing_unlock"));
 }

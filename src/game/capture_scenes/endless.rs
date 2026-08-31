@@ -2,7 +2,7 @@
 
 use super::super::Game;
 use crate::simulation;
-use crate::state::creatures::Good;
+use crate::state::creatures::{Good, Job};
 use crate::state::structures::Building;
 use crate::state::GameState;
 
@@ -169,6 +169,39 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                     route.expedition_progress =
                         simulation::outposts::expedition_cycle_sec(route, &game.data)
                             - simulation::SIM_DT;
+                }
+            }
+        }
+        "endless_wormbone_drill" => {
+            super::post_campaign::begin(game, "endless");
+            game.paused = true;
+            if let GameState::Warren(session) = &mut game.state {
+                session.outpost_charter_claimed = true;
+                session.economy.ingots_stock = 8;
+                let spawn = session.spawn_tile();
+                let spot = session
+                    .world
+                    .tiles
+                    .iter_with_pos()
+                    .filter(|(pos, _)| session.can_place_building(*pos))
+                    .map(|(pos, _)| pos)
+                    .min_by_key(|pos| (pos.manhattan_distance(&spawn), pos.x, pos.y));
+                if let Some(spot) = spot {
+                    let mut shop = Building::new("blacksmith", spot);
+                    shop.add_stock(Good::Ingot, 8.0);
+                    session.buildings.push(shop);
+                    if let Some(worker) = session
+                        .creatures
+                        .iter_mut()
+                        .find(|creature| !creature.is_remote())
+                    {
+                        worker.job = Job::Smith;
+                        worker.x = spot.x as f32 + 0.5;
+                        worker.y = spot.y as f32 + 0.5;
+                        worker.clear_task();
+                    }
+                    game.selected_building = Some(spot);
+                    game.focus_camera_on_tile(spot);
                 }
             }
         }

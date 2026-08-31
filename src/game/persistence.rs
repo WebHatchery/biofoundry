@@ -376,14 +376,20 @@ pub(super) fn validate_loaded_session(
             validate_nonnegative_finite(*amount, &format!("building stock {good:?}"))?;
         }
         for order in &building.orders {
-            if data.equipment_def(order).is_none() {
+            let Some(equipment) = data.equipment_def(order) else {
                 return Err(format!("unknown equipment order id {order:?}"));
+            };
+            if !session.equipment_unlocked(equipment) {
+                return Err(format!("locked equipment order id {order:?}"));
             }
         }
     }
     for equipment in session.economy.gear_stock.keys() {
-        if data.equipment_def(equipment).is_none() {
+        let Some(definition) = data.equipment_def(equipment) else {
             return Err(format!("unknown stored equipment id {equipment:?}"));
+        };
+        if !session.equipment_unlocked(definition) {
+            return Err(format!("locked stored equipment id {equipment:?}"));
         }
     }
 
@@ -456,8 +462,11 @@ pub(super) fn validate_loaded_session(
             return Err("creature wellbeing contains a non-finite value".to_owned());
         }
         if let Some(equipment) = &creature.equipment {
-            if data.equipment_def(equipment).is_none() {
+            let Some(definition) = data.equipment_def(equipment) else {
                 return Err(format!("unknown equipped item id {equipment:?}"));
+            };
+            if !session.equipment_unlocked(definition) {
+                return Err(format!("locked equipped item id {equipment:?}"));
             }
         }
         validate_task_positions(session, &creature.task, &creature.path)?;

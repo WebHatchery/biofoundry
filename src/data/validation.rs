@@ -1,6 +1,6 @@
 //! Semantic validation for the embedded content tables.
 
-use super::{GameData, TutorialDone};
+use super::{GameData, TutorialDone, OUTPOST_CHARTER_UNLOCK};
 use std::collections::HashSet;
 
 const WORKSTATION_JOBS: &[&str] = &["miner", "smith"];
@@ -176,6 +176,16 @@ fn validate_equipment(data: &GameData) -> Result<(), String> {
                 "equipment '{}' must have a positive cost and finite value",
                 equipment.id
             ));
+        }
+        if let Some(unlock) = &equipment.requires_unlock {
+            if unlock != OUTPOST_CHARTER_UNLOCK
+                && !data.unlocks.iter().any(|candidate| candidate.id == *unlock)
+            {
+                return Err(format!(
+                    "equipment '{}' references missing unlock '{unlock}'",
+                    equipment.id
+                ));
+            }
         }
     }
     Ok(())

@@ -34,6 +34,7 @@ automated simulation results into first-time-player evidence.
 | Endless Outpost survey rig | Pass (focused and capture evidence) | A route with both the expanded hold and camp can spend 16 banked ingots once to install a survey rig, raising the expedition yield from 3 to 4 ore per scout. The inspection card and route ledger expose the yield, the expedition forecast and completion use the upgraded value, and legacy routes retain the base yield. Refreshed [ui_endless_survey_upgrade.png](../verification/ui_endless_survey_upgrade.png) and [ui_endless_survey_upgraded.png](../verification/ui_endless_survey_upgraded.png) captures show the gated purchase and success toast. |
 | Endless Outpost resonance beacon | Pass (focused and capture evidence) | A route with a survey rig can spend 24 banked ingots once to tune a resonance beacon, shortening each scouting cycle from 30 to 20 seconds. The inspection hint, route ledger, expedition forecast, completion tick, and completed-campaign Objective expose the faster cycle, while legacy routes retain the original timing. Refreshed [ui_endless_resonator_upgrade.png](../verification/ui_endless_resonator_upgrade.png) and [ui_endless_resonator_upgraded.png](../verification/ui_endless_resonator_upgraded.png) captures show the gated purchase and success toast. |
 | Endless Worm Road Charter | Pass (focused and capture evidence) | After three completed scouting hauls across the awakened Outpost network, the data-driven one-time Charter awards 12 banked ingots and persists its claimed state. The completed-campaign Objective exposes the live haul target and reward, the simulation emits a safe-beat success event, and focused captures show the 2/3 setup and reward toast in `endless_charter` and `endless_charter_awarded`. |
+| Endless Charter equipment payoff | Pass (focused and capture evidence) | Claiming the Worm Road Charter unlocks the data-driven 8-ingot Wormbone Drill. The Blacksmith keeps the recipe disabled with an explicit `Charter required` label until the milestone is claimed; afterward the visible recipe can be queued, and the auto-equip loop prefers it over a weaker Iron Pickaxe for miners. Focused gate, persistence, simulation, and content-validation coverage pass; refreshed [ui_compact_blacksmith.png](../verification/ui_compact_blacksmith.png) shows the locked recipe, while [ui_compact_endless_wormbone_drill.png](../verification/ui_compact_endless_wormbone_drill.png) shows the unlocked Endless recipe and the 800×450 touch audit reports no grown-target overlap. |
 | Endless crew dispatch quota | Pass (focused and capture evidence) | An awakened Outpost exposes the visible `Crew per run · Auto` control, which cycles through cargo-only and bounded scout counts. Legacy saves keep automatic dispatch, while cargo-only loads can deliver provisions without borrowing local workers; the Objective names the control when that setting blocks an otherwise-ready scouting payload. Refreshed [ui_endless_load_preview.png](../verification/ui_endless_load_preview.png), [ui_endless_upgrade.png](../verification/ui_endless_upgrade.png), and [ui_endless_upgraded.png](../verification/ui_endless_upgraded.png) captures keep the route controls readable. |
 | Endless cargo-only returns | Pass (focused and capture evidence) | A staffed Outpost exposes `Send N cargo · keep crew` beside the normal full return, so a completed haul can come home without recalling the remote scouts. The route keeps those scouts assigned for another expedition, the departure notice explains the choice, and the Objective/field guide describe the remote-team outcome. Refreshed [ui_endless.png](../verification/ui_endless.png), [ui_endless_expedition_report.png](../verification/ui_endless_expedition_report.png), and [ui_endless_upgraded.png](../verification/ui_endless_upgraded.png) captures keep both return paths readable. |
 | Endless automatic cargo returns | Pass (focused and capture evidence) | An awakened Outpost exposes the persisted `Auto-return · Off` / `Auto-return · Cargo only` policy. When an opted-in hold reaches capacity, the fixed-step simulation starts one cargo-only return, preserves the remote scouts and one configured expedition's food when other cargo creates room, and returns provisions too when they alone fill the hold so the route can resupply. It emits a departure notice and autosaves the safe beat; later routes wait for the global worm transit. Refreshed [ui_endless_auto_return.png](../verification/ui_endless_auto_return.png) shows the enabled policy beside the manual return and scouting controls. Live Preview route interaction remains unclaimed because the resumed developer save has not yet reached the Outpost unlock. |
@@ -80,7 +81,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 356 unit tests and 2 integration/code-standard
+- `cargo test --all-targets` — 358 unit tests and 2 integration/code-standard
   targets pass,
   including fresh/simulated/remote-transit valid sessions, modal route
   planning, rejected malformed save shapes, and event-history save/load
@@ -167,6 +168,17 @@ automated simulation results into first-time-player evidence.
   [ui_endless_charter.png](../verification/ui_endless_charter.png) and
   [ui_endless_charter_awarded.png](../verification/ui_endless_charter_awarded.png)
   captures show the 2/3 setup and reward toast at 800×450.
+- Endless Charter equipment payoff — pass; the one-time Charter now unlocks the
+  save-compatible Wormbone Drill, an 8-ingot miner tool that supersedes the
+  Iron Pickaxe's 1.5× mining multiplier with 2×. The Blacksmith's disabled recipe
+  names the exact `Charter required` gate before the milestone and becomes a
+  visible craft target afterward; save validation rejects gated gear in an
+  unclaimed session, and the auto-equip loop chooses the strongest unlocked
+  matching tool. Focused data, game-state, persistence, and simulation coverage
+  passes; refreshed [ui_compact_blacksmith.png](../verification/ui_compact_blacksmith.png)
+  and [ui_compact_endless_wormbone_drill.png](../verification/ui_compact_endless_wormbone_drill.png)
+  captures show the locked and unlocked states, with the 800×450 touch audit
+  reporting no grown-target overlap.
 - Endless crew dispatch quota — pass; a save-compatible optional quota keeps
   older routes on automatic dispatch, cycles the visible control through
   cargo-only and bounded scout counts, and limits new passengers in transit.

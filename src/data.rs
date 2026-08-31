@@ -436,7 +436,14 @@ pub struct EquipmentDef {
     /// "guard_dps_mult".
     pub effect: String,
     pub value: f32,
+    /// Optional persisted progression gate. The Charter is represented by
+    /// the special `outpost_charter` milestone rather than a counter unlock.
+    #[serde(default)]
+    pub requires_unlock: Option<String>,
 }
+
+/// Special equipment gate awarded by the one-time Worm Road Charter.
+pub const OUTPOST_CHARTER_UNLOCK: &str = "outpost_charter";
 
 /// What completes a tutorial step (checked every frame while active).
 #[derive(Debug, Clone, Serialize, Deserialize)]

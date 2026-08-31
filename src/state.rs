@@ -12,7 +12,7 @@ pub mod structures;
 pub mod wildlife;
 pub mod world;
 
-use crate::data::{Balance, GameData};
+use crate::data::{Balance, EquipmentDef, GameData, OUTPOST_CHARTER_UNLOCK};
 use creatures::{Creature, Job};
 use macroquad_toolkit::grid::TilePos;
 use macroquad_toolkit::notifications::LoggedNotification;
@@ -533,6 +533,22 @@ impl GameSession {
         def.requires_unlock
             .as_ref()
             .map(|id| self.unlocked.contains(id))
+            .unwrap_or(true)
+    }
+
+    /// Whether a craftable equipment definition is available in this run.
+    /// The Charter milestone is persisted separately from the counter-based
+    /// unlock set because it is a one-time Endless reward.
+    pub fn equipment_unlocked(&self, def: &EquipmentDef) -> bool {
+        def.requires_unlock
+            .as_deref()
+            .map(|id| {
+                if id == OUTPOST_CHARTER_UNLOCK {
+                    self.outpost_charter_claimed
+                } else {
+                    self.unlocked.contains(id)
+                }
+            })
             .unwrap_or(true)
     }
 }

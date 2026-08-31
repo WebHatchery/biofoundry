@@ -175,6 +175,43 @@ fn blacksmith_order_crafts_gear_a_miner_equips() {
     );
 }
 
+/// The Charter gate keeps the Wormbone Drill out of the early campaign, then
+/// lets it replace a weaker mining tool when both are in the stockpile.
+#[test]
+fn charter_drill_is_gated_and_replaces_a_weaker_mining_tool() {
+    let (data, mut session) = boot_on_config_seed();
+    session.economy.food = 500.0;
+    session.creatures.clear();
+    session.spawn_creature(&data, "goblin", Job::Miner);
+    session
+        .economy
+        .gear_stock
+        .insert("wormbone_drill".to_owned(), 1);
+
+    tick(&mut session, &data);
+    assert!(session.creatures[0].equipment.is_none());
+    assert_eq!(
+        session.economy.gear_stock.get("wormbone_drill").copied(),
+        Some(1),
+        "a locked Charter recipe must stay in the stockpile"
+    );
+
+    session.outpost_charter_claimed = true;
+    session.creatures[0].equipment = Some("iron_pickaxe".to_owned());
+    session.creatures[0].clear_task();
+    tick(&mut session, &data);
+
+    assert_eq!(
+        session.creatures[0].equipment.as_deref(),
+        Some("wormbone_drill")
+    );
+    assert_eq!(
+        session.economy.gear_stock.get("iron_pickaxe").copied(),
+        Some(1),
+        "the replaced Iron Pickaxe returns to stock"
+    );
+}
+
 /// A reassigned goblin drops job-mismatched gear back to the pool.
 #[test]
 fn reassigned_worker_drops_mismatched_gear() {

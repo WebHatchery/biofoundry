@@ -30,5 +30,14 @@
     "cost_ingots": 3,
     "effect": "guard_dps_mult",
     "value": 1.5
+  },
+  {
+    "id": "wormbone_drill",
+    "name": "Wormbone Drill",
+    "job": "miner",
+    "cost_ingots": 8,
+    "effect": "mine_speed_mult",
+    "value": 2.0,
+    "requires_unlock": "outpost_charter"
   }
 ]

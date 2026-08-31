@@ -220,8 +220,8 @@ impl Game {
                     if report.outpost_charter_awarded {
                         safe_beat_reached = true;
                         self.notifications.success(format!(
-                            "Worm Road Charter · +{} ingots.",
-                            self.data.balance.outpost_charter_reward_ingots
+                            "Worm Road Charter · +{} ingots · Wormbone Drill unlocked.",
+                            self.data.balance.outpost_charter_reward_ingots,
                         ));
                         self.audio.play(Sfx::Complete);
                     }

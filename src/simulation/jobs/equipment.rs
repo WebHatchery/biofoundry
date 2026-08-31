@@ -5,6 +5,7 @@ use crate::data::{GameData, SpeciesDef};
 use crate::simulation::jobs::routing::send_to;
 use crate::state::creatures::{Creature, Job, Task};
 use crate::state::GameSession;
+use std::cmp::Ordering;
 
 /// The equipment job-affinity key for a job, if it can wear gear.
 fn job_key(job: Job) -> Option<&'static str> {
@@ -38,9 +39,35 @@ fn wants_gear(creature: &Creature, session: &GameSession, data: &GameData) -> Op
     let key = job_key(creature.job)?;
     data.equipment
         .iter()
-        .filter(|e| e.job == key)
-        .find(|e| session.economy.gear_stock.get(&e.id).copied().unwrap_or(0) > 0)
+        .filter(|e| e.job == key && session.equipment_unlocked(e))
+        .filter(|e| session.economy.gear_stock.get(&e.id).copied().unwrap_or(0) > 0)
+        .max_by(|a, b| a.value.partial_cmp(&b.value).unwrap_or(Ordering::Equal))
         .map(|e| e.id.clone())
+}
+
+fn stronger_gear_waiting(
+    creature: &Creature,
+    current_id: &str,
+    session: &GameSession,
+    data: &GameData,
+) -> bool {
+    let Some(current) = data.equipment_def(current_id) else {
+        return false;
+    };
+    data.equipment.iter().any(|candidate| {
+        candidate.job == current.job
+            && candidate.effect == current.effect
+            && candidate.value > current.value
+            && session.equipment_unlocked(candidate)
+            && session
+                .economy
+                .gear_stock
+                .get(&candidate.id)
+                .copied()
+                .unwrap_or(0)
+                > 0
+            && job_key(creature.job) == Some(candidate.job.as_str())
+    })
 }
 
 /// Indirect auto-equip: drop gear that no longer matches this creature's
@@ -53,10 +80,10 @@ pub(super) fn tick_gear(
 ) -> bool {
     // Drop job-mismatched gear (e.g. a reassigned goblin).
     if let Some(id) = creature.equipment.clone() {
-        let job_ok = data
-            .equipment_def(&id)
-            .is_some_and(|e| job_key(creature.job) == Some(e.job.as_str()));
-        if !job_ok {
+        let job_ok = data.equipment_def(&id).is_some_and(|e| {
+            session.equipment_unlocked(e) && job_key(creature.job) == Some(e.job.as_str())
+        });
+        if !job_ok || stronger_gear_waiting(creature, &id, session, data) {
             *session.economy.gear_stock.entry(id).or_insert(0) += 1;
             creature.equipment = None;
         }

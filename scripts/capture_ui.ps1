@@ -10,7 +10,7 @@
     The focused Outpost expansion scenes are endless_crew_upgrade,
     endless_crew_upgraded, endless_survey_upgrade, endless_survey_upgraded,
     endless_resonator_upgrade, endless_resonator_upgraded, endless_charter,
-    and endless_charter_awarded.
+    endless_charter_awarded, and endless_wormbone_drill.
 
     The explicit `crowding` scene demonstrates the Jobs-panel recovery guidance.
 
@@ -41,7 +41,8 @@ if (-not $PSBoundParameters.ContainsKey("Scenes")) {
         "endless_resonator_upgrade",
         "endless_resonator_upgraded",
         "endless_charter",
-        "endless_charter_awarded"
+        "endless_charter_awarded",
+        "endless_wormbone_drill"
     )
 }
 $gameDir = Split-Path -Parent $PSScriptRoot

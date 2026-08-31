@@ -289,16 +289,21 @@ pub(super) fn draw_inspect_panel(
             for eq in &data.equipment {
                 let banked = session.economy.gear_stock.get(&eq.id).copied().unwrap_or(0);
                 let queued = building.orders.iter().filter(|o| **o == eq.id).count();
-                let mut label = format!("{} ({})", eq.name, eq.cost_ingots);
-                if queued > 0 {
+                let unlocked = session.equipment_unlocked(eq);
+                let mut label = if unlocked {
+                    format!("{} ({})", eq.name, eq.cost_ingots)
+                } else {
+                    format!("{} {LOCKED_SPECIALIST_MARKER} · Charter required", eq.name)
+                };
+                if unlocked && queued > 0 {
                     label.push_str(&format!("  ·{queued} queued"));
-                } else if banked > 0 {
+                } else if unlocked && banked > 0 {
                     label.push_str(&format!("  ·{banked} ready"));
                 }
                 if hud_button(
                     Rect::new(x, y, bw, inspect_button_height),
                     &label,
-                    queue_available,
+                    queue_available && unlocked,
                     mouse,
                 ) {
                     actions.push(UiAction::QueueOrder(pos, eq.id.clone()));

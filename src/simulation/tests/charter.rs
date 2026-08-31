@@ -7,6 +7,10 @@ use crate::state::creatures::Good;
 fn charter_awards_ingots_after_the_configured_number_of_hauls() {
     let (data, mut session, _) = super::novel::active_outpost(164);
     let goal = data.balance.outpost_charter_haul_goal;
+    let drill = data
+        .equipment_def("wormbone_drill")
+        .expect("Wormbone Drill data");
+    assert!(!session.equipment_unlocked(drill));
     session.economy.ingots_stock = 0;
     for route in &mut session.outposts {
         route.expeditions_completed = goal.saturating_sub(1);
@@ -17,6 +21,7 @@ fn charter_awards_ingots_after_the_configured_number_of_hauls() {
 
     assert!(outposts::claim_outpost_charter(&mut session, &data));
     assert!(session.outpost_charter_claimed);
+    assert!(session.equipment_unlocked(drill));
     assert_eq!(
         session.economy.ingots_stock,
         data.balance.outpost_charter_reward_ingots

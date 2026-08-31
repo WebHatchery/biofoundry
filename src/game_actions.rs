@@ -565,8 +565,12 @@ impl Game {
                 let cap = self.data.balance.order_queue_size;
                 let mut queued = false;
                 if let GameState::Warren(session) = &mut self.state {
+                    let recipe_unlocked = self
+                        .data
+                        .equipment_def(&item)
+                        .is_some_and(|equipment| session.equipment_unlocked(equipment));
                     if let Some(b) = session.building_at_mut(pos) {
-                        if b.kind == "blacksmith" && b.orders.len() < cap {
+                        if recipe_unlocked && b.kind == "blacksmith" && b.orders.len() < cap {
                             b.orders.push(item);
                             queued = true;
                             self.notifications.info("Order queued.");
