@@ -1,5 +1,5 @@
 use super::*;
-use crate::state::creatures::Good;
+use crate::state::creatures::{Good, Job};
 use crate::state::structures::Building;
 
 #[test]
@@ -109,4 +109,46 @@ fn completed_objective_guides_the_next_network_muster_after_convoy() {
     );
     assert!(objective.next.contains("1/4 active routes"));
     assert!(objective.next.contains("5/16 hauls"));
+}
+
+#[test]
+fn completed_objective_guides_the_wormsong_concord_after_muster() {
+    let (data, mut session) = boot();
+    session.worm_awake = true;
+    session.unlocked.insert("worm_transit".to_owned());
+    session.outpost_charter_claimed = true;
+    session.outpost_archive_claims = 1;
+    session.outpost_relay_claimed = true;
+    session.outpost_convoy_claims = 1;
+    session.outpost_muster_claims = 1;
+    let pos = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(pos, _)| session.can_place_building(*pos))
+        .map(|(pos, _)| pos)
+        .unwrap();
+    session.buildings.push(Building::new("outpost", pos));
+    session.ensure_outpost(pos);
+    session.outposts[0].active = true;
+    let mut crew = Vec::new();
+    for (job, equipment) in [
+        (Job::Carrier, "wormsong_harness"),
+        (Job::Miner, "wormsong_drill"),
+        (Job::Smith, "wormsong_smiths_hammer"),
+    ] {
+        session.spawn_creature(&data, "goblin", job);
+        let creature = session.creatures.last_mut().expect("specialist spawned");
+        creature.equipment = Some(equipment.to_owned());
+        creature.remote_outpost = Some(pos);
+        crew.push(creature.id);
+    }
+    session.outposts[0].crew = crew;
+    session.outposts[0].cargo.insert(Good::CookedFood, 4);
+
+    let objective = CampaignObjective::current(&session, &data);
+
+    assert!(objective.next.contains("Wormsong"));
+    assert!(objective.next.contains("3/4 roles"));
+    assert!(objective.next.contains("station a Wormsong"));
 }

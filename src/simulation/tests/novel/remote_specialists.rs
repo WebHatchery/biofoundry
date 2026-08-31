@@ -91,3 +91,45 @@ fn route_bonus_is_empty_when_stationed_crew_has_legacy_tools() {
         outposts::storage_capacity(&session.outposts[0], &data)
     );
 }
+
+#[test]
+fn wormsong_concord_requires_each_role_on_an_active_route() {
+    let (data, mut session, outpost_pos) = active_outpost(185);
+    session.outpost_muster_claims = 1;
+    session.economy.ingots_stock = 3;
+    session.creatures.clear();
+
+    let specialist_gear = [
+        (Job::Carrier, "wormsong_harness"),
+        (Job::Miner, "wormsong_drill"),
+        (Job::Smith, "wormsong_smiths_hammer"),
+        (Job::Guard, "wormsong_guard_blade"),
+    ];
+    let mut crew = Vec::new();
+    for (job, equipment) in specialist_gear {
+        session.spawn_creature(&data, "goblin", job);
+        let creature = session.creatures.last_mut().expect("specialist spawned");
+        creature.equipment = Some(equipment.to_owned());
+        creature.remote_outpost = Some(outpost_pos);
+        crew.push(creature.id);
+    }
+    session.outposts[0].crew = crew[..3].to_vec();
+
+    assert_eq!(outposts::outpost_concord_progress(&session, &data), (3, 1));
+    assert!(!outposts::claim_outpost_concord(&mut session, &data));
+    assert!(!session.outpost_concord_claimed);
+
+    session.outposts[0].crew.push(crew[3]);
+    assert_eq!(outposts::outpost_concord_progress(&session, &data), (4, 1));
+    assert!(outposts::claim_outpost_concord(&mut session, &data));
+    assert!(session.outpost_concord_claimed);
+    assert_eq!(
+        session.economy.ingots_stock,
+        3 + data.balance.outpost_concord_reward_ingots
+    );
+    assert!(!outposts::claim_outpost_concord(&mut session, &data));
+
+    session.outpost_concord_claimed = false;
+    session.outposts[0].active = false;
+    assert_eq!(outposts::outpost_concord_progress(&session, &data), (0, 0));
+}

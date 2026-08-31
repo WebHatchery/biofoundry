@@ -1,5 +1,5 @@
 use super::*;
-use crate::state::creatures::Good;
+use crate::state::creatures::{Good, Job};
 use crate::state::structures::Building;
 
 #[test]
@@ -29,6 +29,40 @@ fn route_network_summary_reports_the_whole_warren_network() {
     assert_eq!(
         route_network_summary(&session, &data),
         "Routes 2 · Active 1 · Held cargo 5 · Remote crew 2 · Ore scouted 9 · Charter 0/3 · +12 ingots · Attention 2"
+    );
+}
+
+#[test]
+fn concord_summary_reports_role_progress_and_claimed_reward() {
+    let data = GameData::load().expect("embedded game data");
+    let mut session = GameSession::new(&data, 62);
+    session.worm_awake = true;
+    session.outpost_muster_claims = 1;
+    let mut route = Outpost::new(TilePos::new(4, 4));
+    route.active = true;
+    let mut crew = Vec::new();
+    for (job, equipment) in [
+        (Job::Carrier, "wormsong_harness"),
+        (Job::Miner, "wormsong_drill"),
+        (Job::Smith, "wormsong_smiths_hammer"),
+    ] {
+        session.spawn_creature(&data, "goblin", job);
+        let creature = session.creatures.last_mut().expect("specialist spawned");
+        creature.equipment = Some(equipment.to_owned());
+        crew.push(creature.id);
+    }
+    route.crew = crew;
+    session.outposts.push(route);
+
+    assert_eq!(
+        concord_contract_summary(&session, &data).as_deref(),
+        Some("Wormsong Concord · 3/4 roles · 1 active routes · +48 ingots")
+    );
+
+    session.outpost_concord_claimed = true;
+    assert_eq!(
+        concord_contract_summary(&session, &data).as_deref(),
+        Some("Wormsong Concord complete · 4 roles on the road · +48 ingots")
     );
 }
 

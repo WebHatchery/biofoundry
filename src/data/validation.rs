@@ -71,6 +71,11 @@ fn validate_balance(data: &GameData) -> Result<(), String> {
     {
         return Err("outpost Muster goals and reward must exceed Convoy".to_owned());
     }
+    if balance.outpost_concord_role_goal != 4 || balance.outpost_concord_reward_ingots == 0 {
+        return Err(
+            "outpost Wormsong Concord requires four roles and a positive reward".to_owned(),
+        );
+    }
     if balance.outpost_signal_cache_upgrade_ingots == 0
         || balance.outpost_signal_cache_ingots_per_haul == 0
     {

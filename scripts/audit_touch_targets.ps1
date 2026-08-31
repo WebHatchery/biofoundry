@@ -44,7 +44,8 @@ param(
         "endless_waypoint",
         "endless_waypoint_awarded",
         "endless_muster_harness",
-        "endless_wormsong_route"
+        "endless_wormsong_route",
+        "endless_wormsong_concord"
     ),
     [int]$WindowWidth = 1280,
     [int]$WindowHeight = 720,

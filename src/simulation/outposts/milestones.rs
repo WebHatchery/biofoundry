@@ -1,6 +1,8 @@
 use crate::data::GameData;
 use crate::state::GameSession;
 
+use super::specialists::wormsong_route_bonus;
+
 /// Return the aggregate completed scouting hauls across all routes.
 pub fn total_expeditions(session: &GameSession) -> u32 {
     session.outposts.iter().fold(0, |total, outpost| {
@@ -208,4 +210,53 @@ pub fn claim_outpost_muster(session: &mut GameSession, data: &GameData) -> u32 {
         .ingots_stock
         .saturating_add(musters.saturating_mul(data.balance.outpost_muster_reward_ingots));
     musters
+}
+
+/// Count distinct Wormsong roles currently stationed on active routes.
+/// Duplicate kits add throughput, but a Concord needs one carrier, miner,
+/// smith, and guard represented somewhere on the live Worm Road.
+pub fn outpost_concord_progress(session: &GameSession, data: &GameData) -> (u32, u32) {
+    let active_routes = session
+        .outposts
+        .iter()
+        .filter(|outpost| outpost.active)
+        .count() as u32;
+    if !session.worm_awake || session.outpost_muster_claims == 0 {
+        return (0, active_routes);
+    }
+    let mut roles = [false; 4];
+    for outpost in session.outposts.iter().filter(|outpost| outpost.active) {
+        let bonus = wormsong_route_bonus(session, data, outpost);
+        roles[0] |= bonus.carriers > 0;
+        roles[1] |= bonus.miners > 0;
+        roles[2] |= bonus.smiths > 0;
+        roles[3] |= bonus.guards > 0;
+    }
+    (
+        roles.into_iter().filter(|present| *present).count() as u32,
+        active_routes,
+    )
+}
+
+/// Award the one-time Wormsong Concord once every remote specialist role is
+/// represented on an active route after the Muster has been held.
+pub fn claim_outpost_concord(session: &mut GameSession, data: &GameData) -> bool {
+    if session.outpost_concord_claimed
+        || !session.worm_awake
+        || session.outpost_muster_claims == 0
+        || data.balance.outpost_concord_role_goal == 0
+        || data.balance.outpost_concord_reward_ingots == 0
+    {
+        return false;
+    }
+    let (roles, _) = outpost_concord_progress(session, data);
+    if roles < data.balance.outpost_concord_role_goal {
+        return false;
+    }
+    session.outpost_concord_claimed = true;
+    session.economy.ingots_stock = session
+        .economy
+        .ingots_stock
+        .saturating_add(data.balance.outpost_concord_reward_ingots);
+    true
 }

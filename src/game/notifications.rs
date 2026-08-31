@@ -81,6 +81,14 @@ pub(super) fn announce_outpost_milestones(
         ));
         audio.play(Sfx::Complete);
     }
+    if report.outpost_concord_awarded {
+        awarded = true;
+        notifications.success(format!(
+            "Wormsong Concord · +{} ingots · all four roles on the road.",
+            data.balance.outpost_concord_reward_ingots,
+        ));
+        audio.play(Sfx::Complete);
+    }
     awarded
 }
 

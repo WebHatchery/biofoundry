@@ -9,10 +9,12 @@ use crate::state::GameState;
 use macroquad_toolkit::grid::TilePos;
 
 mod remote_specialists;
+mod wormsong_concord;
 
 pub(super) fn begin(game: &mut Game, scene: &str) {
     match scene {
         "endless_wormsong_route" => remote_specialists::begin(game),
+        "endless_wormsong_concord" => wormsong_concord::begin(game),
         "endless_auto_return" => {
             super::begin(game, "endless_load_preview");
             if let GameState::Warren(session) = &mut game.state {

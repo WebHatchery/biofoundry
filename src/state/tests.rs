@@ -20,6 +20,7 @@ fn session_boots_from_config() {
     assert!(!session.vein_ore.is_empty());
     assert!(session.economy.food > 0.0);
     assert!(!session.outpost_charter_claimed);
+    assert!(!session.outpost_concord_claimed);
 }
 
 #[test]
@@ -137,6 +138,21 @@ fn saves_from_before_muster_contract_load_with_no_contracts_claimed() {
     let restored: GameSession = serde_json::from_value(encoded).unwrap();
 
     assert_eq!(restored.outpost_muster_claims, 0);
+}
+
+#[test]
+fn saves_from_before_wormsong_concord_load_unclaimed() {
+    let data = GameData::load().unwrap();
+    let session = GameSession::new(&data, 42);
+    let mut encoded = serde_json::to_value(&session).unwrap();
+    encoded
+        .as_object_mut()
+        .unwrap()
+        .remove("outpost_concord_claimed");
+
+    let restored: GameSession = serde_json::from_value(encoded).unwrap();
+
+    assert!(!restored.outpost_concord_claimed);
 }
 
 #[test]

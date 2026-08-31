@@ -287,6 +287,12 @@ pub struct Balance {
     /// Ingots awarded for each completed Worm Road Muster.
     #[serde(default = "default_outpost_muster_reward_ingots")]
     pub outpost_muster_reward_ingots: u32,
+    /// Number of distinct Wormsong roles required for the one-time Concord.
+    #[serde(default = "default_outpost_concord_role_goal")]
+    pub outpost_concord_role_goal: u32,
+    /// Ingots awarded when all Wormsong roles take the road together.
+    #[serde(default = "default_outpost_concord_reward_ingots")]
+    pub outpost_concord_reward_ingots: u32,
     /// Ingot cost for the post-Relay Signal Cache route upgrade.
     #[serde(default = "default_outpost_signal_cache_upgrade_ingots")]
     pub outpost_signal_cache_upgrade_ingots: u32,
@@ -442,6 +448,12 @@ fn default_outpost_muster_haul_goal() -> u32 {
 }
 fn default_outpost_muster_reward_ingots() -> u32 {
     32
+}
+fn default_outpost_concord_role_goal() -> u32 {
+    4
+}
+fn default_outpost_concord_reward_ingots() -> u32 {
+    48
 }
 fn default_outpost_signal_cache_upgrade_ingots() -> u32 {
     28

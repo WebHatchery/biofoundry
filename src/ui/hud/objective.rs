@@ -475,6 +475,9 @@ fn charter_guidance(session: &GameSession, data: &GameData) -> Option<String> {
         if let Some(guidance) = relay_contract_guidance(session, data) {
             return Some(guidance);
         }
+        if let Some(guidance) = concord_contract_guidance(session, data) {
+            return Some(guidance);
+        }
         if let Some(guidance) = muster_contract_guidance(session, data) {
             return Some(guidance);
         }
@@ -545,6 +548,22 @@ fn muster_contract_guidance(session: &GameSession, data: &GameData) -> Option<St
         data.balance.outpost_muster_route_goal,
         data.balance.outpost_muster_haul_goal,
         data.balance.outpost_muster_reward_ingots
+    ))
+}
+
+fn concord_contract_guidance(session: &GameSession, data: &GameData) -> Option<String> {
+    if session.outpost_muster_claims == 0
+        || session.outpost_concord_claimed
+        || data.balance.outpost_concord_role_goal == 0
+    {
+        return None;
+    }
+    let (roles, active_routes) =
+        crate::simulation::outposts::outpost_concord_progress(session, data);
+    Some(format!(
+        "Next: station a Wormsong carrier, miner, smith, and guard on active routes · Concord {roles}/{} roles · {active_routes} active routes · +{} ingots.",
+        data.balance.outpost_concord_role_goal,
+        data.balance.outpost_concord_reward_ingots
     ))
 }
 
