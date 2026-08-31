@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-31
-**Source revision:** `e324e5b`
+**Source revision:** `80bbd19`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -46,6 +46,7 @@ automated simulation results into first-time-player evidence.
 | Endless cargo-only returns | Pass (focused and capture evidence) | A staffed Outpost exposes `Send N cargo · keep crew` beside the normal full return, so a completed haul can come home without recalling the remote scouts. The route keeps those scouts assigned for another expedition, the departure notice explains the choice, and the Objective/field guide describe the remote-team outcome. Refreshed [ui_endless.png](../verification/ui_endless.png), [ui_endless_expedition_report.png](../verification/ui_endless_expedition_report.png), and [ui_endless_upgraded.png](../verification/ui_endless_upgraded.png) captures keep both return paths readable. |
 | Endless automatic cargo returns | Pass (focused and capture evidence) | An awakened Outpost exposes the persisted `Auto-return · Off` / `Auto-return · Cargo only` policy. When an opted-in hold reaches capacity, the fixed-step simulation starts one cargo-only return, preserves the remote scouts and one configured expedition's food when other cargo creates room, and returns provisions too when they alone fill the hold so the route can resupply. It emits a departure notice and autosaves the safe beat; later routes wait for the global worm transit. Refreshed [ui_endless_auto_return.png](../verification/ui_endless_auto_return.png) shows the enabled policy beside the manual return and scouting controls. Live Preview route interaction remains unclaimed because the resumed developer save has not yet reached the Outpost unlock. |
 | Endless automatic Outpost resupply | Pass (focused and capture evidence) | An awakened Outpost exposes the persisted `Auto-resupply · Off` / `Auto-resupply · Food only` policy. When staffed remote scouts need provisions, the fixed-step simulation starts a food-only transit from the home reserve without dispatching more crew; a manually paused expedition is left untouched. The departure notice, Objective, and field guide name the automatic behavior. Refreshed [ui_endless_auto_resupply.png](../verification/ui_endless_auto_resupply.png) shows the shortage state, enabled policy, and visible recovery controls. Live Preview route interaction remains unclaimed because the resumed developer save has not yet reached the Outpost unlock. |
+| Endless automatic outbound loading | Pass (focused and capture evidence) | An awakened Outpost exposes the persisted `Auto-load · Off` / `Auto-load · Cargo + crew` policy. When an opted-in route has hold room and reserve-safe cargo or eligible local scouts, the fixed-step simulation starts one standard outbound run, respects manual scouting pause and full holds, and shares the persisted round-robin cursor with the other automatic logistics policies. The departure notice, Objective, route ledger, and field guide name the behavior. Refreshed [ui_endless_auto_load.png](../verification/ui_endless_auto_load.png) and [ui_endless_auto_load_started.png](../verification/ui_endless_auto_load_started.png) show the enabled policy and in-flight departure, with compact variants preserving the 800×450 controls. Live Preview route interaction remains unclaimed because the resumed developer save has not yet reached the Outpost unlock. |
 | Endless transit failure recovery | Pass (focused and published build evidence) | If an in-flight worm route is deactivated, the simulation restores its payload, records the failed Outpost, and emits a one-shot transit-failure event. The game turns that event into a visible danger notification with the exact recovery action and treats it as a safe-beat autosave, so a refresh cannot erase the route's recovered state. |
 | Multi-route failure visibility | Pass (focused evidence) | Reopening one failed Outpost now clears only that route's failure; the global route warning remains visible while any other Outpost still needs recovery, including when a healthy second route starts a transit. This keeps the top-bar warning consistent with the per-route inspection state as remote routes multiply. |
 | Loaded route failure visibility | Pass (focused and published build evidence) | Installing a save now reconciles each persisted Outpost failure with the global top-bar warning, repairing a missing banner and clearing a stale one. The route records remain authoritative across refresh and load boundaries. |
@@ -57,25 +58,25 @@ automated simulation results into first-time-player evidence.
 | Load availability reconciliation | Pass (focused and published build evidence) | If Load finds neither the primary slot nor its backup, the title screen now disables the stale Continue action and reports that no saved warren is available, with a visible New Warren recovery path. A successful Load also re-enables Continue when startup or an earlier recovery had marked the slot unavailable. Startup now recognizes a surviving backup as available, while damaged-save recovery remains unchanged. |
 | Active-run load confirmation | Pass (focused and capture evidence) | The active Warren Load control now opens a visible `Load Last Save` / `Keep Current` confirmation before replacing the live run, names that post-checkpoint work would be discarded, and pauses simulation while the choice is open. The confirmation owns the full frame's world input, so taps on the dimmed background cannot select or modify the Warren. Confirmed loads clear the modal before installing the saved session, including the failed-load path, so the player is never trapped behind stale confirmation UI. Title-screen Continue and non-viable recovery retain their direct Load actions; refreshed [ui_load_confirm.png](../verification/ui_load_confirm.png), [ui_compact_load_confirm.png](../verification/ui_compact_load_confirm.png), [ui_load_confirm_resolved.png](../verification/ui_load_confirm_resolved.png), and [ui_compact_load_confirm_resolved.png](../verification/ui_compact_load_confirm_resolved.png) captures keep the prompt and resolved state readable. |
 | Menu exit checkpoint guard | Pass (focused and published build evidence) | Leaving a viable Warren through the visible Menu now requires its automatic checkpoint to succeed. If storage rejects that write, the live Warren stays open with the existing `SAVE FAILED` recovery banner and a direct instruction to use Save, so a first-save failure cannot silently discard the run. A viable Warren still exits normally after a successful autosave; non-viable recovery keeps its existing direct Load/New Warren choices. The refreshed [ui_menu_save_guard.png](../verification/ui_menu_save_guard.png) and [ui_compact_menu_save_guard.png](../verification/ui_compact_menu_save_guard.png) captures keep the recovery instruction readable at normal and compact scales. |
-| Outpost route setting persistence | Pass (focused and published build evidence) | Successful route activation, cargo-order changes, crew quotas, scouting pause/resume, and automatic return/resupply policy changes now write an autosave immediately. A refresh after changing a route control therefore preserves the player's recovery or logistics decision instead of waiting for a later transit or expedition beat. |
+| Outpost route setting persistence | Pass (focused and published build evidence) | Successful route activation, cargo-order changes, crew quotas, scouting pause/resume, and automatic load/return/resupply policy changes now write an autosave immediately. A refresh after changing a route control therefore preserves the player's recovery or logistics decision instead of waiting for a later transit or expedition beat. |
 | Worm Shrine offering policy persistence | Pass (focused and published build evidence) | The visible Pause/Resume offerings control now autosaves immediately after a successful toggle, so protecting the reserve remains in force across refreshes instead of silently restarting the Shrine draw. Invalid targets do not write a checkpoint. |
 | Direct player decision persistence | Pass (focused and published build evidence) | Successful job reassignment, specialist recruitment, breeding, Blacksmith queueing, tutorial skip, milestone-report dismissal, building placement, and dig designation now write an immediate autosave. Failed or duplicate actions do not write, and the refreshed save roundtrip covers the persisted job, queue, map, and decision flags. |
 | Progression checkpoint persistence | Pass (focused and published build evidence) | Capture unlocks, newly granted systems, breeding-pit hatches, survived raids, and tutorial-step advancement now enter the safe-beat autosave path. The next refresh therefore retains earned progression without turning ordinary simulation ticks into constant storage writes. |
 | Food-crisis Farm recovery | Pass (focused and published Preview) | Below the normal Carrier food reserve, a pending Farm now still receives construction ore from the stockpile or a backed-up Mine buffer; unrelated Blacksmith construction remains shed. The Objective names that Farm handoff and the visible Jobs response when Food is falling. After reloading the published Preview save with Food `24` and a Farm site needing `10` ore, the site advanced to `9` ore remaining and the objective reached `2/50` delivered ore during the food crisis; the refreshed [ui_tutorial_food.png](../verification/ui_tutorial_food.png) capture preserves the same handoff. |
 | Reachable construction placement | Pass (focused and capture evidence) | Building ghosts now require a walkable path from the stockpile, so a player cannot create a worker-delivered construction site in an isolated floor pocket. The generated spawn chamber also restores its center exits after procedural water placement; focused coverage checks the placement rejection and 128 deterministic world seeds. Legacy worker-serviced buildings already present in older saves now show `No valid route` on the map and filtered legend, with the inspection card directing the player to dig a tunnel; [ui_unreachable_workstation.png](../verification/ui_unreachable_workstation.png) preserves the recovery state. |
 | Engineer Mine slot accounting | Pass (focused and published build evidence) | The optional Engineer now uses the same live Mine-claim accounting as ordinary Miners, so it waits when every post is occupied and reserves a free slot before walking toward it. A stale over-capacity arrival is rejected instead of overbooking the Mine; focused simulation coverage verifies both branches. |
-| Multi-Outpost automatic scheduling | Pass (focused evidence) | Automatic returns and food-only resupplies share a persisted round-robin cursor, so a continuously needy first route cannot monopolize the single worm transit. The cursor advances only after a successful automatic departure and defaults safely for older saves; focused multi-route simulation and save-roundtrip coverage verifies that later eligible Outposts receive their turn. |
+| Multi-Outpost automatic scheduling | Pass (focused evidence) | Automatic returns, food-only resupplies, and standard outbound loads share a persisted round-robin cursor, so a continuously needy first route cannot monopolize the single worm transit. The cursor advances only after a successful automatic departure and defaults safely for older saves; focused multi-route simulation and save-roundtrip coverage verifies that later eligible Outposts receive their turn. |
 | Multi-route ledger | Pass (published capture evidence) | The awakened HUD now exposes a visible Routes control that opens a modal Worm Route Ledger. Each route shows the same inspection status vocabulary, live `Scouting` state and percentage when active, cargo/hold and crew counts, policy state, and a touch-sized Inspect action into the existing Outpost card; selecting a route also centers the bounds-clamped map camera on it. The network `Attention` total now includes active routes with no scout crew, keeping the aggregate count aligned with each card's blocker status. The release [ui_endless_routes.png](../verification/ui_endless_routes.png) capture shows two routes together; the ledger pauses planning and keeps the Close action visible in the compact probe. |
 | Network route summary | Pass (published capture evidence) | The Worm Route Ledger now summarizes the whole network above its cards: total routes, active routes, held cargo, remote crew, scouted ore, live Worm Road Charter progress/reward, routes needing attention, and aggregate `Cache kept N` earnings when any route has a cache. Each route card also mirrors the selected Outpost's persisted Signal Cache history, showing `Cache +N/haul · Kept N` at normal size and a compact `Cache +N · Kept N` policy line at 800×450. The summary is derived from the same persisted route state as the cards, so scaling from one route to several does not require opening each card to understand the network. Refreshed [ui_endless_routes.png](../verification/ui_endless_routes.png) and [ui_compact_endless_routes.png](../verification/ui_compact_endless_routes.png) keep the summary and route controls readable. |
 | World-space worm route links | Pass (published capture evidence) | After awakening, the world now draws each shrine-to-Outpost link beneath the buildings, using a bright solid path for active routes and a subdued dashed path for inactive ones. A purchased Waypoint adds a distinct midpoint marker, while an in-flight return shows a high-contrast pulse moving from the Outpost toward the shrine and outbound travel reverses that direction. Refreshed [ui_endless.png](../verification/ui_endless.png), [ui_endless_in_flight.png](../verification/ui_endless_in_flight.png), and [ui_endless_arrived.png](../verification/ui_endless_arrived.png) captures show the network feedback without changing route state or save data. |
-| Settled touch-target audit | Pass (focused evidence) | Every enabled menu/HUD button now registers with the shared touch audit. The opt-in `scripts/audit_touch_targets.ps1` sweep settles each screen for neighbor-aware hit growth, reports the smallest target and drawn density, and fails on actual grown-target overlap. The 800×450 sweep passed for the title, settings, New Warren and active-run Load confirmations, core HUD, crafting, shrine, completion, Recent Events newest and older pages, Outpost, multi-route ledger, Signal Cache purchase, award, and completed-haul screens, and Worm Road Waypoint purchase and award screens; modal occlusion keeps covered controls out of the report. |
+| Settled touch-target audit | Pass (focused evidence) | Every enabled menu/HUD button now registers with the shared touch audit. The opt-in `scripts/audit_touch_targets.ps1` sweep settles each screen for neighbor-aware hit growth, reports the smallest target and drawn density, and fails on actual grown-target overlap. The 800×450 sweep passed for the title, settings, New Warren and active-run Load confirmations, core HUD, crafting, shrine, completion, Recent Events newest and older pages, Outpost, automatic outbound loading enabled and in-flight states, multi-route ledger, Signal Cache purchase, award, and completed-haul screens, and Worm Road Waypoint purchase and award screens; modal occlusion keeps covered controls out of the report. |
 | State-aware awakened objective recovery | Pass (focused and capture evidence) | After the worm wakes, the Objective now names the visible recovery action when the forge chain is incomplete: place a Blacksmith, replace an exhausted Mine, staff a Smith, or staff a Carrier. The refreshed worm and completion captures show the first of these prompts, and focused coverage keeps the guidance honest for each recovery state. |
 | Multi-route objective ordering | Pass (focused evidence) | If several active Worm Outposts are present, the completed-campaign Objective prioritizes a route with cargo or crew ready, then a route that can be loaded, before an empty active route. This keeps the next visible instruction actionable as the existing outpost activity scales. |
 | Crowding recovery diagnosis | Pass (focused and capture evidence) | The Jobs panel now turns the existing local-capacity penalty into an actionable warning: when local workers exceed floor capacity it shows the estimated work-rate loss and the visible `Dig` control to open more room. The warning is absent when capacity is sufficient, and [ui_crowding.png](../verification/ui_crowding.png) keeps the diagnosis readable at 800×450. |
 | Optional support upkeep disclosure | Pass (focused and capture evidence) | Available post-campaign support actions now show their ongoing supply draw on a second line before recruitment: food-eaters name their `+food/min` draw and Salamanders name their charcoal-per-batch meal. Already-posted specialists retain their practical role labels, and the refreshed [ui_optional.png](../verification/ui_optional.png) remains readable in the compact layout. |
 | Breeding upkeep disclosure | Pass (focused and capture evidence) | Available Hobgoblin, Overseer, and Engineer actions now show their role benefit, one-time ingot price, and ongoing `food/min` draw before recruitment. Refreshed [ui_breeding.png](../verification/ui_breeding.png) and [ui_compact_breeding.png](../verification/ui_compact_breeding.png) captures keep the two-line choices readable at normal and compact scales. |
 | Minimum-layout spot check | Pass | The 1200×675 canvas and required HUD remained visible in the 1280×720 Preview viewport. |
-| Public metadata alignment | Pass (Preview) | The generated Preview page names the visible touch actions for panning, inspection, tools, Jobs controls, optional specialist recruitment, awakened Outpost cargo runs, optional automatic cargo-only returns and food-only resupply, and the post-awakening Endless/Menu choices. Production FTP publication remains a separate release action. |
+| Public metadata alignment | Pass (Preview) | The generated Preview page names the visible touch actions for panning, inspection, tools, Jobs controls, optional specialist recruitment, awakened Outpost cargo runs, optional automatic loading, cargo-only returns and food-only resupply, and the post-awakening Endless/Menu choices. Production FTP publication remains a separate release action. |
 | Compact viewport exploration | Pass with follow-up | The hosted Preview smoke path at 800×450 keeps the title, field guide, and Warren HUD on-canvas; capture probes at 800×450, 1024×576, 1280×720, and 1440×900 keep the Food/Factory/Worm tutorial cards, Blacksmith queue controls, Shrine pause control, completion choices, and Endless outpost actions visible without clipping or overlap. The compact branch now gives the high-frequency top-bar, Jobs, Build & Dig, Outpost, Blacksmith, Breeding Pit, and Shrine controls larger visual affordances, and the refreshed warning captures keep their messages clear of that row. Representative [ui_compact_warren.png](../verification/ui_compact_warren.png), [ui_compact_blacksmith.png](../verification/ui_compact_blacksmith.png), [ui_compact_breeding.png](../verification/ui_compact_breeding.png), [ui_compact_shrine.png](../verification/ui_compact_shrine.png), [ui_compact_endless_load_preview.png](../verification/ui_compact_endless_load_preview.png), and [ui_compact_endless_upgraded.png](../verification/ui_compact_endless_upgraded.png) captures preserve the responsive states. The compact Blacksmith and Breeding Pit follow-up now uses 36-pixel action targets with 40-pixel spacing; remaining text density and first-time-player comprehension still require human validation. |
 | Visible-control smoke path | Pass | A fresh full-screen Preview warren advanced through visible New Warren, + zoom, direct map drag, map-tap inspection (`Stockpile`), valid Farm placement, `− Miner`/`+ Carrier` reassignment, Pause/Resume, Help/Close, Save, and Load without keyboard input. Invalid placement also returned the readable `Can't build there.` notice. The Load round-trip restored the saved `04:45` state with the 10-ore construction site, 2 Miner/2 Carrier staffing, and tutorial `2/5 — Stabilize the Food Grid`; successful placement returned to Inspect instead of creating a second site. This is developer smoke evidence, not a qualifying first-time-player session. |
 | Packaged HUD recovery controls | Pass | A fresh full-screen Preview run changed Settings volume with visible `−`/`+` controls, opened and closed the Field Guide while paused, and resumed the warren with the same visible HUD and tutorial state. This confirms the modal guide leaves the underlying Warren controls recoverable by pointer; it does not replace the still-open full-campaign evidence. |
@@ -88,7 +89,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 416 unit tests and 2 integration/code-standard
+- `cargo test --all-targets` — 426 unit tests and 2 integration/code-standard
   targets pass,
   including fresh/simulated/remote-transit valid sessions, modal route
   planning, rejected malformed save shapes, and event-history save/load
@@ -105,8 +106,11 @@ automated simulation results into first-time-player evidence.
   clipping. The refreshed [ui_compact_blacksmith.png](../verification/ui_compact_blacksmith.png),
   [ui_compact_breeding.png](../verification/ui_compact_breeding.png), and
   [ui_compact_shrine.png](../verification/ui_compact_shrine.png) captures show
-  the enlarged craft, specialist, and Shrine actions. Remaining text density
-  remains a human-readability follow-up.
+  the enlarged craft, specialist, and Shrine actions; the compact
+  [ui_compact_endless_auto_load.png](../verification/ui_compact_endless_auto_load.png)
+  and [ui_compact_endless_auto_load_started.png](../verification/ui_compact_endless_auto_load_started.png)
+  captures keep the new Dispatch policy and departure notice visible.
+  Remaining text density remains a human-readability follow-up.
 - Endless cargo priority — pass; the outbound hold obeys Ore, Ingots, or Food
   priority, preserves the local food reserve, and persists the selected order
   through a save roundtrip. The shared `CargoLoad` forecast now drives both
@@ -323,6 +327,20 @@ automated simulation results into first-time-player evidence.
   notice coverage passes, with
   [ui_endless_auto_resupply.png](../verification/ui_endless_auto_resupply.png)
   showing the shortage state and enabled recovery policy.
+- Endless automatic outbound loading — pass; an awakened route can persist an
+  opt-in `Auto-load · Cargo + crew` policy. When the route has hold room and
+  reserve-safe cargo or eligible local scouts, the simulation starts a normal
+  outbound worm run, leaves manually paused routes untouched, refuses empty or
+  full-hold launches, respects the cargo-only crew quota, and shares the
+  persisted round-robin cursor with automatic returns and resupplies. It emits
+  a distinct departure notice, marks the event as a safe-beat autosave, and
+  keeps the manual Load action available as an override. Focused state,
+  save-roundtrip, simulation, Objective, route-ledger, overlay, game-notice,
+  and compact touch-audit coverage passes, with
+  [ui_endless_auto_load.png](../verification/ui_endless_auto_load.png) showing
+  the enabled policy and
+  [ui_endless_auto_load_started.png](../verification/ui_endless_auto_load_started.png)
+  showing its in-flight notice.
 - Endless transit failure recovery — pass; an in-flight route that loses its
   active Outpost now restores its payload and records the failure in the
   simulation report exactly once. The game announces the touch-first recovery
@@ -358,8 +376,9 @@ automated simulation results into first-time-player evidence.
   creating a route state that the transport actions cannot unload.
 - Outpost route setting persistence — pass; successful route controls now
   trigger immediate autosaves, and the save-roundtrip coverage includes cargo
-  priority and scouting pause alongside dispatch and automatic logistics
-  policies. The published Preview build includes the updated action path.
+  priority and scouting pause alongside dispatch and automatic load, return,
+  and resupply policies. The published Preview build includes the updated
+  action path.
 - Active-run load confirmation — pass; the top-bar Load action now pauses the
   live simulation and asks for a visible `Load Last Save` or `Keep Current`
   choice before replacing the active Warren. The confirmation claims the
@@ -399,12 +418,12 @@ automated simulation results into first-time-player evidence.
   existing safe-beat autosave boundary. Focused coverage verifies the
   progression report classification, and the published Preview includes the
   updated path.
-- Multi-Outpost automatic scheduling — pass; automatic cargo returns and
-  food-only resupplies use the same save-compatible round-robin cursor. A
-  successful service advances the next starting route, an in-flight worm keeps
-  all other routes waiting without changing the cursor, and a route whose
-  transit cannot start does not consume its turn. Focused multi-route simulation
-  and save-roundtrip coverage passes.
+- Multi-Outpost automatic scheduling — pass; automatic cargo returns,
+  food-only resupplies, and standard outbound loads use the same save-compatible
+  round-robin cursor. A successful service advances the next starting route, an
+  in-flight worm keeps all other routes waiting without changing the cursor,
+  and a route whose transit cannot start does not consume its turn. Focused
+  multi-route simulation and save-roundtrip coverage passes.
 - State-aware awakened objective — pass; focused coverage names the visible
   Build & Dig or Jobs recovery for a missing Blacksmith, exhausted Mine, missing
   Smith, and missing Carrier instead of promising more ingots without a viable
@@ -422,7 +441,8 @@ automated simulation results into first-time-player evidence.
   and its 800×450 completion/Endless path was exercised successfully.
 - Settled touch-target audit — pass; `scripts/audit_touch_targets.ps1` walks
   the title, settings, confirmation, core HUD, crafting, shrine, completion,
-  Outpost, multi-route ledger, Signal Cache purchase, award, and haul, and
+  Outpost, automatic outbound loading enabled and in-flight, multi-route ledger,
+  Signal Cache purchase, award, and haul, and
   Worm Road Waypoint purchase and award
   scenes at 800×450 after the neighbor map is warm. Enabled controls are
   measured, modal occlusion removes covered HUD controls, and the sweep reports
@@ -573,6 +593,15 @@ automated simulation results into first-time-player evidence.
   shows a staffed route short on provisions with `Auto-resupply · Food only`
   enabled, the Objective's wait instruction, and the visible return/load and
   Pause scouting controls.
+- Automatic outbound loading captures —
+  [ui_endless_auto_load.png](../verification/ui_endless_auto_load.png) shows
+  `Auto-load · Cargo + crew` enabled and the Objective's refill guidance, while
+  [ui_endless_auto_load_started.png](../verification/ui_endless_auto_load_started.png)
+  shows the same route in flight with the departure notice. Compact
+  [ui_compact_endless_auto_load.png](../verification/ui_compact_endless_auto_load.png)
+  and [ui_compact_endless_auto_load_started.png](../verification/ui_compact_endless_auto_load_started.png)
+  variants keep the Dispatch target and in-flight state on-canvas at 800×450;
+  both compact states report no grown-target overlap.
 - Paused expedition capture —
   [ui_endless_expedition_paused.png](../verification/ui_endless_expedition_paused.png)
   shows the touch-first `Resume scouting` control, the persisted player-paused
