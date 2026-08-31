@@ -662,10 +662,10 @@ automated simulation results into first-time-player evidence.
   are available; focused inspection coverage also exercises the unlocked and
   staffed Slime paths.
 - Completion capture — [ui_completion.png](../verification/ui_completion.png)
-  shows the Worm Awakened summary naming the food and ingot totals, with visible
-  Continue in Endless and Return to Menu choices. The completed Objective also
-  points toward the first visible Endless forge recovery step. Packaged completion remains an open
-  live-session check below.
+  shows the Worm Awakened summary naming the food and ingot totals, with body
+  copy that names the visible `Continue in Endless` and `Return to Menu` taps.
+  The completed Objective also points toward the first visible Endless forge
+  recovery step. Packaged completion remains an open live-session check below.
 - Endless route capture — [ui_endless.png](../verification/ui_endless.png) shows
   the completed Objective pointing to a cargo run and an active Worm Outpost
   with cargo mix, capacity, crew, directional transit controls, and a clear

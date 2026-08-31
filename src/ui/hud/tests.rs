@@ -81,6 +81,8 @@ fn worm_completion_summary_names_the_resources_consumed() {
         "Fed on {:.0} food and {} ingots",
         data.balance.worm_awaken_at, data.balance.worm_awaken_ingots
     )));
+    assert!(body.contains("Tap Continue in Endless"));
+    assert!(body.contains("tap Return to Menu"));
     assert!(!body.contains("offerings"));
 }
 

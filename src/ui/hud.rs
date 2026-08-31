@@ -301,7 +301,7 @@ fn colony_failure_reason(session: &GameSession, data: &GameData) -> Option<Colon
 
 fn worm_completion_body(session: &GameSession) -> String {
     format!(
-        "Fed on {:.0} food and {} ingots, the great worm rises from the deep and coils around the warren that raised it.\n\nThe campaign is complete in {:.0} minutes. The warren — and its worm — play on.",
+        "Fed on {:.0} food and {} ingots, the great worm rises from the deep and coils around the warren that raised it.\n\nThe campaign is complete in {:.0} minutes. Tap Continue in Endless to keep the warren growing, or tap Return to Menu.",
         session.worm_fed,
         session.worm_ingots_fed,
         simulation::sim_seconds(session) / 60.0
