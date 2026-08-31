@@ -33,8 +33,17 @@ fn panels_claim_scaled_button_margins_before_world_input() {
 fn inspection_card_moves_below_the_tutorial_card() {
     let tutorial = Rect::new(938.0, 72.0, 330.0, 168.0);
 
-    assert_eq!(inspect_panel_top(Some(tutorial)), 250.0);
-    assert_eq!(inspect_panel_top(None), 210.0);
+    assert_eq!(inspect_panel_top(Some(tutorial), false), 250.0);
+    assert_eq!(inspect_panel_top(None, false), 210.0);
+}
+
+#[test]
+fn compact_inspection_card_uses_the_open_right_side_of_the_hud() {
+    assert_eq!(inspect_panel_top(None, true), 60.0);
+    assert_eq!(
+        inspect_panel_top(Some(Rect::new(938.0, 72.0, 330.0, 168.0)), true),
+        250.0
+    );
 }
 
 #[test]

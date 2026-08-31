@@ -779,9 +779,7 @@ pub(super) fn draw_inspect_panel(
 }
 
 fn inspection_button_metrics(kind: &str, compact: bool, equipment_count: usize) -> (f32, f32) {
-    if compact && kind == "blacksmith" && equipment_count >= 13 {
-        (26.0, 28.0)
-    } else if compact && kind == "blacksmith" && equipment_count >= 10 {
+    if compact && kind == "blacksmith" && equipment_count >= 10 {
         (30.0, 32.0)
     } else if compact && kind == "blacksmith" && equipment_count >= 8 {
         (34.0, 38.0)

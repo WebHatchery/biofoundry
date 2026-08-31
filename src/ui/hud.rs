@@ -154,7 +154,7 @@ pub fn draw(
     );
     let tutorial_panel = panels::draw_tutorial_panel(session, data, mouse, ui.scale, &mut actions);
     let objective_panel = panels::draw_objective_panel(session, data);
-    let inspect_top = inspect_panel_top(tutorial_panel);
+    let inspect_top = inspect_panel_top(tutorial_panel, panels::compact_top_bar(ui.scale));
     let inspect_panel = selected.and_then(|pos| {
         inspect::draw_inspect_panel(
             session,
@@ -383,8 +383,10 @@ fn interaction_point(ui: &VirtualUi, mouse: Vec2, touch_position: Option<Vec2>) 
         .unwrap_or(mouse)
 }
 
-fn inspect_panel_top(tutorial_panel: Option<Rect>) -> f32 {
-    tutorial_panel.map_or(210.0, |panel| panel.y + panel.h + 10.0)
+fn inspect_panel_top(tutorial_panel: Option<Rect>, compact: bool) -> f32 {
+    tutorial_panel.map_or(if compact { 60.0 } else { 210.0 }, |panel| {
+        panel.y + panel.h + 10.0
+    })
 }
 
 #[cfg(test)]

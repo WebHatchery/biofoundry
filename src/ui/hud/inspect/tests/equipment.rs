@@ -28,7 +28,7 @@ fn blacksmith_uses_the_exact_muster_gate_for_wormsong_harness() {
 }
 
 #[test]
-fn compact_blacksmith_cards_shrink_for_the_complete_wormsong_tier() {
+fn compact_blacksmith_cards_keep_a_touchable_height_for_the_complete_wormsong_tier() {
     assert_eq!(
         inspection_button_metrics("blacksmith", true, 8),
         (34.0, 38.0)
@@ -39,7 +39,7 @@ fn compact_blacksmith_cards_shrink_for_the_complete_wormsong_tier() {
     );
     assert_eq!(
         inspection_button_metrics("blacksmith", true, 13),
-        (26.0, 28.0)
+        (30.0, 32.0)
     );
     assert_eq!(
         inspection_button_metrics("blacksmith", false, 8),
