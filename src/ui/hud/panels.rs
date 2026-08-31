@@ -4,6 +4,7 @@
 mod food;
 mod specialists;
 mod top_bar;
+mod tutorial;
 mod workforce;
 
 pub(super) use food::draw_food_grid_panel;
@@ -12,6 +13,9 @@ pub(super) use top_bar::{
     compact_food_recovery_hint, compact_raid_defense_hint, compact_top_bar,
     condensed_food_recovery_hint, condensed_raid_defense_hint, reassignable_job_count,
 };
+pub(super) use tutorial::draw_tutorial_panel;
+#[cfg(test)]
+pub(super) use tutorial::tutorial_body;
 use workforce::{engineer_status_label, workforce_capacity_label, workforce_pressure_label};
 
 use crate::data::GameData;
@@ -22,14 +26,12 @@ use crate::ui::hud::requirements::unlock_requirement_progress;
 use crate::ui::hud::widgets::{hud_button, panel_style};
 use crate::ui::hud::HudSprites;
 use crate::ui::legibility::advanced_systems_unlocked;
-use crate::ui::{UiAction, UiMode, LOGICAL_WIDTH};
+use crate::ui::{UiAction, UiMode};
 use macroquad::prelude::*;
 use macroquad_toolkit::prelude::*;
 use macroquad_toolkit::ui::{draw_ui_text_ex, format_mmss};
 
 const OBJECTIVE_PANEL: Rect = Rect::new(548.0, 72.0, 370.0, 128.0);
-const TUTORIAL_PANEL_HEIGHT: f32 = 168.0;
-const TUTORIAL_BODY_HEIGHT: f32 = 94.0;
 const LOCKED_TOOL_MARKER: &str = "[L]";
 
 #[derive(Debug, Clone, Copy)]
@@ -704,90 +706,4 @@ pub(super) fn draw_objective_panel(session: &GameSession, data: &GameData) -> Re
     );
 
     OBJECTIVE_PANEL
-}
-
-/// The tutorial card, top-right: current step, progress chip, and a skip
-/// button. Returns its rect while visible (for pointer-over-UI checks).
-pub(super) fn draw_tutorial_panel(
-    session: &GameSession,
-    data: &GameData,
-    mouse: Vec2,
-    ui_scale: f32,
-    actions: &mut Vec<UiAction>,
-) -> Option<Rect> {
-    let step = crate::tutorial::current_step(session, data)?;
-    let (done, total) = crate::tutorial::progress(session, data);
-
-    let panel = Rect::new(LOGICAL_WIDTH - 342.0, 72.0, 330.0, TUTORIAL_PANEL_HEIGHT);
-    draw_surface_with_title(
-        panel,
-        Some(&format!("Tutorial {}/{} — {}", done + 1, total, step.title)),
-        &panel_style(),
-        TextStyle::new(15.0, dark::TEXT_BRIGHT),
-    );
-
-    let body = tutorial_body(step, session, data);
-    draw_text_block(
-        &body,
-        panel.x + 14.0,
-        panel.y + 42.0,
-        panel.w - 28.0,
-        TUTORIAL_BODY_HEIGHT,
-        14.0,
-        4.0,
-        dark::TEXT,
-    );
-
-    let skip_height = if compact_top_bar(ui_scale) {
-        30.0
-    } else {
-        22.0
-    };
-    if hud_button(
-        Rect::new(
-            panel.right() - 78.0,
-            panel.bottom() - 30.0,
-            64.0,
-            skip_height,
-        ),
-        "Skip",
-        true,
-        mouse,
-    ) {
-        actions.push(UiAction::SkipTutorial);
-    }
-
-    Some(panel)
-}
-
-fn tutorial_body(
-    step: &crate::data::TutorialStepDef,
-    session: &GameSession,
-    data: &GameData,
-) -> String {
-    match step.id.as_str() {
-        "food" => format!(
-            "Read Food Grid: keep Production above Upkeep. Tap Farm, then open floor. Wait for Farm construction. If food pressure rises, {}.",
-            super::objective::job_assignment_action_hint(
-                session,
-                data,
-                Job::Carrier,
-                &[Job::Miner, Job::Smith, Job::Guard],
-            )
-        ),
-        "factory" => format!(
-            "Tap the existing Mine to read its rate. Place a Blacksmith. To staff it, {}. Tap Blacksmith, then Iron Pickaxe; the miner equips it and the Mine speeds up.",
-            super::objective::job_assignment_action_hint(
-                session,
-                data,
-                Job::Smith,
-                &[Job::Miner, Job::Carrier, Job::Cook, Job::Guard],
-            )
-        ),
-        "secure" => format!(
-            "Deliver 50 ore and hold 100 food in Objective. Before a raid, {}. This secures the warren and ends onboarding; next, forge 20 ingots and raise the Shrine.",
-            super::objective::security_handoff_action_hint(session, data)
-        ),
-        _ => step.body.clone(),
-    }
 }

@@ -69,6 +69,23 @@ fn food_tutorial_names_the_available_carrier_action() {
 }
 
 #[test]
+fn tutorial_placement_and_crafting_steps_name_each_visible_tap() {
+    let data = GameData::load().expect("embedded game data");
+    let mut session = GameSession::new(&data, 7);
+
+    session.tutorial_step = 1;
+    let food = crate::tutorial::current_step(&session, &data).expect("food tutorial step");
+    let food_body = tutorial_body(food, &session, &data);
+    assert!(food_body.contains("Tap Farm, then tap open floor"));
+
+    session.tutorial_step = 2;
+    let factory = crate::tutorial::current_step(&session, &data).expect("factory tutorial step");
+    let factory_body = tutorial_body(factory, &session, &data);
+    assert!(factory_body.contains("Tap Blacksmith in Build & Dig, then tap open floor"));
+    assert!(factory_body.contains("Tap the placed Blacksmith, then tap Iron Pickaxe"));
+}
+
+#[test]
 fn factory_tutorial_names_the_available_smith_action() {
     let data = GameData::load().expect("embedded game data");
     let mut session = GameSession::new(&data, 7);

@@ -187,7 +187,7 @@ fn food_and_worm_lessons_name_the_next_visible_tap() {
         .find(|step| step.id == "worm")
         .expect("worm lesson");
 
-    assert!(food.body.contains("Tap Farm, then open floor"));
+    assert!(food.body.contains("Tap Farm, then tap open floor"));
     assert!(worm.body.contains("Tap the Worm Shrine to inspect it"));
 }
 

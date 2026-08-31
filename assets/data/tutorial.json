@@ -8,13 +8,13 @@
   {
     "id": "food",
     "title": "Stabilize the Food Grid",
-    "body": "Read Food Grid: keep Production above Upkeep. Tap Farm, then open floor. Wait for Farm construction. If food pressure rises, use the visible Jobs controls to move a worker to Carrier or Cook.",
+    "body": "Read Food Grid: keep Production above Upkeep. Tap Farm, then tap open floor. Wait for Farm construction. If food pressure rises, use the visible Jobs controls to move a worker to Carrier or Cook.",
     "done": { "kind": "building_completed", "building": "farm" }
   },
   {
     "id": "factory",
     "title": "Close the Living Factory Loop",
-    "body": "Tap the existing Mine to read its rate. Place a Blacksmith. Use the visible Jobs controls to staff Smith if needed. Tap Blacksmith, then Iron Pickaxe; the miner equips it and the Mine speeds up.",
+    "body": "Tap the existing Mine to read its rate. Tap Blacksmith in Build & Dig, then tap open floor. Use the visible Jobs controls to staff Smith if needed. Tap the placed Blacksmith, then tap Iron Pickaxe; the miner equips it and the Mine speeds up.",
     "done": { "kind": "gear_crafted", "item": "iron_pickaxe" }
   },
   {
