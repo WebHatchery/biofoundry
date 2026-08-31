@@ -19,6 +19,64 @@ pub(super) fn equipment_lock_label(
     }
 }
 
+pub(super) fn blacksmith_equipment_label(
+    data: &GameData,
+    equipment: &crate::data::EquipmentDef,
+    compact: bool,
+    unlocked: bool,
+    queued: usize,
+    banked: u32,
+) -> String {
+    let name = if compact {
+        compact_equipment_name(&equipment.id, &equipment.name)
+    } else {
+        equipment.name.as_str()
+    };
+    let mut label = if unlocked {
+        format!("{name} ({})", equipment.cost_ingots)
+    } else {
+        let lock = if compact {
+            compact_equipment_lock_label(&equipment.id).to_owned()
+        } else {
+            equipment_lock_label(data, equipment)
+        };
+        format!("{name} [L] · {lock}")
+    };
+    if unlocked && queued > 0 {
+        label.push_str(&format!("  ·{queued} queued"));
+    } else if unlocked && banked > 0 {
+        label.push_str(&format!("  ·{banked} ready"));
+    }
+    label
+}
+
+fn compact_equipment_name<'a>(id: &str, full_name: &'a str) -> &'a str {
+    match id {
+        "iron_pickaxe" => "Pickaxe",
+        "wormbone_hauling_frame" => "Wormbone Frame",
+        "wormbone_smiths_hammer" => "Wormbone Hammer",
+        "wormbone_guard_blade" => "Wormbone Guard",
+        "wormsong_smiths_hammer" => "Wormsong Hammer",
+        "wormsong_guard_blade" => "Wormsong Guard",
+        _ => full_name,
+    }
+}
+
+fn compact_equipment_lock_label(id: &str) -> &'static str {
+    match id {
+        "wormbone_drill"
+        | "wormbone_hauling_frame"
+        | "wormbone_smiths_hammer"
+        | "wormbone_guard_blade" => "Charter",
+        "archive_wayfinder" => "Archive page",
+        "wormsong_harness"
+        | "wormsong_drill"
+        | "wormsong_smiths_hammer"
+        | "wormsong_guard_blade" => "Muster",
+        _ => "Unlock required",
+    }
+}
+
 pub(super) fn blacksmith_queue_available(building: &Building, data: &GameData) -> bool {
     building.orders.len() < data.balance.order_queue_size
 }

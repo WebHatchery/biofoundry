@@ -41,10 +41,12 @@ use status::{
     transit_payload_line, waste_inspection_hint,
 };
 use study::{study_adaptation_line, study_rate_per_min};
+#[cfg(test)]
+use workstations::equipment_lock_label;
 use workstations::{
-    blacksmith_input_hint, blacksmith_queue_available, cook_pot_input_hint, equipment_lock_label,
-    kiln_input_hint, local_smelter_staffed_at, local_smelter_worker_at, local_smith_staffed_at,
-    local_smith_worker_at, smelter_input_hint,
+    blacksmith_equipment_label, blacksmith_input_hint, blacksmith_queue_available,
+    cook_pot_input_hint, kiln_input_hint, local_smelter_staffed_at, local_smelter_worker_at,
+    local_smith_staffed_at, local_smith_worker_at, smelter_input_hint,
 };
 
 const LOCKED_SPECIALIST_MARKER: &str = "[L]";
@@ -333,20 +335,7 @@ pub(super) fn draw_inspect_panel(
                 let banked = session.economy.gear_stock.get(&eq.id).copied().unwrap_or(0);
                 let queued = building.orders.iter().filter(|o| **o == eq.id).count();
                 let unlocked = session.equipment_unlocked(eq);
-                let mut label = if unlocked {
-                    format!("{} ({})", eq.name, eq.cost_ingots)
-                } else {
-                    format!(
-                        "{} {LOCKED_SPECIALIST_MARKER} · {}",
-                        eq.name,
-                        equipment_lock_label(data, eq)
-                    )
-                };
-                if unlocked && queued > 0 {
-                    label.push_str(&format!("  ·{queued} queued"));
-                } else if unlocked && banked > 0 {
-                    label.push_str(&format!("  ·{banked} ready"));
-                }
+                let label = blacksmith_equipment_label(data, eq, compact, unlocked, queued, banked);
                 if hud_button(
                     Rect::new(x, y, bw, inspect_button_height),
                     &label,

@@ -1,4 +1,4 @@
-use super::super::{equipment_lock_label, inspection_button_metrics};
+use super::super::{blacksmith_equipment_label, equipment_lock_label, inspection_button_metrics};
 use crate::data::GameData;
 
 #[test]
@@ -24,6 +24,27 @@ fn blacksmith_uses_the_exact_muster_gate_for_wormsong_harness() {
     assert_eq!(
         equipment_lock_label(&data, harness),
         "Needs hold 1 Worm Road Muster"
+    );
+}
+
+#[test]
+fn compact_blacksmith_labels_keep_recipe_and_gate_text_readable() {
+    let data = GameData::load().expect("embedded game data");
+    let harness = data
+        .equipment_def("wormsong_harness")
+        .expect("Wormsong Harness data");
+
+    assert_eq!(
+        blacksmith_equipment_label(&data, harness, true, false, 0, 0),
+        "Wormsong Harness [L] · Muster"
+    );
+    assert_eq!(
+        blacksmith_equipment_label(&data, harness, true, true, 1, 0),
+        "Wormsong Harness (22)  ·1 queued"
+    );
+    assert_eq!(
+        blacksmith_equipment_label(&data, harness, false, false, 0, 0),
+        "Wormsong Harness [L] · Needs hold 1 Worm Road Muster"
     );
 }
 
