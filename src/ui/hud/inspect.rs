@@ -23,9 +23,8 @@ mod workstations;
 
 use breeding::{breed_button_label, breeding_unlock_hint};
 use outpost::{
-    draw_compact_route_controls, draw_route_upgrade_controls, outpost_archive_summary,
-    outpost_signal_cache_summary, outpost_waypoint_summary, CompactRouteContext,
-    RouteUpgradeContext,
+    draw_compact_route_controls, draw_full_route_controls, outpost_archive_summary,
+    outpost_signal_cache_summary, outpost_waypoint_summary, CompactRouteContext, FullRouteContext,
 };
 pub(super) use status::inspect_status;
 use status::{
@@ -658,86 +657,18 @@ pub(super) fn draw_inspect_panel(
                             actions,
                         });
                     } else {
-                        let auto_return_label = outpost
-                            .map(|route| route.auto_return_label())
-                            .unwrap_or("Auto-return · Off");
-                        if hud_button(
-                            Rect::new(x, y, panel.w - 28.0, 24.0),
-                            auto_return_label,
-                            session.worm_transit.is_none(),
-                            mouse,
-                        ) {
-                            actions.push(UiAction::ToggleOutpostAutoReturn(pos));
-                        }
-                        y += 26.0;
-                        let auto_resupply_label = outpost
-                            .map(|route| route.auto_resupply_label())
-                            .unwrap_or("Auto-resupply · Off");
-                        if hud_button(
-                            Rect::new(x, y, panel.w - 28.0, 24.0),
-                            auto_resupply_label,
-                            session.worm_transit.is_none(),
-                            mouse,
-                        ) {
-                            actions.push(UiAction::ToggleOutpostAutoResupply(pos));
-                        }
-                        y += 26.0;
-                        let priority = outpost
-                            .map(|route| route.cargo_priority.label())
-                            .unwrap_or("Ore first");
-                        if hud_button(
-                            Rect::new(x, y, panel.w - 28.0, 24.0),
-                            &format!("Load order · {priority}"),
-                            session.worm_transit.is_none(),
-                            mouse,
-                        ) {
-                            actions.push(UiAction::CycleOutpostCargo(pos));
-                        }
-                        y += 26.0;
-                        let crew_label = outpost
-                            .map(|route| {
-                                route.crew_dispatch_label(
-                                    crate::simulation::outposts::crew_capacity(route, data),
-                                )
-                            })
-                            .unwrap_or_else(|| "Crew per run · Auto".to_owned());
-                        if hud_button(
-                            Rect::new(x, y, panel.w - 28.0, 24.0),
-                            &crew_label,
-                            session.worm_transit.is_none(),
-                            mouse,
-                        ) {
-                            actions.push(UiAction::CycleOutpostCrew(pos));
-                        }
-                        y += 26.0;
-                        draw_route_upgrade_controls(RouteUpgradeContext {
+                        draw_full_route_controls(FullRouteContext {
                             session,
                             data,
                             pos,
                             outpost,
                             x,
-                            width: panel.w - 28.0,
                             y: &mut y,
-                            button_height: 24.0,
-                            button_step: 26.0,
+                            width: panel.w - 28.0,
+                            crew,
                             mouse,
                             actions,
                         });
-                        if crew > 0
-                            && hud_button(
-                                Rect::new(x, y, panel.w - 28.0, 24.0),
-                                if outpost.is_some_and(|route| route.expedition_paused) {
-                                    "Resume scouting"
-                                } else {
-                                    "Pause scouting"
-                                },
-                                session.worm_transit.is_none(),
-                                mouse,
-                            )
-                        {
-                            actions.push(UiAction::ToggleOutpostExpedition(pos));
-                        }
-                        y += 38.0;
                     }
                     if let Some(load_hint) =
                         outpost.and_then(|route| outpost_load_hint(session, data, route))

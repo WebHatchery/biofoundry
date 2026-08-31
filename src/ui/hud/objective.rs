@@ -399,6 +399,11 @@ fn active_outpost_next_step(session: &GameSession, data: &GameData) -> String {
                 {
                     return "Next: let Auto-resupply deliver food to the remote scouts.".to_owned();
                 }
+                if outpost.auto_load
+                    && crate::simulation::outposts::has_loadable_payload(session, data, outpost)
+                {
+                    return "Next: let Auto-load refill the active Worm Outpost.".to_owned();
+                }
                 if session.economy.food - data.balance.worm_feed_reserve >= 1.0 {
                     return "Next: tap the active Worm Outpost, then load food for its expedition."
                         .to_owned();
@@ -428,6 +433,13 @@ fn active_outpost_next_step(session: &GameSession, data: &GameData) -> String {
         if let Some(hint) = outpost_upgrade_next_step(session, data, outpost) {
             return hint;
         }
+    }
+    if outpost.auto_load
+        && !outpost.expedition_paused
+        && session.worm_transit.is_none()
+        && crate::simulation::outposts::has_loadable_payload(session, data, outpost)
+    {
+        return "Next: let Auto-load dispatch the active Worm Outpost.".to_owned();
     }
     match (has_cargo, has_crew) {
         (true, true) => {

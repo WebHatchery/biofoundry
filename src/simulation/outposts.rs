@@ -210,6 +210,36 @@ pub fn preview_outbound_cargo(
     load
 }
 
+/// Whether a standard outbound run has anything useful to send to an active
+/// route. This mirrors the player-facing Load action while keeping automatic
+/// dispatch from launching empty trips.
+pub fn has_loadable_payload(session: &GameSession, data: &GameData, outpost: &Outpost) -> bool {
+    let capacity = storage_capacity(outpost, data);
+    if outpost.cargo_total() >= capacity {
+        return false;
+    }
+    let food_available = (session.economy.food - data.balance.worm_feed_reserve)
+        .max(0.0)
+        .floor() as u32;
+    let load = preview_outbound_cargo(
+        outpost,
+        capacity,
+        session.economy.ore_stock,
+        session.economy.ingots_stock,
+        food_available,
+    );
+    if load.total() > 0 {
+        return true;
+    }
+    let remaining_crew = crew_capacity(outpost, data).saturating_sub(outpost.crew.len() as u32);
+    outpost.crew_dispatch_count(remaining_crew) > 0
+        && session.creatures.iter().any(|creature| {
+            !creature.is_remote()
+                && creature.carrying.is_none()
+                && creature.tile() == session.stockpile_pos()
+        })
+}
+
 pub fn expedition_state(outpost: &Outpost, data: &GameData) -> ExpeditionState {
     if !outpost.active {
         return ExpeditionState::Inactive;
@@ -354,6 +384,34 @@ pub fn start_auto_resupply_if_needed(
         pos,
         TransitDirection::ToOutpost,
         TransitPlan::FoodResupply,
+    ) {
+        advance_auto_route_cursor(session, index);
+        Some(pos)
+    } else {
+        None
+    }
+}
+
+/// Start one opt-in standard outbound run when a route has room and a useful
+/// home payload. Manual expedition pause is respected; the shared cursor
+/// keeps several automatic routes from starving one another.
+pub fn start_auto_load_if_ready(session: &mut GameSession, data: &GameData) -> Option<TilePos> {
+    if session.worm_transit.is_some() {
+        return None;
+    }
+    let index = next_auto_route_index(session, |outpost| {
+        outpost.active
+            && outpost.auto_load
+            && !outpost.expedition_paused
+            && has_loadable_payload(session, data, outpost)
+    })?;
+    let pos = session.outposts[index].pos;
+    if start_transit(
+        session,
+        data,
+        pos,
+        TransitDirection::ToOutpost,
+        TransitPlan::Standard,
     ) {
         advance_auto_route_cursor(session, index);
         Some(pos)

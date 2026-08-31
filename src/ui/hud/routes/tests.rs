@@ -180,6 +180,21 @@ fn route_policy_label_explains_automatic_choices() {
 }
 
 #[test]
+fn route_policy_label_exposes_automatic_outbound_loading() {
+    let mut route = Outpost::new(TilePos::new(4, 4));
+    route.auto_load = true;
+
+    assert_eq!(route_policy_label(&route), "Auto-load route");
+
+    route.auto_return_cargo = true;
+    route.auto_resupply_food = true;
+    assert_eq!(
+        route_policy_label(&route),
+        "Auto-load · Auto-return · Auto-resupply"
+    );
+}
+
+#[test]
 fn route_metrics_reports_remote_hold_capacity() {
     let data = GameData::load().expect("embedded game data");
     let session = GameSession::new(&data, 42);
@@ -328,6 +343,20 @@ fn compact_route_cards_keep_signal_cache_history_in_the_policy_line() {
     assert_eq!(
         route_policy_summary(&route, &data, true),
         "Paused · Cache +1 · Kept 3"
+    );
+}
+
+#[test]
+fn compact_route_policy_keeps_auto_loading_visible_with_signal_cache() {
+    let data = GameData::load().expect("embedded game data");
+    let mut route = Outpost::new(TilePos::new(4, 4));
+    route.signal_cache_upgraded = true;
+    route.auto_load = true;
+    route.auto_return_cargo = true;
+
+    assert_eq!(
+        route_policy_summary(&route, &data, true),
+        "Auto-load + return · Cache +1 · Kept 0"
     );
 }
 

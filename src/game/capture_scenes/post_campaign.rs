@@ -124,6 +124,8 @@ pub(super) fn begin(game: &mut Game, scene: &str) -> bool {
         "endless_routes"
         | "endless_auto_return"
         | "endless_auto_resupply"
+        | "endless_auto_load"
+        | "endless_auto_load_started"
         | "endless_upgrade"
         | "endless_upgraded"
         | "endless_crew_upgrade"

@@ -7,6 +7,7 @@ use crate::state::outposts::{CargoPriority, TransitDirection};
 use crate::state::structures::Building;
 use macroquad_toolkit::grid::TilePos;
 
+mod auto_load;
 mod capacity;
 mod cargo_return;
 mod engineering;

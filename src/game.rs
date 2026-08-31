@@ -235,6 +235,11 @@ impl Game {
                         self.notifications.info(auto_resupply_notice());
                         self.audio.play(Sfx::Select);
                     }
+                    if report.auto_load_started.is_some() {
+                        safe_beat_reached = true;
+                        self.notifications.info(auto_load_notice());
+                        self.audio.play(Sfx::Select);
+                    }
                     if report.transit_failed.is_some() {
                         safe_beat_reached = true;
                         self.notifications.danger(transit_failure_notice());
@@ -673,6 +678,7 @@ fn progression_reaches_safe_beat(report: &simulation::TickReport) -> bool {
         || report.wild.bred_beetle
         || report.outpost_relay_awarded
         || report.outpost_convoy_awarded > 0
+        || report.auto_load_started.is_some()
 }
 
 fn transit_completion_notice(completion: TransitCompletion) -> &'static str {
@@ -708,6 +714,10 @@ fn auto_return_notice() -> &'static str {
 
 fn auto_resupply_notice() -> &'static str {
     "Outpost scouts need food — a food-only resupply is on its way."
+}
+
+fn auto_load_notice() -> &'static str {
+    "Auto-load departed — cargo and available scouts are on the worm road."
 }
 
 fn transit_failure_notice() -> &'static str {

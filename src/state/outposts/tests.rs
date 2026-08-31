@@ -21,6 +21,8 @@ fn new_outpost_defaults_to_ore_first_loading() {
     assert_eq!(outpost.auto_return_label(), "Auto-return · Off");
     assert!(!outpost.auto_resupply_food);
     assert_eq!(outpost.auto_resupply_label(), "Auto-resupply · Off");
+    assert!(!outpost.auto_load);
+    assert_eq!(outpost.auto_load_label(), "Auto-load · Off");
     assert_eq!(outpost.crew_dispatch_label(4), "Crew per run · Auto");
 }
 
@@ -205,4 +207,30 @@ fn auto_resupply_toggle_names_the_food_only_policy() {
     outpost.toggle_auto_resupply();
     assert!(!outpost.auto_resupply_food);
     assert_eq!(outpost.auto_resupply_label(), "Auto-resupply · Off");
+}
+
+#[test]
+fn auto_load_toggle_names_the_standard_dispatch_policy() {
+    let mut outpost = Outpost::new(TilePos::new(4, 4));
+
+    outpost.toggle_auto_load();
+    assert!(outpost.auto_load);
+    assert_eq!(outpost.auto_load_label(), "Auto-load · Cargo + crew");
+
+    outpost.toggle_auto_load();
+    assert!(!outpost.auto_load);
+    assert_eq!(outpost.auto_load_label(), "Auto-load · Off");
+}
+
+#[test]
+fn older_outpost_saves_default_auto_load_to_off() {
+    let outpost = Outpost::new(TilePos::new(4, 4));
+    let mut value = serde_json::to_value(outpost).expect("serialize outpost");
+    value
+        .as_object_mut()
+        .expect("outpost serializes as an object")
+        .remove("auto_load");
+
+    let restored: Outpost = serde_json::from_value(value).expect("restore legacy outpost");
+    assert!(!restored.auto_load);
 }

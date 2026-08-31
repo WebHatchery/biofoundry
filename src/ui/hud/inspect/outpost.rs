@@ -70,6 +70,19 @@ pub(super) struct CompactRouteContext<'a> {
     pub(super) actions: &'a mut Vec<UiAction>,
 }
 
+pub(super) struct FullRouteContext<'a> {
+    pub(super) session: &'a GameSession,
+    pub(super) data: &'a GameData,
+    pub(super) pos: TilePos,
+    pub(super) outpost: Option<&'a Outpost>,
+    pub(super) x: f32,
+    pub(super) y: &'a mut f32,
+    pub(super) width: f32,
+    pub(super) crew: usize,
+    pub(super) mouse: Vec2,
+    pub(super) actions: &'a mut Vec<UiAction>,
+}
+
 pub(super) struct SurveyUpgradeContext<'a> {
     pub(super) session: &'a GameSession,
     pub(super) data: &'a GameData,
@@ -423,6 +436,21 @@ pub(super) fn draw_compact_route_controls(context: CompactRouteContext<'_>) {
     }
     *y += button_step;
 
+    let auto_load_label = if outpost.is_some_and(|route| route.auto_load) {
+        "Dispatch: auto"
+    } else {
+        "Dispatch: manual"
+    };
+    if hud_button(
+        Rect::new(x, *y, panel.w - 28.0, button_height),
+        auto_load_label,
+        session.worm_transit.is_none(),
+        mouse,
+    ) {
+        actions.push(UiAction::ToggleOutpostAutoLoad(pos));
+    }
+    *y += button_step;
+
     draw_route_upgrade_controls(RouteUpgradeContext {
         session,
         data,
@@ -445,6 +473,112 @@ pub(super) fn draw_compact_route_controls(context: CompactRouteContext<'_>) {
                 "Pause scouting"
             },
             session.worm_transit.is_none(),
+            mouse,
+        )
+    {
+        actions.push(UiAction::ToggleOutpostExpedition(pos));
+    }
+    *y += 38.0;
+}
+
+pub(super) fn draw_full_route_controls(context: FullRouteContext<'_>) {
+    let FullRouteContext {
+        session,
+        data,
+        pos,
+        outpost,
+        x,
+        y,
+        width,
+        crew,
+        mouse,
+        actions,
+    } = context;
+    let route_controls_enabled = session.worm_transit.is_none();
+    let auto_return_label = outpost
+        .map(|route| route.auto_return_label())
+        .unwrap_or("Auto-return · Off");
+    if hud_button(
+        Rect::new(x, *y, width, 24.0),
+        auto_return_label,
+        route_controls_enabled,
+        mouse,
+    ) {
+        actions.push(UiAction::ToggleOutpostAutoReturn(pos));
+    }
+    *y += 26.0;
+    let auto_resupply_label = outpost
+        .map(|route| route.auto_resupply_label())
+        .unwrap_or("Auto-resupply · Off");
+    if hud_button(
+        Rect::new(x, *y, width, 24.0),
+        auto_resupply_label,
+        route_controls_enabled,
+        mouse,
+    ) {
+        actions.push(UiAction::ToggleOutpostAutoResupply(pos));
+    }
+    *y += 26.0;
+    let auto_load_label = outpost
+        .map(|route| route.auto_load_label())
+        .unwrap_or("Auto-load · Off");
+    if hud_button(
+        Rect::new(x, *y, width, 24.0),
+        auto_load_label,
+        route_controls_enabled,
+        mouse,
+    ) {
+        actions.push(UiAction::ToggleOutpostAutoLoad(pos));
+    }
+    *y += 26.0;
+    let priority = outpost
+        .map(|route| route.cargo_priority.label())
+        .unwrap_or("Ore first");
+    if hud_button(
+        Rect::new(x, *y, width, 24.0),
+        &format!("Load order · {priority}"),
+        route_controls_enabled,
+        mouse,
+    ) {
+        actions.push(UiAction::CycleOutpostCargo(pos));
+    }
+    *y += 26.0;
+    let crew_label = outpost
+        .map(|route| {
+            route.crew_dispatch_label(crate::simulation::outposts::crew_capacity(route, data))
+        })
+        .unwrap_or_else(|| "Crew per run · Auto".to_owned());
+    if hud_button(
+        Rect::new(x, *y, width, 24.0),
+        &crew_label,
+        route_controls_enabled,
+        mouse,
+    ) {
+        actions.push(UiAction::CycleOutpostCrew(pos));
+    }
+    *y += 26.0;
+    draw_route_upgrade_controls(RouteUpgradeContext {
+        session,
+        data,
+        pos,
+        outpost,
+        x,
+        width,
+        y,
+        button_height: 24.0,
+        button_step: 26.0,
+        mouse,
+        actions,
+    });
+    if crew > 0
+        && hud_button(
+            Rect::new(x, *y, width, 24.0),
+            if outpost.is_some_and(|route| route.expedition_paused) {
+                "Resume scouting"
+            } else {
+                "Pause scouting"
+            },
+            route_controls_enabled,
             mouse,
         )
     {

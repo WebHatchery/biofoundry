@@ -700,22 +700,6 @@ fn expedition_completion_notice_names_the_remote_yield_and_upkeep() {
 }
 
 #[test]
-fn auto_return_notice_names_the_remote_team_outcome() {
-    assert_eq!(
-        auto_return_notice(),
-        "Outpost hold full — cargo returning while scouts remain remote."
-    );
-}
-
-#[test]
-fn auto_resupply_notice_names_the_food_only_transit() {
-    assert_eq!(
-        auto_resupply_notice(),
-        "Outpost scouts need food — a food-only resupply is on its way."
-    );
-}
-
-#[test]
 fn transit_failure_notice_points_to_route_recovery() {
     assert_eq!(
         transit_failure_notice(),

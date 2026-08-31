@@ -94,6 +94,10 @@ pub struct Outpost {
     /// another expedition provision.
     #[serde(default)]
     pub auto_resupply_food: bool,
+    /// Automatically launch a standard outbound run whenever this route has
+    /// room and cargo or eligible local scouts are ready.
+    #[serde(default)]
+    pub auto_load: bool,
     #[serde(default)]
     pub last_failure: Option<String>,
 }
@@ -121,6 +125,7 @@ impl Outpost {
             waypoint_upgraded: false,
             auto_return_cargo: false,
             auto_resupply_food: false,
+            auto_load: false,
             last_failure: None,
         }
     }
@@ -243,6 +248,18 @@ impl Outpost {
             "Auto-resupply · Food only"
         } else {
             "Auto-resupply · Off"
+        }
+    }
+
+    pub fn toggle_auto_load(&mut self) {
+        self.auto_load = !self.auto_load;
+    }
+
+    pub fn auto_load_label(&self) -> &'static str {
+        if self.auto_load {
+            "Auto-load · Cargo + crew"
+        } else {
+            "Auto-load · Off"
         }
     }
 }

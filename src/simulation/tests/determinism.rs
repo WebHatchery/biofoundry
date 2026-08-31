@@ -74,6 +74,7 @@ fn save_roundtrip_preserves_outpost_dispatch_settings() {
     session.outposts[0].expedition_paused = true;
     session.outposts[0].auto_return_cargo = true;
     session.outposts[0].auto_resupply_food = true;
+    session.outposts[0].auto_load = true;
     session.auto_route_cursor = 1;
     session.outpost_charter_claimed = true;
     session.outpost_archive_claims = 2;
@@ -95,6 +96,7 @@ fn save_roundtrip_preserves_outpost_dispatch_settings() {
     assert!(restored.outposts[0].expedition_paused);
     assert!(restored.outposts[0].auto_return_cargo);
     assert!(restored.outposts[0].auto_resupply_food);
+    assert!(restored.outposts[0].auto_load);
     assert_eq!(restored.auto_route_cursor, 1);
     assert!(restored.outpost_charter_claimed);
     assert_eq!(restored.outpost_archive_claims, 2);

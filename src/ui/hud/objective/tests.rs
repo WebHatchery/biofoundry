@@ -547,6 +547,34 @@ fn completed_objective_names_auto_resupply_when_food_is_available() {
 }
 
 #[test]
+fn completed_objective_names_auto_load_for_a_ready_route() {
+    let (data, mut session) = boot();
+    session.worm_awake = true;
+    session.unlocked.insert("worm_transit".to_owned());
+    let pos = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(pos, _)| session.can_place_building(*pos))
+        .map(|(pos, _)| pos)
+        .unwrap();
+    session.buildings.push(Building::new("outpost", pos));
+    session.ensure_outpost(pos);
+    let outpost = session.outposts.first_mut().unwrap();
+    outpost.active = true;
+    outpost.auto_load = true;
+    outpost.cargo.insert(Good::Ore, 1);
+    session.economy.ore_stock = 1;
+
+    let objective = CampaignObjective::current(&session, &data);
+
+    assert_eq!(
+        objective.next,
+        "Next: let Auto-load dispatch the active Worm Outpost."
+    );
+}
+
+#[test]
 fn completed_objective_names_the_wait_step_for_a_scouting_outpost() {
     let (data, mut session) = boot();
     session.worm_awake = true;

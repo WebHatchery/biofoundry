@@ -405,14 +405,19 @@ fn route_metrics(session: &GameSession, data: &GameData, outpost: &Outpost) -> S
 fn route_policy_label(outpost: &Outpost) -> &'static str {
     match (
         outpost.expedition_paused,
+        outpost.auto_load,
         outpost.auto_return_cargo,
         outpost.auto_resupply_food,
     ) {
-        (true, _, _) => "Scouting paused",
-        (false, true, true) => "Auto cargo return · Auto food resupply",
-        (false, true, false) => "Auto cargo return",
-        (false, false, true) => "Auto food resupply",
-        (false, false, false) => "Manual route",
+        (true, _, _, _) => "Scouting paused",
+        (false, true, true, true) => "Auto-load · Auto-return · Auto-resupply",
+        (false, true, true, false) => "Auto-load · Auto-return",
+        (false, true, false, true) => "Auto-load · Auto-resupply",
+        (false, true, false, false) => "Auto-load route",
+        (false, false, true, true) => "Auto cargo return · Auto food resupply",
+        (false, false, true, false) => "Auto cargo return",
+        (false, false, false, true) => "Auto food resupply",
+        (false, false, false, false) => "Manual route",
     }
 }
 
@@ -444,14 +449,19 @@ fn route_policy_summary(outpost: &Outpost, data: &GameData, compact: bool) -> St
     }
     let policy = match (
         outpost.expedition_paused,
+        outpost.auto_load,
         outpost.auto_return_cargo,
         outpost.auto_resupply_food,
     ) {
-        (true, _, _) => "Paused",
-        (false, true, true) => "Auto return + food",
-        (false, true, false) => "Auto return",
-        (false, false, true) => "Auto food",
-        (false, false, false) => "Manual",
+        (true, _, _, _) => "Paused",
+        (false, true, true, true) => "Auto-load + return + food",
+        (false, true, true, false) => "Auto-load + return",
+        (false, true, false, true) => "Auto-load + food",
+        (false, true, false, false) => "Auto-load",
+        (false, false, true, true) => "Auto return + food",
+        (false, false, true, false) => "Auto return",
+        (false, false, false, true) => "Auto food",
+        (false, false, false, false) => "Manual",
     };
     format!(
         "{policy} · Cache +{} · Kept {}",

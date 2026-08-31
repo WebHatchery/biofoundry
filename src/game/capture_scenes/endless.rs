@@ -27,6 +27,25 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                 }
             }
         }
+        "endless_auto_load" => {
+            super::begin(game, "endless_load_preview");
+            if let GameState::Warren(session) = &mut game.state {
+                if let Some(route) = session.outposts.last_mut() {
+                    route.auto_load = true;
+                    route.cargo.clear();
+                }
+            }
+        }
+        "endless_auto_load_started" => {
+            begin(game, "endless_auto_load");
+            if let GameState::Warren(session) = &mut game.state {
+                if simulation::outposts::start_auto_load_if_ready(session, &game.data).is_some() {
+                    game.notifications.info(
+                        "Auto-load departed — cargo and available scouts are on the worm road.",
+                    );
+                }
+            }
+        }
         "endless_upgrade" => {
             super::begin(game, "endless_load_preview");
             if let GameState::Warren(session) = &mut game.state {

@@ -421,6 +421,33 @@ impl Game {
                     self.autosave_game();
                 }
             }
+            UiAction::ToggleOutpostAutoLoad(pos) => {
+                let mut route_changed = false;
+                if let GameState::Warren(session) = &mut self.state {
+                    if session.worm_awake
+                        && session.worm_transit.is_none()
+                        && session
+                            .building_at(pos)
+                            .is_some_and(|building| building.kind == "outpost")
+                    {
+                        session.ensure_outpost(pos);
+                        if let Some(outpost) = session.outposts.iter_mut().find(|o| o.pos == pos) {
+                            if outpost.active {
+                                outpost.toggle_auto_load();
+                                route_changed = true;
+                                self.notifications.info(format!(
+                                    "Outpost policy: {}.",
+                                    outpost.auto_load_label()
+                                ));
+                                self.audio.play(Sfx::Select);
+                            }
+                        }
+                    }
+                }
+                if route_changed {
+                    self.autosave_game();
+                }
+            }
             UiAction::TransitToOutpost(pos)
             | UiAction::TransitToShrine(pos)
             | UiAction::TransitCargoToShrine(pos) => {
