@@ -6,6 +6,7 @@ use crate::state::structures::Building;
 
 mod equipment;
 mod outpost_details;
+mod route_status;
 
 fn shrine_session() -> (GameData, GameSession, TilePos) {
     let data = GameData::load().expect("embedded game data");
@@ -332,29 +333,6 @@ fn empty_awakened_outpost_explains_the_missing_scout_crew() {
     assert_eq!(
         outpost_expedition_hint(&data, &session.outposts[0]).as_deref(),
         Some("Need scout crew")
-    );
-}
-
-#[test]
-fn active_loaded_outpost_reports_payload_ready() {
-    let data = GameData::load().expect("embedded game data");
-    let mut session = GameSession::new(&data, 15);
-    let pos = session
-        .world
-        .tiles
-        .iter_with_pos()
-        .find(|(pos, _)| session.can_place_building(*pos))
-        .map(|(pos, _)| pos)
-        .expect("a walkable outpost location");
-    session.buildings.push(Building::new("outpost", pos));
-    session.ensure_outpost(pos);
-    session.outposts[0].active = true;
-    session.worm_awake = true;
-    session.outposts[0].cargo.insert(Good::Ore, 2);
-
-    assert_eq!(
-        inspect_status(&session, &data, session.building_at(pos).unwrap()),
-        ("Payload ready", dark::POSITIVE)
     );
 }
 

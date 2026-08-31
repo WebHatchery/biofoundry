@@ -188,6 +188,13 @@ pub(in crate::ui::hud) fn inspect_status(
                 return ("Route active", dark::POSITIVE);
             }
             if outpost.cargo_total() > 0 || !outpost.crew.is_empty() {
+                if session
+                    .worm_transit
+                    .as_ref()
+                    .is_some_and(|transit| transit.outpost != building.pos)
+                {
+                    return ("Worm busy · payload ready", dark::WARNING);
+                }
                 return ("Payload ready", dark::POSITIVE);
             }
             if outpost_has_loadable_payload(
@@ -199,6 +206,13 @@ pub(in crate::ui::hud) fn inspect_status(
                 crate::simulation::outposts::crew_capacity(outpost, data),
                 outpost.crew_dispatch_limit,
             ) {
+                if session
+                    .worm_transit
+                    .as_ref()
+                    .is_some_and(|transit| transit.outpost != building.pos)
+                {
+                    return ("Worm busy · load ready", dark::WARNING);
+                }
                 return ("Ready to load", dark::POSITIVE);
             } else {
                 return ("Awaiting payload", dark::WARNING);
