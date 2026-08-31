@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-31
-**Source revision:** `94879b7`
+**Source revision:** `33d65ea`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -86,7 +86,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 391 unit tests and 2 integration/code-standard
+- `cargo test --all-targets` — 392 unit tests and 2 integration/code-standard
   targets pass,
   including fresh/simulated/remote-transit valid sessions, modal route
   planning, rejected malformed save shapes, and event-history save/load
@@ -208,7 +208,8 @@ automated simulation results into first-time-player evidence.
   an active route can spend a save-compatible 28-ingot upgrade once to add one
   ingot to every later completed haul, bounded by remote hold capacity. The
   inspection card, route ledger, Objective, notification, and help copy expose
-  the payoff, and load validation rejects cache states that bypass either gate.
+  the payoff, load validation rejects cache states that bypass either gate, and
+  balance validation rejects a zero-cost or zero-payload configuration.
   Focused data, persistence, simulation, UI, and capture coverage passes;
   refreshed [ui_endless_signal_cache.png](../verification/ui_endless_signal_cache.png)
   and [ui_endless_signal_cache_awarded.png](../verification/ui_endless_signal_cache_awarded.png)
