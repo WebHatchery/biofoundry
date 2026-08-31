@@ -48,6 +48,8 @@ fn field_guide_points_to_post_campaign_cargo_runs() {
     assert!(INSPECT_HELP_BODY.contains("install a survey rig"));
     assert!(INSPECT_HELP_BODY.contains("resonance beacon"));
     assert!(INSPECT_HELP_BODY.contains("Archive pages"));
+    assert!(INSPECT_HELP_BODY.contains("Archive Wayfinder"));
+    assert!(OBJECTIVE_HELP_BODY.contains("first page"));
 }
 
 #[test]

@@ -18,6 +18,14 @@ pub(super) fn unlock_requirement(data: &GameData, id: &str) -> Option<String> {
         "courier_deliveries" => format!("complete {} courier deliveries", unlock.threshold),
         "ingots_forged" => format!("forge {} ingots", unlock.threshold),
         "ore_delivered_total" => format!("deliver {} ore", unlock.threshold),
+        "outpost_archive_claims" => {
+            let noun = if unlock.threshold == 1 {
+                "Archive page"
+            } else {
+                "Archive pages"
+            };
+            format!("log {} {noun}", unlock.threshold)
+        }
         _ => return None,
     };
     Some(phrase)

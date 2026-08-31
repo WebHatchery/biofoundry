@@ -4,6 +4,7 @@ use crate::state::creatures::Job;
 use crate::state::outposts::CargoPriority;
 use crate::state::structures::Building;
 
+mod equipment;
 mod outpost_details;
 
 fn shrine_session() -> (GameData, GameSession, TilePos) {

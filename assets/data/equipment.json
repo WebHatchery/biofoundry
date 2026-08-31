@@ -66,5 +66,14 @@
     "effect": "guard_dps_mult",
     "value": 2.0,
     "requires_unlock": "outpost_charter"
+  },
+  {
+    "id": "archive_wayfinder",
+    "name": "Archive Wayfinder",
+    "job": "carrier",
+    "cost_ingots": 14,
+    "effect": "carry_bonus",
+    "value": 4.0,
+    "requires_unlock": "archive_wayfinder"
   }
 ]

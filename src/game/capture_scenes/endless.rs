@@ -244,6 +244,27 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                 }
             }
         }
+        "endless_archive_wayfinder" => {
+            begin(game, "endless_wormbone_drill");
+            game.notifications.clear();
+            game.paused = true;
+            let selected = game.selected_building;
+            if let GameState::Warren(session) = &mut game.state {
+                session.outpost_archive_claims = 1;
+                session.unlocked.insert("archive_wayfinder".to_owned());
+                session.economy.ingots_stock = game
+                    .data
+                    .equipment_def("archive_wayfinder")
+                    .map(|equipment| equipment.cost_ingots)
+                    .unwrap_or(14);
+                if let Some(pos) = selected {
+                    if let Some(blacksmith) = session.building_at_mut(pos) {
+                        blacksmith.orders.clear();
+                        blacksmith.stocks.clear();
+                    }
+                }
+            }
+        }
         "endless_wormbone_drill" => {
             super::post_campaign::begin(game, "endless");
             game.paused = true;

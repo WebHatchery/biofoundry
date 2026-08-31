@@ -18,6 +18,10 @@ fn unlocks_explain_the_action_and_threshold() {
         unlock_requirement(&data, "slime_janitor").as_deref(),
         Some("spoil 10 food")
     );
+    assert_eq!(
+        unlock_requirement(&data, "archive_wayfinder").as_deref(),
+        Some("log 1 Archive page")
+    );
 }
 
 #[test]
@@ -26,6 +30,7 @@ fn locked_gates_show_live_progress_from_the_simulation_counter() {
     let mut session = GameSession::new(&data, 42);
     session.progress.waste_generated = 4.75;
     session.economy.ore_delivered_total = 12;
+    session.outpost_archive_claims = 0;
 
     assert_eq!(
         unlock_requirement_progress(&session, &data, "slime_janitor").as_deref(),
@@ -34,5 +39,9 @@ fn locked_gates_show_live_progress_from_the_simulation_counter() {
     assert_eq!(
         unlock_requirement_progress(&session, &data, "bat_courier").as_deref(),
         Some("deliver 75 ore (12/75)")
+    );
+    assert_eq!(
+        unlock_requirement_progress(&session, &data, "archive_wayfinder").as_deref(),
+        Some("log 1 Archive page (0/1)")
     );
 }

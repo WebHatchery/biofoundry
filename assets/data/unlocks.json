@@ -98,5 +98,15 @@
     "effect": "unlock_building",
     "value": 0.0,
     "building": "outpost"
+  },
+  {
+    "id": "archive_wayfinder",
+    "name": "Archive Wayfinder",
+    "description": "The first Archive page reveals a route-finding pattern. The Blacksmith can forge an Archive Wayfinder for carriers.",
+    "counter": "outpost_archive_claims",
+    "threshold": 1,
+    "effect": "unlock_equipment",
+    "value": 0.0,
+    "building": null
   }
 ]

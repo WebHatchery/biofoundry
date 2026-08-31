@@ -15,6 +15,7 @@ const UNLOCK_COUNTERS: &[&str] = &[
     "courier_deliveries",
     "ingots_forged",
     "ore_delivered_total",
+    "outpost_archive_claims",
 ];
 
 pub(super) fn validate(data: &GameData) -> Result<(), String> {
@@ -136,13 +137,16 @@ fn validate_unlocks(data: &GameData) -> Result<(), String> {
                     unlock.id
                 ));
             }
-            "guard_dps_mult" | "farm_cap_mult" | "unlock_creature" if unlock.building.is_some() => {
+            "unlock_equipment" | "guard_dps_mult" | "farm_cap_mult" | "unlock_creature"
+                if unlock.building.is_some() =>
+            {
                 return Err(format!(
                     "non-building unlock '{}' must not name a building",
                     unlock.id
                 ));
             }
-            "unlock_building" | "guard_dps_mult" | "farm_cap_mult" | "unlock_creature" => {}
+            "unlock_building" | "unlock_equipment" | "guard_dps_mult" | "farm_cap_mult"
+            | "unlock_creature" => {}
             effect => {
                 return Err(format!(
                     "unlock '{}' has unknown effect '{effect}'",

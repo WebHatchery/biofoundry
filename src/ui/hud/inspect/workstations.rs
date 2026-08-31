@@ -3,7 +3,21 @@
 use crate::data::GameData;
 use crate::state::creatures::{Creature, Good, Job, Task};
 use crate::state::structures::Building;
+use crate::ui::hud::requirements::unlock_requirement;
 use macroquad_toolkit::grid::TilePos;
+
+pub(super) fn equipment_lock_label(
+    data: &GameData,
+    equipment: &crate::data::EquipmentDef,
+) -> String {
+    match equipment.requires_unlock.as_deref() {
+        Some(crate::data::OUTPOST_CHARTER_UNLOCK) => "Charter required".to_owned(),
+        Some(unlock_id) => unlock_requirement(data, unlock_id)
+            .map(|phrase| format!("Needs {phrase}"))
+            .unwrap_or_else(|| "Unlock required".to_owned()),
+        None => "Unlock required".to_owned(),
+    }
+}
 
 pub(super) fn blacksmith_queue_available(building: &Building, data: &GameData) -> bool {
     building.orders.len() < data.balance.order_queue_size

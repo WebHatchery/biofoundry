@@ -89,6 +89,18 @@ fn equipment_loads_with_valid_job_affinities() {
         blade.value > guard_blade.value,
         "the Charter reward should improve guard damage"
     );
+    let wayfinder = data
+        .equipment_def("archive_wayfinder")
+        .expect("Archive Wayfinder exists");
+    assert_eq!(wayfinder.job, "carrier");
+    assert_eq!(
+        wayfinder.requires_unlock.as_deref(),
+        Some("archive_wayfinder")
+    );
+    assert!(
+        wayfinder.value > frame.value,
+        "the first Archive page should improve hauling"
+    );
     // Every item targets a real, gear-wearing job.
     for eq in &data.equipment {
         assert!(

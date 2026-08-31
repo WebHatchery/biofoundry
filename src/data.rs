@@ -437,11 +437,12 @@ pub struct UnlockDef {
     pub id: String,
     pub name: String,
     pub description: String,
-    /// Which session counter drives this ("beetles_captured",
-    /// "raids_survived", "famines_survived").
+    /// Which session counter drives this (for example
+    /// "beetles_captured" or "outpost_archive_claims").
     pub counter: String,
     pub threshold: u32,
-    /// "unlock_building", "guard_dps_mult", or "farm_cap_mult".
+    /// "unlock_building", "unlock_equipment", "guard_dps_mult", or
+    /// "farm_cap_mult".
     pub effect: String,
     pub value: f32,
     pub building: Option<String>,
@@ -461,8 +462,9 @@ pub struct EquipmentDef {
     /// "guard_dps_mult".
     pub effect: String,
     pub value: f32,
-    /// Optional persisted progression gate. The Charter is represented by
-    /// the special `outpost_charter` milestone rather than a counter unlock.
+    /// Optional persisted progression gate. Most gates reference an unlock
+    /// in `unlocks.json`; the Charter uses the special `outpost_charter`
+    /// milestone rather than a counter unlock.
     #[serde(default)]
     pub requires_unlock: Option<String>,
 }

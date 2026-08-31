@@ -8,6 +8,18 @@ use crate::ui::UiAction;
 use macroquad::prelude::*;
 use macroquad_toolkit::grid::TilePos;
 
+pub(super) fn outpost_archive_summary(session: &GameSession, data: &GameData) -> Option<String> {
+    if !session.outpost_charter_claimed || data.balance.outpost_archive_haul_goal == 0 {
+        return None;
+    }
+    Some(format!(
+        "Archive pages {} · Next {}/{}",
+        session.outpost_archive_claims,
+        crate::simulation::outposts::outpost_archive_progress(session, data),
+        data.balance.outpost_archive_haul_goal
+    ))
+}
+
 pub(super) struct CompactRouteContext<'a> {
     pub(super) session: &'a GameSession,
     pub(super) data: &'a GameData,

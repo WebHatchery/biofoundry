@@ -23,8 +23,8 @@ mod workstations;
 
 use breeding::{breed_button_label, breeding_unlock_hint};
 use outpost::{
-    draw_compact_route_controls, draw_route_upgrade_controls, CompactRouteContext,
-    RouteUpgradeContext,
+    draw_compact_route_controls, draw_route_upgrade_controls, outpost_archive_summary,
+    CompactRouteContext, RouteUpgradeContext,
 };
 pub(super) use status::inspect_status;
 use status::{
@@ -34,8 +34,8 @@ use status::{
     waste_inspection_hint,
 };
 use workstations::{
-    blacksmith_input_hint, blacksmith_queue_available, cook_pot_input_hint, kiln_input_hint,
-    local_smelter_staffed_at, local_smelter_worker_at, local_smith_staffed_at,
+    blacksmith_input_hint, blacksmith_queue_available, cook_pot_input_hint, equipment_lock_label,
+    kiln_input_hint, local_smelter_staffed_at, local_smelter_worker_at, local_smith_staffed_at,
     local_smith_worker_at, smelter_input_hint,
 };
 
@@ -293,7 +293,11 @@ pub(super) fn draw_inspect_panel(
                 let mut label = if unlocked {
                     format!("{} ({})", eq.name, eq.cost_ingots)
                 } else {
-                    format!("{} {LOCKED_SPECIALIST_MARKER} · Charter required", eq.name)
+                    format!(
+                        "{} {LOCKED_SPECIALIST_MARKER} · {}",
+                        eq.name,
+                        equipment_lock_label(data, eq)
+                    )
                 };
                 if unlocked && queued > 0 {
                     label.push_str(&format!("  ·{queued} queued"));
@@ -767,18 +771,6 @@ pub(super) fn draw_inspect_panel(
     }
 
     Some(panel)
-}
-
-fn outpost_archive_summary(session: &GameSession, data: &GameData) -> Option<String> {
-    if !session.outpost_charter_claimed || data.balance.outpost_archive_haul_goal == 0 {
-        return None;
-    }
-    Some(format!(
-        "Archive pages {} · Next {}/{}",
-        session.outpost_archive_claims,
-        crate::simulation::outposts::outpost_archive_progress(session, data),
-        data.balance.outpost_archive_haul_goal
-    ))
 }
 
 fn inspection_button_metrics(kind: &str, compact: bool, equipment_count: usize) -> (f32, f32) {

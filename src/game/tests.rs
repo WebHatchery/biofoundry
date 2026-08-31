@@ -12,6 +12,7 @@ use macroquad_toolkit::notifications::{
 };
 
 mod persistence;
+mod unlocks;
 
 fn session() -> (GameData, GameSession) {
     let data = GameData::load().unwrap();

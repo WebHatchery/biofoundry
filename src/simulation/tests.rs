@@ -2,6 +2,7 @@
 //! the shared harness; each submodule is one suite.
 
 mod archive;
+mod archive_gear;
 mod campaign;
 mod charter;
 mod crafting;
