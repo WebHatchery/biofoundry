@@ -143,6 +143,21 @@ pub(super) fn begin(game: &mut Game, scene: &str) -> bool {
             game.paused = true;
             if let GameState::Warren(session) = &mut game.state {
                 session.auto_route_priority = AutoRoutePriority::Load;
+                session.economy.ore_stock = 1;
+                if let Some(route) = session.outposts.first_mut() {
+                    route.auto_load = true;
+                    route.auto_return_cargo = false;
+                    route.cargo.clear();
+                }
+                if let Some(route) = session.outposts.get_mut(1) {
+                    route.auto_load = false;
+                    route.auto_return_cargo = true;
+                    route.expedition_paused = true;
+                    route.cargo.clear();
+                    route
+                        .cargo
+                        .insert(Good::Ore, game.data.balance.outpost_storage_cap);
+                }
             }
             true
         }

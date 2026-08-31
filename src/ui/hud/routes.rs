@@ -41,7 +41,7 @@ pub(super) fn draw_route_overview(
     let relay_summary = relay_contract_summary(session, data);
     let convoy_summary = convoy_contract_summary(session, data);
     let transit_summary = worm_transit_summary(session);
-    let summary_lines = 1
+    let summary_lines = 2
         + relay_summary.is_some() as u32
         + convoy_summary.is_some() as u32
         + transit_summary.is_some() as u32;
@@ -82,6 +82,13 @@ pub(super) fn draw_route_overview(
     ) {
         actions.push(UiAction::CycleAutoRoutePriority);
     }
+    summary_y += 18.0;
+    draw_ui_text_ex(
+        &automatic_route_summary(session, data),
+        panel.x + 24.0,
+        summary_y,
+        TextStyle::new(13.0, dark::TEXT_DIM).params(),
+    );
     summary_y += 18.0;
     if let Some(summary) = relay_summary {
         draw_ui_text_ex(
@@ -363,6 +370,25 @@ fn worm_transit_summary(session: &GameSession) -> Option<String> {
         "Worm in transit · {route} {direction} · {:.0}s remaining",
         transit.remaining.max(0.0)
     ))
+}
+
+fn automatic_route_summary(session: &GameSession, data: &GameData) -> String {
+    if session.worm_transit.is_some() {
+        return "Automatic jobs · waiting for Worm".to_owned();
+    }
+    let Some(preview) = crate::simulation::outposts::automatic_route_preview(session, data) else {
+        return "Automatic jobs · none ready".to_owned();
+    };
+    let route = session
+        .outposts
+        .iter()
+        .position(|outpost| outpost.pos == preview.outpost)
+        .map(|index| format!("Route {}", index + 1))
+        .unwrap_or_else(|| "Route".to_owned());
+    format!(
+        "Next automatic · {route} · {}",
+        preview.priority.job_label()
+    )
 }
 
 fn route_needs_attention(outpost: &Outpost, data: &GameData) -> bool {

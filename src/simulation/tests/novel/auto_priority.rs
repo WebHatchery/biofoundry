@@ -1,7 +1,7 @@
 //! Coverage for choosing which automatic job receives the shared Worm first.
 
 use super::active_outpost;
-use crate::simulation;
+use crate::simulation::{self, outposts};
 use crate::state::creatures::Good;
 use crate::state::outposts::AutoRoutePriority;
 use crate::state::structures::Building;
@@ -26,6 +26,11 @@ fn load_first_can_precede_a_ready_automatic_return() {
     session.outposts[1].auto_load = true;
     session.economy.ore_stock = 1;
     session.auto_route_priority = AutoRoutePriority::Load;
+
+    let preview = outposts::automatic_route_preview(&session, &data)
+        .expect("load-first preview should find the second route");
+    assert_eq!(preview.outpost, second_pos);
+    assert_eq!(preview.priority, AutoRoutePriority::Load);
 
     let report = simulation::tick(&mut session, &data);
 

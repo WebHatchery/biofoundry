@@ -3,7 +3,8 @@
 use crate::data::GameData;
 use crate::state::creatures::Good;
 use crate::state::outposts::{
-    CargoPriority, ExpeditionCompletion, Outpost, TransitCompletion, TransitDirection, WormTransit,
+    AutoRoutePriority, CargoPriority, ExpeditionCompletion, Outpost, TransitCompletion,
+    TransitDirection, WormTransit,
 };
 use crate::state::GameSession;
 use macroquad_toolkit::grid::TilePos;
@@ -172,6 +173,14 @@ pub enum ExpeditionState {
     },
 }
 
+/// The next eligible automatic job according to the shared Worm's current
+/// priority and fair route cursor.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct AutomaticRoutePreview {
+    pub outpost: TilePos,
+    pub priority: AutoRoutePriority,
+}
+
 impl CargoLoad {
     pub fn total(self) -> u32 {
         self.ore
@@ -238,6 +247,70 @@ pub fn has_loadable_payload(session: &GameSession, data: &GameData, outpost: &Ou
                 && creature.carrying.is_none()
                 && creature.tile() == session.stockpile_pos()
         })
+}
+
+/// Preview the automatic job that would claim the Worm if it were free now.
+/// This intentionally uses the same eligibility predicates as the dispatcher,
+/// so the ledger never promises a route the next fixed-step tick cannot start.
+pub fn automatic_route_preview(
+    session: &GameSession,
+    data: &GameData,
+) -> Option<AutomaticRoutePreview> {
+    if !session.worm_awake
+        || session.worm_transit.is_some()
+        || session.buildings_of("worm_shrine").next().is_none()
+    {
+        return None;
+    }
+    for priority in session.auto_route_priority.order() {
+        let index = match priority {
+            AutoRoutePriority::Return => {
+                next_auto_route_index(session, |outpost| auto_return_ready(outpost, data))
+            }
+            AutoRoutePriority::Resupply => next_auto_route_index(session, |outpost| {
+                auto_resupply_ready(session, data, outpost)
+            }),
+            AutoRoutePriority::Load => {
+                next_auto_route_index(session, |outpost| auto_load_ready(session, data, outpost))
+            }
+        };
+        if let Some(index) = index {
+            return Some(AutomaticRoutePreview {
+                outpost: session.outposts[index].pos,
+                priority,
+            });
+        }
+    }
+    None
+}
+
+fn auto_return_ready(outpost: &Outpost, data: &GameData) -> bool {
+    outpost.active
+        && outpost.auto_return_cargo
+        && outpost.cargo_total() >= storage_capacity(outpost, data)
+}
+
+fn auto_resupply_ready(session: &GameSession, data: &GameData, outpost: &Outpost) -> bool {
+    let food_required =
+        (outpost.crew.len() as u32).saturating_mul(data.balance.outpost_expedition_food_per_crew);
+    let food_available = outpost.cargo.get(&Good::CookedFood).copied().unwrap_or(0);
+    let food_ready_at_warren = (session.economy.food - data.balance.worm_feed_reserve)
+        .max(0.0)
+        .floor() as u32;
+    outpost.active
+        && outpost.auto_resupply_food
+        && !outpost.expedition_paused
+        && !outpost.crew.is_empty()
+        && outpost.cargo_total() < storage_capacity(outpost, data)
+        && food_available < food_required
+        && food_ready_at_warren > 0
+}
+
+fn auto_load_ready(session: &GameSession, data: &GameData, outpost: &Outpost) -> bool {
+    outpost.active
+        && outpost.auto_load
+        && !outpost.expedition_paused
+        && has_loadable_payload(session, data, outpost)
 }
 
 pub fn expedition_state(outpost: &Outpost, data: &GameData) -> ExpeditionState {
@@ -332,11 +405,7 @@ pub fn start_auto_return_if_full(session: &mut GameSession, data: &GameData) -> 
     if session.worm_transit.is_some() {
         return None;
     }
-    let index = next_auto_route_index(session, |outpost| {
-        outpost.active
-            && outpost.auto_return_cargo
-            && outpost.cargo_total() >= storage_capacity(outpost, data)
-    })?;
+    let index = next_auto_route_index(session, |outpost| auto_return_ready(outpost, data))?;
     let pos = session.outposts[index].pos;
     if start_transit(
         session,
@@ -363,19 +432,7 @@ pub fn start_auto_resupply_if_needed(
         return None;
     }
     let index = next_auto_route_index(session, |outpost| {
-        let food_required = (outpost.crew.len() as u32)
-            .saturating_mul(data.balance.outpost_expedition_food_per_crew);
-        let food_available = outpost.cargo.get(&Good::CookedFood).copied().unwrap_or(0);
-        let food_ready_at_warren = (session.economy.food - data.balance.worm_feed_reserve)
-            .max(0.0)
-            .floor() as u32;
-        outpost.active
-            && outpost.auto_resupply_food
-            && !outpost.expedition_paused
-            && !outpost.crew.is_empty()
-            && outpost.cargo_total() < storage_capacity(outpost, data)
-            && food_available < food_required
-            && food_ready_at_warren > 0
+        auto_resupply_ready(session, data, outpost)
     })?;
     let pos = session.outposts[index].pos;
     if start_transit(
@@ -399,12 +456,7 @@ pub fn start_auto_load_if_ready(session: &mut GameSession, data: &GameData) -> O
     if session.worm_transit.is_some() {
         return None;
     }
-    let index = next_auto_route_index(session, |outpost| {
-        outpost.active
-            && outpost.auto_load
-            && !outpost.expedition_paused
-            && has_loadable_payload(session, data, outpost)
-    })?;
+    let index = next_auto_route_index(session, |outpost| auto_load_ready(session, data, outpost))?;
     let pos = session.outposts[index].pos;
     if start_transit(
         session,

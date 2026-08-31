@@ -61,6 +61,14 @@ impl AutoRoutePriority {
         }
     }
 
+    pub fn job_label(self) -> &'static str {
+        match self {
+            Self::Return => "cargo return",
+            Self::Resupply => "food resupply",
+            Self::Load => "outbound load",
+        }
+    }
+
     pub fn order(self) -> [Self; 3] {
         match self {
             Self::Return => [Self::Return, Self::Resupply, Self::Load],

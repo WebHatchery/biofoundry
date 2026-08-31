@@ -205,6 +205,46 @@ fn worm_transit_summary_keeps_an_unlisted_route_diagnostic_readable() {
 }
 
 #[test]
+fn automatic_route_summary_names_the_next_ready_job() {
+    let data = GameData::load().expect("embedded game data");
+    let mut session = GameSession::new(&data, 53);
+    let shrine = session.spawn_tile();
+    session.buildings.push(Building::new("worm_shrine", shrine));
+    session.worm_awake = true;
+    let mut route = Outpost::new(TilePos::new(8, 8));
+    route.active = true;
+    route.auto_load = true;
+    session.outposts.push(route);
+    session.economy.ore_stock = 1;
+
+    assert_eq!(
+        automatic_route_summary(&session, &data),
+        "Next automatic · Route 1 · outbound load"
+    );
+}
+
+#[test]
+fn automatic_route_summary_explains_when_the_worm_is_unavailable() {
+    let data = GameData::load().expect("embedded game data");
+    let mut session = GameSession::new(&data, 54);
+    session.outposts.push(Outpost::new(TilePos::new(8, 8)));
+    session.worm_transit = Some(crate::state::outposts::WormTransit {
+        outpost: TilePos::new(8, 8),
+        direction: TransitDirection::ToOutpost,
+        remaining: 4.0,
+        ore: 1,
+        ingots: 0,
+        food: 0.0,
+        passengers: Vec::new(),
+    });
+
+    assert_eq!(
+        automatic_route_summary(&session, &data),
+        "Automatic jobs · waiting for Worm"
+    );
+}
+
+#[test]
 fn route_policy_label_explains_automatic_choices() {
     let mut route = Outpost::new(TilePos::new(4, 4));
     assert_eq!(route_policy_label(&route), "Manual route");
