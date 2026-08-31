@@ -58,31 +58,34 @@ fn field_guide_explains_breeding_specialists() {
     assert!(INSPECT_HELP_BODY.contains("Breeding Pit"));
     assert!(INSPECT_HELP_BODY.contains("after onboarding"));
     assert!(INSPECT_HELP_BODY.contains("benefits"));
-    assert!(INSPECT_HELP_BODY.contains("Rest Hollow"));
-    assert!(INSPECT_HELP_BODY.contains("Load order"));
+    assert!(INSPECT_HELP_BODY.contains("Study Pen"));
 }
 
 #[test]
-fn field_guide_points_to_post_campaign_cargo_runs() {
-    assert!(OBJECTIVE_HELP_BODY.contains("worm wakes"));
-    assert!(OBJECTIVE_HELP_BODY.contains("tap Routes"));
-    assert!(OBJECTIVE_HELP_BODY.contains("Outpost"));
-    assert!(OBJECTIVE_HELP_BODY.contains("Archive"));
-    assert!(INSPECT_HELP_BODY.contains("scout for ore"));
-    assert!(INSPECT_HELP_BODY.contains("Auto-resupply · Food only"));
-    assert!(INSPECT_HELP_BODY.contains("Auto-load · Cargo + crew"));
-    assert!(INSPECT_HELP_BODY.contains("expand the hold and camp"));
-    assert!(INSPECT_HELP_BODY.contains("install a survey rig"));
-    assert!(INSPECT_HELP_BODY.contains("resonance beacon"));
-    assert!(INSPECT_HELP_BODY.contains("Archive pages"));
-    assert!(INSPECT_HELP_BODY.contains("Archive Wayfinder"));
-    assert!(INSPECT_HELP_BODY.contains("Worm Road Relay"));
-    assert!(INSPECT_HELP_BODY.contains("Signal Cache"));
-    assert!(INSPECT_HELP_BODY.contains("Worm Road Waypoint"));
-    assert!(OBJECTIVE_HELP_BODY.contains("first page"));
-    assert!(OBJECTIVE_HELP_BODY.contains("Worm Road Relay"));
-    assert!(OBJECTIVE_HELP_BODY.contains("Signal Cache"));
-    assert!(OBJECTIVE_HELP_BODY.contains("Waypoint"));
+fn field_guide_switches_to_compact_post_campaign_guidance() {
+    let (title, body) = field_guide_inspect_content(true);
+    assert_eq!(title, "Endless routes");
+    assert!(body.contains("Load order"));
+    assert!(body.contains("Pause scouting"));
+    assert!(body.contains("remote crew"));
+
+    let objective = field_guide_objective_content(true);
+    assert!(objective.contains("Routes"));
+    assert!(objective.contains("upgrades"));
+    assert!(objective.contains("shared-Worm"));
+}
+
+#[test]
+fn field_guide_keeps_core_guidance_before_the_worm_wakes() {
+    let (title, body) = field_guide_inspect_content(false);
+    assert_eq!(title, "Inspect & craft");
+    assert!(body.contains("Blacksmith recipe"));
+    assert!(!body.contains("awakened Outpost"));
+
+    let objective = field_guide_objective_content(false);
+    assert!(objective.contains("Jobs"));
+    assert!(objective.contains("Build & Dig"));
+    assert!(!objective.contains("shared-Worm"));
 }
 
 #[test]

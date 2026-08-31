@@ -11,6 +11,12 @@ pub(super) fn help(game: &mut Game) {
     }
 }
 
+pub(super) fn help_endless(game: &mut Game) {
+    super::begin(game, "endless");
+    game.help_open = true;
+    game.paused = true;
+}
+
 pub(super) fn event_log(game: &mut Game) {
     help(game);
     game.event_log_open = true;

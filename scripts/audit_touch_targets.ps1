@@ -24,6 +24,7 @@ param(
         "load_confirm",
         "menu_save_guard",
         "help",
+        "help_endless",
         "event_log",
         "event_log_older",
         "blacksmith",

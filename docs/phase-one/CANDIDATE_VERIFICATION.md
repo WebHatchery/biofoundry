@@ -103,7 +103,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 504 unit tests and 2 integration/code-standard
+- `cargo test --all-targets` — 505 unit tests and 2 integration/code-standard
   targets pass,
   including fresh/simulated/remote-transit valid sessions, modal route
   planning, rejected malformed save shapes, and event-history save/load
@@ -888,11 +888,12 @@ automated simulation results into first-time-player evidence.
   keeps the revisitable guide truthful for the current workforce: a fresh
   warren sees the enabled `− Miner, then + Carrier/Guard` recovery paths, and
   specialist-only states receive a `free a worker` fallback instead of a
-  disabled assignment. The same guide now points to the Breeding Pit for
-  specialist unlocks, costs, and benefits after onboarding, and to the Outpost
-  for optional cargo runs after the worm wakes. Its visible `Recent events`
-  action opens the new notification-history surface shown in
-  [ui_event_log.png](../verification/ui_event_log.png); the compact
+  disabled assignment. Before the worm wakes, the guide keeps its core
+  inspection, Blacksmith, Breeding Pit, and Study Pen instructions concise;
+  after awakening it changes the same section to short Outpost load, scouting,
+  remote-crew, and Routes guidance in [ui_help_endless.png](../verification/ui_help_endless.png).
+  Its visible `Recent events` action opens the new notification-history surface
+  shown in [ui_event_log.png](../verification/ui_event_log.png); the compact
   [ui_compact_event_log.png](../verification/ui_compact_event_log.png) probe
   keeps the same review and close actions on-canvas.
 - Persistent notification history — pass; `GameSession` carries the bounded

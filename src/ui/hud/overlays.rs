@@ -12,9 +12,13 @@ use macroquad_toolkit::prelude::*;
 use macroquad_toolkit::ui::draw_ui_text_ex;
 
 const INSPECT_HELP_BODY: &str =
-    "Tap a building on the map to see its status and controls. In Endless, build a Rest Hollow to add local room when the warren crowds. Tap an equipment button in the Blacksmith card to queue it; after onboarding, Breeding Pit buttons show specialist benefits. Tap a Study Pen to turn captured specimens into observation, unlock stronger Beetle Haulers, and shorten future Breeding Pit hatch cycles. At an awakened Outpost, tap Load order for cargo priority, Crew per run for cargo-only or scout counts, then Load to send food and crew to scout for ore; pause scouting to protect provisions, use the cargo-only return to bring ore home while keeping scouts remote, turn on Auto-load · Cargo + crew to launch ready outbound runs, turn on Auto-return · Cargo only for full holds, turn on Auto-resupply · Food only when remote scouts need provisions, and tap Routes · Cycle order to choose which ready automatic job gets the shared Worm first. After that, expand the hold and camp with banked ingots, install a survey rig to increase ore per scout, then tune its resonance beacon to shorten survey cycles and keep scouting to log repeatable Archive pages for ingots. The first page unlocks the stronger Archive Wayfinder carrier recipe at the Blacksmith; after that, use Routes to run the Worm Road Relay across two active Outposts, run the repeatable Worm Road Convoy across three active routes, hold four active routes for the Worm Road Muster, station a Wormsong carrier, miner, smith, and guard for the Concord reward, then carry complete Wormsong crews on two active routes for the Circuit reward, keep three complete routes singing for the optional Wormsong Chorus, install a Signal Cache for ingots on later hauls, and add a Worm Road Waypoint to shorten transit.";
+    "Tap a building on the map to read its status and controls. Tap a Blacksmith recipe to queue equipment; after onboarding, Breeding Pit buttons show specialist costs and benefits. Tap a Study Pen to turn captured specimens into observation.";
 const OBJECTIVE_HELP_BODY: &str =
-    "Read the Objective card for the current milestone. Locked gates name their exact unlock; after the worm wakes, tap Routes for every Outpost. The card tracks Charter hauls, claimed Archive pages, the Archive Wayfinder payoff from the first page, the Worm Road Relay, repeatable Worm Road Convoy contracts, the Worm Road Muster network goal, the Wormsong Concord for all four remote roles, the two-route Wormsong Circuit, the optional three-route Wormsong Chorus and its live haul payoff, the Signal Cache payoff, the Worm Road Waypoint transit payoff, the shared-Worm automatic dispatch order, the next route target, and local room from Rest Hollows when Endless crowding returns.";
+    "Read the Objective card for the current milestone. Locked gates name the exact unlock. Use the visible Jobs and Build & Dig controls it names.";
+const ENDLESS_INSPECT_HELP_BODY: &str =
+    "At an awakened Outpost, tap Load order and Crew per run, then Load. Pause scouting to protect food; return cargo while keeping remote crew. Tap Routes to plan multiple runs.";
+const ENDLESS_OBJECTIVE_HELP_BODY: &str =
+    "After the worm wakes, the Objective points to Routes, cargo, crew, upgrades, contracts, and shared-Worm dispatch order. Tap Routes to inspect the network.";
 const FIELD_GUIDE_INTRO: &str =
     "Everything below has a visible touch or pointer control. Review Recent events when a toast has faded; use Older or Newer to browse further.";
 pub(super) const LOAD_CONFIRMATION_TEXT: &str =
@@ -251,11 +255,8 @@ pub(super) fn draw_help_overlay(
     let left = panel.x + 28.0;
     let right = panel.x + 550.0;
     let recovery_body = recovery_guide_body(session, data);
-    let inspect_help_body = format!(
-        "{INSPECT_HELP_BODY} Keep a complete Wormsong crew scouting for repeatable Encore rewards."
-    );
-    let objective_help_body =
-        format!("{OBJECTIVE_HELP_BODY} The repeatable Wormsong Encore follows the Circuit.");
+    let (inspect_title, inspect_help_body) = field_guide_inspect_content(session.worm_awake);
+    let objective_help_body = field_guide_objective_content(session.worm_awake);
     for (x, title, body, y) in [
         (
             left,
@@ -277,8 +278,8 @@ pub(super) fn draw_help_overlay(
         ),
         (
             left,
-            "Inspect & craft",
-            inspect_help_body.as_str(),
+            inspect_title,
+            inspect_help_body,
             478.0,
         ),
         (
@@ -290,7 +291,7 @@ pub(super) fn draw_help_overlay(
         (
             right,
             "Objective",
-            objective_help_body.as_str(),
+            objective_help_body,
             270.0,
         ),
         (
@@ -431,6 +432,22 @@ pub(super) fn draw_event_log_overlay(
 
 fn event_log_page_count(history_len: usize) -> usize {
     history_len.div_ceil(EVENTS_PER_PAGE).max(1)
+}
+
+fn field_guide_inspect_content(worm_awake: bool) -> (&'static str, &'static str) {
+    if worm_awake {
+        ("Endless routes", ENDLESS_INSPECT_HELP_BODY)
+    } else {
+        ("Inspect & craft", INSPECT_HELP_BODY)
+    }
+}
+
+fn field_guide_objective_content(worm_awake: bool) -> &'static str {
+    if worm_awake {
+        ENDLESS_OBJECTIVE_HELP_BODY
+    } else {
+        OBJECTIVE_HELP_BODY
+    }
 }
 
 fn event_log_page_bounds(history_len: usize, page: usize) -> (usize, usize) {

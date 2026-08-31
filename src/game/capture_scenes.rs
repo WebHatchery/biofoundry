@@ -699,6 +699,7 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
             game.checkpoint_warning = Some(super::persistence::save_recovery_failure_banner());
         }
         "help" => overlays::help(game),
+        "help_endless" => overlays::help_endless(game),
         "event_log" => overlays::event_log(game),
         "event_log_older" => overlays::event_log_older(game),
         "pause" => overlays::pause(game),
