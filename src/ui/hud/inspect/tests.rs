@@ -382,6 +382,22 @@ fn scouting_outpost_reports_that_the_remote_team_is_working() {
 }
 
 #[test]
+fn claimed_outpost_reports_archive_history_and_next_page() {
+    let data = GameData::load().expect("embedded game data");
+    let mut session = GameSession::new(&data, 45);
+    session.outpost_charter_claimed = true;
+    session.outpost_archive_claims = 1;
+    let mut outpost = crate::state::outposts::Outpost::new(TilePos::new(4, 4));
+    outpost.expeditions_completed = data.balance.outpost_charter_haul_goal + 7;
+    session.outposts.push(outpost);
+
+    assert_eq!(
+        outpost_archive_summary(&session, &data).as_deref(),
+        Some("Archive pages 1 · Next 2/5")
+    );
+}
+
+#[test]
 fn inactive_loaded_outpost_reports_payload_recovery() {
     let data = GameData::load().expect("embedded game data");
     let mut session = GameSession::new(&data, 17);

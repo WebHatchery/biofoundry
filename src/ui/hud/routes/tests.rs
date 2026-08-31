@@ -37,9 +37,12 @@ fn route_network_summary_confirms_a_claimed_charter() {
     let data = GameData::load().expect("embedded game data");
     let mut session = GameSession::new(&data, 42);
     session.outpost_charter_claimed = true;
+    session.outpost_archive_claims = 2;
     session.outposts.push(Outpost::new(TilePos::new(4, 4)));
 
-    assert!(route_network_summary(&session, &data).contains("Charter complete"));
+    let summary = route_network_summary(&session, &data);
+    assert!(summary.contains("Charter complete"));
+    assert!(summary.contains("Pages 2"));
 }
 
 #[test]

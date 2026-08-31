@@ -543,6 +543,9 @@ pub(super) fn draw_inspect_panel(
                         dark::TEXT_DIM,
                         &mut y,
                     );
+                    if let Some(archive_summary) = outpost_archive_summary(session, data) {
+                        line(&archive_summary, dark::TEXT_DIM, &mut y);
+                    }
                 }
                 let in_transit = session
                     .worm_transit
@@ -764,6 +767,18 @@ pub(super) fn draw_inspect_panel(
     }
 
     Some(panel)
+}
+
+fn outpost_archive_summary(session: &GameSession, data: &GameData) -> Option<String> {
+    if !session.outpost_charter_claimed || data.balance.outpost_archive_haul_goal == 0 {
+        return None;
+    }
+    Some(format!(
+        "Archive pages {} · Next {}/{}",
+        session.outpost_archive_claims,
+        crate::simulation::outposts::outpost_archive_progress(session, data),
+        data.balance.outpost_archive_haul_goal
+    ))
 }
 
 fn inspection_button_metrics(kind: &str, compact: bool, equipment_count: usize) -> (f32, f32) {

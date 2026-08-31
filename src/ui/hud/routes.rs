@@ -196,9 +196,10 @@ fn charter_summary(session: &GameSession, data: &GameData) -> String {
             return "Charter complete".to_owned();
         }
         return format!(
-            "Charter complete · Archive {}/{} · +{} ingots",
+            "Charter complete · Archive {}/{} · Pages {} · +{} ingots",
             crate::simulation::outposts::outpost_archive_progress(session, data),
             archive_goal,
+            session.outpost_archive_claims,
             data.balance.outpost_archive_reward_ingots
         );
     }

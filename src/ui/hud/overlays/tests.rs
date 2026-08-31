@@ -41,11 +41,13 @@ fn field_guide_points_to_post_campaign_cargo_runs() {
     assert!(OBJECTIVE_HELP_BODY.contains("worm wakes"));
     assert!(OBJECTIVE_HELP_BODY.contains("tap Routes"));
     assert!(OBJECTIVE_HELP_BODY.contains("Outpost"));
+    assert!(OBJECTIVE_HELP_BODY.contains("Archive"));
     assert!(INSPECT_HELP_BODY.contains("scout for ore"));
     assert!(INSPECT_HELP_BODY.contains("Auto-resupply · Food only"));
     assert!(INSPECT_HELP_BODY.contains("expand the hold and camp"));
     assert!(INSPECT_HELP_BODY.contains("install a survey rig"));
     assert!(INSPECT_HELP_BODY.contains("resonance beacon"));
+    assert!(INSPECT_HELP_BODY.contains("Archive pages"));
 }
 
 #[test]
