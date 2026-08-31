@@ -60,3 +60,29 @@ fn charter_claims_from_a_real_expedition_completion() {
         data.balance.outpost_charter_reward_ingots
     );
 }
+
+#[test]
+fn charter_hauling_frame_replaces_a_weaker_carrier_tool() {
+    let (data, mut session, _) = super::novel::active_outpost(166);
+    session.outpost_charter_claimed = true;
+    let carrier = session
+        .creatures
+        .iter_mut()
+        .find(|creature| creature.job == crate::state::creatures::Job::Carrier)
+        .expect("the active-outpost fixture has a carrier");
+    carrier.equipment = Some("hauling_frame".to_owned());
+    session
+        .economy
+        .gear_stock
+        .insert("wormbone_hauling_frame".to_owned(), 1);
+
+    simulation::tick(&mut session, &data);
+
+    let carrier = session
+        .creatures
+        .iter()
+        .find(|creature| creature.job == crate::state::creatures::Job::Carrier)
+        .unwrap();
+    assert_eq!(carrier.equipment.as_deref(), Some("wormbone_hauling_frame"));
+    assert_eq!(session.economy.gear_stock.get("hauling_frame"), Some(&1));
+}

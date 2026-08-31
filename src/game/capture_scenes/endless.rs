@@ -177,7 +177,7 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
             game.paused = true;
             if let GameState::Warren(session) = &mut game.state {
                 session.outpost_charter_claimed = true;
-                session.economy.ingots_stock = 8;
+                session.economy.ingots_stock = 16;
                 let spawn = session.spawn_tile();
                 let spot = session
                     .world
@@ -192,6 +192,12 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                         &game.data,
                         spot,
                         "wormbone_drill".to_owned(),
+                        game.data.balance.order_queue_size,
+                    );
+                    let _ = session.queue_equipment_order(
+                        &game.data,
+                        spot,
+                        "wormbone_hauling_frame".to_owned(),
                         game.data.balance.order_queue_size,
                     );
                     if let Some(worker) = session

@@ -53,6 +53,18 @@ fn equipment_loads_with_valid_job_affinities() {
         drill.value > pick.value,
         "the Charter reward should improve mining"
     );
+    let frame = data
+        .equipment_def("wormbone_hauling_frame")
+        .expect("Wormbone Hauling Frame exists");
+    let hauling_frame = data
+        .equipment_def("hauling_frame")
+        .expect("hauling frame exists");
+    assert_eq!(frame.job, "carrier");
+    assert_eq!(frame.requires_unlock.as_deref(), Some("outpost_charter"));
+    assert!(
+        frame.value > hauling_frame.value,
+        "the Charter reward should improve hauling"
+    );
     // Every item targets a real, gear-wearing job.
     for eq in &data.equipment {
         assert!(

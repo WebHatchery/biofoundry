@@ -39,5 +39,14 @@
     "effect": "mine_speed_mult",
     "value": 2.0,
     "requires_unlock": "outpost_charter"
+  },
+  {
+    "id": "wormbone_hauling_frame",
+    "name": "Wormbone Hauling Frame",
+    "job": "carrier",
+    "cost_ingots": 8,
+    "effect": "carry_bonus",
+    "value": 3.0,
+    "requires_unlock": "outpost_charter"
   }
 ]
