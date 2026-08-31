@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-31
-**Source revision:** `e2f56fc`
+**Source revision:** `b3e7056`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -44,6 +44,7 @@ automated simulation results into first-time-player evidence.
 | Endless Worm Road Charter | Pass (focused and capture evidence) | After three completed scouting hauls across the awakened Outpost network, the data-driven one-time Charter awards 12 banked ingots and persists its claimed state. The completed-campaign Objective exposes the live haul target and reward, the simulation emits a safe-beat success event, and focused captures show the 2/3 setup and reward toast in `endless_charter` and `endless_charter_awarded`. |
 | Endless Charter equipment payoff | Pass (focused and capture evidence) | Claiming the Worm Road Charter unlocks the data-driven Wormbone toolkit: the 8-ingot Wormbone Drill for miners, the 8-ingot Wormbone Hauling Frame for carriers, the 10-ingot Wormbone Smith's Hammer for smiths, and the 10-ingot Wormbone Guard Blade for guards. The Blacksmith keeps all four recipes disabled with an explicit `Charter required` label until the milestone is claimed; afterward visible recipes can be queued, and any banked Charter ingots are reserved into the Blacksmith buffer at queue time so funded orders can start immediately. The auto-equip loop prefers each Wormbone item over its weaker baseline counterpart, improving mining speed, carrier capacity, craft speed, and guard damage. Focused gate, persistence, simulation, and content-validation coverage pass; refreshed [ui_compact_blacksmith.png](../verification/ui_compact_blacksmith.png) shows the locked recipes, while [ui_compact_endless_wormbone_drill.png](../verification/ui_compact_endless_wormbone_drill.png) shows the funded unlocked toolkit and the 800×450 touch audit reports no grown-target overlap. |
 | Endless Muster equipment payoff | Pass (focused, capture, and touch-audit evidence) | The first held Worm Road Muster now unlocks the data-driven four-role Wormsong toolkit: a 22-ingot +6 Harness for carriers, a 26-ingot 2.5× Drill for miners, a 28-ingot 0.5× Smith's Hammer, and a 28-ingot 2.5× Guard Blade. The Blacksmith exposes the exact `hold 1 Worm Road Muster` gate before unlock, queues funded orders through the existing ingot buffer, and the auto-equip loop replaces weaker Wormbone tools after the new gate is granted. Focused data, unlock, persistence, simulation, UI, and content-validation coverage pass; [ui_endless_muster_harness.png](../verification/ui_endless_muster_harness.png) and [ui_compact_endless_muster_harness.png](../verification/ui_compact_endless_muster_harness.png) show the complete tier at normal and compact sizes, while the official 800×450 touch audit reports no grown-target overlap. |
+| Endless Wormsong remote expedition crew | Pass (focused, capture, and touch-audit evidence) | Stationing the four Wormsong kits turns the remote crew into a route toolkit: a Harness adds 2 hold slots, a Drill adds 2 ore per haul, a Smith's Hammer adds 1 Signal Cache ingot per haul, and a Guard Blade shortens the scouting cycle by 4 seconds. The optional equipment-data fields default to zero for legacy gear; the same derived values drive expedition completion, automatic return/load readiness, save validation, the Outpost forecast, and the route ledger. [ui_endless_wormsong_route.png](../verification/ui_endless_wormsong_route.png) shows `Cargo 12/22`, the four-person crew, `+14` ore, `16s`, and the compact bonus line; the official 800×450 touch audit reports no grown-target overlap. |
 | Endless crew dispatch quota | Pass (focused and capture evidence) | An awakened Outpost exposes the visible `Crew per run · Auto` control, which cycles through cargo-only and bounded scout counts. Legacy saves keep automatic dispatch, while cargo-only loads can deliver provisions without borrowing local workers; the Objective names the control when that setting blocks an otherwise-ready scouting payload. Refreshed [ui_endless_load_preview.png](../verification/ui_endless_load_preview.png), [ui_endless_upgrade.png](../verification/ui_endless_upgrade.png), and [ui_endless_upgraded.png](../verification/ui_endless_upgraded.png) captures keep the route controls readable. |
 | Endless cargo-only returns | Pass (focused and capture evidence) | A staffed Outpost exposes `Send N cargo · keep crew` beside the normal full return, so a completed haul can come home without recalling the remote scouts. The route keeps those scouts assigned for another expedition, the departure notice explains the choice, and the Objective/field guide describe the remote-team outcome. Refreshed [ui_endless.png](../verification/ui_endless.png), [ui_endless_expedition_report.png](../verification/ui_endless_expedition_report.png), and [ui_endless_upgraded.png](../verification/ui_endless_upgraded.png) captures keep both return paths readable. |
 | Endless automatic cargo returns | Pass (focused and capture evidence) | An awakened Outpost exposes the persisted `Auto-return · Off` / `Auto-return · Cargo only` policy. When an opted-in hold reaches capacity, the fixed-step simulation starts one cargo-only return, preserves the remote scouts and one configured expedition's food when other cargo creates room, and returns provisions too when they alone fill the hold so the route can resupply. It emits a departure notice and autosaves the safe beat; later routes wait for the global worm transit. Refreshed [ui_endless_auto_return.png](../verification/ui_endless_auto_return.png) shows the enabled policy beside the manual return and scouting controls. Live Preview route interaction remains unclaimed because the resumed developer save has not yet reached the Outpost unlock. |
@@ -94,7 +95,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 458 unit tests and 2 integration/code-standard
+- `cargo test --all-targets` — 461 unit tests and 2 integration/code-standard
   targets pass,
   including fresh/simulated/remote-transit valid sessions, modal route
   planning, rejected malformed save shapes, and event-history save/load
@@ -313,6 +314,14 @@ automated simulation results into first-time-player evidence.
   and [ui_compact_endless_muster_harness.png](../verification/ui_compact_endless_muster_harness.png)
   captures show the recipe at both layout sizes; the official 800×450 touch
   audit reports no grown-target overlap.
+- Endless Wormsong remote expedition crew — pass; the four Wormsong kits now
+  carry data-driven route contributions when their wearers are stationed at an
+  Outpost. The Harness adds 2 hold slots, the Drill adds 2 ore per haul, the
+  Smith's Hammer adds 1 Signal Cache ingot, and the Guard Blade cuts 4 seconds
+  from the scouting cycle. Simulation and inspection forecasts share the same
+  derived values, legacy kits remain neutral, and the compact
+  [ui_endless_wormsong_route.png](../verification/ui_endless_wormsong_route.png)
+  capture plus the 800×450 touch audit keep the explanation visible.
 - Endless crew dispatch quota — pass; a save-compatible optional quota keeps
   older routes on automatic dispatch, cycles the visible control through
   cargo-only and bounded scout counts, and limits new passengers in transit.
@@ -482,7 +491,7 @@ automated simulation results into first-time-player evidence.
   preview, multi-route ledger,
   Signal Cache purchase, award, and haul, and
   Worm Road Waypoint purchase and award, and
-  the Muster-gated Wormsong Harness Blacksmith card
+  the Muster-gated Wormsong Blacksmith and remote expedition scenes
   scenes at 800×450 after the neighbor map is warm. Enabled controls are
   measured, modal occlusion removes covered HUD controls, and the sweep reports
   no grown-target overlap. The
