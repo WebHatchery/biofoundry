@@ -5,6 +5,7 @@ mod archive;
 mod archive_gear;
 mod campaign;
 mod charter;
+mod convoy;
 mod crafting;
 mod determinism;
 mod economy;

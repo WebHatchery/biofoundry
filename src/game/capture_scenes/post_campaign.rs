@@ -142,6 +142,8 @@ pub(super) fn begin(game: &mut Game, scene: &str) -> bool {
         | "endless_archive_wayfinder"
         | "endless_relay"
         | "endless_relay_awarded"
+        | "endless_convoy"
+        | "endless_convoy_awarded"
         | "endless_signal_cache"
         | "endless_signal_cache_awarded"
         | "endless_signal_cache_haul"

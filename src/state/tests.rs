@@ -94,6 +94,21 @@ fn saves_from_before_relay_contract_load_unclaimed() {
 }
 
 #[test]
+fn saves_from_before_convoy_contract_load_with_no_contracts_claimed() {
+    let data = GameData::load().unwrap();
+    let session = GameSession::new(&data, 42);
+    let mut encoded = serde_json::to_value(&session).unwrap();
+    encoded
+        .as_object_mut()
+        .unwrap()
+        .remove("outpost_convoy_claims");
+
+    let restored: GameSession = serde_json::from_value(encoded).unwrap();
+
+    assert_eq!(restored.outpost_convoy_claims, 0);
+}
+
+#[test]
 fn blacksmith_orders_reserve_banked_ingots_before_forging_the_balance() {
     let data = GameData::load().unwrap();
     let mut session = GameSession::new(&data, 42);

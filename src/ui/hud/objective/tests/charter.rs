@@ -108,3 +108,35 @@ fn completed_objective_names_the_relay_after_the_first_archive_page() {
     assert!(objective.next.contains("6/6 hauls"));
     assert!(objective.next.contains("+20 ingots"));
 }
+
+#[test]
+fn completed_objective_names_the_convoy_after_relay() {
+    let (data, mut session) = boot();
+    session.worm_awake = true;
+    session.unlocked.insert("worm_transit".to_owned());
+    session.outpost_charter_claimed = true;
+    session.outpost_archive_claims = 1;
+    session.outpost_relay_claimed = true;
+    let first_pos = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(pos, _)| session.can_place_building(*pos))
+        .map(|(pos, _)| pos)
+        .unwrap();
+    session.buildings.push(Building::new("outpost", first_pos));
+    session.ensure_outpost(first_pos);
+    let crew_id = session.creatures.first().unwrap().id;
+    session.outposts[0].active = true;
+    session.outposts[0].crew.push(crew_id);
+    session.outposts[0].cargo.insert(Good::CookedFood, 1);
+    session.outposts[0].expeditions_completed =
+        data.balance.outpost_relay_haul_goal + data.balance.outpost_convoy_haul_goal / 2;
+
+    let objective = CampaignObjective::current(&session, &data);
+
+    assert!(objective.next.contains("Worm Road Convoy"));
+    assert!(objective.next.contains("1/3 active routes"));
+    assert!(objective.next.contains("6/12 hauls"));
+    assert!(objective.next.contains("+24 ingots"));
+}

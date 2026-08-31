@@ -39,7 +39,9 @@ pub(super) fn draw_route_overview(
 
     let column_count = route_column_count(session.outposts.len());
     let relay_summary = relay_contract_summary(session, data);
-    let summary_extra = if relay_summary.is_some() { 18.0 } else { 0.0 };
+    let convoy_summary = convoy_contract_summary(session, data);
+    let summary_lines = relay_summary.is_some() as u32 + convoy_summary.is_some() as u32;
+    let summary_extra = summary_lines as f32 * 18.0;
     let route_rows = session.outposts.len().div_ceil(column_count).max(1);
     let desired_height = 112.0 + summary_extra + route_rows as f32 * CARD_HEIGHT + 56.0;
     let panel_height = desired_height.min(PANEL_BOTTOM - PANEL_TOP);
@@ -66,6 +68,20 @@ pub(super) fn draw_route_overview(
             &summary,
             panel.x + 24.0,
             panel.y + 76.0,
+            TextStyle::new(13.0, dark::POSITIVE).params(),
+        );
+    }
+    if let Some(summary) = convoy_summary {
+        draw_ui_text_ex(
+            &summary,
+            panel.x + 24.0,
+            panel.y
+                + 76.0
+                + if relay_contract_summary(session, data).is_some() {
+                    18.0
+                } else {
+                    0.0
+                },
             TextStyle::new(13.0, dark::POSITIVE).params(),
         );
     }
@@ -278,6 +294,32 @@ fn relay_contract_summary(session: &GameSession, data: &GameData) -> Option<Stri
         data.balance.outpost_relay_route_goal,
         data.balance.outpost_relay_haul_goal,
         data.balance.outpost_relay_reward_ingots
+    ))
+}
+
+fn convoy_contract_summary(session: &GameSession, data: &GameData) -> Option<String> {
+    if !session.outpost_relay_claimed
+        || data.balance.outpost_convoy_route_goal == 0
+        || data.balance.outpost_convoy_haul_goal == 0
+    {
+        return None;
+    }
+    if session.outpost_convoy_claims > 0 {
+        return Some(format!(
+            "Worm Road Convoy · {} cleared · next {}/{} hauls · +{} ingots",
+            session.outpost_convoy_claims,
+            crate::simulation::outposts::outpost_convoy_progress(session, data).1,
+            data.balance.outpost_convoy_haul_goal,
+            data.balance.outpost_convoy_reward_ingots
+        ));
+    }
+    let (active_routes, completed_hauls) =
+        crate::simulation::outposts::outpost_convoy_progress(session, data);
+    Some(format!(
+        "Worm Road Convoy · {active_routes}/{} routes · {completed_hauls}/{} hauls · +{} ingots",
+        data.balance.outpost_convoy_route_goal,
+        data.balance.outpost_convoy_haul_goal,
+        data.balance.outpost_convoy_reward_ingots
     ))
 }
 

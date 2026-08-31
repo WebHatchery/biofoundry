@@ -165,6 +165,9 @@ pub struct GameSession {
     /// Whether the one-time multi-route Worm Road Relay contract was claimed.
     #[serde(default)]
     pub outpost_relay_claimed: bool,
+    /// Number of repeatable Worm Road Convoy contracts already rewarded.
+    #[serde(default)]
+    pub outpost_convoy_claims: u32,
     #[serde(default)]
     pub worm_transit: Option<WormTransit>,
     #[serde(default)]
@@ -260,6 +263,7 @@ impl GameSession {
             outpost_charter_claimed: false,
             outpost_archive_claims: 0,
             outpost_relay_claimed: false,
+            outpost_convoy_claims: 0,
             worm_transit: None,
             last_transit_failure: None,
             event_history: Vec::new(),

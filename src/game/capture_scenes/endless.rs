@@ -6,6 +6,7 @@ use crate::state::creatures::{Good, Job};
 use crate::state::outposts::ExpeditionCompletion;
 use crate::state::structures::Building;
 use crate::state::GameState;
+use macroquad_toolkit::grid::TilePos;
 
 pub(super) fn begin(game: &mut Game, scene: &str) {
     match scene {
@@ -296,6 +297,77 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                     game.notifications.success(format!(
                         "Worm Road Relay · +{} ingots · twin routes linked.",
                         game.data.balance.outpost_relay_reward_ingots
+                    ));
+                }
+            }
+            game.routes_open = true;
+            game.paused = true;
+        }
+        "endless_convoy" => {
+            begin(game, "endless_routes");
+            game.notifications.clear();
+            game.routes_open = true;
+            game.paused = true;
+            if let GameState::Warren(session) = &mut game.state {
+                session.outpost_charter_claimed = true;
+                session.outpost_relay_claimed = true;
+                session.outpost_convoy_claims = 0;
+                session.economy.ingots_stock = 0;
+                let route_goal = game.data.balance.outpost_convoy_route_goal as usize;
+                while session.outposts.len() < route_goal {
+                    let existing: Vec<TilePos> =
+                        session.outposts.iter().map(|route| route.pos).collect();
+                    let pos = session
+                        .world
+                        .tiles
+                        .iter_with_pos()
+                        .find(|(pos, tile)| {
+                            tile.walkable()
+                                && session.can_place_building(*pos)
+                                && !existing.contains(pos)
+                        })
+                        .map(|(pos, _)| pos);
+                    let Some(pos) = pos else { break };
+                    session.buildings.push(Building::new("outpost", pos));
+                    session.ensure_outpost(pos);
+                }
+                let total_hauls = game
+                    .data
+                    .balance
+                    .outpost_relay_haul_goal
+                    .saturating_add(game.data.balance.outpost_convoy_haul_goal)
+                    .saturating_sub(1);
+                for (index, route) in session.outposts.iter_mut().enumerate() {
+                    route.active = index < route_goal;
+                    route.expedition_paused = true;
+                    route.expeditions_completed = if index == 0 {
+                        total_hauls / route_goal.max(1) as u32
+                    } else {
+                        0
+                    };
+                }
+                let assigned = session
+                    .outposts
+                    .iter()
+                    .map(|route| route.expeditions_completed)
+                    .sum::<u32>();
+                if let Some(route) = session.outposts.first_mut() {
+                    route.expeditions_completed = route
+                        .expeditions_completed
+                        .saturating_add(total_hauls.saturating_sub(assigned));
+                }
+            }
+        }
+        "endless_convoy_awarded" => {
+            begin(game, "endless_convoy");
+            if let GameState::Warren(session) = &mut game.state {
+                if let Some(route) = session.outposts.first_mut() {
+                    route.expeditions_completed = route.expeditions_completed.saturating_add(1);
+                }
+                if simulation::outposts::claim_outpost_convoy(session, &game.data) > 0 {
+                    game.notifications.success(format!(
+                        "Worm Road Convoy · +{} ingots · contract cleared.",
+                        game.data.balance.outpost_convoy_reward_ingots
                     ));
                 }
             }

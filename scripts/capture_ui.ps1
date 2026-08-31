@@ -13,6 +13,7 @@
     endless_charter_awarded, endless_deep_survey, endless_deep_survey_upgrade,
     endless_deep_survey_upgraded, endless_archive, endless_archive_awarded,
     endless_archive_wayfinder, endless_relay, endless_relay_awarded,
+    endless_convoy, endless_convoy_awarded,
     endless_signal_cache, endless_signal_cache_awarded,
     endless_signal_cache_haul, and endless_wormbone_drill.
 
@@ -54,6 +55,8 @@ if (-not $PSBoundParameters.ContainsKey("Scenes")) {
         "endless_archive_wayfinder",
         "endless_relay",
         "endless_relay_awarded",
+        "endless_convoy",
+        "endless_convoy_awarded",
         "endless_signal_cache",
         "endless_signal_cache_awarded",
         "endless_signal_cache_haul",

@@ -219,39 +219,12 @@ impl Game {
                             .info(format_expedition_completion(*completion));
                         self.audio.play(Sfx::Complete);
                     }
-                    if report.outpost_charter_awarded {
-                        safe_beat_reached = true;
-                        self.notifications.success(format!(
-                            "Worm Road Charter · +{} ingots · Wormbone Drill unlocked.",
-                            self.data.balance.outpost_charter_reward_ingots,
-                        ));
-                        self.audio.play(Sfx::Complete);
-                    }
-                    if report.outpost_archive_awarded > 0 {
-                        safe_beat_reached = true;
-                        let reward = report
-                            .outpost_archive_awarded
-                            .saturating_mul(self.data.balance.outpost_archive_reward_ingots);
-                        self.notifications.success(format!(
-                            "Worm Road Archive · +{} ingots · {} page{} logged.",
-                            reward,
-                            report.outpost_archive_awarded,
-                            if report.outpost_archive_awarded == 1 {
-                                ""
-                            } else {
-                                "s"
-                            }
-                        ));
-                        self.audio.play(Sfx::Complete);
-                    }
-                    if report.outpost_relay_awarded {
-                        safe_beat_reached = true;
-                        self.notifications.success(format!(
-                            "Worm Road Relay · +{} ingots · twin routes linked.",
-                            self.data.balance.outpost_relay_reward_ingots,
-                        ));
-                        self.audio.play(Sfx::Complete);
-                    }
+                    safe_beat_reached |= notifications::announce_outpost_milestones(
+                        &report,
+                        &self.data,
+                        &mut self.notifications,
+                        &mut self.audio,
+                    );
                     if report.auto_return_started.is_some() {
                         safe_beat_reached = true;
                         self.notifications.info(auto_return_notice());
@@ -699,6 +672,7 @@ fn progression_reaches_safe_beat(report: &simulation::TickReport) -> bool {
         || !report.wild.unlocked.is_empty()
         || report.wild.bred_beetle
         || report.outpost_relay_awarded
+        || report.outpost_convoy_awarded > 0
 }
 
 fn transit_completion_notice(completion: TransitCompletion) -> &'static str {

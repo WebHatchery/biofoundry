@@ -106,6 +106,36 @@ fn relay_summary_confirms_a_claimed_contract() {
 }
 
 #[test]
+fn convoy_summary_reports_live_progress_after_relay() {
+    let data = GameData::load().expect("embedded game data");
+    let mut session = GameSession::new(&data, 49);
+    session.outpost_relay_claimed = true;
+    let mut first = Outpost::new(TilePos::new(4, 4));
+    first.active = true;
+    first.expeditions_completed = data.balance.outpost_relay_haul_goal + 4;
+    session.outposts = vec![first];
+
+    let summary = convoy_contract_summary(&session, &data).expect("Convoy should be visible");
+
+    assert!(summary.contains("1/3 routes"), "{summary}");
+    assert!(summary.contains("4/12 hauls"), "{summary}");
+    assert!(summary.contains("+24 ingots"), "{summary}");
+}
+
+#[test]
+fn convoy_summary_confirms_a_claimed_contract() {
+    let data = GameData::load().expect("embedded game data");
+    let mut session = GameSession::new(&data, 50);
+    session.outpost_relay_claimed = true;
+    session.outpost_convoy_claims = 2;
+
+    let summary = convoy_contract_summary(&session, &data).expect("Convoy should be visible");
+
+    assert!(summary.contains("2 cleared"), "{summary}");
+    assert!(summary.contains("next 0/12 hauls"), "{summary}");
+}
+
+#[test]
 fn route_network_summary_counts_active_blockers_as_attention() {
     let data = GameData::load().expect("embedded game data");
     let mut session = GameSession::new(&data, 42);

@@ -100,3 +100,54 @@ pub fn claim_outpost_relay(session: &mut GameSession, data: &GameData) -> bool {
         .saturating_add(data.balance.outpost_relay_reward_ingots);
     true
 }
+
+/// Return the current progress for the repeatable multi-route Worm Road
+/// Convoy after Relay has been claimed. Hauls are measured from the Relay
+/// baseline so old saves and replayed routes remain deterministic.
+pub fn outpost_convoy_progress(session: &GameSession, data: &GameData) -> (u32, u32) {
+    let active_routes = session
+        .outposts
+        .iter()
+        .filter(|outpost| outpost.active)
+        .count() as u32;
+    let goal = data.balance.outpost_convoy_haul_goal;
+    let post_relay_hauls =
+        total_expeditions(session).saturating_sub(data.balance.outpost_relay_haul_goal);
+    let claimed_hauls = session.outpost_convoy_claims.saturating_mul(goal);
+    (
+        active_routes,
+        post_relay_hauls.saturating_sub(claimed_hauls).min(goal),
+    )
+}
+
+/// Reward every newly completed Convoy contract once Relay is live and the
+/// network can sustain the required number of active routes.
+pub fn claim_outpost_convoy(session: &mut GameSession, data: &GameData) -> u32 {
+    let route_goal = data.balance.outpost_convoy_route_goal;
+    let haul_goal = data.balance.outpost_convoy_haul_goal;
+    if !session.worm_awake
+        || !session.outpost_relay_claimed
+        || route_goal == 0
+        || haul_goal == 0
+        || data.balance.outpost_convoy_reward_ingots == 0
+    {
+        return 0;
+    }
+    let (active_routes, _) = outpost_convoy_progress(session, data);
+    if active_routes < route_goal {
+        return 0;
+    }
+    let post_relay_hauls =
+        total_expeditions(session).saturating_sub(data.balance.outpost_relay_haul_goal);
+    let completed_contracts = post_relay_hauls / haul_goal;
+    let contracts = completed_contracts.saturating_sub(session.outpost_convoy_claims);
+    if contracts == 0 {
+        return 0;
+    }
+    session.outpost_convoy_claims = session.outpost_convoy_claims.saturating_add(contracts);
+    session.economy.ingots_stock = session
+        .economy
+        .ingots_stock
+        .saturating_add(contracts.saturating_mul(data.balance.outpost_convoy_reward_ingots));
+    contracts
+}

@@ -142,6 +142,9 @@ fn balance_values_are_playable() {
     assert!(b.outpost_relay_route_goal >= 2);
     assert!(b.outpost_relay_haul_goal > 0);
     assert!(b.outpost_relay_reward_ingots > 0);
+    assert!(b.outpost_convoy_route_goal > b.outpost_relay_route_goal);
+    assert!(b.outpost_convoy_haul_goal > b.outpost_relay_haul_goal);
+    assert!(b.outpost_convoy_reward_ingots > b.outpost_relay_reward_ingots);
     assert!(b.outpost_signal_cache_upgrade_ingots > b.outpost_relay_reward_ingots);
     assert!(b.outpost_signal_cache_ingots_per_haul > 0);
     assert!(b.win_ore_delivered > 0);
@@ -193,4 +196,15 @@ fn content_validation_rejects_a_disabled_signal_cache() {
         .validate()
         .expect_err("a zero-payload Signal Cache should be rejected");
     assert!(error.contains("Signal Cache"));
+}
+
+#[test]
+fn content_validation_rejects_a_disabled_convoy_contract() {
+    let mut data = GameData::load().unwrap();
+    data.balance.outpost_convoy_reward_ingots = 0;
+
+    let error = data
+        .validate()
+        .expect_err("a zero-reward Convoy should be rejected");
+    assert!(error.contains("convoy"));
 }

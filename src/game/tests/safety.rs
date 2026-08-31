@@ -14,6 +14,16 @@ fn relay_award_is_a_safe_autosave_beat() {
 }
 
 #[test]
+fn convoy_award_is_a_safe_autosave_beat() {
+    let report = TickReport {
+        outpost_convoy_awarded: 1,
+        ..TickReport::default()
+    };
+
+    assert!(progression_reaches_safe_beat(&report));
+}
+
+#[test]
 fn expedition_notice_names_signal_cache_ingots() {
     assert_eq!(
         format_expedition_completion(ExpeditionCompletion {
