@@ -11,6 +11,10 @@ use macroquad_toolkit::grid::TilePos;
 use macroquad_toolkit::prelude::*;
 use macroquad_toolkit::ui::draw_ui_text_ex;
 
+mod network;
+
+use network::compact_route_network_summary;
+
 const PANEL_MARGIN_X: f32 = 70.0;
 const PANEL_TOP: f32 = 48.0;
 const PANEL_WIDTH: f32 = LOGICAL_WIDTH - PANEL_MARGIN_X * 2.0;
@@ -37,6 +41,7 @@ pub(super) fn draw_route_overview(
         Color::new(0.0, 0.0, 0.0, 0.64),
     );
 
+    let compact = super::panels::compact_top_bar(ui_scale);
     let column_count = route_column_count(session.outposts.len());
     let relay_summary = relay_contract_summary(session, data);
     let convoy_summary = convoy_contract_summary(session, data);
@@ -47,6 +52,7 @@ pub(super) fn draw_route_overview(
     let chorus_summary = chorus_contract_summary(session, data);
     let transit_summary = worm_transit_summary(session);
     let summary_lines = 2
+        + compact as u32
         + relay_summary.is_some() as u32
         + convoy_summary.is_some() as u32
         + muster_summary.is_some() as u32
@@ -71,13 +77,31 @@ pub(super) fn draw_route_overview(
     // hit areas, otherwise a route tap can be reported as ambiguous with a
     // control painted underneath the modal.
     macroquad_toolkit::ui::occlude(Rect::new(0.0, 0.0, LOGICAL_WIDTH, LOGICAL_HEIGHT));
-    draw_ui_text_ex(
-        &route_network_summary(session, data),
-        panel.x + 24.0,
-        panel.y + 58.0,
-        TextStyle::new(14.0, dark::TEXT_DIM).params(),
-    );
-    let mut summary_y = panel.y + 76.0;
+    let mut summary_y = panel.y + 58.0;
+    if compact {
+        let (headline, detail) = compact_route_network_summary(session, data);
+        draw_ui_text_ex(
+            &headline,
+            panel.x + 24.0,
+            summary_y,
+            TextStyle::new(14.0, dark::TEXT_DIM).params(),
+        );
+        summary_y += 18.0;
+        draw_ui_text_ex(
+            &detail,
+            panel.x + 24.0,
+            summary_y,
+            TextStyle::new(13.0, dark::TEXT_DIM).params(),
+        );
+    } else {
+        draw_ui_text_ex(
+            &route_network_summary(session, data),
+            panel.x + 24.0,
+            summary_y,
+            TextStyle::new(14.0, dark::TEXT_DIM).params(),
+        );
+    }
+    summary_y += 18.0;
     draw_ui_text_ex(
         &format!("Auto dispatch · {}", session.auto_route_priority.label()),
         panel.x + 24.0,
@@ -174,7 +198,6 @@ pub(super) fn draw_route_overview(
 
     let card_width =
         (panel.w - 48.0 - CARD_GAP * (column_count as f32 - 1.0)) / column_count as f32;
-    let compact = super::panels::compact_top_bar(ui_scale);
     for (index, outpost) in session.outposts.iter().enumerate() {
         let column = index % column_count;
         let row = index / column_count;

@@ -33,6 +33,28 @@ fn route_network_summary_reports_the_whole_warren_network() {
 }
 
 #[test]
+fn compact_route_network_summary_keeps_the_network_meters_visible() {
+    let data = GameData::load().expect("embedded game data");
+    let mut session = GameSession::new(&data, 43);
+    let mut route = Outpost::new(TilePos::new(4, 4));
+    route.active = true;
+    route.cargo.insert(Good::Ore, 5);
+    route.crew.extend([1, 2]);
+    route.ore_scouted = 9;
+    route.signal_cache_ingots = 3;
+    session.outposts.push(route);
+
+    let (headline, detail) = compact_route_network_summary(&session, &data);
+
+    assert_eq!(
+        headline,
+        "Routes 1 · Active 1 · Cargo 5 · Crew 2 · Ore 9 · Attention 1"
+    );
+    assert!(detail.contains("Charter 0/3"), "{detail}");
+    assert!(detail.contains("Cache 3"), "{detail}");
+}
+
+#[test]
 fn concord_summary_reports_role_progress_and_claimed_reward() {
     let data = GameData::load().expect("embedded game data");
     let mut session = GameSession::new(&data, 62);
