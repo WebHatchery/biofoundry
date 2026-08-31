@@ -65,6 +65,18 @@ fn equipment_loads_with_valid_job_affinities() {
         frame.value > hauling_frame.value,
         "the Charter reward should improve hauling"
     );
+    let hammer = data
+        .equipment_def("wormbone_smiths_hammer")
+        .expect("Wormbone Smith's Hammer exists");
+    let smiths_hammer = data
+        .equipment_def("smiths_hammer")
+        .expect("smith's hammer exists");
+    assert_eq!(hammer.job, "smith");
+    assert_eq!(hammer.requires_unlock.as_deref(), Some("outpost_charter"));
+    assert!(
+        hammer.value < smiths_hammer.value,
+        "the Charter reward should shorten smithing time"
+    );
     // Every item targets a real, gear-wearing job.
     for eq in &data.equipment {
         assert!(

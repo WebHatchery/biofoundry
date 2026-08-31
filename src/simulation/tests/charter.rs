@@ -1,7 +1,8 @@
 //! Coverage for the Worm Road Charter milestone.
 
 use crate::simulation::{self, outposts};
-use crate::state::creatures::Good;
+use crate::state::creatures::{Good, Job, Task};
+use crate::state::structures::Building;
 
 #[test]
 fn charter_awards_ingots_after_the_configured_number_of_hauls() {
@@ -85,4 +86,62 @@ fn charter_hauling_frame_replaces_a_weaker_carrier_tool() {
         .unwrap();
     assert_eq!(carrier.equipment.as_deref(), Some("wormbone_hauling_frame"));
     assert_eq!(session.economy.gear_stock.get("hauling_frame"), Some(&1));
+}
+
+#[test]
+fn charter_hammer_shortens_a_blacksmith_craft() {
+    let (data, mut session, _) = super::novel::active_outpost(167);
+    session.outpost_charter_claimed = true;
+    let spot = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(pos, _)| session.can_place_building(*pos))
+        .map(|(pos, _)| pos)
+        .expect("a walkable blacksmith location");
+    session.buildings.push(Building::new("blacksmith", spot));
+    session.economy.ingots_stock = 2;
+    session.spawn_creature(&data, "goblin", Job::Smith);
+    let smith_id = session.creatures.last().unwrap().id;
+    session
+        .economy
+        .gear_stock
+        .insert("wormbone_smiths_hammer".to_owned(), 1);
+
+    simulation::tick(&mut session, &data);
+    let smith = session
+        .creatures
+        .iter_mut()
+        .find(|creature| creature.id == smith_id)
+        .unwrap();
+    assert_eq!(smith.equipment.as_deref(), Some("wormbone_smiths_hammer"));
+    smith.x = spot.x as f32 + 0.5;
+    smith.y = spot.y as f32 + 0.5;
+    smith.clear_task();
+    assert_eq!(
+        session.queue_equipment_order(
+            &data,
+            spot,
+            "iron_pickaxe".to_owned(),
+            data.balance.order_queue_size,
+        ),
+        Some(2)
+    );
+
+    simulation::tick(&mut session, &data);
+
+    let smith = session
+        .creatures
+        .iter()
+        .find(|creature| creature.id == smith_id)
+        .unwrap();
+    match &smith.task {
+        Task::Crafting {
+            item, remaining, ..
+        } => {
+            assert_eq!(item, "iron_pickaxe");
+            assert!((*remaining - data.balance.gear_craft_time_sec * 0.6).abs() < 0.001);
+        }
+        task => panic!("expected a shortened craft task, got {task:?}"),
+    }
 }

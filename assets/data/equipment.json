@@ -48,5 +48,14 @@
     "effect": "carry_bonus",
     "value": 3.0,
     "requires_unlock": "outpost_charter"
+  },
+  {
+    "id": "wormbone_smiths_hammer",
+    "name": "Wormbone Smith's Hammer",
+    "job": "smith",
+    "cost_ingots": 10,
+    "effect": "smith_time_mult",
+    "value": 0.6,
+    "requires_unlock": "outpost_charter"
   }
 ]
