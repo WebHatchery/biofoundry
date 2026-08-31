@@ -76,6 +76,20 @@ fn route_network_summary_reports_cached_ingots_across_routes() {
 }
 
 #[test]
+fn route_network_summary_counts_an_active_route_without_scout_crew_as_attention() {
+    let data = GameData::load().expect("embedded game data");
+    let mut session = GameSession::new(&data, 50);
+    let mut route = Outpost::new(TilePos::new(4, 4));
+    route.active = true;
+    session.outposts = vec![route];
+
+    let summary = route_network_summary(&session, &data);
+
+    assert!(summary.contains("Active 1"), "{summary}");
+    assert!(summary.ends_with("Attention 1"), "{summary}");
+}
+
+#[test]
 fn relay_summary_reports_live_route_and_haul_progress() {
     let data = GameData::load().expect("embedded game data");
     let mut session = GameSession::new(&data, 45);

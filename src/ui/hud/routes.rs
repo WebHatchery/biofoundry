@@ -328,7 +328,8 @@ fn route_needs_attention(outpost: &Outpost, data: &GameData) -> bool {
         || outpost.last_failure.is_some()
         || matches!(
             crate::simulation::outposts::expedition_state(outpost, data),
-            crate::simulation::outposts::ExpeditionState::Paused
+            crate::simulation::outposts::ExpeditionState::NoCrew
+                | crate::simulation::outposts::ExpeditionState::Paused
                 | crate::simulation::outposts::ExpeditionState::NeedsFood { .. }
                 | crate::simulation::outposts::ExpeditionState::HoldFull
         )
