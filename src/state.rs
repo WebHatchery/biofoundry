@@ -178,6 +178,9 @@ pub struct GameSession {
     /// Whether the one-time four-role Wormsong Concord reward was claimed.
     #[serde(default)]
     pub outpost_concord_claimed: bool,
+    /// Whether the one-time multi-route Wormsong Circuit reward was claimed.
+    #[serde(default)]
+    pub outpost_circuit_claimed: bool,
     #[serde(default)]
     pub worm_transit: Option<WormTransit>,
     #[serde(default)]
@@ -277,6 +280,7 @@ impl GameSession {
             outpost_convoy_claims: 0,
             outpost_muster_claims: 0,
             outpost_concord_claimed: false,
+            outpost_circuit_claimed: false,
             worm_transit: None,
             last_transit_failure: None,
             event_history: Vec::new(),

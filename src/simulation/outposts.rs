@@ -14,9 +14,10 @@ mod specialists;
 mod upgrades;
 
 pub use milestones::{
-    claim_outpost_archive, claim_outpost_charter, claim_outpost_concord, claim_outpost_convoy,
-    claim_outpost_muster, claim_outpost_relay, outpost_archive_progress, outpost_concord_progress,
-    outpost_convoy_progress, outpost_muster_progress, outpost_relay_progress, total_expeditions,
+    claim_outpost_archive, claim_outpost_charter, claim_outpost_circuit, claim_outpost_concord,
+    claim_outpost_convoy, claim_outpost_muster, claim_outpost_relay, outpost_archive_progress,
+    outpost_circuit_progress, outpost_concord_progress, outpost_convoy_progress,
+    outpost_muster_progress, outpost_relay_progress, total_expeditions,
 };
 pub use specialists::{
     route_bonus_summary, route_expedition_cycle_sec, route_expedition_ore,

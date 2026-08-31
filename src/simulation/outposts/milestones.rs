@@ -260,3 +260,48 @@ pub fn claim_outpost_concord(session: &mut GameSession, data: &GameData) -> bool
         .saturating_add(data.balance.outpost_concord_reward_ingots);
     true
 }
+
+/// Count active routes carrying a complete Wormsong crew for the one-time
+/// Circuit contract. Unlike Concord's network-wide role count, each route
+/// must hold all four voices at once.
+pub fn outpost_circuit_progress(session: &GameSession, data: &GameData) -> (u32, u32) {
+    let active_routes = session
+        .outposts
+        .iter()
+        .filter(|outpost| outpost.active)
+        .count() as u32;
+    if !session.worm_awake || !session.outpost_concord_claimed {
+        return (0, active_routes);
+    }
+    let complete_routes = session
+        .outposts
+        .iter()
+        .filter(|outpost| {
+            outpost.active && wormsong_route_bonus(session, data, outpost).has_all_roles()
+        })
+        .count() as u32;
+    (complete_routes, active_routes)
+}
+
+/// Award the one-time Wormsong Circuit after two active routes each carry a
+/// complete four-role crew.
+pub fn claim_outpost_circuit(session: &mut GameSession, data: &GameData) -> bool {
+    if session.outpost_circuit_claimed
+        || !session.worm_awake
+        || !session.outpost_concord_claimed
+        || data.balance.outpost_circuit_route_goal < 2
+        || data.balance.outpost_circuit_reward_ingots == 0
+    {
+        return false;
+    }
+    let (complete_routes, _) = outpost_circuit_progress(session, data);
+    if complete_routes < data.balance.outpost_circuit_route_goal {
+        return false;
+    }
+    session.outpost_circuit_claimed = true;
+    session.economy.ingots_stock = session
+        .economy
+        .ingots_stock
+        .saturating_add(data.balance.outpost_circuit_reward_ingots);
+    true
+}

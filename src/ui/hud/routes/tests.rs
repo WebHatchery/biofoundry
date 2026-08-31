@@ -67,6 +67,37 @@ fn concord_summary_reports_role_progress_and_claimed_reward() {
 }
 
 #[test]
+fn circuit_summary_reports_complete_route_progress_and_claimed_reward() {
+    let data = GameData::load().expect("embedded game data");
+    let mut session = GameSession::new(&data, 63);
+    session.worm_awake = true;
+    session.outpost_concord_claimed = true;
+    session.outposts = vec![
+        {
+            let mut route = Outpost::new(TilePos::new(4, 4));
+            route.active = true;
+            route
+        },
+        {
+            let mut route = Outpost::new(TilePos::new(8, 8));
+            route.active = true;
+            route
+        },
+    ];
+
+    assert_eq!(
+        circuit_contract_summary(&session, &data).as_deref(),
+        Some("Wormsong Circuit · 0/2 complete routes · 2 active routes · +64 ingots")
+    );
+
+    session.outpost_circuit_claimed = true;
+    assert_eq!(
+        circuit_contract_summary(&session, &data).as_deref(),
+        Some("Wormsong Circuit complete · 2 complete routes · +64 ingots")
+    );
+}
+
+#[test]
 fn route_network_summary_confirms_a_claimed_charter() {
     let data = GameData::load().expect("embedded game data");
     let mut session = GameSession::new(&data, 42);

@@ -197,7 +197,9 @@ pub(super) fn begin(game: &mut Game, scene: &str) -> bool {
         | "endless_wormbone_drill"
         | "endless_muster_harness"
         | "endless_wormsong_route"
-        | "endless_wormsong_concord" => {
+        | "endless_wormsong_concord"
+        | "endless_wormsong_circuit"
+        | "endless_wormsong_circuit_awarded" => {
             super::endless::begin(game, scene);
             true
         }

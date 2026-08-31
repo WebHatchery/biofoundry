@@ -110,6 +110,8 @@
   "outpost_concord_reward_ingots": 48,
   "outpost_concord_ore_bonus": 1,
   "outpost_concord_cycle_reduction": 2.0,
+  "outpost_circuit_route_goal": 2,
+  "outpost_circuit_reward_ingots": 64,
   "outpost_signal_cache_upgrade_ingots": 28,
   "outpost_signal_cache_ingots_per_haul": 1,
   "outpost_waypoint_upgrade_ingots": 36,

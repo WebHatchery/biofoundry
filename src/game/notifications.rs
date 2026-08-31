@@ -89,6 +89,14 @@ pub(super) fn announce_outpost_milestones(
         ));
         audio.play(Sfx::Complete);
     }
+    if report.outpost_circuit_awarded {
+        awarded = true;
+        notifications.success(format!(
+            "Wormsong Circuit · +{} ingots · two complete crews linked.",
+            data.balance.outpost_circuit_reward_ingots,
+        ));
+        audio.play(Sfx::Complete);
+    }
     awarded
 }
 

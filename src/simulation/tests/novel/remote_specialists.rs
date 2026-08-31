@@ -186,3 +186,61 @@ fn claimed_concord_gives_a_complete_route_an_ongoing_song_bonus() {
         0
     );
 }
+
+#[test]
+fn wormsong_circuit_requires_two_complete_route_crews_and_pays_once() {
+    let (data, mut session, first_pos) = active_outpost(187);
+    session.outpost_concord_claimed = true;
+    session.economy.ingots_stock = 5;
+    session.creatures.clear();
+    let second_pos = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(pos, tile)| {
+            tile.walkable() && session.can_place_building(*pos) && *pos != first_pos
+        })
+        .map(|(pos, _)| pos)
+        .expect("a second route location");
+    session
+        .buildings
+        .push(crate::state::structures::Building::new(
+            "outpost", second_pos,
+        ));
+    session.ensure_outpost(second_pos);
+
+    for route_pos in [first_pos, second_pos] {
+        let specialist_gear = [
+            (Job::Carrier, "wormsong_harness"),
+            (Job::Miner, "wormsong_drill"),
+            (Job::Smith, "wormsong_smiths_hammer"),
+            (Job::Guard, "wormsong_guard_blade"),
+        ];
+        let mut crew = Vec::new();
+        for (job, equipment) in specialist_gear {
+            session.spawn_creature(&data, "goblin", job);
+            let creature = session.creatures.last_mut().expect("specialist spawned");
+            creature.equipment = Some(equipment.to_owned());
+            creature.remote_outpost = Some(route_pos);
+            crew.push(creature.id);
+        }
+        let route = session
+            .outposts
+            .iter_mut()
+            .find(|route| route.pos == route_pos)
+            .expect("route exists");
+        route.active = true;
+        route.crew = crew;
+    }
+
+    assert_eq!(outposts::outpost_circuit_progress(&session, &data), (2, 2));
+    assert!(outposts::claim_outpost_circuit(&mut session, &data));
+    assert_eq!(
+        session.economy.ingots_stock,
+        5 + data.balance.outpost_circuit_reward_ingots
+    );
+    assert!(!outposts::claim_outpost_circuit(&mut session, &data));
+
+    session.outposts[1].crew.pop();
+    assert_eq!(outposts::outpost_circuit_progress(&session, &data), (1, 2));
+}

@@ -42,12 +42,14 @@ pub(super) fn draw_route_overview(
     let convoy_summary = convoy_contract_summary(session, data);
     let muster_summary = muster_contract_summary(session, data);
     let concord_summary = concord_contract_summary(session, data);
+    let circuit_summary = circuit_contract_summary(session, data);
     let transit_summary = worm_transit_summary(session);
     let summary_lines = 2
         + relay_summary.is_some() as u32
         + convoy_summary.is_some() as u32
         + muster_summary.is_some() as u32
         + concord_summary.is_some() as u32
+        + circuit_summary.is_some() as u32
         + transit_summary.is_some() as u32;
     let summary_extra = summary_lines as f32 * 18.0;
     let route_rows = session.outposts.len().div_ceil(column_count).max(1);
@@ -122,6 +124,15 @@ pub(super) fn draw_route_overview(
         summary_y += 18.0;
     }
     if let Some(summary) = concord_summary {
+        draw_ui_text_ex(
+            &summary,
+            panel.x + 24.0,
+            summary_y,
+            TextStyle::new(13.0, dark::POSITIVE).params(),
+        );
+        summary_y += 18.0;
+    }
+    if let Some(summary) = circuit_summary {
         draw_ui_text_ex(
             &summary,
             panel.x + 24.0,
@@ -418,6 +429,25 @@ fn concord_contract_summary(session: &GameSession, data: &GameData) -> Option<St
     Some(format!(
         "Wormsong Concord · {roles}/{} roles · {active_routes} active routes · +{} ingots",
         data.balance.outpost_concord_role_goal, data.balance.outpost_concord_reward_ingots
+    ))
+}
+
+fn circuit_contract_summary(session: &GameSession, data: &GameData) -> Option<String> {
+    if !session.outpost_concord_claimed || data.balance.outpost_circuit_route_goal < 2 {
+        return None;
+    }
+    if session.outpost_circuit_claimed {
+        return Some(format!(
+            "Wormsong Circuit complete · {} complete routes · +{} ingots",
+            data.balance.outpost_circuit_route_goal, data.balance.outpost_circuit_reward_ingots
+        ));
+    }
+    let (complete_routes, active_routes) =
+        crate::simulation::outposts::outpost_circuit_progress(session, data);
+    Some(format!(
+        "Wormsong Circuit · {complete_routes}/{} complete routes · {active_routes} active routes · +{} ingots",
+        data.balance.outpost_circuit_route_goal,
+        data.balance.outpost_circuit_reward_ingots
     ))
 }
 

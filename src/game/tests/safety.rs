@@ -47,6 +47,16 @@ fn concord_award_is_a_safe_autosave_beat() {
 }
 
 #[test]
+fn circuit_award_is_a_safe_autosave_beat() {
+    let report = TickReport {
+        outpost_circuit_awarded: true,
+        ..TickReport::default()
+    };
+
+    assert!(progression_reaches_safe_beat(&report));
+}
+
+#[test]
 fn auto_load_departure_is_a_safe_autosave_beat() {
     let report = TickReport {
         auto_load_started: Some(TilePos::new(4, 4)),

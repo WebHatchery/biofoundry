@@ -300,6 +300,12 @@ pub struct Balance {
     /// Seconds removed from a route's scouting cycle while Concord sings.
     #[serde(default = "default_outpost_concord_cycle_reduction")]
     pub outpost_concord_cycle_reduction: f32,
+    /// Complete Wormsong routes required for the one-time Circuit contract.
+    #[serde(default = "default_outpost_circuit_route_goal")]
+    pub outpost_circuit_route_goal: u32,
+    /// Ingots awarded when the Wormsong Circuit is completed.
+    #[serde(default = "default_outpost_circuit_reward_ingots")]
+    pub outpost_circuit_reward_ingots: u32,
     /// Ingot cost for the post-Relay Signal Cache route upgrade.
     #[serde(default = "default_outpost_signal_cache_upgrade_ingots")]
     pub outpost_signal_cache_upgrade_ingots: u32,
@@ -467,6 +473,12 @@ fn default_outpost_concord_ore_bonus() -> u32 {
 }
 fn default_outpost_concord_cycle_reduction() -> f32 {
     2.0
+}
+fn default_outpost_circuit_route_goal() -> u32 {
+    2
+}
+fn default_outpost_circuit_reward_ingots() -> u32 {
+    64
 }
 fn default_outpost_signal_cache_upgrade_ingots() -> u32 {
     28

@@ -1,6 +1,7 @@
 use super::*;
 use crate::state::creatures::{Good, Job};
 use crate::state::structures::Building;
+use macroquad_toolkit::grid::TilePos;
 
 #[test]
 fn completed_objective_guides_the_route_upgrade_ladder_when_funded() {
@@ -151,4 +152,30 @@ fn completed_objective_guides_the_wormsong_concord_after_muster() {
     assert!(objective.next.contains("Wormsong"));
     assert!(objective.next.contains("3/4 roles"));
     assert!(objective.next.contains("station a Wormsong"));
+}
+
+#[test]
+fn completed_objective_guides_the_wormsong_circuit_after_concord() {
+    let (data, mut session) = boot();
+    session.worm_awake = true;
+    session.outpost_muster_claims = 1;
+    session.outpost_concord_claimed = true;
+    session.outposts = vec![
+        {
+            let mut route = Outpost::new(TilePos::new(4, 4));
+            route.active = true;
+            route
+        },
+        {
+            let mut route = Outpost::new(TilePos::new(8, 8));
+            route.active = true;
+            route
+        },
+    ];
+
+    let guidance = circuit_contract_guidance(&session, &data).expect("Circuit should guide");
+
+    assert!(guidance.contains("Wormsong Circuit"));
+    assert!(guidance.contains("0/2 complete routes"));
+    assert!(guidance.contains("+64 ingots"));
 }
