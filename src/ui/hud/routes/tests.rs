@@ -43,6 +43,19 @@ fn route_network_summary_confirms_a_claimed_charter() {
 }
 
 #[test]
+fn route_network_summary_reports_archive_progress_after_charter() {
+    let data = GameData::load().expect("embedded game data");
+    let mut session = GameSession::new(&data, 44);
+    session.outpost_charter_claimed = true;
+    session.outposts = vec![Outpost::new(TilePos::new(4, 4))];
+    session.outposts[0].expeditions_completed = data.balance.outpost_charter_haul_goal + 2;
+
+    let summary = route_network_summary(&session, &data);
+
+    assert!(summary.contains("Archive 2/5"), "{summary}");
+}
+
+#[test]
 fn route_network_summary_counts_active_blockers_as_attention() {
     let data = GameData::load().expect("embedded game data");
     let mut session = GameSession::new(&data, 42);

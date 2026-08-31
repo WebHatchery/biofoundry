@@ -125,6 +125,8 @@ fn balance_values_are_playable() {
     assert!(b.outpost_deep_survey_ore_per_crew > b.outpost_upgraded_ore_per_crew);
     assert!(b.outpost_charter_haul_goal > 0);
     assert!(b.outpost_charter_reward_ingots > 0);
+    assert!(b.outpost_archive_haul_goal > 0);
+    assert!(b.outpost_archive_reward_ingots > 0);
     assert!(b.win_ore_delivered > 0);
     assert!(b.win_food_surplus > b.start_food);
     assert!(b.food_warning_sec > 0.0);

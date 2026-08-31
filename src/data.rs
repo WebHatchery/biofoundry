@@ -253,6 +253,13 @@ pub struct Balance {
     /// Ingots awarded when the Worm Road Charter is completed.
     #[serde(default = "default_outpost_charter_reward_ingots")]
     pub outpost_charter_reward_ingots: u32,
+    /// Additional scouting hauls required for each repeatable Worm Road
+    /// Archive reward after the Charter is claimed.
+    #[serde(default = "default_outpost_archive_haul_goal")]
+    pub outpost_archive_haul_goal: u32,
+    /// Ingots awarded for each completed Worm Road Archive page.
+    #[serde(default = "default_outpost_archive_reward_ingots")]
+    pub outpost_archive_reward_ingots: u32,
     #[serde(default = "default_worm_transit_time")]
     pub worm_transit_time_sec: f32,
     /// Time for a staffed remote outpost to complete one scouting haul.
@@ -363,6 +370,12 @@ fn default_outpost_charter_haul_goal() -> u32 {
 }
 fn default_outpost_charter_reward_ingots() -> u32 {
     12
+}
+fn default_outpost_archive_haul_goal() -> u32 {
+    5
+}
+fn default_outpost_archive_reward_ingots() -> u32 {
+    8
 }
 fn default_worm_transit_time() -> f32 {
     18.0

@@ -191,7 +191,16 @@ fn route_network_summary(session: &GameSession, data: &GameData) -> String {
 fn charter_summary(session: &GameSession, data: &GameData) -> String {
     let goal = data.balance.outpost_charter_haul_goal;
     if session.outpost_charter_claimed {
-        return "Charter complete".to_owned();
+        let archive_goal = data.balance.outpost_archive_haul_goal;
+        if archive_goal == 0 {
+            return "Charter complete".to_owned();
+        }
+        return format!(
+            "Charter complete · Archive {}/{} · +{} ingots",
+            crate::simulation::outposts::outpost_archive_progress(session, data),
+            archive_goal,
+            data.balance.outpost_archive_reward_ingots
+        );
     }
     if goal == 0 {
         return "Charter unavailable".to_owned();

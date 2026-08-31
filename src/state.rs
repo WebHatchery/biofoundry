@@ -159,6 +159,9 @@ pub struct GameSession {
     /// Whether the one-time Worm Road Charter reward has been claimed.
     #[serde(default)]
     pub outpost_charter_claimed: bool,
+    /// Number of repeatable Worm Road Archive pages already rewarded.
+    #[serde(default)]
+    pub outpost_archive_claims: u32,
     #[serde(default)]
     pub worm_transit: Option<WormTransit>,
     #[serde(default)]
@@ -252,6 +255,7 @@ impl GameSession {
             outposts: Vec::new(),
             auto_route_cursor: 0,
             outpost_charter_claimed: false,
+            outpost_archive_claims: 0,
             worm_transit: None,
             last_transit_failure: None,
             event_history: Vec::new(),

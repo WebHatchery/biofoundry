@@ -95,6 +95,8 @@
   "outpost_deep_survey_ore_per_crew": 6,
   "outpost_charter_haul_goal": 3,
   "outpost_charter_reward_ingots": 12,
+  "outpost_archive_haul_goal": 5,
+  "outpost_archive_reward_ingots": 8,
   "worm_transit_time_sec": 18.0,
   "outpost_expedition_cycle_sec": 30.0,
   "outpost_expedition_food_per_crew": 1,

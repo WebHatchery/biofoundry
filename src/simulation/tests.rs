@@ -1,6 +1,7 @@
 //! Headless simulation tests, grouped by what they pin down. This file is
 //! the shared harness; each submodule is one suite.
 
+mod archive;
 mod campaign;
 mod charter;
 mod crafting;

@@ -225,6 +225,23 @@ impl Game {
                         ));
                         self.audio.play(Sfx::Complete);
                     }
+                    if report.outpost_archive_awarded > 0 {
+                        safe_beat_reached = true;
+                        let reward = report
+                            .outpost_archive_awarded
+                            .saturating_mul(self.data.balance.outpost_archive_reward_ingots);
+                        self.notifications.success(format!(
+                            "Worm Road Archive · +{} ingots · {} page{} logged.",
+                            reward,
+                            report.outpost_archive_awarded,
+                            if report.outpost_archive_awarded == 1 {
+                                ""
+                            } else {
+                                "s"
+                            }
+                        ));
+                        self.audio.play(Sfx::Complete);
+                    }
                     if report.auto_return_started.is_some() {
                         safe_beat_reached = true;
                         self.notifications.info(auto_return_notice());

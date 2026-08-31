@@ -11,7 +11,8 @@
     endless_crew_upgraded, endless_survey_upgrade, endless_survey_upgraded,
     endless_resonator_upgrade, endless_resonator_upgraded, endless_charter,
     endless_charter_awarded, endless_deep_survey, endless_deep_survey_upgrade,
-    endless_deep_survey_upgraded, and endless_wormbone_drill.
+    endless_deep_survey_upgraded, endless_archive, endless_archive_awarded, and
+    endless_wormbone_drill.
 
     The explicit `crowding` scene demonstrates the Jobs-panel recovery guidance.
 
@@ -46,6 +47,8 @@ if (-not $PSBoundParameters.ContainsKey("Scenes")) {
         "endless_deep_survey",
         "endless_deep_survey_upgrade",
         "endless_deep_survey_upgraded",
+        "endless_archive",
+        "endless_archive_awarded",
         "endless_wormbone_drill"
     )
 }

@@ -445,8 +445,21 @@ fn active_outpost_next_step(session: &GameSession, data: &GameData) -> String {
 
 fn charter_guidance(session: &GameSession, data: &GameData) -> Option<String> {
     let goal = data.balance.outpost_charter_haul_goal;
-    if session.outpost_charter_claimed || goal == 0 {
+    if goal == 0 {
         return None;
+    }
+    if session.outpost_charter_claimed {
+        if session.outpost_archive_claims == 0
+            && crate::simulation::outposts::outpost_archive_progress(session, data) == 0
+        {
+            return None;
+        }
+        return Some(format!(
+            "Next: keep scouting · Archive {}/{} · +{} ingots.",
+            crate::simulation::outposts::outpost_archive_progress(session, data),
+            data.balance.outpost_archive_haul_goal,
+            data.balance.outpost_archive_reward_ingots
+        ));
     }
     let completed = crate::simulation::outposts::total_expeditions(session).min(goal);
     Some(format!(

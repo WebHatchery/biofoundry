@@ -208,6 +208,42 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                 ));
             }
         }
+        "endless_archive" => {
+            begin(game, "endless_deep_survey_upgraded");
+            game.notifications.clear();
+            game.paused = true;
+            if let GameState::Warren(session) = &mut game.state {
+                session.economy.ingots_stock = 0;
+                session.outpost_archive_claims = 0;
+                if let Some(route) = session.outposts.last_mut() {
+                    let archive_goal = game.data.balance.outpost_archive_haul_goal;
+                    route.expeditions_completed = game
+                        .data
+                        .balance
+                        .outpost_charter_haul_goal
+                        .saturating_add(archive_goal.saturating_sub(1));
+                    route.ore_scouted = route
+                        .expeditions_completed
+                        .saturating_mul(route.crew.len() as u32)
+                        .saturating_mul(simulation::outposts::ore_per_crew(route, &game.data));
+                    route.cargo.clear();
+                    route.cargo.insert(Good::CookedFood, 2);
+                    route.expedition_progress = 0.0;
+                    route.expedition_paused = false;
+                }
+            }
+        }
+        "endless_archive_awarded" => {
+            begin(game, "endless_archive");
+            game.paused = false;
+            if let GameState::Warren(session) = &mut game.state {
+                if let Some(route) = session.outposts.last_mut() {
+                    route.expedition_progress =
+                        simulation::outposts::expedition_cycle_sec(route, &game.data)
+                            - simulation::SIM_DT;
+                }
+            }
+        }
         "endless_wormbone_drill" => {
             super::post_campaign::begin(game, "endless");
             game.paused = true;

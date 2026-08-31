@@ -56,4 +56,8 @@ fn completed_objective_returns_to_route_guidance_after_charter_claim() {
 
     assert!(objective.next.contains("let the Outpost expedition finish"));
     assert!(!objective.next.contains("Charter"));
+
+    session.outposts[0].expeditions_completed = data.balance.outpost_charter_haul_goal + 2;
+    let objective = CampaignObjective::current(&session, &data);
+    assert!(objective.next.contains("Archive 2/5"));
 }

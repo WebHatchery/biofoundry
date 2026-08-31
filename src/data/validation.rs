@@ -48,6 +48,9 @@ fn validate_balance(data: &GameData) -> Result<(), String> {
     if balance.outpost_charter_haul_goal == 0 || balance.outpost_charter_reward_ingots == 0 {
         return Err("outpost charter goal and reward must be positive".to_owned());
     }
+    if balance.outpost_archive_haul_goal == 0 || balance.outpost_archive_reward_ingots == 0 {
+        return Err("outpost archive goal and reward must be positive".to_owned());
+    }
     Ok(())
 }
 

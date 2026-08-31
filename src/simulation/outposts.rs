@@ -8,6 +8,12 @@ use crate::state::outposts::{
 use crate::state::GameSession;
 use macroquad_toolkit::grid::TilePos;
 
+mod milestones;
+
+pub use milestones::{
+    claim_outpost_archive, claim_outpost_charter, outpost_archive_progress, total_expeditions,
+};
+
 pub fn activate_outpost(session: &mut GameSession, pos: TilePos) -> bool {
     if session.buildings_of("worm_shrine").next().is_none()
         || session.building_at(pos).is_none_or(|b| b.kind != "outpost")
@@ -117,29 +123,6 @@ pub fn expedition_cycle_sec(outpost: &Outpost, data: &GameData) -> f32 {
             data.balance.outpost_resonator_cycle_sec,
         )
         .max(0.1)
-}
-
-/// Return the aggregate completed scouting hauls across all routes.
-pub fn total_expeditions(session: &GameSession) -> u32 {
-    session.outposts.iter().fold(0, |total, outpost| {
-        total.saturating_add(outpost.expeditions_completed)
-    })
-}
-
-/// Award the one-time Worm Road Charter when its haul target is met.
-pub fn claim_outpost_charter(session: &mut GameSession, data: &GameData) -> bool {
-    if session.outpost_charter_claimed
-        || data.balance.outpost_charter_haul_goal == 0
-        || total_expeditions(session) < data.balance.outpost_charter_haul_goal
-    {
-        return false;
-    }
-    session.outpost_charter_claimed = true;
-    session.economy.ingots_stock = session
-        .economy
-        .ingots_stock
-        .saturating_add(data.balance.outpost_charter_reward_ingots);
-    true
 }
 
 /// Buy the one-time remote hold expansion for an active awakened route.

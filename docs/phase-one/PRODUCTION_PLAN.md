@@ -165,5 +165,6 @@ commit.
   beyond the Charter-gated Wormbone toolkit;
 - campaign narrative or dialogue beyond concise objective framing;
 - meta-progression, achievements, multiplayer, modding, and localization;
-- expansion of worm outposts beyond a clear post-campaign activity;
+- additional Outpost regions, route contracts, and multi-route objectives
+  beyond the repeatable Worm Road Archive;
 - systemic redesigns not supported by observed player problems.
