@@ -23,9 +23,11 @@ mod study;
 mod workstations;
 
 use breeding::{breed_button_label, breeding_unlock_hint};
+#[cfg(test)]
+use outpost::outpost_archive_summary;
 use outpost::{
-    draw_compact_route_controls, draw_full_route_controls, outpost_archive_summary,
-    outpost_signal_cache_summary, outpost_waypoint_summary, CompactRouteContext, FullRouteContext,
+    draw_compact_route_controls, draw_full_route_controls, outpost_signal_cache_summary,
+    outpost_waypoint_summary, CompactRouteContext, FullRouteContext,
 };
 pub(super) use status::inspect_status;
 #[cfg(test)]
@@ -607,9 +609,7 @@ pub(super) fn draw_inspect_panel(
                             line(&route_bonus, dark::POSITIVE, &mut y);
                         }
                     }
-                    if let Some(archive_summary) = outpost_archive_summary(session, data) {
-                        line(&archive_summary, dark::TEXT_DIM, &mut y);
-                    }
+                    outpost::draw_archive_summary(session, data, x, &mut y, compact);
                     if let Some(cache_summary) = outpost_signal_cache_summary(route, data, compact)
                     {
                         line(&cache_summary, dark::POSITIVE, &mut y);

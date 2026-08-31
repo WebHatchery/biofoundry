@@ -18,8 +18,8 @@
     endless_signal_cache, endless_signal_cache_awarded,
     endless_signal_cache_haul, endless_wormbone_drill, endless_muster_harness,
     endless_wormsong_route, endless_wormsong_concord, endless_wormsong_circuit,
-    endless_wormsong_circuit_awarded, endless_wormsong_encore, and
-    endless_wormsong_encore_awarded.
+    endless_wormsong_circuit_awarded, endless_wormsong_encore,
+    endless_wormsong_encore_awarded, and endless_wormsong_encore_inspect.
 
     The explicit `crowding` scene demonstrates the Jobs-panel recovery guidance.
 
@@ -80,7 +80,8 @@ if (-not $PSBoundParameters.ContainsKey("Scenes")) {
         "endless_wormsong_circuit",
         "endless_wormsong_circuit_awarded",
         "endless_wormsong_encore",
-        "endless_wormsong_encore_awarded"
+        "endless_wormsong_encore_awarded",
+        "endless_wormsong_encore_inspect"
     )
 }
 $gameDir = Split-Path -Parent $PSScriptRoot

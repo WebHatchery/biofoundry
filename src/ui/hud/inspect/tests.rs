@@ -4,6 +4,7 @@ use crate::state::creatures::Job;
 use crate::state::outposts::CargoPriority;
 use crate::state::structures::Building;
 
+mod encore;
 mod equipment;
 mod outpost_details;
 mod route_status;

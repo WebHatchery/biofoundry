@@ -33,6 +33,10 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
         }
         "endless_wormsong_encore" => wormsong_encore::begin(game),
         "endless_wormsong_encore_awarded" => wormsong_encore::award(game),
+        "endless_wormsong_encore_inspect" => {
+            wormsong_encore::begin(game);
+            game.routes_open = false;
+        }
         "endless_auto_return" => {
             super::begin(game, "endless_load_preview");
             if let GameState::Warren(session) = &mut game.state {

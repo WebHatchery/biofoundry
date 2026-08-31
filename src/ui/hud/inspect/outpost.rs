@@ -7,10 +7,65 @@ use crate::ui::hud::widgets::hud_button;
 use crate::ui::UiAction;
 use macroquad::prelude::*;
 use macroquad_toolkit::grid::TilePos;
+use macroquad_toolkit::prelude::*;
+use macroquad_toolkit::ui::draw_ui_text_ex;
 
 pub(super) fn outpost_archive_summary(session: &GameSession, data: &GameData) -> Option<String> {
     if !session.outpost_charter_claimed || data.balance.outpost_archive_haul_goal == 0 {
         return None;
+    }
+    let archive = format!(
+        "Archive pages {} · Next {}/{}",
+        session.outpost_archive_claims,
+        crate::simulation::outposts::outpost_archive_progress(session, data),
+        data.balance.outpost_archive_haul_goal
+    );
+    if session.outpost_circuit_claimed && data.balance.outpost_encore_haul_goal > 0 {
+        return Some(format!(
+            "{archive} · Encore {}/{} · +{} ingots",
+            crate::simulation::outposts::outpost_encore_progress(session, data),
+            data.balance.outpost_encore_haul_goal,
+            data.balance.outpost_encore_reward_ingots
+        ));
+    }
+    Some(archive)
+}
+
+pub(super) fn draw_archive_summary(
+    session: &GameSession,
+    data: &GameData,
+    x: f32,
+    y: &mut f32,
+    compact: bool,
+) {
+    let summary = if compact {
+        compact_archive_summary(session, data)
+    } else {
+        outpost_archive_summary(session, data)
+    };
+    if let Some(summary) = summary {
+        draw_ui_text_ex(
+            &summary,
+            x,
+            *y,
+            TextStyle::new(if compact { 10.0 } else { 14.0 }, dark::TEXT_DIM).params(),
+        );
+        *y += if compact { 16.0 } else { 20.0 };
+    }
+}
+
+pub(super) fn compact_archive_summary(session: &GameSession, data: &GameData) -> Option<String> {
+    if !session.outpost_charter_claimed || data.balance.outpost_archive_haul_goal == 0 {
+        return None;
+    }
+    if session.outpost_circuit_claimed && data.balance.outpost_encore_haul_goal > 0 {
+        return Some(format!(
+            "Archive {}/{} · Encore {}/{}",
+            session.outpost_archive_claims,
+            data.balance.outpost_archive_haul_goal,
+            crate::simulation::outposts::outpost_encore_progress(session, data),
+            data.balance.outpost_encore_haul_goal
+        ));
     }
     Some(format!(
         "Archive pages {} · Next {}/{}",
