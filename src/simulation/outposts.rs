@@ -9,10 +9,15 @@ use crate::state::GameSession;
 use macroquad_toolkit::grid::TilePos;
 
 mod milestones;
+mod upgrades;
 
 pub use milestones::{
     claim_outpost_archive, claim_outpost_charter, claim_outpost_relay, outpost_archive_progress,
     outpost_relay_progress, total_expeditions,
+};
+pub use upgrades::{
+    upgrade_outpost, upgrade_outpost_crew, upgrade_outpost_deep_survey, upgrade_outpost_resonator,
+    upgrade_outpost_signal_cache, upgrade_outpost_survey,
 };
 
 pub fn activate_outpost(session: &mut GameSession, pos: TilePos) -> bool {
@@ -124,164 +129,6 @@ pub fn expedition_cycle_sec(outpost: &Outpost, data: &GameData) -> f32 {
             data.balance.outpost_resonator_cycle_sec,
         )
         .max(0.1)
-}
-
-/// Buy the one-time remote hold expansion for an active awakened route.
-pub fn upgrade_outpost(session: &mut GameSession, data: &GameData, pos: TilePos) -> bool {
-    if !session.worm_awake
-        || session.worm_transit.is_some()
-        || session
-            .building_at(pos)
-            .is_none_or(|building| building.kind != "outpost")
-    {
-        return false;
-    }
-    session.ensure_outpost(pos);
-    let Some(index) = session
-        .outposts
-        .iter()
-        .position(|outpost| outpost.pos == pos)
-    else {
-        return false;
-    };
-    if !session.outposts[index].active
-        || session.outposts[index].storage_upgraded
-        || session.economy.ingots_stock < data.balance.outpost_upgrade_ingots
-    {
-        return false;
-    }
-    session.economy.ingots_stock -= data.balance.outpost_upgrade_ingots;
-    session.outposts[index].upgrade_storage();
-    true
-}
-
-/// Buy the one-time remote camp expansion for an active awakened route.
-pub fn upgrade_outpost_crew(session: &mut GameSession, data: &GameData, pos: TilePos) -> bool {
-    if !session.worm_awake
-        || session.worm_transit.is_some()
-        || session
-            .building_at(pos)
-            .is_none_or(|building| building.kind != "outpost")
-    {
-        return false;
-    }
-    session.ensure_outpost(pos);
-    let Some(index) = session
-        .outposts
-        .iter()
-        .position(|outpost| outpost.pos == pos)
-    else {
-        return false;
-    };
-    if !session.outposts[index].active
-        || session.outposts[index].crew_upgraded
-        || session.economy.ingots_stock < data.balance.outpost_crew_upgrade_ingots
-    {
-        return false;
-    }
-    session.economy.ingots_stock -= data.balance.outpost_crew_upgrade_ingots;
-    session.outposts[index].upgrade_crew_capacity();
-    true
-}
-
-/// Install the one-time survey rig after the route's hold and camp are ready.
-pub fn upgrade_outpost_survey(session: &mut GameSession, data: &GameData, pos: TilePos) -> bool {
-    if !session.worm_awake
-        || session.worm_transit.is_some()
-        || session
-            .building_at(pos)
-            .is_none_or(|building| building.kind != "outpost")
-    {
-        return false;
-    }
-    session.ensure_outpost(pos);
-    let Some(index) = session
-        .outposts
-        .iter()
-        .position(|outpost| outpost.pos == pos)
-    else {
-        return false;
-    };
-    let outpost = &session.outposts[index];
-    if !outpost.active
-        || !outpost.storage_upgraded
-        || !outpost.crew_upgraded
-        || outpost.survey_upgraded
-        || session.economy.ingots_stock < data.balance.outpost_survey_upgrade_ingots
-    {
-        return false;
-    }
-    session.economy.ingots_stock -= data.balance.outpost_survey_upgrade_ingots;
-    session.outposts[index].upgrade_survey();
-    true
-}
-
-/// Install the one-time resonance beacon after the route's survey rig is ready.
-pub fn upgrade_outpost_resonator(session: &mut GameSession, data: &GameData, pos: TilePos) -> bool {
-    if !session.worm_awake
-        || session.worm_transit.is_some()
-        || session
-            .building_at(pos)
-            .is_none_or(|building| building.kind != "outpost")
-    {
-        return false;
-    }
-    session.ensure_outpost(pos);
-    let Some(index) = session
-        .outposts
-        .iter()
-        .position(|outpost| outpost.pos == pos)
-    else {
-        return false;
-    };
-    let outpost = &session.outposts[index];
-    if !outpost.active
-        || !outpost.survey_upgraded
-        || outpost.resonator_upgraded
-        || session.economy.ingots_stock < data.balance.outpost_resonator_upgrade_ingots
-    {
-        return false;
-    }
-    session.economy.ingots_stock -= data.balance.outpost_resonator_upgrade_ingots;
-    session.outposts[index].upgrade_resonator();
-    true
-}
-
-/// Calibrate the one-time Charter-gated deep survey after the route's beacon
-/// is ready, increasing the ore returned by each remote scout.
-pub fn upgrade_outpost_deep_survey(
-    session: &mut GameSession,
-    data: &GameData,
-    pos: TilePos,
-) -> bool {
-    if !session.worm_awake
-        || session.worm_transit.is_some()
-        || !session.outpost_charter_claimed
-        || session
-            .building_at(pos)
-            .is_none_or(|building| building.kind != "outpost")
-    {
-        return false;
-    }
-    session.ensure_outpost(pos);
-    let Some(index) = session
-        .outposts
-        .iter()
-        .position(|outpost| outpost.pos == pos)
-    else {
-        return false;
-    };
-    let outpost = &session.outposts[index];
-    if !outpost.active
-        || !outpost.resonator_upgraded
-        || outpost.deep_survey_upgraded
-        || session.economy.ingots_stock < data.balance.outpost_deep_survey_upgrade_ingots
-    {
-        return false;
-    }
-    session.economy.ingots_stock -= data.balance.outpost_deep_survey_upgrade_ingots;
-    session.outposts[index].upgrade_deep_survey();
-    true
 }
 
 /// The cargo that the next outbound run will put in an Outpost hold.
@@ -413,12 +260,22 @@ pub fn tick_expeditions(
         take_cargo(outpost, Good::CookedFood, food_cost);
         let ore = crew.saturating_mul(ore_per_crew(outpost, data)).min(room);
         add_cargo(outpost, Good::Ore, ore);
+        let remaining_room = room.saturating_sub(ore);
+        let ingots = if outpost.signal_cache_upgraded {
+            data.balance
+                .outpost_signal_cache_ingots_per_haul
+                .min(remaining_room)
+        } else {
+            0
+        };
+        add_cargo(outpost, Good::Ingot, ingots);
         outpost.expedition_progress -= cycle;
         outpost.expeditions_completed = outpost.expeditions_completed.saturating_add(1);
         outpost.ore_scouted = outpost.ore_scouted.saturating_add(ore);
         completed.push(ExpeditionCompletion {
             outpost: outpost.pos,
             ore,
+            ingots,
             food_spent: food_cost,
         });
     }

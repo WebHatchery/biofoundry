@@ -546,6 +546,18 @@ pub(super) fn validate_loaded_session(
                 outpost.pos
             ));
         }
+        if outpost.signal_cache_upgraded && !outpost.deep_survey_upgraded {
+            return Err(format!(
+                "outpost Signal Cache lacks deep survey at {:?}",
+                outpost.pos
+            ));
+        }
+        if outpost.signal_cache_upgraded && !session.outpost_relay_claimed {
+            return Err(format!(
+                "outpost Signal Cache lacks the Worm Road Relay at {:?}",
+                outpost.pos
+            ));
+        }
         validate_outpost_cargo(outpost, data)?;
         validate_nonnegative_finite(outpost.expedition_progress, "outpost expedition progress")?;
 

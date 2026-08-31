@@ -14,6 +14,7 @@ fn new_outpost_defaults_to_ore_first_loading() {
     assert!(!outpost.survey_upgraded);
     assert!(!outpost.resonator_upgraded);
     assert!(!outpost.deep_survey_upgraded);
+    assert!(!outpost.signal_cache_upgraded);
     assert!(!outpost.auto_return_cargo);
     assert_eq!(outpost.auto_return_label(), "Auto-return · Off");
     assert!(!outpost.auto_resupply_food);
@@ -88,6 +89,19 @@ fn older_outpost_saves_default_deep_survey_to_off() {
 
     let restored: Outpost = serde_json::from_value(value).expect("restore legacy outpost");
     assert!(!restored.deep_survey_upgraded);
+}
+
+#[test]
+fn older_outpost_saves_default_signal_cache_to_off() {
+    let outpost = Outpost::new(TilePos::new(4, 4));
+    let mut value = serde_json::to_value(outpost).expect("serialize outpost");
+    value
+        .as_object_mut()
+        .expect("outpost serializes as an object")
+        .remove("signal_cache_upgraded");
+
+    let restored: Outpost = serde_json::from_value(value).expect("restore legacy outpost");
+    assert!(!restored.signal_cache_upgraded);
 }
 
 #[test]

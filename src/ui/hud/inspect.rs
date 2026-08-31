@@ -24,7 +24,7 @@ mod workstations;
 use breeding::{breed_button_label, breeding_unlock_hint};
 use outpost::{
     draw_compact_route_controls, draw_route_upgrade_controls, outpost_archive_summary,
-    CompactRouteContext, RouteUpgradeContext,
+    outpost_signal_cache_summary, CompactRouteContext, RouteUpgradeContext,
 };
 pub(super) use status::inspect_status;
 use status::{
@@ -549,6 +549,9 @@ pub(super) fn draw_inspect_panel(
                     );
                     if let Some(archive_summary) = outpost_archive_summary(session, data) {
                         line(&archive_summary, dark::TEXT_DIM, &mut y);
+                    }
+                    if let Some(cache_summary) = outpost_signal_cache_summary(route, data) {
+                        line(&cache_summary, dark::POSITIVE, &mut y);
                     }
                 }
                 let in_transit = session

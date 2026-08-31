@@ -66,6 +66,8 @@ pub enum UiAction {
     UpgradeOutpostResonator(TilePos),
     /// Calibrate the one-time Charter-gated deep survey for an awakened route.
     UpgradeOutpostDeepSurvey(TilePos),
+    /// Install the one-time Relay-gated Signal Cache on an awakened route.
+    UpgradeOutpostSignalCache(TilePos),
     /// Cycle the number of new scouts sent on an awakened worm route.
     CycleOutpostCrew(TilePos),
     /// Pause or resume remote scouting without closing the worm route.

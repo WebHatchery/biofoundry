@@ -51,4 +51,15 @@ fn completed_objective_guides_the_route_upgrade_ladder_when_funded() {
     assert!(CampaignObjective::current(&session, &data)
         .progress
         .contains("Upgrades 5"));
+
+    session.outpost_relay_claimed = true;
+    session.economy.ingots_stock = data.balance.outpost_signal_cache_upgrade_ingots;
+    assert!(CampaignObjective::current(&session, &data)
+        .next
+        .contains("Install signal cache"));
+
+    session.outposts[0].signal_cache_upgraded = true;
+    assert!(CampaignObjective::current(&session, &data)
+        .progress
+        .contains("Upgrades 6"));
 }

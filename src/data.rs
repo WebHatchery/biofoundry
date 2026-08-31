@@ -269,6 +269,12 @@ pub struct Balance {
     /// Ingots awarded when the Relay contract is completed.
     #[serde(default = "default_outpost_relay_reward_ingots")]
     pub outpost_relay_reward_ingots: u32,
+    /// Ingot cost for the post-Relay Signal Cache route upgrade.
+    #[serde(default = "default_outpost_signal_cache_upgrade_ingots")]
+    pub outpost_signal_cache_upgrade_ingots: u32,
+    /// Ingots carried home by each haul after a Signal Cache is installed.
+    #[serde(default = "default_outpost_signal_cache_ingots_per_haul")]
+    pub outpost_signal_cache_ingots_per_haul: u32,
     #[serde(default = "default_worm_transit_time")]
     pub worm_transit_time_sec: f32,
     /// Time for a staffed remote outpost to complete one scouting haul.
@@ -394,6 +400,12 @@ fn default_outpost_relay_haul_goal() -> u32 {
 }
 fn default_outpost_relay_reward_ingots() -> u32 {
     20
+}
+fn default_outpost_signal_cache_upgrade_ingots() -> u32 {
+    28
+}
+fn default_outpost_signal_cache_ingots_per_haul() -> u32 {
+    1
 }
 fn default_worm_transit_time() -> f32 {
     18.0

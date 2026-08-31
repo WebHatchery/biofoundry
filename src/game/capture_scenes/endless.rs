@@ -301,6 +301,43 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
             game.routes_open = true;
             game.paused = true;
         }
+        "endless_signal_cache" => {
+            begin(game, "endless_relay");
+            game.notifications.clear();
+            game.routes_open = false;
+            game.paused = true;
+            if let GameState::Warren(session) = &mut game.state {
+                session.outpost_charter_claimed = true;
+                session.outpost_relay_claimed = true;
+                session.economy.ingots_stock =
+                    game.data.balance.outpost_signal_cache_upgrade_ingots;
+                if let Some(route) = session.outposts.first_mut() {
+                    route.active = true;
+                    route.storage_upgraded = true;
+                    route.crew_upgraded = true;
+                    route.survey_upgraded = true;
+                    route.resonator_upgraded = true;
+                    route.deep_survey_upgraded = true;
+                    route.signal_cache_upgraded = false;
+                }
+            }
+        }
+        "endless_signal_cache_awarded" => {
+            begin(game, "endless_signal_cache");
+            let selected = game.selected_building;
+            if let Some(pos) = selected {
+                if let GameState::Warren(session) = &mut game.state {
+                    if simulation::outposts::upgrade_outpost_signal_cache(session, &game.data, pos)
+                    {
+                        game.notifications.success(format!(
+                            "Signal cache online · +{} ingot per haul.",
+                            game.data.balance.outpost_signal_cache_ingots_per_haul
+                        ));
+                    }
+                }
+            }
+            game.paused = true;
+        }
         "endless_wormbone_drill" => {
             super::post_campaign::begin(game, "endless");
             game.paused = true;

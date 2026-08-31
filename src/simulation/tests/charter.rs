@@ -234,3 +234,61 @@ fn deep_survey_increases_a_real_expedition_yield() {
     );
     assert_eq!(session.outposts[0].ore_scouted, completed[0].ore);
 }
+
+#[test]
+fn signal_cache_requires_relay_and_pays_for_each_real_haul() {
+    let (data, mut session, outpost_pos) = super::novel::active_outpost(174);
+    session.economy.ingots_stock = data.balance.outpost_signal_cache_upgrade_ingots;
+    let route = &mut session.outposts[0];
+    route.storage_upgraded = true;
+    route.crew_upgraded = true;
+    route.survey_upgraded = true;
+    route.resonator_upgraded = true;
+    route.deep_survey_upgraded = true;
+    route.active = true;
+
+    assert!(!outposts::upgrade_outpost_signal_cache(
+        &mut session,
+        &data,
+        outpost_pos
+    ));
+    assert_eq!(
+        session.economy.ingots_stock,
+        data.balance.outpost_signal_cache_upgrade_ingots
+    );
+
+    session.outpost_relay_claimed = true;
+    assert!(outposts::upgrade_outpost_signal_cache(
+        &mut session,
+        &data,
+        outpost_pos
+    ));
+    assert_eq!(session.economy.ingots_stock, 0);
+
+    let crew: Vec<u32> = session
+        .creatures
+        .iter()
+        .take(2)
+        .map(|creature| creature.id)
+        .collect();
+    let route = &mut session.outposts[0];
+    route.crew = crew;
+    route.cargo.insert(Good::CookedFood, 2);
+    route.expedition_progress = outposts::expedition_cycle_sec(route, &data);
+
+    let completed = outposts::tick_expeditions(&mut session, &data, 0.0);
+
+    assert_eq!(completed.len(), 1);
+    assert_eq!(
+        completed[0].ore,
+        2 * data.balance.outpost_deep_survey_ore_per_crew
+    );
+    assert_eq!(
+        completed[0].ingots,
+        data.balance.outpost_signal_cache_ingots_per_haul
+    );
+    assert_eq!(
+        session.outposts[0].cargo.get(&Good::Ingot),
+        Some(&data.balance.outpost_signal_cache_ingots_per_haul)
+    );
+}

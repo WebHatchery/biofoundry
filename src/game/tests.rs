@@ -692,6 +692,7 @@ fn expedition_completion_notice_names_the_remote_yield_and_upkeep() {
         format_expedition_completion(ExpeditionCompletion {
             outpost: macroquad_toolkit::grid::TilePos::new(4, 4),
             ore: 6,
+            ingots: 0,
             food_spent: 2,
         }),
         "Outpost haul · +6 ore / -2 food."

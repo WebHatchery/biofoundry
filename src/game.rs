@@ -5,7 +5,7 @@ use crate::audio::{Audio, Sfx};
 use crate::data::GameData;
 use crate::simulation::{self, MAX_TICKS_PER_FRAME, SIM_DT};
 use crate::state::creatures::Job;
-use crate::state::outposts::{ExpeditionCompletion, TransitCompletion, TransitDirection};
+use crate::state::outposts::{TransitCompletion, TransitDirection};
 use crate::state::{GameSession, GameState, StateTransition};
 use crate::tutorial::{self, TutorialInputs};
 use crate::ui::{self, UiAction, UiMode};
@@ -24,7 +24,9 @@ mod capture_scenes;
 #[path = "game_actions.rs"]
 mod game_actions;
 mod input;
+mod notifications;
 mod persistence;
+pub(super) use notifications::format_expedition_completion;
 #[cfg(test)]
 mod tests;
 
@@ -719,13 +721,6 @@ fn transit_completion_notice(completion: TransitCompletion) -> &'static str {
             _ => "The worm returns to the shrine — route complete.",
         },
     }
-}
-
-fn format_expedition_completion(completion: ExpeditionCompletion) -> String {
-    format!(
-        "Outpost haul · +{} ore / -{} food.",
-        completion.ore, completion.food_spent
-    )
 }
 
 fn auto_return_notice() -> &'static str {

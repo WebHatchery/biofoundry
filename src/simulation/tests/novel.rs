@@ -615,6 +615,7 @@ fn staffed_outpost_scouting_consumes_food_and_stores_remote_ore() {
         vec![crate::state::outposts::ExpeditionCompletion {
             outpost: session.outposts[0].pos,
             ore: 6,
+            ingots: 0,
             food_spent: 2,
         }]
     );

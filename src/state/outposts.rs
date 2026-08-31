@@ -77,6 +77,9 @@ pub struct Outpost {
     /// Whether this route has calibrated deep survey data after the Charter.
     #[serde(default)]
     pub deep_survey_upgraded: bool,
+    /// Whether this route has installed a post-Relay Signal Cache.
+    #[serde(default)]
+    pub signal_cache_upgraded: bool,
     /// Automatically return a full hold as cargo-only, keeping remote crew
     /// stationed for the next expedition.
     #[serde(default)]
@@ -107,6 +110,7 @@ impl Outpost {
             survey_upgraded: false,
             resonator_upgraded: false,
             deep_survey_upgraded: false,
+            signal_cache_upgraded: false,
             auto_return_cargo: false,
             auto_resupply_food: false,
             last_failure: None,
@@ -206,6 +210,10 @@ impl Outpost {
         self.deep_survey_upgraded = true;
     }
 
+    pub fn upgrade_signal_cache(&mut self) {
+        self.signal_cache_upgraded = true;
+    }
+
     pub fn toggle_auto_return(&mut self) {
         self.auto_return_cargo = !self.auto_return_cargo;
     }
@@ -251,6 +259,7 @@ pub struct TransitCompletion {
 pub struct ExpeditionCompletion {
     pub outpost: TilePos,
     pub ore: u32,
+    pub ingots: u32,
     pub food_spent: u32,
 }
 

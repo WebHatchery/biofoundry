@@ -436,6 +436,29 @@ impl Game {
                     self.autosave_game();
                 }
             }
+            UiAction::UpgradeOutpostSignalCache(pos) => {
+                let mut upgraded = false;
+                if let GameState::Warren(session) = &mut self.state {
+                    if simulation::outposts::upgrade_outpost_signal_cache(session, &self.data, pos)
+                    {
+                        self.notifications.success(format!(
+                            "Signal cache online · +{} ingot per haul.",
+                            self.data.balance.outpost_signal_cache_ingots_per_haul
+                        ));
+                        self.audio.play(Sfx::Complete);
+                        upgraded = true;
+                    } else {
+                        self.notifications.warning(format!(
+                            "Claim Relay and calibrate Deep Survey first, then spend {} ingots.",
+                            self.data.balance.outpost_signal_cache_upgrade_ingots
+                        ));
+                        self.audio.play(Sfx::Deny);
+                    }
+                }
+                if upgraded {
+                    self.autosave_game();
+                }
+            }
             UiAction::CycleOutpostCrew(pos) => {
                 let mut route_changed = false;
                 if let GameState::Warren(session) = &mut self.state {

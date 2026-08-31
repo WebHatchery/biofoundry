@@ -74,3 +74,32 @@ fn loaded_deep_survey_requires_the_worm_road_charter() {
 
     assert!(error.contains("Worm Road Charter"), "{error}");
 }
+
+#[test]
+fn loaded_signal_cache_requires_deep_survey() {
+    let (data, mut session) = session_with_outpost();
+    session.outpost_relay_claimed = true;
+    session.outposts[0].signal_cache_upgraded = true;
+
+    let error = validate_loaded_session(&session, &data)
+        .expect_err("Signal Cache cannot exist before Deep Survey");
+
+    assert!(error.contains("deep survey"), "{error}");
+}
+
+#[test]
+fn loaded_signal_cache_requires_the_worm_road_relay() {
+    let (data, mut session) = session_with_outpost();
+    session.outpost_charter_claimed = true;
+    session.outposts[0].storage_upgraded = true;
+    session.outposts[0].crew_upgraded = true;
+    session.outposts[0].survey_upgraded = true;
+    session.outposts[0].resonator_upgraded = true;
+    session.outposts[0].deep_survey_upgraded = true;
+    session.outposts[0].signal_cache_upgraded = true;
+
+    let error = validate_loaded_session(&session, &data)
+        .expect_err("Signal Cache cannot exist before the Relay");
+
+    assert!(error.contains("Worm Road Relay"), "{error}");
+}

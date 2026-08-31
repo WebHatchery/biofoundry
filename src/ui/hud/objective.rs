@@ -68,6 +68,7 @@ impl CampaignObjective {
                         outpost.survey_upgraded,
                         outpost.resonator_upgraded,
                         outpost.deep_survey_upgraded,
+                        outpost.signal_cache_upgraded,
                     ]
                     .into_iter()
                     .filter(|installed| *installed)
@@ -537,6 +538,16 @@ fn outpost_upgrade_next_step(
         return Some(format!(
             "Next: tap the active Worm Outpost, then Calibrate deep survey for {} ingots.",
             data.balance.outpost_deep_survey_upgrade_ingots
+        ));
+    }
+    if outpost.deep_survey_upgraded
+        && session.outpost_relay_claimed
+        && !outpost.signal_cache_upgraded
+        && available >= data.balance.outpost_signal_cache_upgrade_ingots
+    {
+        return Some(format!(
+            "Next: tap the active Worm Outpost, then Install signal cache for {} ingots.",
+            data.balance.outpost_signal_cache_upgrade_ingots
         ));
     }
     None

@@ -295,13 +295,22 @@ fn route_metrics(session: &GameSession, data: &GameData, outpost: &Outpost) -> S
     } else {
         String::new()
     };
+    let cache_summary = if outpost.signal_cache_upgraded {
+        format!(
+            " · Cache +{}/haul",
+            data.balance.outpost_signal_cache_ingots_per_haul
+        )
+    } else {
+        String::new()
+    };
     let cargo_summary = format!(
-        "Cargo {}/{} · Crew {}/{}{}",
+        "Cargo {}/{} · Crew {}/{}{}{}",
         outpost.cargo_total(),
         crate::simulation::outposts::storage_capacity(outpost, data),
         outpost.crew.len(),
         crate::simulation::outposts::crew_capacity(outpost, data),
-        survey_summary
+        survey_summary,
+        cache_summary
     );
     let cargo_summary = format!("{cargo_summary}{resonator_summary}");
     match crate::simulation::outposts::expedition_state(outpost, data) {

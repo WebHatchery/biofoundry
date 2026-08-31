@@ -20,6 +20,15 @@ pub(super) fn outpost_archive_summary(session: &GameSession, data: &GameData) ->
     ))
 }
 
+pub(super) fn outpost_signal_cache_summary(outpost: &Outpost, data: &GameData) -> Option<String> {
+    outpost.signal_cache_upgraded.then(|| {
+        format!(
+            "Signal cache · +{} ingot/haul",
+            data.balance.outpost_signal_cache_ingots_per_haul
+        )
+    })
+}
+
 pub(super) struct CompactRouteContext<'a> {
     pub(super) session: &'a GameSession,
     pub(super) data: &'a GameData,
@@ -150,6 +159,39 @@ pub(super) fn draw_deep_survey_control(context: SurveyUpgradeContext<'_>) {
     *y += step;
 }
 
+pub(super) fn draw_signal_cache_control(context: SurveyUpgradeContext<'_>) {
+    let SurveyUpgradeContext {
+        session,
+        data,
+        pos,
+        outpost,
+        rect,
+        y,
+        step,
+        mouse,
+        actions,
+    } = context;
+    if !outpost.is_some_and(|route| route.deep_survey_upgraded && !route.signal_cache_upgraded) {
+        return;
+    }
+    let relay_claimed = session.outpost_relay_claimed;
+    let cache_cost = data.balance.outpost_signal_cache_upgrade_ingots;
+    let label = if relay_claimed {
+        format!("Install signal cache · {cache_cost} ingots")
+    } else {
+        "Signal cache · Relay required".to_owned()
+    };
+    if hud_button(
+        Rect::new(rect.x, *y, rect.w, rect.h),
+        &label,
+        relay_claimed && session.economy.ingots_stock >= cache_cost,
+        mouse,
+    ) {
+        actions.push(UiAction::UpgradeOutpostSignalCache(pos));
+    }
+    *y += step;
+}
+
 pub(super) fn draw_route_upgrade_controls(context: RouteUpgradeContext<'_>) {
     let RouteUpgradeContext {
         session,
@@ -212,6 +254,17 @@ pub(super) fn draw_route_upgrade_controls(context: RouteUpgradeContext<'_>) {
         actions,
     });
     draw_deep_survey_control(SurveyUpgradeContext {
+        session,
+        data,
+        pos,
+        outpost,
+        rect,
+        y,
+        step: button_step,
+        mouse,
+        actions,
+    });
+    draw_signal_cache_control(SurveyUpgradeContext {
         session,
         data,
         pos,

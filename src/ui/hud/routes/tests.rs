@@ -231,6 +231,24 @@ fn route_metrics_reports_deep_survey_yield() {
 }
 
 #[test]
+fn route_metrics_reports_signal_cache_payload() {
+    let data = GameData::load().expect("embedded game data");
+    let session = GameSession::new(&data, 47);
+    let mut route = Outpost::new(TilePos::new(4, 4));
+    route.signal_cache_upgraded = true;
+
+    assert_eq!(
+        route_metrics(&session, &data, &route),
+        format!(
+            "Cargo 0/{} · Crew 0/{} · Cache +{}/haul",
+            data.balance.outpost_storage_cap,
+            data.balance.outpost_capacity,
+            data.balance.outpost_signal_cache_ingots_per_haul
+        )
+    );
+}
+
+#[test]
 fn route_status_reuses_the_inspection_vocabulary() {
     let data = GameData::load().expect("embedded game data");
     let mut session = GameSession::new(&data, 43);
