@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-31
-**Source revision:** `0228495`
+**Source revision:** `07a7273`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -94,7 +94,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 426 unit tests and 2 integration/code-standard
+- `cargo test --all-targets` — 457 unit tests and 2 integration/code-standard
   targets pass,
   including fresh/simulated/remote-transit valid sessions, modal route
   planning, rejected malformed save shapes, and event-history save/load
@@ -115,6 +115,8 @@ automated simulation results into first-time-player evidence.
   [ui_compact_endless_auto_load.png](../verification/ui_compact_endless_auto_load.png)
   and [ui_compact_endless_auto_load_started.png](../verification/ui_compact_endless_auto_load_started.png)
   captures keep the new Dispatch policy and departure notice visible.
+  The new [ui_compact_endless_muster_harness.png](../verification/ui_compact_endless_muster_harness.png)
+  capture keeps the ten-recipe Muster-gated Blacksmith card on-canvas.
   Remaining text density remains a human-readability follow-up.
 - Endless cargo priority — pass; the outbound hold obeys Ore, Ingots, or Food
   priority, preserves the local food reserve, and persists the selected order
