@@ -103,7 +103,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 502 unit tests and 2 integration/code-standard
+- `cargo test --all-targets` — 504 unit tests and 2 integration/code-standard
   targets pass,
   including fresh/simulated/remote-transit valid sessions, modal route
   planning, rejected malformed save shapes, and event-history save/load
@@ -865,8 +865,10 @@ automated simulation results into first-time-player evidence.
 - Non-viable security recovery — [ui_security_stuck.png](../verification/ui_security_stuck.png)
   shows the dedicated `Guard Handoff Blocked` recovery state when only
   non-reassignable specialists remain after the reserve threshold, with
-  visible Load Last Safe and Return to Menu actions. Awakened specialist
-  warrens are explicitly excluded from this failure state. Manual Save,
+  visible Load Last Safe and Start New Warren actions when a safe checkpoint
+  exists. A fresh failure without a checkpoint keeps Start New Warren and
+  Return to Menu available. Awakened specialist warrens are explicitly
+  excluded from this failure state. Manual Save,
   milestone autosave, and viable-run Menu exit all refuse to overwrite the
   earlier checkpoint while this recovery state is active.
 - Security threshold notice — the live threshold toast now follows the same

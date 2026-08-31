@@ -29,6 +29,31 @@ fn recovery_guide_keeps_specialists_out_of_disabled_recovery_steps() {
 }
 
 #[test]
+fn saved_failure_offers_load_or_direct_restart() {
+    let ((load_action, load_label), (restart_action, restart_label)) = colony_failure_actions(true);
+
+    assert_eq!(load_action, UiAction::Load);
+    assert_eq!(load_label, "Load Last Safe");
+    assert_eq!(restart_action, UiAction::StartWarren);
+    assert_eq!(restart_label, "Start New Warren");
+    assert!(colony_failure_body(ColonyFailure::Silent, true).contains("tap Start New Warren"));
+    assert!(
+        colony_failure_body(ColonyFailure::GuardHandoff, true).contains("replace this checkpoint")
+    );
+}
+
+#[test]
+fn failure_without_a_save_keeps_new_warren_and_menu_choices() {
+    let ((restart_action, restart_label), (menu_action, menu_label)) =
+        colony_failure_actions(false);
+
+    assert_eq!(restart_action, UiAction::StartWarren);
+    assert_eq!(restart_label, "Start New Warren");
+    assert_eq!(menu_action, UiAction::BackToMenu);
+    assert_eq!(menu_label, "Return to Menu");
+}
+
+#[test]
 fn field_guide_explains_breeding_specialists() {
     assert!(INSPECT_HELP_BODY.contains("Breeding Pit"));
     assert!(INSPECT_HELP_BODY.contains("after onboarding"));

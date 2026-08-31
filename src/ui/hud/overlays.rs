@@ -110,16 +110,8 @@ pub(super) fn draw_colony_failure_overlay(
         dark::TEXT,
     );
 
-    let primary_action = if save_exists {
-        UiAction::Load
-    } else {
-        UiAction::StartWarren
-    };
-    let primary_label = if save_exists {
-        "Load Last Safe"
-    } else {
-        "Start New Warren"
-    };
+    let ((primary_action, primary_label), (secondary_action, secondary_label)) =
+        colony_failure_actions(save_exists);
     if hud_button(
         Rect::new(panel.x + 40.0, panel.bottom() - 56.0, 195.0, 38.0),
         primary_label,
@@ -130,11 +122,27 @@ pub(super) fn draw_colony_failure_overlay(
     }
     if hud_button(
         Rect::new(panel.x + 245.0, panel.bottom() - 56.0, 195.0, 38.0),
-        "Return to Menu",
+        secondary_label,
         true,
         mouse,
     ) {
-        actions.push(UiAction::BackToMenu);
+        actions.push(secondary_action);
+    }
+}
+
+fn colony_failure_actions(
+    save_exists: bool,
+) -> ((UiAction, &'static str), (UiAction, &'static str)) {
+    if save_exists {
+        (
+            (UiAction::Load, "Load Last Safe"),
+            (UiAction::StartWarren, "Start New Warren"),
+        )
+    } else {
+        (
+            (UiAction::StartWarren, "Start New Warren"),
+            (UiAction::BackToMenu, "Return to Menu"),
+        )
     }
 }
 
@@ -148,13 +156,13 @@ fn colony_failure_title(failure: ColonyFailure) -> &'static str {
 fn colony_failure_body(failure: ColonyFailure, save_exists: bool) -> &'static str {
     match (failure, save_exists) {
         (ColonyFailure::Silent, true) => {
-            "No creatures remain, so this warren cannot produce food or advance the campaign.\n\nLoad the last safe warren to recover your progress, or start fresh."
+            "No creatures remain, so this warren cannot produce food or advance the campaign.\n\nLoad the last safe warren to recover your progress, or tap Start New Warren to replace this checkpoint."
         }
         (ColonyFailure::Silent, false) => {
             "No creatures remain, so this warren cannot produce food or advance the campaign.\n\nStart a new warren to begin again."
         }
         (ColonyFailure::GuardHandoff, true) => {
-            "No reassignable workers remain, so this warren cannot staff the Guard post or advance onboarding.\n\nLoad the last safe warren to recover your progress, or start fresh."
+            "No reassignable workers remain, so this warren cannot staff the Guard post or advance onboarding.\n\nLoad the last safe warren to recover your progress, or tap Start New Warren to replace this checkpoint."
         }
         (ColonyFailure::GuardHandoff, false) => {
             "No reassignable workers remain, so this warren cannot staff the Guard post or advance onboarding.\n\nStart a new warren to begin again."
