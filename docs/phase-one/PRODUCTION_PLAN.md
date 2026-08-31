@@ -166,5 +166,5 @@ commit.
 - campaign narrative or dialogue beyond concise objective framing;
 - meta-progression, achievements, multiplayer, modding, and localization;
 - additional Outpost regions, route contracts, and multi-route objectives
-  beyond the repeatable Worm Road Archive;
+  beyond the repeatable Worm Road Convoy;
 - systemic redesigns not supported by observed player problems.
