@@ -161,7 +161,7 @@ fn objective_marks_the_worm_awake_as_complete() {
     );
     assert_eq!(
         objective.next,
-        "Next: tap Blacksmith in Build & Dig, then place it on open floor."
+        "Next: tap Blacksmith in Build & Dig, then tap open floor."
     );
 }
 
@@ -176,7 +176,7 @@ fn awakened_objective_recovers_an_exhausted_mine_before_promising_more_ingots() 
 
     assert_eq!(
         objective.next,
-        "Next: tap Blacksmith in Build & Dig, then place it on open floor."
+        "Next: tap Blacksmith in Build & Dig, then tap open floor."
     );
 
     let blacksmith = session
@@ -193,7 +193,7 @@ fn awakened_objective_recovers_an_exhausted_mine_before_promising_more_ingots() 
     let objective = CampaignObjective::current(&session, &data);
     assert_eq!(
         objective.next,
-        "Next: tap Mine in Build & Dig, then place a new Mine on open floor."
+        "Next: tap Mine in Build & Dig, then tap open floor for a new Mine."
     );
 }
 

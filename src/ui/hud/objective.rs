@@ -146,7 +146,7 @@ impl CampaignObjective {
             let goal = data.balance.win2_ingots;
             let forged = session.economy.ingots_forged.min(goal);
             let next: String = if session.buildings_of("blacksmith").next().is_none() {
-                "Next: tap Blacksmith in Build & Dig, then place it on open floor.".to_owned()
+                "Next: tap Blacksmith in Build & Dig, then tap open floor.".to_owned()
             } else if session.job_count(crate::state::creatures::Job::Smith) == 0 {
                 format!(
                     "Next: {}.",
@@ -211,13 +211,13 @@ fn endless_forge_next_step(session: &GameSession, data: &GameData) -> String {
         if pending_build_site(session, "blacksmith") {
             return "Next: keep carriers delivering ore to the Blacksmith site.".to_owned();
         }
-        return "Next: tap Blacksmith in Build & Dig, then place it on open floor.".to_owned();
+        return "Next: tap Blacksmith in Build & Dig, then tap open floor.".to_owned();
     }
     if !session.buildings_of("mine").any(|mine| mine.reserve > 0.0) {
         if pending_build_site(session, "mine") {
             return "Next: keep carriers delivering ore to the new Mine site.".to_owned();
         }
-        return "Next: tap Mine in Build & Dig, then place a new Mine on open floor.".to_owned();
+        return "Next: tap Mine in Build & Dig, then tap open floor for a new Mine.".to_owned();
     }
     if session.job_count(Job::Smith) == 0 {
         return format!(
@@ -262,7 +262,7 @@ fn shrine_build_requirement(session: &GameSession, data: &GameData) -> (String, 
     if session.unlocked.contains("worm_shrine") {
         return (
             "Worm Shrine · ready to build".to_owned(),
-            "Next: tap Shrine in Build & Dig, then place it on open floor.".to_owned(),
+            "Next: tap Shrine in Build & Dig, then tap open floor.".to_owned(),
         );
     }
 
