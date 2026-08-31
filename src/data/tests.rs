@@ -121,6 +121,8 @@ fn balance_values_are_playable() {
     assert!(b.outpost_resonator_upgrade_ingots > b.outpost_survey_upgrade_ingots);
     assert!(b.outpost_resonator_cycle_sec > 0.0);
     assert!(b.outpost_resonator_cycle_sec < b.outpost_expedition_cycle_sec);
+    assert!(b.outpost_deep_survey_upgrade_ingots > b.outpost_resonator_upgrade_ingots);
+    assert!(b.outpost_deep_survey_ore_per_crew > b.outpost_upgraded_ore_per_crew);
     assert!(b.outpost_charter_haul_goal > 0);
     assert!(b.outpost_charter_reward_ingots > 0);
     assert!(b.win_ore_delivered > 0);

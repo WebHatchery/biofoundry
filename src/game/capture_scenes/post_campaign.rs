@@ -134,6 +134,9 @@ pub(super) fn begin(game: &mut Game, scene: &str) -> bool {
         | "endless_resonator_upgraded"
         | "endless_charter"
         | "endless_charter_awarded"
+        | "endless_deep_survey"
+        | "endless_deep_survey_upgrade"
+        | "endless_deep_survey_upgraded"
         | "endless_wormbone_drill" => {
             super::endless::begin(game, scene);
             true

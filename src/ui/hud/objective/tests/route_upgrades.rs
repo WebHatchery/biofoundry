@@ -39,4 +39,16 @@ fn completed_objective_guides_the_route_upgrade_ladder_when_funded() {
     let objective = CampaignObjective::current(&session, &data);
     assert!(objective.next.contains("Tune beacon"));
     assert!(objective.progress.contains("Upgrades 3"));
+
+    session.outposts[0].resonator_upgraded = true;
+    session.outpost_charter_claimed = true;
+    session.economy.ingots_stock = data.balance.outpost_deep_survey_upgrade_ingots;
+    let objective = CampaignObjective::current(&session, &data);
+    assert!(objective.next.contains("Calibrate deep survey"));
+    assert!(objective.progress.contains("Upgrades 4"));
+
+    session.outposts[0].deep_survey_upgraded = true;
+    assert!(CampaignObjective::current(&session, &data)
+        .progress
+        .contains("Upgrades 5"));
 }

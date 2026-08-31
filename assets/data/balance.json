@@ -91,6 +91,8 @@
   "outpost_upgraded_ore_per_crew": 4,
   "outpost_resonator_upgrade_ingots": 24,
   "outpost_resonator_cycle_sec": 20.0,
+  "outpost_deep_survey_upgrade_ingots": 32,
+  "outpost_deep_survey_ore_per_crew": 6,
   "outpost_charter_haul_goal": 3,
   "outpost_charter_reward_ingots": 12,
   "worm_transit_time_sec": 18.0,

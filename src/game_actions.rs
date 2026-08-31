@@ -409,6 +409,33 @@ impl Game {
                     self.autosave_game();
                 }
             }
+            UiAction::UpgradeOutpostDeepSurvey(pos) => {
+                let mut upgraded = false;
+                if let GameState::Warren(session) = &mut self.state {
+                    if simulation::outposts::upgrade_outpost_deep_survey(session, &self.data, pos) {
+                        let ore_per_crew = session
+                            .outposts
+                            .iter()
+                            .find(|outpost| outpost.pos == pos)
+                            .map(|outpost| simulation::outposts::ore_per_crew(outpost, &self.data))
+                            .unwrap_or(self.data.balance.outpost_upgraded_ore_per_crew);
+                        self.notifications.success(format!(
+                            "Deep survey calibrated · {ore_per_crew} ore/scout."
+                        ));
+                        self.audio.play(Sfx::Complete);
+                        upgraded = true;
+                    } else {
+                        self.notifications.warning(format!(
+                            "Claim the Worm Road Charter and tune the beacon, then spend {} ingots.",
+                            self.data.balance.outpost_deep_survey_upgrade_ingots
+                        ));
+                        self.audio.play(Sfx::Deny);
+                    }
+                }
+                if upgraded {
+                    self.autosave_game();
+                }
+            }
             UiAction::CycleOutpostCrew(pos) => {
                 let mut route_changed = false;
                 if let GameState::Warren(session) = &mut self.state {

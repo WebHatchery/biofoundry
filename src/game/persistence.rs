@@ -534,6 +534,18 @@ pub(super) fn validate_loaded_session(
                 outpost.pos
             ));
         }
+        if outpost.deep_survey_upgraded && !outpost.resonator_upgraded {
+            return Err(format!(
+                "outpost deep survey lacks its resonance beacon at {:?}",
+                outpost.pos
+            ));
+        }
+        if outpost.deep_survey_upgraded && !session.outpost_charter_claimed {
+            return Err(format!(
+                "outpost deep survey lacks the Worm Road Charter at {:?}",
+                outpost.pos
+            ));
+        }
         validate_outpost_cargo(outpost, data)?;
         validate_nonnegative_finite(outpost.expedition_progress, "outpost expedition progress")?;
 

@@ -172,6 +172,42 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                 }
             }
         }
+        "endless_deep_survey" => {
+            begin(game, "endless_charter");
+        }
+        "endless_deep_survey_upgrade" => {
+            begin(game, "endless_charter_awarded");
+            game.notifications.clear();
+            game.paused = true;
+            if let GameState::Warren(session) = &mut game.state {
+                session.outpost_charter_claimed = true;
+                session.economy.ingots_stock = game.data.balance.outpost_deep_survey_upgrade_ingots;
+                if let Some(route) = session.outposts.last_mut() {
+                    route.expedition_paused = true;
+                    route.expedition_progress = 0.0;
+                }
+            }
+        }
+        "endless_deep_survey_upgraded" => {
+            begin(game, "endless_deep_survey_upgrade");
+            let upgraded = if let GameState::Warren(session) = &mut game.state {
+                session
+                    .outposts
+                    .last()
+                    .map(|route| route.pos)
+                    .is_some_and(|pos| {
+                        simulation::outposts::upgrade_outpost_deep_survey(session, &game.data, pos)
+                    })
+            } else {
+                false
+            };
+            if upgraded {
+                game.notifications.success(format!(
+                    "Deep survey calibrated · {} ore/scout.",
+                    game.data.balance.outpost_deep_survey_ore_per_crew
+                ));
+            }
+        }
         "endless_wormbone_drill" => {
             super::post_campaign::begin(game, "endless");
             game.paused = true;

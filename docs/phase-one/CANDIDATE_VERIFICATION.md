@@ -33,6 +33,7 @@ automated simulation results into first-time-player evidence.
 | Endless Outpost camp expansion | Pass (focused and capture evidence) | An active awakened route can spend 12 banked ingots once to expand its remote camp from 4 to 6 crew. The inspection card exposes `Expand camp · 12 ingots`, dynamic capacity flows through dispatch, transit validation, remote-room pressure, and the route ledger, and legacy saves keep the base capacity. Refreshed [ui_endless_crew_upgrade.png](../verification/ui_endless_crew_upgrade.png) and [ui_endless_crew_upgraded.png](../verification/ui_endless_crew_upgraded.png) captures show the purchase and expanded route. |
 | Endless Outpost survey rig | Pass (focused and capture evidence) | A route with both the expanded hold and camp can spend 16 banked ingots once to install a survey rig, raising the expedition yield from 3 to 4 ore per scout. The inspection card and route ledger expose the yield, the expedition forecast and completion use the upgraded value, and legacy routes retain the base yield. Refreshed [ui_endless_survey_upgrade.png](../verification/ui_endless_survey_upgrade.png) and [ui_endless_survey_upgraded.png](../verification/ui_endless_survey_upgraded.png) captures show the gated purchase and success toast. |
 | Endless Outpost resonance beacon | Pass (focused and capture evidence) | A route with a survey rig can spend 24 banked ingots once to tune a resonance beacon, shortening each scouting cycle from 30 to 20 seconds. The inspection hint, route ledger, expedition forecast, completion tick, and completed-campaign Objective expose the faster cycle, while legacy routes retain the original timing. Refreshed [ui_endless_resonator_upgrade.png](../verification/ui_endless_resonator_upgrade.png) and [ui_endless_resonator_upgraded.png](../verification/ui_endless_resonator_upgraded.png) captures show the gated purchase and success toast. |
+| Endless Outpost Deep Survey calibration | Pass (focused and capture evidence) | After the Worm Road Charter and resonance beacon are in place, an active route can spend 32 banked ingots once to calibrate Deep Survey, raising the expedition yield from 4 to 6 ore per scout. The disabled route control names the Charter gate, the completed-campaign Objective counts the fifth route upgrade, and the inspection hint and ledger expose the calibrated yield. Refreshed [ui_endless_deep_survey.png](../verification/ui_endless_deep_survey.png), [ui_endless_deep_survey_upgrade.png](../verification/ui_endless_deep_survey_upgrade.png), and [ui_endless_deep_survey_upgraded.png](../verification/ui_endless_deep_survey_upgraded.png) captures show the gate, purchase, and success toast; compact variants preserve the 800×450 touch layout. |
 | Endless Worm Road Charter | Pass (focused and capture evidence) | After three completed scouting hauls across the awakened Outpost network, the data-driven one-time Charter awards 12 banked ingots and persists its claimed state. The completed-campaign Objective exposes the live haul target and reward, the simulation emits a safe-beat success event, and focused captures show the 2/3 setup and reward toast in `endless_charter` and `endless_charter_awarded`. |
 | Endless Charter equipment payoff | Pass (focused and capture evidence) | Claiming the Worm Road Charter unlocks the data-driven Wormbone toolkit: the 8-ingot Wormbone Drill for miners, the 8-ingot Wormbone Hauling Frame for carriers, the 10-ingot Wormbone Smith's Hammer for smiths, and the 10-ingot Wormbone Guard Blade for guards. The Blacksmith keeps all four recipes disabled with an explicit `Charter required` label until the milestone is claimed; afterward visible recipes can be queued, and any banked Charter ingots are reserved into the Blacksmith buffer at queue time so funded orders can start immediately. The auto-equip loop prefers each Wormbone item over its weaker baseline counterpart, improving mining speed, carrier capacity, craft speed, and guard damage. Focused gate, persistence, simulation, and content-validation coverage pass; refreshed [ui_compact_blacksmith.png](../verification/ui_compact_blacksmith.png) shows the locked recipes, while [ui_compact_endless_wormbone_drill.png](../verification/ui_compact_endless_wormbone_drill.png) shows the funded unlocked toolkit and the 800×450 touch audit reports no grown-target overlap. |
 | Endless crew dispatch quota | Pass (focused and capture evidence) | An awakened Outpost exposes the visible `Crew per run · Auto` control, which cycles through cargo-only and bounded scout counts. Legacy saves keep automatic dispatch, while cargo-only loads can deliver provisions without borrowing local workers; the Objective names the control when that setting blocks an otherwise-ready scouting payload. Refreshed [ui_endless_load_preview.png](../verification/ui_endless_load_preview.png), [ui_endless_upgrade.png](../verification/ui_endless_upgrade.png), and [ui_endless_upgraded.png](../verification/ui_endless_upgraded.png) captures keep the route controls readable. |
@@ -81,7 +82,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 362 unit tests and 2 integration/code-standard
+- `cargo test --all-targets` — 369 unit tests and 2 integration/code-standard
   targets pass,
   including fresh/simulated/remote-transit valid sessions, modal route
   planning, rejected malformed save shapes, and event-history save/load
@@ -159,6 +160,18 @@ automated simulation results into first-time-player evidence.
   [ui_endless_resonator_upgrade.png](../verification/ui_endless_resonator_upgrade.png)
   and [ui_endless_resonator_upgraded.png](../verification/ui_endless_resonator_upgraded.png)
   captures keep the purchase and success toast readable at 800×450.
+- Endless Outpost Deep Survey calibration — pass; after the save-compatible
+  Worm Road Charter and resonance beacon are complete, an active route can
+  purchase the one-time 32-ingot calibration, raising each scout's data-driven
+  haul from 4 to 6 ore. The disabled control names the Charter gate, the
+  inspection forecast and route ledger expose the calibrated yield, and the
+  completed-campaign Objective counts the fifth installed route upgrade.
+  Focused data, state, persistence, simulation, Objective, and UI coverage
+  passes; refreshed [ui_endless_deep_survey.png](../verification/ui_endless_deep_survey.png),
+  [ui_endless_deep_survey_upgrade.png](../verification/ui_endless_deep_survey_upgrade.png),
+  and [ui_endless_deep_survey_upgraded.png](../verification/ui_endless_deep_survey_upgraded.png)
+  captures show the gate, purchase, and success toast, with compact variants
+  preserving the 800×450 route controls.
 - Endless Worm Road Charter — pass; after three completed scouting hauls across
   the awakened Outpost network, the save-compatible milestone awards 12 banked
   ingots once and persists its claimed flag. The completed-campaign Objective

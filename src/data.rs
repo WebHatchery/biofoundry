@@ -241,6 +241,12 @@ pub struct Balance {
     /// Scouting cycle after a resonance beacon is installed.
     #[serde(default = "default_outpost_resonator_cycle_sec")]
     pub outpost_resonator_cycle_sec: f32,
+    /// Ingot cost for the one-time Charter-gated deep survey calibration.
+    #[serde(default = "default_outpost_deep_survey_upgrade_ingots")]
+    pub outpost_deep_survey_upgrade_ingots: u32,
+    /// Ore discovered by each scout after deep survey calibration.
+    #[serde(default = "default_outpost_deep_survey_ore_per_crew")]
+    pub outpost_deep_survey_ore_per_crew: u32,
     /// Completed scouting hauls required for the one-time Worm Road Charter.
     #[serde(default = "default_outpost_charter_haul_goal")]
     pub outpost_charter_haul_goal: u32,
@@ -345,6 +351,12 @@ fn default_outpost_resonator_upgrade_ingots() -> u32 {
 }
 fn default_outpost_resonator_cycle_sec() -> f32 {
     20.0
+}
+fn default_outpost_deep_survey_upgrade_ingots() -> u32 {
+    32
+}
+fn default_outpost_deep_survey_ore_per_crew() -> u32 {
+    6
 }
 fn default_outpost_charter_haul_goal() -> u32 {
     3

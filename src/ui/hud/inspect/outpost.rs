@@ -105,6 +105,39 @@ pub(super) fn draw_resonator_upgrade_control(context: SurveyUpgradeContext<'_>) 
     *y += step;
 }
 
+pub(super) fn draw_deep_survey_control(context: SurveyUpgradeContext<'_>) {
+    let SurveyUpgradeContext {
+        session,
+        data,
+        pos,
+        outpost,
+        rect,
+        y,
+        step,
+        mouse,
+        actions,
+    } = context;
+    if !outpost.is_some_and(|route| route.resonator_upgraded && !route.deep_survey_upgraded) {
+        return;
+    }
+    let upgrade_cost = data.balance.outpost_deep_survey_upgrade_ingots;
+    let charter_claimed = session.outpost_charter_claimed;
+    let label = if charter_claimed {
+        format!("Calibrate deep survey · {upgrade_cost} ingots")
+    } else {
+        "Deep survey · Charter required".to_owned()
+    };
+    if hud_button(
+        Rect::new(rect.x, *y, rect.w, rect.h),
+        &label,
+        charter_claimed && session.economy.ingots_stock >= upgrade_cost,
+        mouse,
+    ) {
+        actions.push(UiAction::UpgradeOutpostDeepSurvey(pos));
+    }
+    *y += step;
+}
+
 pub(super) fn draw_route_upgrade_controls(context: RouteUpgradeContext<'_>) {
     let RouteUpgradeContext {
         session,
@@ -156,6 +189,17 @@ pub(super) fn draw_route_upgrade_controls(context: RouteUpgradeContext<'_>) {
         actions,
     });
     draw_resonator_upgrade_control(SurveyUpgradeContext {
+        session,
+        data,
+        pos,
+        outpost,
+        rect,
+        y,
+        step: button_step,
+        mouse,
+        actions,
+    });
+    draw_deep_survey_control(SurveyUpgradeContext {
         session,
         data,
         pos,

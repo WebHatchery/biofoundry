@@ -164,6 +164,27 @@ fn route_metrics_reports_resonance_beacon_cycle() {
 }
 
 #[test]
+fn route_metrics_reports_deep_survey_yield() {
+    let data = GameData::load().expect("embedded game data");
+    let session = GameSession::new(&data, 42);
+    let mut route = Outpost::new(TilePos::new(4, 4));
+    route.survey_upgraded = true;
+    route.resonator_upgraded = true;
+    route.deep_survey_upgraded = true;
+
+    assert_eq!(
+        route_metrics(&session, &data, &route),
+        format!(
+            "Cargo 0/{} · Crew 0/{} · Deep yield {}/scout · Cycle {:.0}s",
+            data.balance.outpost_storage_cap,
+            data.balance.outpost_capacity,
+            data.balance.outpost_deep_survey_ore_per_crew,
+            data.balance.outpost_resonator_cycle_sec
+        )
+    );
+}
+
+#[test]
 fn route_status_reuses_the_inspection_vocabulary() {
     let data = GameData::load().expect("embedded game data");
     let mut session = GameSession::new(&data, 43);

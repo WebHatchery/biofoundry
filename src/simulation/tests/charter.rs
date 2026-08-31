@@ -171,3 +171,66 @@ fn charter_blade_replaces_a_weaker_guard_tool() {
     assert_eq!(guard.equipment.as_deref(), Some("wormbone_guard_blade"));
     assert_eq!(session.economy.gear_stock.get("guard_blade"), Some(&1));
 }
+
+#[test]
+fn deep_survey_requires_the_claimed_charter_and_resonator() {
+    let (data, mut session, outpost_pos) = super::novel::active_outpost(169);
+    session.economy.ingots_stock = data.balance.outpost_deep_survey_upgrade_ingots;
+    session.outposts[0].resonator_upgraded = true;
+
+    assert!(!outposts::upgrade_outpost_deep_survey(
+        &mut session,
+        &data,
+        outpost_pos
+    ));
+    assert_eq!(
+        session.economy.ingots_stock,
+        data.balance.outpost_deep_survey_upgrade_ingots
+    );
+
+    session.outpost_charter_claimed = true;
+    assert!(outposts::upgrade_outpost_deep_survey(
+        &mut session,
+        &data,
+        outpost_pos
+    ));
+    assert_eq!(session.economy.ingots_stock, 0);
+    assert!(session.outposts[0].deep_survey_upgraded);
+    assert_eq!(
+        outposts::ore_per_crew(&session.outposts[0], &data),
+        data.balance.outpost_deep_survey_ore_per_crew
+    );
+    assert!(!outposts::upgrade_outpost_deep_survey(
+        &mut session,
+        &data,
+        outpost_pos
+    ));
+}
+
+#[test]
+fn deep_survey_increases_a_real_expedition_yield() {
+    let (data, mut session, _outpost_pos) = super::novel::active_outpost(170);
+    let crew: Vec<u32> = session
+        .creatures
+        .iter()
+        .take(2)
+        .map(|creature| creature.id)
+        .collect();
+    let route = &mut session.outposts[0];
+    route.storage_upgraded = true;
+    route.crew_upgraded = true;
+    route.survey_upgraded = true;
+    route.resonator_upgraded = true;
+    route.deep_survey_upgraded = true;
+    route.crew = crew;
+    route.cargo.insert(Good::CookedFood, 2);
+    route.expedition_progress = outposts::expedition_cycle_sec(route, &data);
+
+    let completed = outposts::tick_expeditions(&mut session, &data, 0.0);
+
+    assert_eq!(
+        completed[0].ore,
+        2 * data.balance.outpost_deep_survey_ore_per_crew
+    );
+    assert_eq!(session.outposts[0].ore_scouted, completed[0].ore);
+}

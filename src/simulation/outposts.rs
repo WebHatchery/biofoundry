@@ -102,9 +102,10 @@ pub fn crew_capacity(outpost: &Outpost, data: &GameData) -> u32 {
 
 /// Return the ore yield of one scout on the selected Outpost's next haul.
 pub fn ore_per_crew(outpost: &Outpost, data: &GameData) -> u32 {
-    outpost.survey_ore_per_crew(
+    outpost.deep_survey_ore_per_crew(
         data.balance.outpost_expedition_ore_per_crew,
         data.balance.outpost_upgraded_ore_per_crew,
+        data.balance.outpost_deep_survey_ore_per_crew,
     )
 }
 
@@ -259,6 +260,43 @@ pub fn upgrade_outpost_resonator(session: &mut GameSession, data: &GameData, pos
     }
     session.economy.ingots_stock -= data.balance.outpost_resonator_upgrade_ingots;
     session.outposts[index].upgrade_resonator();
+    true
+}
+
+/// Calibrate the one-time Charter-gated deep survey after the route's beacon
+/// is ready, increasing the ore returned by each remote scout.
+pub fn upgrade_outpost_deep_survey(
+    session: &mut GameSession,
+    data: &GameData,
+    pos: TilePos,
+) -> bool {
+    if !session.worm_awake
+        || session.worm_transit.is_some()
+        || !session.outpost_charter_claimed
+        || session
+            .building_at(pos)
+            .is_none_or(|building| building.kind != "outpost")
+    {
+        return false;
+    }
+    session.ensure_outpost(pos);
+    let Some(index) = session
+        .outposts
+        .iter()
+        .position(|outpost| outpost.pos == pos)
+    else {
+        return false;
+    };
+    let outpost = &session.outposts[index];
+    if !outpost.active
+        || !outpost.resonator_upgraded
+        || outpost.deep_survey_upgraded
+        || session.economy.ingots_stock < data.balance.outpost_deep_survey_upgrade_ingots
+    {
+        return false;
+    }
+    session.economy.ingots_stock -= data.balance.outpost_deep_survey_upgrade_ingots;
+    session.outposts[index].upgrade_deep_survey();
     true
 }
 

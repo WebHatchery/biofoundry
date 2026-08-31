@@ -47,3 +47,30 @@ fn loaded_resonance_beacon_requires_a_survey_rig() {
 
     assert!(error.contains("survey rig"), "{error}");
 }
+
+#[test]
+fn loaded_deep_survey_requires_a_resonance_beacon() {
+    let (data, mut session) = session_with_outpost();
+    session.outpost_charter_claimed = true;
+    session.outposts[0].deep_survey_upgraded = true;
+
+    let error = validate_loaded_session(&session, &data)
+        .expect_err("deep survey cannot exist before the resonance beacon");
+
+    assert!(error.contains("resonance beacon"), "{error}");
+}
+
+#[test]
+fn loaded_deep_survey_requires_the_worm_road_charter() {
+    let (data, mut session) = session_with_outpost();
+    session.outposts[0].storage_upgraded = true;
+    session.outposts[0].crew_upgraded = true;
+    session.outposts[0].survey_upgraded = true;
+    session.outposts[0].resonator_upgraded = true;
+    session.outposts[0].deep_survey_upgraded = true;
+
+    let error = validate_loaded_session(&session, &data)
+        .expect_err("deep survey cannot exist before the Charter");
+
+    assert!(error.contains("Worm Road Charter"), "{error}");
+}

@@ -234,7 +234,12 @@ fn route_metrics(session: &GameSession, data: &GameData, outpost: &Outpost) -> S
         );
     }
 
-    let survey_summary = if outpost.survey_upgraded {
+    let survey_summary = if outpost.deep_survey_upgraded {
+        format!(
+            " · Deep yield {}/scout",
+            crate::simulation::outposts::ore_per_crew(outpost, data)
+        )
+    } else if outpost.survey_upgraded {
         format!(
             " · Yield {}/scout",
             crate::simulation::outposts::ore_per_crew(outpost, data)

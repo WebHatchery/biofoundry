@@ -74,6 +74,9 @@ pub struct Outpost {
     /// Whether this route has installed a beacon that shortens survey cycles.
     #[serde(default)]
     pub resonator_upgraded: bool,
+    /// Whether this route has calibrated deep survey data after the Charter.
+    #[serde(default)]
+    pub deep_survey_upgraded: bool,
     /// Automatically return a full hold as cargo-only, keeping remote crew
     /// stationed for the next expedition.
     #[serde(default)]
@@ -103,6 +106,7 @@ impl Outpost {
             crew_upgraded: false,
             survey_upgraded: false,
             resonator_upgraded: false,
+            deep_survey_upgraded: false,
             auto_return_cargo: false,
             auto_resupply_food: false,
             last_failure: None,
@@ -183,6 +187,23 @@ impl Outpost {
 
     pub fn upgrade_resonator(&mut self) {
         self.resonator_upgraded = true;
+    }
+
+    pub fn deep_survey_ore_per_crew(
+        &self,
+        base_yield: u32,
+        upgraded_yield: u32,
+        deep_yield: u32,
+    ) -> u32 {
+        if self.deep_survey_upgraded {
+            deep_yield.max(upgraded_yield).max(base_yield)
+        } else {
+            self.survey_ore_per_crew(base_yield, upgraded_yield)
+        }
+    }
+
+    pub fn upgrade_deep_survey(&mut self) {
+        self.deep_survey_upgraded = true;
     }
 
     pub fn toggle_auto_return(&mut self) {

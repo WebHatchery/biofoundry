@@ -67,6 +67,7 @@ impl CampaignObjective {
                         outpost.crew_upgraded,
                         outpost.survey_upgraded,
                         outpost.resonator_upgraded,
+                        outpost.deep_survey_upgraded,
                     ]
                     .into_iter()
                     .filter(|installed| *installed)
@@ -492,6 +493,16 @@ fn outpost_upgrade_next_step(
         return Some(format!(
             "Next: tap the active Worm Outpost, then Tune beacon for {} ingots.",
             data.balance.outpost_resonator_upgrade_ingots
+        ));
+    }
+    if outpost.resonator_upgraded
+        && session.outpost_charter_claimed
+        && !outpost.deep_survey_upgraded
+        && available >= data.balance.outpost_deep_survey_upgrade_ingots
+    {
+        return Some(format!(
+            "Next: tap the active Worm Outpost, then Calibrate deep survey for {} ingots.",
+            data.balance.outpost_deep_survey_upgrade_ingots
         ));
     }
     None
