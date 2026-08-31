@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-31
-**Source revision:** `e091d28`
+**Source revision:** `94879b7`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -37,6 +37,7 @@ automated simulation results into first-time-player evidence.
 | Endless Worm Road Archive | Pass (focused, capture, and touch-audit evidence) | After the one-time Charter, every five additional scouting hauls fill a repeatable Worm Road Archive page for 8 banked ingots. The persisted claim count pays all outstanding pages exactly once, the Outpost card and route summary show the accumulated page history, the first page unlocks the stronger Archive Wayfinder carrier recipe, the simulation reports the reward as a safe-beat event, and the completed-campaign Objective plus route ledger keep the next page visible. [ui_endless_archive.png](../verification/ui_endless_archive.png) shows `Archive pages 0 · Next 4/5` and the next-action guidance; [ui_endless_archive_awarded.png](../verification/ui_endless_archive_awarded.png) shows `Archive pages 1 · Next 0/5` beside the haul and `+8 ingots · 1 page logged` notification. Compact variants preserve the route controls, and the 800×450 touch audit reports no grown-target overlap. |
 | Endless Archive Wayfinder payoff | Pass (focused, capture, and touch-audit evidence) | The first claimed Archive page adds a data-driven `Archive Wayfinder` recipe to the Blacksmith for 14 ingots, raising the carrier bonus from +3 to +4. Before the page, the locked recipe names `Needs log 1 Archive page`; afterward it becomes a visible queue target, and the auto-equip loop replaces a weaker carrier tool when the crafted Wayfinder reaches the stockpile. [ui_endless_archive_wayfinder.png](../verification/ui_endless_archive_wayfinder.png) and [ui_compact_endless_archive_wayfinder.png](../verification/ui_compact_endless_archive_wayfinder.png) show the unlocked nine-recipe card at normal and 800×450 sizes; the touch audit reports no grown-target overlap. |
 | Endless Worm Road Relay | Pass (focused, capture, and touch-audit evidence) | After the first Archive page, the one-time data-driven Relay asks the player to keep two Worm Outposts active and combine six scouting hauls, then awards 20 banked ingots exactly once. The route ledger shows live `2/2 routes · 6/6 hauls` progress and the completed payout, while the completed-campaign Objective and help copy name the next action; the persisted claim flag and simulation safe-beat event survive save boundaries. [ui_endless_relay.png](../verification/ui_endless_relay.png) and [ui_endless_relay_awarded.png](../verification/ui_endless_relay_awarded.png) show the live and completed ledger states, with compact variants preserving the route controls and the 800×450 touch audit reporting no grown-target overlap. |
+| Endless Signal Cache route upgrade | Pass (focused, capture, and touch-audit evidence) | After the Relay and Deep Survey are complete, an active route can spend 28 banked ingots once to install a Signal Cache that adds 1 ingot to each later scouting haul without exceeding the remote hold. The inspection card, route ledger, Objective, expedition notification, and help copy expose the payoff; the persisted gate rejects cache states without Deep Survey or the Relay, while older saves default safely off. [ui_endless_signal_cache.png](../verification/ui_endless_signal_cache.png) and [ui_endless_signal_cache_awarded.png](../verification/ui_endless_signal_cache_awarded.png) show the purchase and success toast; compact variants preserve the route controls and the 800×450 touch audit reports no grown-target overlap. |
 | Endless Worm Road Charter | Pass (focused and capture evidence) | After three completed scouting hauls across the awakened Outpost network, the data-driven one-time Charter awards 12 banked ingots and persists its claimed state. The completed-campaign Objective exposes the live haul target and reward, the simulation emits a safe-beat success event, and focused captures show the 2/3 setup and reward toast in `endless_charter` and `endless_charter_awarded`. |
 | Endless Charter equipment payoff | Pass (focused and capture evidence) | Claiming the Worm Road Charter unlocks the data-driven Wormbone toolkit: the 8-ingot Wormbone Drill for miners, the 8-ingot Wormbone Hauling Frame for carriers, the 10-ingot Wormbone Smith's Hammer for smiths, and the 10-ingot Wormbone Guard Blade for guards. The Blacksmith keeps all four recipes disabled with an explicit `Charter required` label until the milestone is claimed; afterward visible recipes can be queued, and any banked Charter ingots are reserved into the Blacksmith buffer at queue time so funded orders can start immediately. The auto-equip loop prefers each Wormbone item over its weaker baseline counterpart, improving mining speed, carrier capacity, craft speed, and guard damage. Focused gate, persistence, simulation, and content-validation coverage pass; refreshed [ui_compact_blacksmith.png](../verification/ui_compact_blacksmith.png) shows the locked recipes, while [ui_compact_endless_wormbone_drill.png](../verification/ui_compact_endless_wormbone_drill.png) shows the funded unlocked toolkit and the 800×450 touch audit reports no grown-target overlap. |
 | Endless crew dispatch quota | Pass (focused and capture evidence) | An awakened Outpost exposes the visible `Crew per run · Auto` control, which cycles through cargo-only and bounded scout counts. Legacy saves keep automatic dispatch, while cargo-only loads can deliver provisions without borrowing local workers; the Objective names the control when that setting blocks an otherwise-ready scouting payload. Refreshed [ui_endless_load_preview.png](../verification/ui_endless_load_preview.png), [ui_endless_upgrade.png](../verification/ui_endless_upgrade.png), and [ui_endless_upgraded.png](../verification/ui_endless_upgraded.png) captures keep the route controls readable. |
@@ -85,7 +86,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 384 unit tests and 2 integration/code-standard
+- `cargo test --all-targets` — 391 unit tests and 2 integration/code-standard
   targets pass,
   including fresh/simulated/remote-transit valid sessions, modal route
   planning, rejected malformed save shapes, and event-history save/load
@@ -203,6 +204,17 @@ automated simulation results into first-time-player evidence.
   [ui_endless_relay_awarded.png](../verification/ui_endless_relay_awarded.png)
   captures show the live and completed ledger states; compact variants and
   the 800×450 touch audit preserve the controls without grown-target overlap.
+- Endless Signal Cache route upgrade — pass; after the Relay and Deep Survey,
+  an active route can spend a save-compatible 28-ingot upgrade once to add one
+  ingot to every later completed haul, bounded by remote hold capacity. The
+  inspection card, route ledger, Objective, notification, and help copy expose
+  the payoff, and load validation rejects cache states that bypass either gate.
+  Focused data, persistence, simulation, UI, and capture coverage passes;
+  refreshed [ui_endless_signal_cache.png](../verification/ui_endless_signal_cache.png)
+  and [ui_endless_signal_cache_awarded.png](../verification/ui_endless_signal_cache_awarded.png)
+  captures show the purchase and success toast, while compact variants keep the
+  route controls on-canvas and the 800×450 touch audit reports no grown-target
+  overlap.
 - Endless Worm Road Charter — pass; after three completed scouting hauls across
   the awakened Outpost network, the save-compatible milestone awards 12 banked
   ingots once and persists its claimed flag. The completed-campaign Objective
