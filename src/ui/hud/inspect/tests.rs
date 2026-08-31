@@ -57,6 +57,25 @@ fn shrine_is_working_when_reserves_can_fund_the_next_bite() {
 }
 
 #[test]
+fn empty_study_pen_reports_its_missing_specimens() {
+    let data = GameData::load().expect("embedded game data");
+    let mut session = GameSession::new(&data, 8);
+    let pos = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(pos, tile)| tile.walkable() && session.can_place_building(*pos))
+        .map(|(pos, _)| pos)
+        .expect("a walkable study pen location");
+    session.buildings.push(Building::new("study_pen", pos));
+
+    assert_eq!(
+        inspect_status(&session, &data, session.building_at(pos).unwrap()),
+        ("Waiting for specimens", dark::WARNING)
+    );
+}
+
+#[test]
 fn breeding_labels_explain_specialist_roles() {
     let data = GameData::load().expect("embedded game data");
 

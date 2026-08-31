@@ -1,4 +1,5 @@
 use super::*;
+use crate::state::structures::Building;
 
 #[test]
 fn study_readout_explains_the_next_adaptation() {
@@ -6,6 +7,14 @@ fn study_readout_explains_the_next_adaptation() {
     let mut session = GameSession::new(&data, 51);
     session.progress.specimens = 2;
     session.progress.knowledge = 7.8;
+    let pos = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(pos, tile)| tile.walkable() && session.can_place_building(*pos))
+        .map(|(pos, _)| pos)
+        .expect("a walkable study pen location");
+    session.buildings.push(Building::new("study_pen", pos));
 
     assert_eq!(study_rate_per_min(&session, &data), 2.0);
     assert_eq!(

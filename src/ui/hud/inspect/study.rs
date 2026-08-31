@@ -4,7 +4,7 @@ use crate::state::GameSession;
 use crate::ui::hud::requirements::unlock_requirement_progress;
 
 pub(super) fn study_rate_per_min(session: &GameSession, data: &GameData) -> f32 {
-    session.progress.specimens as f32 * data.balance.study_knowledge_per_specimen_min
+    wildlife::study_rate_per_min(session, data)
 }
 
 pub(super) fn study_adaptation_line(session: &GameSession, data: &GameData) -> String {

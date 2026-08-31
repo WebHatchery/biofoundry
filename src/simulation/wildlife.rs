@@ -251,11 +251,9 @@ fn settle_raid(session: &mut GameSession, report: &mut WildReport) {
 /// Study pens turn housed specimens into knowledge; a breeding pit slowly
 /// domesticates new beetle haulers from the brood stock.
 fn study_and_breed(session: &mut GameSession, data: &GameData, dt: f32, report: &mut WildReport) {
-    if session.buildings_of("study_pen").next().is_some() {
-        session.progress.knowledge += session.progress.specimens as f32
-            * data.balance.study_knowledge_per_specimen_min
-            / 60.0
-            * dt;
+    let study_rate = study_rate_per_min(session, data);
+    if study_rate > 0.0 {
+        session.progress.knowledge += study_rate / 60.0 * dt;
     }
 
     if session.buildings_of("breeding_pit").next().is_some() && session.progress.specimens >= 2 {
@@ -345,6 +343,14 @@ pub fn beetle_carry_capacity_multiplier(session: &GameSession, data: &GameData) 
             unlock.effect == "beetle_carry_mult" && session.unlocked.contains(&unlock.id)
         })
         .fold(1.0, |multiplier, unlock| multiplier * unlock.value)
+}
+
+/// Study Pens are a real production line: each additional pen contributes
+/// another observation stream for the specimens housed in the warren.
+pub fn study_rate_per_min(session: &GameSession, data: &GameData) -> f32 {
+    session.progress.specimens as f32
+        * data.balance.study_knowledge_per_specimen_min
+        * session.buildings_of("study_pen").count() as f32
 }
 
 /// Return the current breeding cycle after study-derived adaptations.

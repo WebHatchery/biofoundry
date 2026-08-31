@@ -41,3 +41,34 @@ fn brood_memory_shortens_the_breeding_cycle() {
         data.balance.breed_interval_sec * 0.8
     );
 }
+
+#[test]
+fn additional_study_pens_add_observation_throughput() {
+    let (data, mut session) = boot(55);
+    session.progress.specimens = 2;
+    let study_positions: Vec<_> = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .filter(|(pos, tile)| tile.walkable() && session.can_place_building(*pos))
+        .map(|(pos, _)| pos)
+        .take(2)
+        .collect();
+    assert_eq!(study_positions.len(), 2);
+
+    session
+        .buildings
+        .push(Building::new("study_pen", study_positions[0]));
+    assert_eq!(
+        simulation::wildlife::study_rate_per_min(&session, &data),
+        2.0
+    );
+
+    session
+        .buildings
+        .push(Building::new("study_pen", study_positions[1]));
+    assert_eq!(
+        simulation::wildlife::study_rate_per_min(&session, &data),
+        4.0
+    );
+}

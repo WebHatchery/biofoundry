@@ -145,6 +145,9 @@ pub(in crate::ui::hud) fn inspect_status(
     data: &GameData,
     building: &Building,
 ) -> (&'static str, Color) {
+    if building.kind == "study_pen" && session.progress.specimens == 0 {
+        return ("Waiting for specimens", dark::WARNING);
+    }
     if building.kind == "worm_shrine" {
         return worm_shrine_status(session, data);
     }

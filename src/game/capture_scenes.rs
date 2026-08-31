@@ -497,6 +497,29 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                 }
             }
         }
+        "study_expansion" => {
+            begin(game, "study");
+            if let GameState::Warren(session) = &mut game.state {
+                let second_spot = session
+                    .world
+                    .tiles
+                    .iter_with_pos()
+                    .find(|(pos, tile)| tile.walkable() && session.can_place_building(*pos))
+                    .map(|(pos, _)| pos);
+                if let Some(spot) = second_spot {
+                    session.buildings.push(Building::new("study_pen", spot));
+                }
+            }
+        }
+        "study_empty" => {
+            begin(game, "study");
+            if let GameState::Warren(session) = &mut game.state {
+                session.progress.specimens = 0;
+                session.progress.knowledge = 0.0;
+                session.unlocked.remove("adaptive_haulers");
+                session.unlocked.remove("brood_memory");
+            }
+        }
         "breeding" => {
             game.transition(StateTransition::StartWarren);
             if let GameState::Warren(session) = &mut game.state {
