@@ -166,6 +166,12 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                 session.won = true;
             }
         }
+        "victory_factory" => {
+            begin(game, "victory");
+            if let GameState::Warren(session) = &mut game.state {
+                session.creatures[0].job = Job::Guard;
+            }
+        }
         "security_stuck" => {
             game.transition(StateTransition::StartWarren);
             if let GameState::Warren(session) = &mut game.state {

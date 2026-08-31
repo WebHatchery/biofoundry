@@ -321,7 +321,7 @@ fn warren_victory_body(session: &GameSession, data: &GameData) -> String {
     );
     if session.job_count(Job::Guard) > 0 {
         format!(
-            "{base}\n\nOnboarding is complete. Next: place a Blacksmith and forge {} ingots (a Smelter Den + salamander forges them in bulk).",
+            "{base}\n\nOnboarding is complete. Tap Continue to Factory, then tap Blacksmith in Build & Dig and tap open floor to forge {} ingots.",
             data.balance.win2_ingots
         )
     } else {

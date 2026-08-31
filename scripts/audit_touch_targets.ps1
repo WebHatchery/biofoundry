@@ -32,6 +32,7 @@ param(
         "breeding",
         "shrine",
         "completion",
+        "victory_factory",
         "endless_load_preview",
         "endless_route_build",
         "endless_routes",

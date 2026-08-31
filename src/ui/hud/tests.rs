@@ -98,6 +98,9 @@ fn warren_victory_report_keeps_the_guard_handoff_explicit() {
     session.creatures[0].job = Job::Guard;
     let body = warren_victory_body(&session, &data);
     assert!(body.contains("Onboarding is complete"));
+    assert!(body.contains("Tap Continue to Factory"));
+    assert!(body.contains("tap Blacksmith in Build & Dig"));
+    assert!(body.contains("tap open floor"));
     assert!(!body.contains("still needs a Guard"));
     assert_eq!(
         warren_victory_continue_label(&session),
