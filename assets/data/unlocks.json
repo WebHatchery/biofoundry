@@ -10,6 +10,16 @@
     "building": "breeding_pit"
   },
   {
+    "id": "adaptive_haulers",
+    "name": "Adaptive Haulers",
+    "description": "Study reveals a stronger beetle carapace. Beetle Haulers carry 20% more.",
+    "counter": "knowledge",
+    "threshold": 12,
+    "effect": "beetle_carry_mult",
+    "value": 1.2,
+    "building": null
+  },
+  {
     "id": "hardened_guards",
     "name": "Hardened Guards",
     "description": "Surviving a raid teaches the warren to fight. Guards hit 50% harder.",

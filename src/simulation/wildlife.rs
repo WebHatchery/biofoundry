@@ -331,3 +331,15 @@ pub fn farm_cap(session: &GameSession, data: &GameData) -> f32 {
     }
     cap
 }
+
+/// Study can select a biological adaptation without adding another manual
+/// tech tree. Only Beetle Haulers use this multiplier; the unlock itself is
+/// data-driven so old saves can earn it on their next simulation tick.
+pub fn beetle_carry_capacity_multiplier(session: &GameSession, data: &GameData) -> f32 {
+    data.unlocks
+        .iter()
+        .filter(|unlock| {
+            unlock.effect == "beetle_carry_mult" && session.unlocked.contains(&unlock.id)
+        })
+        .fold(1.0, |multiplier, unlock| multiplier * unlock.value)
+}

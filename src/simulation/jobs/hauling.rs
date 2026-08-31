@@ -114,7 +114,8 @@ pub(super) fn harvest_source(
     let Some(good) = fetchable_good(session, source) else {
         return;
     };
-    let space = carry_capacity(creature, species, data).saturating_sub(creature.carried(good));
+    let space =
+        carry_capacity(creature, session, species, data).saturating_sub(creature.carried(good));
     if space == 0 {
         return;
     }

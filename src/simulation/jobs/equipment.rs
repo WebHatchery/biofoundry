@@ -3,6 +3,7 @@
 
 use crate::data::{GameData, SpeciesDef};
 use crate::simulation::jobs::routing::send_to;
+use crate::simulation::wildlife;
 use crate::state::creatures::{Creature, Job, Task};
 use crate::state::GameSession;
 use std::cmp::Ordering;
@@ -26,9 +27,23 @@ pub(super) fn equip_effect(creature: &Creature, data: &GameData, effect: &str) -
 }
 
 /// A creature's carry capacity, including a Hauling Frame's bonus.
-pub(super) fn carry_capacity(creature: &Creature, species: &SpeciesDef, data: &GameData) -> u32 {
-    species.carry_capacity + equip_effect(creature, data, "carry_bonus").unwrap_or(0.0) as u32
+pub(super) fn carry_capacity(
+    creature: &Creature,
+    session: &GameSession,
+    species: &SpeciesDef,
+    data: &GameData,
+) -> u32 {
+    let adaptation = if creature.species == "beetle" {
+        wildlife::beetle_carry_capacity_multiplier(session, data)
+    } else {
+        1.0
+    };
+    (species.carry_capacity as f32 * adaptation).floor() as u32
+        + equip_effect(creature, data, "carry_bonus").unwrap_or(0.0) as u32
 }
+
+#[cfg(test)]
+mod tests;
 
 /// The gear item this creature should be wearing but isn't — a banked item
 /// matching its job. None if already equipped or nothing is waiting.

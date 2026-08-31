@@ -763,6 +763,9 @@ fn unlock_notice(data: &GameData, session: &GameSession, name: &str) -> String {
         }
         "guard_dps_mult" => format!("Guards deal +{:.0}% damage", (unlock.value - 1.0) * 100.0),
         "farm_cap_mult" => format!("Farms hold +{:.0}% food", (unlock.value - 1.0) * 100.0),
+        "beetle_carry_mult" => {
+            format!("Beetle Haulers carry +{:.0}%", (unlock.value - 1.0) * 100.0)
+        }
         "unlock_equipment" => "queue it at the Blacksmith".to_owned(),
         _ => unlock.description.trim_end_matches('.').to_owned(),
     };

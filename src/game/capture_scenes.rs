@@ -466,6 +466,37 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                 session.raid_in = 150.0;
             }
         }
+        "study" => {
+            game.transition(StateTransition::StartWarren);
+            if let GameState::Warren(session) = &mut game.state {
+                // Stage the completed capture → study → adapt loop with the
+                // new biological payoff selected for inspection.
+                session.tutorial_dismissed = true;
+                session.economy.food = 260.0;
+                session.economy.ingots_stock = 20;
+                session.won = true;
+                session.victory_shown = true;
+                session.creatures[0].job = Job::Guard;
+                for unlock in ["breeding_pit", "adaptive_haulers"] {
+                    session.unlocked.insert(unlock.to_owned());
+                }
+                let spawn = session.spawn_tile();
+                let spot = session
+                    .world
+                    .tiles
+                    .iter_with_pos()
+                    .filter(|(pos, _)| session.can_place_building(*pos))
+                    .map(|(pos, _)| pos)
+                    .min_by_key(|p| (p.manhattan_distance(&spawn), p.x, p.y));
+                if let Some(spot) = spot {
+                    session.buildings.push(Building::new("study_pen", spot));
+                    session.progress.beetles_captured = 2;
+                    session.progress.specimens = 2;
+                    session.progress.knowledge = 12.0;
+                    game.selected_building = Some(spot);
+                }
+            }
+        }
         "breeding" => {
             game.transition(StateTransition::StartWarren);
             if let GameState::Warren(session) = &mut game.state {

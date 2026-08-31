@@ -19,6 +19,7 @@ use macroquad_toolkit::ui::draw_ui_text_ex;
 mod breeding;
 mod outpost;
 mod status;
+mod study;
 mod workstations;
 
 use breeding::{breed_button_label, breeding_unlock_hint};
@@ -33,6 +34,7 @@ use status::{
     outpost_load_hint, outpost_return_label, transit_destination, transit_payload_line,
     waste_inspection_hint,
 };
+use study::{study_adaptation_line, study_rate_per_min};
 use workstations::{
     blacksmith_input_hint, blacksmith_queue_available, cook_pot_input_hint, equipment_lock_label,
     kiln_input_hint, local_smelter_staffed_at, local_smelter_worker_at, local_smith_staffed_at,
@@ -211,6 +213,31 @@ pub(super) fn draw_inspect_panel(
                 &mut y,
             );
             line("Carriers haul to the Cook Pot", dark::TEXT_DIM, &mut y);
+        }
+        "study_pen" => {
+            line(
+                &format!("Specimens housed · {}", session.progress.specimens),
+                dark::TEXT,
+                &mut y,
+            );
+            line(
+                &format!(
+                    "Study +{:.1}/min · {:.1} observed",
+                    study_rate_per_min(session, data),
+                    session.progress.knowledge
+                ),
+                dark::TEXT,
+                &mut y,
+            );
+            line(
+                &study_adaptation_line(session, data),
+                if session.unlocked.contains("adaptive_haulers") {
+                    dark::POSITIVE
+                } else {
+                    dark::WARNING
+                },
+                &mut y,
+            );
         }
         "cook_pot" => {
             line(

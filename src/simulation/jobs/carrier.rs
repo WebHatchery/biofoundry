@@ -80,7 +80,7 @@ pub(super) fn tick_carrier(
                 return;
             }
             let wanted = ore_wanted(session, data);
-            let take = carry_capacity(creature, species, data)
+            let take = carry_capacity(creature, session, species, data)
                 .min(session.economy.ore_stock)
                 .min(wanted);
             session.economy.ore_stock -= take;
@@ -146,7 +146,7 @@ fn choose_carrier_work(
             return;
         }
     }
-    if creature.carried(Good::Mushroom) >= carry_capacity(creature, species, data) {
+    if creature.carried(Good::Mushroom) >= carry_capacity(creature, session, species, data) {
         if let Some(pot) = nearest_building(creature, session, "cook_pot") {
             send_to(creature, session, pot, Task::DeliverTo(pot));
         }

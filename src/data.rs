@@ -501,8 +501,8 @@ pub struct UnlockDef {
     /// "beetles_captured" or "outpost_archive_claims").
     pub counter: String,
     pub threshold: u32,
-    /// "unlock_building", "unlock_equipment", "guard_dps_mult", or
-    /// "farm_cap_mult".
+    /// "unlock_building", "unlock_equipment", "guard_dps_mult",
+    /// "farm_cap_mult", or "beetle_carry_mult".
     pub effect: String,
     pub value: f32,
     pub building: Option<String>,

@@ -12,6 +12,7 @@ mod auto_priority;
 mod capacity;
 mod cargo_return;
 mod engineering;
+mod study;
 mod transit_failures;
 
 pub(super) fn active_outpost(
