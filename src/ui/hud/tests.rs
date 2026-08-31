@@ -123,6 +123,18 @@ fn warren_victory_report_does_not_promise_a_specialist_assignment() {
 }
 
 #[test]
+fn factory_completion_body_names_the_visible_worm_handoff_controls() {
+    let data = GameData::load().unwrap();
+    let session = GameSession::new(&data, 42);
+    let body = factory_completion_body(&session);
+
+    assert!(body.contains("Tap Continue to Worm"));
+    assert!(body.contains("tap Shrine in Build & Dig"));
+    assert!(body.contains("tap open floor"));
+    assert!(body.contains("tap Return to Menu"));
+}
+
+#[test]
 fn colony_failure_detects_a_stuck_security_handoff() {
     let data = GameData::load().unwrap();
     let mut session = GameSession::new(&data, 42);

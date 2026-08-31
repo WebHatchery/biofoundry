@@ -206,11 +206,7 @@ pub fn draw(
     } else if factory_up {
         overlays::draw_goal_overlay(
             "Factory Complete",
-            &format!(
-                "The Biofoundry roars: {} ingots forged by hammer and living furnace in {:.0} minutes.\n\nEvery belt breathes. Continue to the Worm Shrine, or return to the menu.",
-                session.economy.ingots_forged,
-                simulation::sim_seconds(session) / 60.0
-            ),
+            &factory_completion_body(session),
             UiAction::DismissFactory,
             "Continue to Worm",
             mouse,
@@ -338,6 +334,14 @@ fn warren_victory_continue_label(session: &GameSession) -> &'static str {
     } else {
         "Return to Warren"
     }
+}
+
+fn factory_completion_body(session: &GameSession) -> String {
+    format!(
+        "The Biofoundry roars: {} ingots forged by hammer and living furnace in {:.0} minutes.\n\nEvery belt breathes. Tap Continue to Worm, then tap Shrine in Build & Dig and tap open floor, or tap Return to Menu.",
+        session.economy.ingots_forged,
+        simulation::sim_seconds(session) / 60.0
+    )
 }
 
 /// Claim the small invisible margins around top-bar buttons for the HUD too.

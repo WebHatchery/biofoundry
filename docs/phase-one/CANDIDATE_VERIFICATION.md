@@ -103,7 +103,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 506 unit tests and 2 integration/code-standard
+- `cargo test --all-targets` — 507 unit tests and 2 integration/code-standard
   targets pass,
   including fresh/simulated/remote-transit valid sessions, modal route
   planning, rejected malformed save shapes, and event-history save/load
@@ -774,7 +774,9 @@ automated simulation results into first-time-player evidence.
   objective recovery states.
 - Factory handoff capture — [ui_factory_complete.png](../verification/ui_factory_complete.png)
   shows the completion overlay with the next Worm Shrine objective visible and
-  no setup unlock toast obscuring the handoff.
+  no setup unlock toast obscuring the handoff. Its body names `Continue to
+  Worm`, the Shrine Build & Dig control, open-floor placement, and `Return to
+  Menu` as visible taps.
 - Save-state coverage — an in-flight Worm Transit survives a session roundtrip
   with its destination, payload, passengers, and active route state intact.
 - Transit launch autosave — successful route departures now persist immediately,
