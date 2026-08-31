@@ -133,3 +133,56 @@ fn wormsong_concord_requires_each_role_on_an_active_route() {
     session.outposts[0].active = false;
     assert_eq!(outposts::outpost_concord_progress(&session, &data), (0, 0));
 }
+
+#[test]
+fn claimed_concord_gives_a_complete_route_an_ongoing_song_bonus() {
+    let (data, mut session, outpost_pos) = active_outpost(186);
+    session.outpost_concord_claimed = true;
+    session.creatures.clear();
+
+    let specialist_gear = [
+        (Job::Carrier, "wormsong_harness"),
+        (Job::Miner, "wormsong_drill"),
+        (Job::Smith, "wormsong_smiths_hammer"),
+        (Job::Guard, "wormsong_guard_blade"),
+    ];
+    let mut crew = Vec::new();
+    for (job, equipment) in specialist_gear {
+        session.spawn_creature(&data, "goblin", job);
+        let creature = session.creatures.last_mut().expect("specialist spawned");
+        creature.equipment = Some(equipment.to_owned());
+        creature.remote_outpost = Some(outpost_pos);
+        crew.push(creature.id);
+    }
+    {
+        let route = &mut session.outposts[0];
+        route.crew = crew;
+        route.storage_upgraded = true;
+        route.cargo.insert(Good::CookedFood, 4);
+    }
+    let route_snapshot = session.outposts[0].clone();
+
+    assert_eq!(
+        outposts::route_expedition_cycle_sec(&session, &data, &route_snapshot),
+        24.0
+    );
+    assert_eq!(
+        outposts::route_expedition_ore(&session, &data, &route_snapshot),
+        15
+    );
+    assert_eq!(
+        outposts::route_bonus_summary(&session, &data, &route_snapshot, true).as_deref(),
+        Some("Wormsong · hold+2 ore+2 cache+1ready cycle-4s concord+1ore/-2s")
+    );
+
+    session.outposts[0].expedition_progress = 24.0;
+    let completed = outposts::tick_expeditions(&mut session, &data, 0.0);
+
+    assert_eq!(completed.len(), 1);
+    assert_eq!(completed[0].ore, 15);
+    session.outposts[0].crew.clear();
+    assert_eq!(
+        outposts::route_expedition_ore(&session, &data, &session.outposts[0]),
+        0
+    );
+}

@@ -76,6 +76,13 @@ fn validate_balance(data: &GameData) -> Result<(), String> {
             "outpost Wormsong Concord requires four roles and a positive reward".to_owned(),
         );
     }
+    if balance.outpost_concord_ore_bonus == 0
+        || !balance.outpost_concord_cycle_reduction.is_finite()
+        || balance.outpost_concord_cycle_reduction <= 0.0
+        || balance.outpost_concord_cycle_reduction >= balance.outpost_expedition_cycle_sec
+    {
+        return Err("outpost Wormsong Concord route bonus must be positive and valid".to_owned());
+    }
     if balance.outpost_signal_cache_upgrade_ingots == 0
         || balance.outpost_signal_cache_ingots_per_haul == 0
     {

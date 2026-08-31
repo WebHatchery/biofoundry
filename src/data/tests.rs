@@ -193,6 +193,8 @@ fn balance_values_are_playable() {
     assert!(b.outpost_muster_reward_ingots > b.outpost_convoy_reward_ingots);
     assert_eq!(b.outpost_concord_role_goal, 4);
     assert!(b.outpost_concord_reward_ingots > b.outpost_muster_reward_ingots);
+    assert_eq!(b.outpost_concord_ore_bonus, 1);
+    assert_eq!(b.outpost_concord_cycle_reduction, 2.0);
     assert!(b.outpost_signal_cache_upgrade_ingots > b.outpost_relay_reward_ingots);
     assert!(b.outpost_signal_cache_ingots_per_haul > 0);
     assert!(b.outpost_waypoint_upgrade_ingots > b.outpost_signal_cache_upgrade_ingots);

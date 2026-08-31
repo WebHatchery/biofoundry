@@ -24,6 +24,10 @@ impl WormsongRouteBonus {
     pub fn is_empty(self) -> bool {
         self.storage_slots == 0 && self.ore == 0 && self.ingots == 0 && self.cycle_reduction <= 0.0
     }
+
+    pub fn has_all_roles(self) -> bool {
+        self.carriers > 0 && self.miners > 0 && self.smiths > 0 && self.guards > 0
+    }
 }
 
 /// Sum the route-facing fields of the kits worn by this Outpost's crew.
@@ -71,6 +75,30 @@ pub fn route_storage_capacity(session: &GameSession, data: &GameData, outpost: &
         .saturating_add(wormsong_route_bonus(session, data, outpost).storage_slots)
 }
 
+/// Whether this active route has the complete four-role crew after the
+/// one-time Concord has been claimed.
+pub fn route_concord_active(session: &GameSession, data: &GameData, outpost: &Outpost) -> bool {
+    session.outpost_concord_claimed
+        && outpost.active
+        && wormsong_route_bonus(session, data, outpost).has_all_roles()
+}
+
+/// The ongoing route-wide benefit of keeping all four Wormsong roles together.
+pub fn concord_route_bonus(
+    session: &GameSession,
+    data: &GameData,
+    outpost: &Outpost,
+) -> (u32, f32) {
+    if route_concord_active(session, data, outpost) {
+        (
+            data.balance.outpost_concord_ore_bonus,
+            data.balance.outpost_concord_cycle_reduction,
+        )
+    } else {
+        (0, 0.0)
+    }
+}
+
 /// Current scouting cycle after applying the route's installed beacon and
 /// stationed guard kits.
 pub fn route_expedition_cycle_sec(
@@ -79,14 +107,18 @@ pub fn route_expedition_cycle_sec(
     outpost: &Outpost,
 ) -> f32 {
     let base = crate::simulation::outposts::expedition_cycle_sec(outpost, data);
-    (base - wormsong_route_bonus(session, data, outpost).cycle_reduction).max(0.5)
+    let specialist_reduction = wormsong_route_bonus(session, data, outpost).cycle_reduction;
+    let concord_reduction = concord_route_bonus(session, data, outpost).1;
+    (base - specialist_reduction - concord_reduction).max(0.5)
 }
 
 /// Total ore returned by the next haul, including Wormsong miner kits.
 pub fn route_expedition_ore(session: &GameSession, data: &GameData, outpost: &Outpost) -> u32 {
     let crew = outpost.crew.len() as u32;
+    let concord_ore = concord_route_bonus(session, data, outpost).0;
     crew.saturating_mul(crate::simulation::outposts::ore_per_crew(outpost, data))
         .saturating_add(wormsong_route_bonus(session, data, outpost).ore)
+        .saturating_add(concord_ore)
 }
 
 /// Total ingots returned by the next haul when a Signal Cache is installed.
@@ -127,6 +159,13 @@ pub fn route_bonus_summary(
     }
     if bonus.cycle_reduction > 0.0 {
         effects.push(format!("cycle -{:.0}s", bonus.cycle_reduction));
+    }
+    let (concord_ore, concord_cycle) = concord_route_bonus(session, data, outpost);
+    if concord_ore > 0 || concord_cycle > 0.0 {
+        effects.push(format!(
+            "concord +{} ore/-{:.0}s",
+            concord_ore, concord_cycle
+        ));
     }
     if compact {
         let compact_effects = effects

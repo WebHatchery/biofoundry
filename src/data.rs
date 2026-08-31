@@ -293,6 +293,13 @@ pub struct Balance {
     /// Ingots awarded when all Wormsong roles take the road together.
     #[serde(default = "default_outpost_concord_reward_ingots")]
     pub outpost_concord_reward_ingots: u32,
+    /// Additional ore returned by a route whose complete Wormsong crew keeps
+    /// the Concord active.
+    #[serde(default = "default_outpost_concord_ore_bonus")]
+    pub outpost_concord_ore_bonus: u32,
+    /// Seconds removed from a route's scouting cycle while Concord sings.
+    #[serde(default = "default_outpost_concord_cycle_reduction")]
+    pub outpost_concord_cycle_reduction: f32,
     /// Ingot cost for the post-Relay Signal Cache route upgrade.
     #[serde(default = "default_outpost_signal_cache_upgrade_ingots")]
     pub outpost_signal_cache_upgrade_ingots: u32,
@@ -454,6 +461,12 @@ fn default_outpost_concord_role_goal() -> u32 {
 }
 fn default_outpost_concord_reward_ingots() -> u32 {
     48
+}
+fn default_outpost_concord_ore_bonus() -> u32 {
+    1
+}
+fn default_outpost_concord_cycle_reduction() -> f32 {
+    2.0
 }
 fn default_outpost_signal_cache_upgrade_ingots() -> u32 {
     28
