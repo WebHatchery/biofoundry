@@ -209,21 +209,30 @@ fn route_network_summary(session: &GameSession, data: &GameData) -> String {
     let scouted_ore = session.outposts.iter().fold(0u32, |total, outpost| {
         total.saturating_add(outpost.ore_scouted)
     });
+    let cached_ingots = session.outposts.iter().fold(0u32, |total, outpost| {
+        total.saturating_add(outpost.signal_cache_ingots)
+    });
     let attention = session
         .outposts
         .iter()
         .filter(|outpost| route_needs_attention(outpost, data))
         .count();
     let charter = charter_summary(session, data);
+    let cache_summary = if cached_ingots > 0 {
+        format!(" · Cache kept {cached_ingots}")
+    } else {
+        String::new()
+    };
     format!(
-        "Routes {} · Active {} · Held cargo {} · Remote crew {} · Ore scouted {} · {} · Attention {}",
+        "Routes {} · Active {} · Held cargo {} · Remote crew {} · Ore scouted {} · {} · Attention {}{}",
         session.outposts.len(),
         active,
         held_cargo,
         remote_crew,
         scouted_ore,
         charter,
-        attention
+        attention,
+        cache_summary
     )
 }
 

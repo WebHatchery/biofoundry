@@ -59,6 +59,23 @@ fn route_network_summary_reports_archive_progress_after_charter() {
 }
 
 #[test]
+fn route_network_summary_reports_cached_ingots_across_routes() {
+    let data = GameData::load().expect("embedded game data");
+    let mut session = GameSession::new(&data, 48);
+    let mut first = Outpost::new(TilePos::new(4, 4));
+    first.signal_cache_upgraded = true;
+    first.signal_cache_ingots = 3;
+    let mut second = Outpost::new(TilePos::new(8, 8));
+    second.signal_cache_upgraded = true;
+    second.signal_cache_ingots = 2;
+    session.outposts = vec![first, second];
+
+    let summary = route_network_summary(&session, &data);
+
+    assert!(summary.ends_with("Attention 2 · Cache kept 5"), "{summary}");
+}
+
+#[test]
 fn relay_summary_reports_live_route_and_haul_progress() {
     let data = GameData::load().expect("embedded game data");
     let mut session = GameSession::new(&data, 45);
