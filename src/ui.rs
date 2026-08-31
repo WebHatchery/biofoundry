@@ -96,6 +96,8 @@ pub enum UiAction {
     CycleAutoRoutePriority,
     /// Select a building from a HUD shortcut such as the route ledger.
     SelectBuilding(TilePos),
+    /// Close the expanded compact inspection sheet.
+    ClearSelection,
     /// The player clicked this world tile with the active tool.
     WorldClick(TilePos),
     /// Queue an equipment craft (item id) at the blacksmith at this tile.

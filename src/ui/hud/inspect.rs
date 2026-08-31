@@ -10,7 +10,7 @@ use crate::state::outposts::{TransitDirection, WormTransit};
 use crate::state::GameSession;
 use crate::ui::hud::widgets::{hud_button, panel_style};
 use crate::ui::legibility::{shrine_waiting_for_food, shrine_waiting_for_ingots, BuildingStatus};
-use crate::ui::{UiAction, LOGICAL_WIDTH};
+use crate::ui::UiAction;
 use macroquad::prelude::*;
 use macroquad_toolkit::grid::TilePos;
 use macroquad_toolkit::prelude::*;
@@ -18,6 +18,7 @@ use macroquad_toolkit::ui::draw_ui_text_ex;
 
 mod blacksmith;
 mod breeding;
+mod layout;
 mod outpost;
 mod rooms;
 mod status;
@@ -26,6 +27,9 @@ mod workstations;
 
 use blacksmith::{draw_blacksmith_inspection, BlacksmithInspection};
 use breeding::{breed_button_label, breeding_unlock_hint};
+#[cfg(test)]
+use layout::blacksmith_recipe_rows;
+use layout::{inspection_button_metrics, InspectionLayout};
 #[cfg(test)]
 use outpost::outpost_archive_summary;
 use outpost::{
@@ -78,43 +82,46 @@ pub(super) fn draw_inspect_panel(
     let (inspect_button_height, inspect_button_step) =
         inspection_button_metrics(&building.kind, compact, data.equipment.len());
 
-    // The blacksmith panel carries the production-order queue and craft
-    // buttons, and the breeding pit its breed buttons — both taller.
-    let height = match building.kind.as_str() {
-        "blacksmith" if compact => {
-            124.0 + blacksmith_recipe_rows(data.equipment.len()) as f32 * inspect_button_step
-        }
-        "blacksmith" => 194.0 + data.equipment.len() as f32 * inspect_button_step,
-        "breeding_pit" => {
-            if compact {
-                350.0
-            } else {
-                280.0
-            }
-        }
-        "worm_shrine" => {
-            if compact {
-                250.0
-            } else {
-                240.0
-            }
-        }
-        "outpost" => 510.0,
-        _ => 152.0,
-    };
-    let panel = Rect::new(LOGICAL_WIDTH - 262.0, top, 250.0, height);
+    let layout = InspectionLayout::new(
+        &building.kind,
+        compact,
+        data.equipment.len(),
+        inspect_button_step,
+        top,
+    );
+    let panel = layout.panel;
+    let compact_outpost = layout.compact_outpost;
+    if compact_outpost {
+        // This sheet replaces the compact HUD rather than floating above it.
+        // Give it an opaque backing so world labels and the bottom status
+        // legend cannot show through its controls.
+        draw_rectangle(panel.x, panel.y, panel.w, panel.h, dark::BACKGROUND);
+    }
     draw_surface_with_title(
         panel,
         Some(name),
         &panel_style(),
         TextStyle::new(16.0, dark::TEXT_BRIGHT),
     );
+    if compact_outpost {
+        // The sheet covers the underlying HUD, so its Close action must be
+        // visible before the route controls take over the compact canvas.
+        macroquad_toolkit::ui::occlude(panel);
+        if hud_button(
+            Rect::new(panel.right() - 92.0, panel.y, 72.0, 72.0),
+            "Close",
+            true,
+            mouse,
+        ) {
+            actions.push(UiAction::ClearSelection);
+        }
+    }
 
-    let x = panel.x + 14.0;
-    let mut y = panel.y + 50.0;
-    let outpost_button_height = if compact { 30.0 } else { 24.0 };
-    let outpost_button_step = if compact { 30.0 } else { 26.0 };
-    let line_step = if compact { 16.0 } else { 20.0 };
+    let x = layout.content_x;
+    let mut y = layout.content_y;
+    let outpost_button_height = layout.outpost_button_height;
+    let outpost_button_step = layout.outpost_button_step;
+    let line_step = layout.line_step;
     let line = |text: &str, color: Color, y: &mut f32| {
         draw_ui_text_ex(text, x, *y, TextStyle::new(14.0, color).params());
         *y += line_step;
@@ -540,36 +547,52 @@ pub(super) fn draw_inspect_panel(
             );
             if active && session.worm_awake {
                 if let Some(route) = outpost {
-                    line(
-                        &format!(
+                    if compact_outpost {
+                        let mut route_details = vec![format!(
                             "Scouted ore {} · Hauls {}",
                             route.ore_scouted, route.expeditions_completed
-                        ),
-                        dark::TEXT_DIM,
-                        &mut y,
-                    );
-                    if let Some(route_bonus) = crate::simulation::outposts::route_bonus_summary(
-                        session, data, route, compact,
-                    ) {
-                        if compact {
-                            draw_ui_text_ex(
-                                &route_bonus,
-                                x,
-                                y,
-                                TextStyle::new(11.0, dark::POSITIVE).params(),
-                            );
-                            y += 16.0;
-                        } else {
+                        )];
+                        if let Some(route_bonus) = crate::simulation::outposts::route_bonus_summary(
+                            session, data, route, true,
+                        ) {
+                            route_details.push(route_bonus);
+                        }
+                        if let Some(archive) = outpost::compact_archive_summary(session, data) {
+                            route_details.push(archive);
+                        }
+                        if let Some(cache_summary) = outpost_signal_cache_summary(route, data, true)
+                        {
+                            route_details.push(cache_summary);
+                        }
+                        if let Some(waypoint_summary) = outpost_waypoint_summary(route, data, true)
+                        {
+                            route_details.push(waypoint_summary);
+                        }
+                        line(&route_details.join(" · "), dark::TEXT_DIM, &mut y);
+                    } else {
+                        line(
+                            &format!(
+                                "Scouted ore {} · Hauls {}",
+                                route.ore_scouted, route.expeditions_completed
+                            ),
+                            dark::TEXT_DIM,
+                            &mut y,
+                        );
+                        if let Some(route_bonus) = crate::simulation::outposts::route_bonus_summary(
+                            session, data, route, false,
+                        ) {
                             line(&route_bonus, dark::POSITIVE, &mut y);
                         }
-                    }
-                    outpost::draw_archive_summary(session, data, x, &mut y, compact);
-                    if let Some(cache_summary) = outpost_signal_cache_summary(route, data, compact)
-                    {
-                        line(&cache_summary, dark::POSITIVE, &mut y);
-                    }
-                    if let Some(waypoint_summary) = outpost_waypoint_summary(route, data, compact) {
-                        line(&waypoint_summary, dark::POSITIVE, &mut y);
+                        outpost::draw_archive_summary(session, data, x, &mut y, false);
+                        if let Some(cache_summary) =
+                            outpost_signal_cache_summary(route, data, false)
+                        {
+                            line(&cache_summary, dark::POSITIVE, &mut y);
+                        }
+                        if let Some(waypoint_summary) = outpost_waypoint_summary(route, data, false)
+                        {
+                            line(&waypoint_summary, dark::POSITIVE, &mut y);
+                        }
                     }
                 }
                 let in_transit = session
@@ -617,7 +640,13 @@ pub(super) fn draw_inspect_panel(
                 }
                 // Leave a full text-line gap before recovery copy so the
                 // baseline cannot crowd the button's lower border.
-                y += if compact { 34.0 } else { 32.0 };
+                y += if compact_outpost {
+                    outpost_button_step
+                } else if compact {
+                    34.0
+                } else {
+                    32.0
+                };
                 if !active && (cargo > 0 || crew > 0) {
                     line("Reactivate route to return payload", dark::WARNING, &mut y);
                 }
@@ -684,10 +713,12 @@ pub(super) fn draw_inspect_panel(
                             actions,
                         });
                     }
-                    if let Some(load_hint) =
-                        outpost.and_then(|route| outpost_load_hint(session, data, route))
-                    {
-                        line(&load_hint, dark::TEXT_DIM, &mut y);
+                    if !compact_outpost {
+                        if let Some(load_hint) =
+                            outpost.and_then(|route| outpost_load_hint(session, data, route))
+                        {
+                            line(&load_hint, dark::TEXT_DIM, &mut y);
+                        }
                     }
                     if hud_button(
                         Rect::new(x, y, panel.w - 28.0, outpost_button_height),
@@ -724,28 +755,6 @@ pub(super) fn draw_inspect_panel(
     }
 
     Some(panel)
-}
-
-fn inspection_button_metrics(kind: &str, compact: bool, equipment_count: usize) -> (f32, f32) {
-    if compact && kind == "worm_shrine" {
-        // The shrine is a critical-path handoff. Its pause/resume action must
-        // remain a full touch target even when the canvas is 800x450.
-        (72.0, 76.0)
-    } else if compact && kind == "blacksmith" && equipment_count > 4 {
-        (46.0, 48.0)
-    } else if compact && matches!(kind, "blacksmith" | "breeding_pit") {
-        (36.0, 40.0)
-    } else if !compact && kind == "breeding_pit" {
-        (38.0, 42.0)
-    } else if compact {
-        (30.0, 34.0)
-    } else {
-        (24.0, 26.0)
-    }
-}
-
-fn blacksmith_recipe_rows(equipment_count: usize) -> usize {
-    equipment_count.div_ceil(2)
 }
 
 #[cfg(test)]

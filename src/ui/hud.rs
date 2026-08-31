@@ -175,6 +175,11 @@ pub fn draw(
     let tutorial_panel = panels::draw_tutorial_panel(session, data, mouse, ui.scale, &mut actions);
     let objective_panel = panels::draw_objective_panel(session, data);
     let inspect_top = inspect_panel_top(tutorial_panel, panels::compact_top_bar(ui.scale));
+    let outpost_open = selected.is_some_and(|pos| {
+        session
+            .building_at(pos)
+            .is_some_and(|building| building.kind == "outpost")
+    });
     let inspect_panel = selected.and_then(|pos| {
         inspect::draw_inspect_panel(
             session,
@@ -189,10 +194,11 @@ pub fn draw(
 
     // A status-icon legend, shown only while some node is stalled — it
     // teaches the in-world badges exactly when they matter.
-    if session
-        .buildings
-        .iter()
-        .any(|b| crate::ui::legibility::building_status(session, data, b).is_some())
+    if !outpost_open
+        && session
+            .buildings
+            .iter()
+            .any(|b| crate::ui::legibility::building_status(session, data, b).is_some())
     {
         overlays::draw_status_legend(session, data);
     }

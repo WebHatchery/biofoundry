@@ -231,6 +231,10 @@ impl Game {
                     self.audio.play(Sfx::Select);
                 }
             }
+            UiAction::ClearSelection => {
+                self.selected_building = None;
+                self.audio.play(Sfx::Select);
+            }
             UiAction::Breed(species) => {
                 let mut bred = false;
                 if let GameState::Warren(session) = &mut self.state {

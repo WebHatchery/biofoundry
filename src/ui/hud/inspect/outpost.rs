@@ -571,7 +571,7 @@ pub(super) fn draw_compact_route_controls(context: CompactRouteContext<'_>) {
     {
         actions.push(UiAction::ToggleOutpostExpedition(pos));
     }
-    *y += 38.0;
+    *y += button_step;
 }
 
 pub(super) fn draw_full_route_controls(context: FullRouteContext<'_>) {
