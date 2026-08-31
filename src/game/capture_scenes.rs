@@ -470,14 +470,14 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
             game.transition(StateTransition::StartWarren);
             if let GameState::Warren(session) = &mut game.state {
                 // Stage the completed capture → study → adapt loop with the
-                // new biological payoff selected for inspection.
+                // mastered biological payoffs selected for inspection.
                 session.tutorial_dismissed = true;
                 session.economy.food = 260.0;
                 session.economy.ingots_stock = 20;
                 session.won = true;
                 session.victory_shown = true;
                 session.creatures[0].job = Job::Guard;
-                for unlock in ["breeding_pit", "adaptive_haulers"] {
+                for unlock in ["breeding_pit", "adaptive_haulers", "brood_memory"] {
                     session.unlocked.insert(unlock.to_owned());
                 }
                 let spawn = session.spawn_tile();
@@ -492,7 +492,7 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                     session.buildings.push(Building::new("study_pen", spot));
                     session.progress.beetles_captured = 2;
                     session.progress.specimens = 2;
-                    session.progress.knowledge = 12.0;
+                    session.progress.knowledge = 24.0;
                     game.selected_building = Some(spot);
                 }
             }

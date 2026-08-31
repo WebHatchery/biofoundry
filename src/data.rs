@@ -502,7 +502,7 @@ pub struct UnlockDef {
     pub counter: String,
     pub threshold: u32,
     /// "unlock_building", "unlock_equipment", "guard_dps_mult",
-    /// "farm_cap_mult", or "beetle_carry_mult".
+    /// "farm_cap_mult", "beetle_carry_mult", or "breed_interval_mult".
     pub effect: String,
     pub value: f32,
     pub building: Option<String>,

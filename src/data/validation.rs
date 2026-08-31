@@ -161,7 +161,11 @@ fn validate_unlocks(data: &GameData) -> Result<(), String> {
                     unlock.id
                 ));
             }
-            "unlock_equipment" | "guard_dps_mult" | "farm_cap_mult" | "beetle_carry_mult"
+            "unlock_equipment"
+            | "guard_dps_mult"
+            | "farm_cap_mult"
+            | "beetle_carry_mult"
+            | "breed_interval_mult"
             | "unlock_creature"
                 if unlock.building.is_some() =>
             {
@@ -170,8 +174,13 @@ fn validate_unlocks(data: &GameData) -> Result<(), String> {
                     unlock.id
                 ));
             }
-            "unlock_building" | "unlock_equipment" | "guard_dps_mult" | "farm_cap_mult"
-            | "beetle_carry_mult" | "unlock_creature" => {}
+            "unlock_building"
+            | "unlock_equipment"
+            | "guard_dps_mult"
+            | "farm_cap_mult"
+            | "beetle_carry_mult"
+            | "breed_interval_mult"
+            | "unlock_creature" => {}
             effect => {
                 return Err(format!(
                     "unlock '{}' has unknown effect '{effect}'",

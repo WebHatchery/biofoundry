@@ -20,6 +20,16 @@
     "building": null
   },
   {
+    "id": "brood_memory",
+    "name": "Brood Memory",
+    "description": "Study reveals a shorter brood cycle. Breeding Pits hatch 20% sooner.",
+    "counter": "knowledge",
+    "threshold": 24,
+    "effect": "breed_interval_mult",
+    "value": 0.8,
+    "building": null
+  },
+  {
     "id": "hardened_guards",
     "name": "Hardened Guards",
     "description": "Surviving a raid teaches the warren to fight. Guards hit 50% harder.",

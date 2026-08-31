@@ -25,3 +25,19 @@ fn study_pen_grants_adaptive_haulers_when_observation_crosses_threshold() {
     assert!(session.progress.knowledge >= 12.0);
     assert!(session.unlocked.contains("adaptive_haulers"));
 }
+
+#[test]
+fn brood_memory_shortens_the_breeding_cycle() {
+    let (data, mut session) = boot(54);
+    assert_eq!(
+        simulation::wildlife::breeding_interval_sec(&session, &data),
+        data.balance.breed_interval_sec
+    );
+
+    session.unlocked.insert("brood_memory".to_owned());
+
+    assert_eq!(
+        simulation::wildlife::breeding_interval_sec(&session, &data),
+        data.balance.breed_interval_sec * 0.8
+    );
+}

@@ -261,7 +261,7 @@ fn study_and_breed(session: &mut GameSession, data: &GameData, dt: f32, report: 
     if session.buildings_of("breeding_pit").next().is_some() && session.progress.specimens >= 2 {
         session.breed_in -= dt;
         if session.breed_in <= 0.0 {
-            session.breed_in = data.balance.breed_interval_sec;
+            session.breed_in = breeding_interval_sec(session, data);
             let beetles = session
                 .creatures
                 .iter()
@@ -294,6 +294,9 @@ fn grant_unlocks(session: &mut GameSession, data: &GameData, report: &mut WildRe
         }
         if counter_value(session, &unlock.counter) >= unlock.threshold {
             session.unlocked.insert(unlock.id.clone());
+            if unlock.effect == "breed_interval_mult" {
+                session.breed_in = session.breed_in.min(breeding_interval_sec(session, data));
+            }
             report.unlocked.push(unlock.name.clone());
         }
     }
@@ -342,4 +345,17 @@ pub fn beetle_carry_capacity_multiplier(session: &GameSession, data: &GameData) 
             unlock.effect == "beetle_carry_mult" && session.unlocked.contains(&unlock.id)
         })
         .fold(1.0, |multiplier, unlock| multiplier * unlock.value)
+}
+
+/// Return the current breeding cycle after study-derived adaptations.
+pub fn breeding_interval_sec(session: &GameSession, data: &GameData) -> f32 {
+    data.unlocks
+        .iter()
+        .filter(|unlock| {
+            unlock.effect == "breed_interval_mult" && session.unlocked.contains(&unlock.id)
+        })
+        .fold(data.balance.breed_interval_sec, |interval, unlock| {
+            interval * unlock.value
+        })
+        .max(0.1)
 }

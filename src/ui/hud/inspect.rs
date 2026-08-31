@@ -389,6 +389,14 @@ pub(super) fn draw_inspect_panel(
         }
         "breeding_pit" => {
             line("Beetles hatch here", dark::TEXT_DIM, &mut y);
+            line(
+                &format!(
+                    "Hatch cycle {:.0}s",
+                    crate::simulation::wildlife::breeding_interval_sec(session, data)
+                ),
+                dark::TEXT,
+                &mut y,
+            );
             line("Specialists cost banked ingots", dark::TEXT_DIM, &mut y);
             // Evolution line: breed heavyweight workers once forged ingots
             // unlock them. Buttons stay visible, disabled until then.
