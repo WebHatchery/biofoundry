@@ -16,6 +16,24 @@ mod wormsong_encore;
 
 pub(super) fn begin(game: &mut Game, scene: &str) {
     match scene {
+        "endless_route_build" => {
+            super::begin(game, "endless");
+            game.notifications.clear();
+            game.routes_open = false;
+            game.paused = true;
+            if let GameState::Warren(session) = &mut game.state {
+                session.outposts.clear();
+                session
+                    .buildings
+                    .retain(|building| building.kind != "outpost");
+                for creature in &mut session.creatures {
+                    creature.remote_outpost = None;
+                }
+                session.unlocked.insert("worm_transit".to_owned());
+                session.economy.ore_stock = 30;
+            }
+            game.selected_building = None;
+        }
         "endless_wormsong_route" => remote_specialists::begin(game),
         "endless_wormsong_concord" => wormsong_concord::begin(game),
         "endless_wormsong_circuit" => wormsong_circuit::begin(game),

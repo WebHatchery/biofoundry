@@ -33,7 +33,7 @@
     ./scripts/capture_ui.ps1 -Scenes completion,endless -WindowWidth 800 -WindowHeight 450 -SkipBuild
 #>
 param(
-    [string[]]$Scenes = @("menu", "new_warren_confirm", "load_confirm", "load_confirm_resolved", "warren", "tutorial_food", "tutorial_factory", "tutorial_worm", "help", "help_endless", "event_log", "event_log_older", "pause", "save_failure", "save_failure_first_save", "menu_save_guard", "save_recovery_failure", "collapse", "mine", "blacksmith", "smelter", "cook_pot", "kiln", "waste", "blacksmith_queue_full", "equipment", "overseer", "factory", "victory", "security_stuck", "factory_complete", "optional", "endless", "endless_load_preview", "endless_routes", "endless_routes_busy", "endless_auto_priority", "endless_auto_return", "endless_auto_resupply", "endless_auto_load", "endless_auto_load_started", "endless_upgrade", "endless_upgraded", "endless_rest_hollow", "endless_wormsong_chorus", "endless_wormsong_chorus_awarded", "endless_wormsong_chorus_haul", "endless_expedition_paused", "endless_expedition_report", "endless_forge", "endless_empty", "endless_in_flight", "endless_arrived", "famine", "food_warning", "raid_food_warning", "raid", "raid_warning", "study", "study_expansion", "study_empty", "breeding", "breeding_locked", "shrine", "shrine_waiting", "worm", "unreachable_workstation", "completion"),
+    [string[]]$Scenes = @("menu", "new_warren_confirm", "load_confirm", "load_confirm_resolved", "warren", "tutorial_food", "tutorial_factory", "tutorial_worm", "help", "help_endless", "event_log", "event_log_older", "pause", "save_failure", "save_failure_first_save", "menu_save_guard", "save_recovery_failure", "collapse", "mine", "blacksmith", "smelter", "cook_pot", "kiln", "waste", "blacksmith_queue_full", "equipment", "overseer", "factory", "victory", "security_stuck", "factory_complete", "optional", "endless", "endless_route_build", "endless_load_preview", "endless_routes", "endless_routes_busy", "endless_auto_priority", "endless_auto_return", "endless_auto_resupply", "endless_auto_load", "endless_auto_load_started", "endless_upgrade", "endless_upgraded", "endless_rest_hollow", "endless_wormsong_chorus", "endless_wormsong_chorus_awarded", "endless_wormsong_chorus_haul", "endless_expedition_paused", "endless_expedition_report", "endless_forge", "endless_empty", "endless_in_flight", "endless_arrived", "famine", "food_warning", "raid_food_warning", "raid", "raid_warning", "study", "study_expansion", "study_empty", "breeding", "breeding_locked", "shrine", "shrine_waiting", "worm", "unreachable_workstation", "completion"),
     [int]$Frames = 150,
     [int]$WindowWidth = 0,
     [int]$WindowHeight = 0,
@@ -68,6 +68,7 @@ if (-not $PSBoundParameters.ContainsKey("Scenes")) {
         "endless_convoy_awarded",
         "endless_muster",
         "endless_muster_awarded",
+        "endless_route_build",
         "endless_routes_busy",
         "endless_auto_priority",
         "endless_auto_load",

@@ -33,6 +33,7 @@ param(
         "shrine",
         "completion",
         "endless_load_preview",
+        "endless_route_build",
         "endless_routes",
         "endless_routes_busy",
         "endless_auto_priority",

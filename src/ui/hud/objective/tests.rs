@@ -8,6 +8,7 @@ use crate::state::GameSession;
 
 mod charter;
 mod chorus;
+mod outposts;
 mod route_upgrades;
 
 fn boot() -> (GameData, GameSession) {
@@ -344,7 +345,7 @@ fn completed_objective_points_into_an_unlocked_outpost_route() {
 
     assert_eq!(
         objective.next,
-        "Next: build a Worm Outpost and send cargo through the awakened route."
+        "Next: tap Outpost in Build & Dig, tap open floor, then tap Activate route."
     );
 }
 

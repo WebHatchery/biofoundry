@@ -33,7 +33,8 @@ impl CampaignObjective {
                     }
                 }
             } else if session.buildings_of("outpost").next().is_none() {
-                "Next: build a Worm Outpost and send cargo through the awakened route.".to_owned()
+                "Next: tap Outpost in Build & Dig, tap open floor, then tap Activate route."
+                    .to_owned()
             } else if session.outposts.iter().any(|outpost| {
                 !outpost.active && (outpost.cargo_total() > 0 || !outpost.crew.is_empty())
             }) {
@@ -55,7 +56,7 @@ impl CampaignObjective {
             } else if session.outposts.iter().any(|outpost| outpost.active) {
                 active_outpost_next_step(session, data)
             } else {
-                "Next: activate the Worm Outpost, then send a cargo run.".to_owned()
+                "Next: tap the Worm Outpost, then tap Activate route.".to_owned()
             };
             let scouting_hauls = crate::simulation::outposts::total_expeditions(session);
             let route_upgrades: u32 = session
@@ -382,7 +383,7 @@ fn active_outpost_next_step(session: &GameSession, data: &GameData) -> String {
         })
         .or_else(|| session.outposts.iter().find(|outpost| outpost.active))
     else {
-        return "Next: activate the Worm Outpost, then send a cargo run.".to_owned();
+        return "Next: tap the Worm Outpost, then tap Activate route.".to_owned();
     };
     let has_cargo = outpost.cargo_total() > 0;
     let has_crew = !outpost.crew.is_empty();
