@@ -565,19 +565,19 @@ impl Game {
                 let cap = self.data.balance.order_queue_size;
                 let mut queued = false;
                 if let GameState::Warren(session) = &mut self.state {
-                    let recipe_unlocked = self
-                        .data
-                        .equipment_def(&item)
-                        .is_some_and(|equipment| session.equipment_unlocked(equipment));
-                    if let Some(b) = session.building_at_mut(pos) {
-                        if recipe_unlocked && b.kind == "blacksmith" && b.orders.len() < cap {
-                            b.orders.push(item);
-                            queued = true;
-                            self.notifications.info("Order queued.");
-                            self.audio.play(Sfx::Select);
+                    if let Some(ingots) = session.queue_equipment_order(&self.data, pos, item, cap)
+                    {
+                        queued = true;
+                        if ingots > 0 {
+                            self.notifications.info(format!(
+                                "Order queued · {ingots} ingots moved to the Blacksmith."
+                            ));
                         } else {
-                            self.audio.play(Sfx::Deny);
+                            self.notifications.info("Order queued.");
                         }
+                        self.audio.play(Sfx::Select);
+                    } else {
+                        self.audio.play(Sfx::Deny);
                     }
                 }
                 if queued {

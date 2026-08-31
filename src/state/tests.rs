@@ -1,6 +1,7 @@
 use super::*;
 use crate::data::GameData;
-use crate::state::creatures::Task;
+use crate::state::creatures::{Good, Task};
+use crate::state::structures::Building;
 use macroquad_toolkit::notifications::{LoggedNotification, NotificationType};
 
 #[test]
@@ -60,6 +61,35 @@ fn saves_from_before_outpost_charter_load_unclaimed() {
     let restored: GameSession = serde_json::from_value(encoded).unwrap();
 
     assert!(!restored.outpost_charter_claimed);
+}
+
+#[test]
+fn blacksmith_orders_reserve_banked_ingots_before_forging_the_balance() {
+    let data = GameData::load().unwrap();
+    let mut session = GameSession::new(&data, 42);
+    let spot = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(pos, _)| session.can_place_building(*pos))
+        .map(|(pos, _)| pos)
+        .expect("a walkable blacksmith location");
+    session.buildings.push(Building::new("blacksmith", spot));
+    session.economy.ingots_stock = 4;
+    let reserved = session
+        .queue_equipment_order(
+            &data,
+            spot,
+            "iron_pickaxe".to_owned(),
+            data.balance.order_queue_size,
+        )
+        .expect("the unlocked Blacksmith recipe should queue");
+
+    assert_eq!(reserved, 2);
+    assert_eq!(session.economy.ingots_stock, 2);
+    let shop = session.building_at(spot).unwrap();
+    assert_eq!(shop.stock(Good::Ingot), 2.0);
+    assert_eq!(shop.orders, vec!["iron_pickaxe"]);
 }
 
 #[test]

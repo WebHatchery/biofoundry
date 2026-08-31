@@ -551,6 +551,38 @@ impl GameSession {
             })
             .unwrap_or(true)
     }
+
+    /// Queue a valid Blacksmith recipe and move any available banked ingots
+    /// into the shop's buffer. Remaining cost can still be forged locally,
+    /// preserving the existing future-order behavior.
+    pub fn queue_equipment_order(
+        &mut self,
+        data: &GameData,
+        pos: TilePos,
+        item: String,
+        queue_cap: usize,
+    ) -> Option<u32> {
+        let cost = data
+            .equipment_def(&item)
+            .filter(|definition| self.equipment_unlocked(definition))
+            .map(|definition| definition.cost_ingots)?;
+        let queue_open = self.building_at(pos).is_some_and(|building| {
+            building.kind == "blacksmith" && building.orders.len() < queue_cap
+        });
+        if !queue_open {
+            return None;
+        }
+
+        let reserved = self.economy.ingots_stock.min(cost);
+        self.economy.ingots_stock -= reserved;
+        let Some(building) = self.building_at_mut(pos) else {
+            self.economy.ingots_stock += reserved;
+            return None;
+        };
+        building.add_stock(creatures::Good::Ingot, reserved as f32);
+        building.orders.push(item);
+        Some(reserved)
+    }
 }
 
 /// Pre-place the starting stockpile, cook pot, farm, and a working Mine on

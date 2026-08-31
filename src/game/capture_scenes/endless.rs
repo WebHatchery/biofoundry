@@ -187,9 +187,13 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                     .map(|(pos, _)| pos)
                     .min_by_key(|pos| (pos.manhattan_distance(&spawn), pos.x, pos.y));
                 if let Some(spot) = spot {
-                    let mut shop = Building::new("blacksmith", spot);
-                    shop.add_stock(Good::Ingot, 8.0);
-                    session.buildings.push(shop);
+                    session.buildings.push(Building::new("blacksmith", spot));
+                    let _ = session.queue_equipment_order(
+                        &game.data,
+                        spot,
+                        "wormbone_drill".to_owned(),
+                        game.data.balance.order_queue_size,
+                    );
                     if let Some(worker) = session
                         .creatures
                         .iter_mut()
