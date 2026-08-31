@@ -36,7 +36,9 @@ param(
         "endless_signal_cache_awarded",
         "endless_signal_cache_haul",
         "endless_convoy",
-        "endless_convoy_awarded"
+        "endless_convoy_awarded",
+        "endless_waypoint",
+        "endless_waypoint_awarded"
     ),
     [int]$WindowWidth = 1280,
     [int]$WindowHeight = 720,

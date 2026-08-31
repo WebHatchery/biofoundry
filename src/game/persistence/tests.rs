@@ -103,3 +103,34 @@ fn loaded_signal_cache_requires_the_worm_road_relay() {
 
     assert!(error.contains("Worm Road Relay"), "{error}");
 }
+
+#[test]
+fn loaded_waypoint_requires_the_signal_cache() {
+    let (data, mut session) = session_with_outpost();
+    session.outpost_convoy_claims = 1;
+    session.outposts[0].waypoint_upgraded = true;
+
+    let error = validate_loaded_session(&session, &data)
+        .expect_err("a Waypoint cannot exist before the Signal Cache");
+
+    assert!(error.contains("Signal Cache"), "{error}");
+}
+
+#[test]
+fn loaded_waypoint_requires_a_cleared_worm_road_convoy() {
+    let (data, mut session) = session_with_outpost();
+    session.outpost_charter_claimed = true;
+    session.outpost_relay_claimed = true;
+    session.outposts[0].storage_upgraded = true;
+    session.outposts[0].crew_upgraded = true;
+    session.outposts[0].survey_upgraded = true;
+    session.outposts[0].resonator_upgraded = true;
+    session.outposts[0].deep_survey_upgraded = true;
+    session.outposts[0].signal_cache_upgraded = true;
+    session.outposts[0].waypoint_upgraded = true;
+
+    let error = validate_loaded_session(&session, &data)
+        .expect_err("a Waypoint cannot exist before the Convoy");
+
+    assert!(error.contains("Worm Road Convoy"), "{error}");
+}

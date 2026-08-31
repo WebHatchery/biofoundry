@@ -62,4 +62,15 @@ fn completed_objective_guides_the_route_upgrade_ladder_when_funded() {
     assert!(CampaignObjective::current(&session, &data)
         .progress
         .contains("Upgrades 6"));
+
+    session.outpost_convoy_claims = 1;
+    session.economy.ingots_stock = data.balance.outpost_waypoint_upgrade_ingots;
+    assert!(CampaignObjective::current(&session, &data)
+        .next
+        .contains("Install Worm Road waypoint"));
+
+    session.outposts[0].waypoint_upgraded = true;
+    assert!(CampaignObjective::current(&session, &data)
+        .progress
+        .contains("Upgrades 7"));
 }

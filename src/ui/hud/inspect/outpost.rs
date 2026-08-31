@@ -40,6 +40,21 @@ pub(super) fn outpost_signal_cache_summary(
     })
 }
 
+pub(super) fn outpost_waypoint_summary(
+    outpost: &Outpost,
+    data: &GameData,
+    compact: bool,
+) -> Option<String> {
+    outpost.waypoint_upgraded.then(|| {
+        let transit_time = crate::simulation::outposts::transit_time_sec(outpost, data);
+        if compact {
+            format!("Waypoint · {transit_time:.0}s")
+        } else {
+            format!("Worm Road Waypoint · {transit_time:.0}s transit")
+        }
+    })
+}
+
 pub(super) struct CompactRouteContext<'a> {
     pub(super) session: &'a GameSession,
     pub(super) data: &'a GameData,
@@ -203,6 +218,39 @@ pub(super) fn draw_signal_cache_control(context: SurveyUpgradeContext<'_>) {
     *y += step;
 }
 
+pub(super) fn draw_waypoint_control(context: SurveyUpgradeContext<'_>) {
+    let SurveyUpgradeContext {
+        session,
+        data,
+        pos,
+        outpost,
+        rect,
+        y,
+        step,
+        mouse,
+        actions,
+    } = context;
+    if !outpost.is_some_and(|route| route.signal_cache_upgraded && !route.waypoint_upgraded) {
+        return;
+    }
+    let waypoint_cost = data.balance.outpost_waypoint_upgrade_ingots;
+    let convoy_claimed = session.outpost_convoy_claims > 0;
+    let label = if convoy_claimed {
+        format!("Install Worm Road waypoint · {waypoint_cost} ingots")
+    } else {
+        "Worm Road waypoint · Convoy required".to_owned()
+    };
+    if hud_button(
+        Rect::new(rect.x, *y, rect.w, rect.h),
+        &label,
+        convoy_claimed && session.economy.ingots_stock >= waypoint_cost,
+        mouse,
+    ) {
+        actions.push(UiAction::UpgradeOutpostWaypoint(pos));
+    }
+    *y += step;
+}
+
 pub(super) fn draw_route_upgrade_controls(context: RouteUpgradeContext<'_>) {
     let RouteUpgradeContext {
         session,
@@ -276,6 +324,17 @@ pub(super) fn draw_route_upgrade_controls(context: RouteUpgradeContext<'_>) {
         actions,
     });
     draw_signal_cache_control(SurveyUpgradeContext {
+        session,
+        data,
+        pos,
+        outpost,
+        rect,
+        y,
+        step: button_step,
+        mouse,
+        actions,
+    });
+    draw_waypoint_control(SurveyUpgradeContext {
         session,
         data,
         pos,

@@ -426,8 +426,20 @@ fn compact_route_metrics(data: &GameData, outpost: &Outpost) -> String {
 }
 
 fn route_policy_summary(outpost: &Outpost, data: &GameData, compact: bool) -> String {
+    let waypoint = outpost.waypoint_upgraded.then(|| {
+        let transit_time = crate::simulation::outposts::transit_time_sec(outpost, data);
+        if compact {
+            format!(" · Waypoint {transit_time:.0}s")
+        } else {
+            format!(" · Waypoint {transit_time:.0}s transit")
+        }
+    });
     if !compact || !outpost.signal_cache_upgraded {
-        return route_policy_label(outpost).to_owned();
+        return format!(
+            "{}{}",
+            route_policy_label(outpost),
+            waypoint.unwrap_or_default()
+        );
     }
     let policy = match (
         outpost.expedition_paused,
@@ -443,7 +455,7 @@ fn route_policy_summary(outpost: &Outpost, data: &GameData, compact: bool) -> St
     format!(
         "{policy} · Cache +{} · Kept {}",
         data.balance.outpost_signal_cache_ingots_per_haul, outpost.signal_cache_ingots
-    )
+    ) + waypoint.as_deref().unwrap_or_default()
 }
 
 #[cfg(test)]

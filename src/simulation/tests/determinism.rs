@@ -68,6 +68,8 @@ fn save_roundtrip_preserves_outpost_dispatch_settings() {
     session.outposts[0].survey_upgraded = true;
     session.outposts[0].resonator_upgraded = true;
     session.outposts[0].deep_survey_upgraded = true;
+    session.outposts[0].signal_cache_upgraded = true;
+    session.outposts[0].waypoint_upgraded = true;
     session.outposts[0].cargo_priority = CargoPriority::Food;
     session.outposts[0].expedition_paused = true;
     session.outposts[0].auto_return_cargo = true;
@@ -75,6 +77,8 @@ fn save_roundtrip_preserves_outpost_dispatch_settings() {
     session.auto_route_cursor = 1;
     session.outpost_charter_claimed = true;
     session.outpost_archive_claims = 2;
+    session.outpost_relay_claimed = true;
+    session.outpost_convoy_claims = 1;
 
     let json = serde_json::to_string(&session).expect("serialize");
     let restored: GameSession = serde_json::from_str(&json).expect("deserialize");
@@ -85,6 +89,8 @@ fn save_roundtrip_preserves_outpost_dispatch_settings() {
     assert!(restored.outposts[0].survey_upgraded);
     assert!(restored.outposts[0].resonator_upgraded);
     assert!(restored.outposts[0].deep_survey_upgraded);
+    assert!(restored.outposts[0].signal_cache_upgraded);
+    assert!(restored.outposts[0].waypoint_upgraded);
     assert_eq!(restored.outposts[0].cargo_priority, CargoPriority::Food);
     assert!(restored.outposts[0].expedition_paused);
     assert!(restored.outposts[0].auto_return_cargo);
@@ -92,6 +98,8 @@ fn save_roundtrip_preserves_outpost_dispatch_settings() {
     assert_eq!(restored.auto_route_cursor, 1);
     assert!(restored.outpost_charter_claimed);
     assert_eq!(restored.outpost_archive_claims, 2);
+    assert!(restored.outpost_relay_claimed);
+    assert_eq!(restored.outpost_convoy_claims, 1);
     assert_eq!(
         crate::simulation::outposts::storage_capacity(&restored.outposts[0], &data),
         data.balance.outpost_upgraded_storage_cap

@@ -105,6 +105,8 @@
   "outpost_convoy_reward_ingots": 24,
   "outpost_signal_cache_upgrade_ingots": 28,
   "outpost_signal_cache_ingots_per_haul": 1,
+  "outpost_waypoint_upgrade_ingots": 36,
+  "outpost_waypoint_transit_time_sec": 12.0,
   "worm_transit_time_sec": 18.0,
   "outpost_expedition_cycle_sec": 30.0,
   "outpost_expedition_food_per_crew": 1,

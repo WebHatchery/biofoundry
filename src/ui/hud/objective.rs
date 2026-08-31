@@ -69,6 +69,7 @@ impl CampaignObjective {
                         outpost.resonator_upgraded,
                         outpost.deep_survey_upgraded,
                         outpost.signal_cache_upgraded,
+                        outpost.waypoint_upgraded,
                     ]
                     .into_iter()
                     .filter(|installed| *installed)
@@ -568,6 +569,16 @@ fn outpost_upgrade_next_step(
         return Some(format!(
             "Next: tap the active Worm Outpost, then Install signal cache for {} ingots.",
             data.balance.outpost_signal_cache_upgrade_ingots
+        ));
+    }
+    if outpost.signal_cache_upgraded
+        && session.outpost_convoy_claims > 0
+        && !outpost.waypoint_upgraded
+        && available >= data.balance.outpost_waypoint_upgrade_ingots
+    {
+        return Some(format!(
+            "Next: tap the active Worm Outpost, then Install Worm Road waypoint for {} ingots.",
+            data.balance.outpost_waypoint_upgrade_ingots
         ));
     }
     None

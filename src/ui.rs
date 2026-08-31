@@ -68,6 +68,8 @@ pub enum UiAction {
     UpgradeOutpostDeepSurvey(TilePos),
     /// Install the one-time Relay-gated Signal Cache on an awakened route.
     UpgradeOutpostSignalCache(TilePos),
+    /// Install the one-time Convoy-gated Worm Road Waypoint.
+    UpgradeOutpostWaypoint(TilePos),
     /// Cycle the number of new scouts sent on an awakened worm route.
     CycleOutpostCrew(TilePos),
     /// Pause or resume remote scouting without closing the worm route.

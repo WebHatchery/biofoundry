@@ -70,6 +70,22 @@ fn signal_cache_summary_reports_rate_and_accumulated_earnings() {
 }
 
 #[test]
+fn waypoint_summary_reports_the_shorter_worm_transit() {
+    let data = GameData::load().expect("embedded game data");
+    let mut outpost = crate::state::outposts::Outpost::new(TilePos::new(4, 4));
+    outpost.waypoint_upgraded = true;
+
+    assert_eq!(
+        outpost_waypoint_summary(&outpost, &data, false).as_deref(),
+        Some("Worm Road Waypoint · 12s transit")
+    );
+    assert_eq!(
+        outpost_waypoint_summary(&outpost, &data, true).as_deref(),
+        Some("Waypoint · 12s")
+    );
+}
+
+#[test]
 fn in_flight_payload_summary_names_cargo_and_crew() {
     let transit = WormTransit {
         outpost: TilePos::new(4, 4),

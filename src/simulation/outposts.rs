@@ -17,7 +17,7 @@ pub use milestones::{
 };
 pub use upgrades::{
     upgrade_outpost, upgrade_outpost_crew, upgrade_outpost_deep_survey, upgrade_outpost_resonator,
-    upgrade_outpost_signal_cache, upgrade_outpost_survey,
+    upgrade_outpost_signal_cache, upgrade_outpost_survey, upgrade_outpost_waypoint,
 };
 
 pub fn activate_outpost(session: &mut GameSession, pos: TilePos) -> bool {
@@ -129,6 +129,18 @@ pub fn expedition_cycle_sec(outpost: &Outpost, data: &GameData) -> f32 {
             data.balance.outpost_resonator_cycle_sec,
         )
         .max(0.1)
+}
+
+/// Return the current worm transit time for a route.
+pub fn transit_time_sec(outpost: &Outpost, data: &GameData) -> f32 {
+    if outpost.waypoint_upgraded {
+        data.balance
+            .outpost_waypoint_transit_time_sec
+            .min(data.balance.worm_transit_time_sec)
+    } else {
+        data.balance.worm_transit_time_sec
+    }
+    .max(0.1)
 }
 
 /// The cargo that the next outbound run will put in an Outpost hold.
@@ -398,6 +410,7 @@ fn start_transit(
         return false;
     }
     let cap = storage_capacity(outpost, data);
+    let transit_time = transit_time_sec(outpost, data);
     let (ore, ingots, food) = match (direction, plan) {
         (TransitDirection::ToOutpost, TransitPlan::FoodResupply) => {
             let room = cap.saturating_sub(outpost.cargo_total());
@@ -488,7 +501,7 @@ fn start_transit(
     session.worm_transit = Some(WormTransit {
         outpost: pos,
         direction,
-        remaining: data.balance.worm_transit_time_sec,
+        remaining: transit_time,
         ore,
         ingots,
         food,

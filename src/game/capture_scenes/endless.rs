@@ -374,6 +374,51 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
             game.routes_open = true;
             game.paused = true;
         }
+        "endless_waypoint" => {
+            begin(game, "endless_convoy_awarded");
+            game.notifications.clear();
+            game.routes_open = false;
+            game.paused = true;
+            if let GameState::Warren(session) = &mut game.state {
+                session.economy.ingots_stock = game.data.balance.outpost_waypoint_upgrade_ingots;
+                session.outpost_convoy_claims = session.outpost_convoy_claims.max(1);
+                session.outposts.truncate(1);
+                let focus = session.outposts.first().map(|route| route.pos);
+                for route in &mut session.outposts {
+                    route.active = Some(route.pos) == focus;
+                    route.expedition_paused = false;
+                    route.cargo.clear();
+                    route.crew.clear();
+                }
+                if let Some(route) = session.outposts.first_mut() {
+                    route.active = true;
+                    route.storage_upgraded = true;
+                    route.crew_upgraded = true;
+                    route.survey_upgraded = true;
+                    route.resonator_upgraded = true;
+                    route.deep_survey_upgraded = true;
+                    route.signal_cache_upgraded = true;
+                    route.waypoint_upgraded = false;
+                    route.expedition_paused = false;
+                    game.selected_building = Some(route.pos);
+                }
+            }
+        }
+        "endless_waypoint_awarded" => {
+            begin(game, "endless_waypoint");
+            if let GameState::Warren(session) = &mut game.state {
+                if let Some(pos) = session.outposts.first().map(|route| route.pos) {
+                    if simulation::outposts::upgrade_outpost_waypoint(session, &game.data, pos) {
+                        game.notifications.success(format!(
+                            "Worm Road Waypoint online · {:.0}s transit.",
+                            game.data.balance.outpost_waypoint_transit_time_sec
+                        ));
+                    }
+                }
+            }
+            game.routes_open = false;
+            game.paused = true;
+        }
         "endless_signal_cache" => {
             begin(game, "endless_relay");
             game.notifications.clear();

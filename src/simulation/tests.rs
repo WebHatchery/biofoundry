@@ -11,6 +11,7 @@ mod determinism;
 mod economy;
 mod mining;
 mod novel;
+mod waypoint;
 mod wild;
 
 use super::*;

@@ -16,6 +16,7 @@ fn new_outpost_defaults_to_ore_first_loading() {
     assert!(!outpost.deep_survey_upgraded);
     assert!(!outpost.signal_cache_upgraded);
     assert_eq!(outpost.signal_cache_ingots, 0);
+    assert!(!outpost.waypoint_upgraded);
     assert!(!outpost.auto_return_cargo);
     assert_eq!(outpost.auto_return_label(), "Auto-return · Off");
     assert!(!outpost.auto_resupply_food);
@@ -111,6 +112,19 @@ fn older_outpost_saves_default_signal_cache_to_off() {
 }
 
 #[test]
+fn older_outpost_saves_default_waypoint_to_off() {
+    let outpost = Outpost::new(TilePos::new(4, 4));
+    let mut value = serde_json::to_value(outpost).expect("serialize outpost");
+    value
+        .as_object_mut()
+        .expect("outpost serializes as an object")
+        .remove("waypoint_upgraded");
+
+    let restored: Outpost = serde_json::from_value(value).expect("restore legacy outpost");
+    assert!(!restored.waypoint_upgraded);
+}
+
+#[test]
 fn signal_cache_earnings_survive_a_save_roundtrip() {
     let mut outpost = Outpost::new(TilePos::new(4, 4));
     outpost.signal_cache_upgraded = true;
@@ -121,6 +135,17 @@ fn signal_cache_earnings_survive_a_save_roundtrip() {
 
     assert!(restored.signal_cache_upgraded);
     assert_eq!(restored.signal_cache_ingots, 7);
+}
+
+#[test]
+fn waypoint_upgrade_survives_a_save_roundtrip() {
+    let mut outpost = Outpost::new(TilePos::new(4, 4));
+    outpost.waypoint_upgraded = true;
+
+    let encoded = serde_json::to_string(&outpost).expect("serialize outpost");
+    let restored: Outpost = serde_json::from_str(&encoded).expect("restore outpost");
+
+    assert!(restored.waypoint_upgraded);
 }
 
 #[test]

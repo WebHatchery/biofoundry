@@ -69,6 +69,13 @@ fn validate_balance(data: &GameData) -> Result<(), String> {
     {
         return Err("outpost Signal Cache cost and payload must be positive".to_owned());
     }
+    if balance.outpost_waypoint_upgrade_ingots == 0
+        || !balance.outpost_waypoint_transit_time_sec.is_finite()
+        || balance.outpost_waypoint_transit_time_sec <= 0.0
+        || balance.outpost_waypoint_transit_time_sec >= balance.worm_transit_time_sec
+    {
+        return Err("outpost Waypoint cost and transit time must be valid".to_owned());
+    }
     Ok(())
 }
 

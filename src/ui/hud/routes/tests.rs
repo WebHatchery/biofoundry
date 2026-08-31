@@ -318,6 +318,22 @@ fn compact_route_cards_keep_signal_cache_history_in_the_policy_line() {
 }
 
 #[test]
+fn route_policy_summary_reports_the_worm_road_waypoint() {
+    let data = GameData::load().expect("embedded game data");
+    let mut route = Outpost::new(TilePos::new(4, 4));
+    route.waypoint_upgraded = true;
+
+    assert_eq!(
+        route_policy_summary(&route, &data, false),
+        "Manual route · Waypoint 12s transit"
+    );
+    assert_eq!(
+        route_policy_summary(&route, &data, true),
+        "Manual route · Waypoint 12s"
+    );
+}
+
+#[test]
 fn route_status_reuses_the_inspection_vocabulary() {
     let data = GameData::load().expect("embedded game data");
     let mut session = GameSession::new(&data, 43);

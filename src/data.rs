@@ -284,6 +284,12 @@ pub struct Balance {
     /// Ingots carried home by each haul after a Signal Cache is installed.
     #[serde(default = "default_outpost_signal_cache_ingots_per_haul")]
     pub outpost_signal_cache_ingots_per_haul: u32,
+    /// Ingot cost for the post-Convoy Worm Road Waypoint.
+    #[serde(default = "default_outpost_waypoint_upgrade_ingots")]
+    pub outpost_waypoint_upgrade_ingots: u32,
+    /// Transit time for a route with a Worm Road Waypoint.
+    #[serde(default = "default_outpost_waypoint_transit_time")]
+    pub outpost_waypoint_transit_time_sec: f32,
     #[serde(default = "default_worm_transit_time")]
     pub worm_transit_time_sec: f32,
     /// Time for a staffed remote outpost to complete one scouting haul.
@@ -424,6 +430,12 @@ fn default_outpost_signal_cache_upgrade_ingots() -> u32 {
 }
 fn default_outpost_signal_cache_ingots_per_haul() -> u32 {
     1
+}
+fn default_outpost_waypoint_upgrade_ingots() -> u32 {
+    36
+}
+fn default_outpost_waypoint_transit_time() -> f32 {
+    12.0
 }
 fn default_worm_transit_time() -> f32 {
     18.0

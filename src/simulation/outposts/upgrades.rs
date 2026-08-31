@@ -146,6 +146,33 @@ pub fn upgrade_outpost_signal_cache(
     true
 }
 
+/// Install the post-Convoy Worm Road Waypoint, shortening this route's
+/// outbound and return transits.
+pub fn upgrade_outpost_waypoint(session: &mut GameSession, data: &GameData, pos: TilePos) -> bool {
+    if !route_upgrade_target_is_valid(session, pos)
+        || session.outpost_convoy_claims == 0
+        || data.balance.outpost_waypoint_transit_time_sec <= 0.0
+    {
+        return false;
+    }
+    session.ensure_outpost(pos);
+    let Some(index) = route_index(session, pos) else {
+        return false;
+    };
+    let outpost = &session.outposts[index];
+    if !outpost.active
+        || !outpost.signal_cache_upgraded
+        || !outpost.deep_survey_upgraded
+        || outpost.waypoint_upgraded
+        || session.economy.ingots_stock < data.balance.outpost_waypoint_upgrade_ingots
+    {
+        return false;
+    }
+    session.economy.ingots_stock -= data.balance.outpost_waypoint_upgrade_ingots;
+    session.outposts[index].waypoint_upgraded = true;
+    true
+}
+
 fn route_upgrade_target_is_valid(session: &GameSession, pos: TilePos) -> bool {
     session.worm_awake
         && session.worm_transit.is_none()
