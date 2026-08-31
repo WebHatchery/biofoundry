@@ -166,5 +166,6 @@ commit.
 - campaign narrative or dialogue beyond concise objective framing;
 - meta-progression, achievements, multiplayer, modding, and localization;
 - additional Outpost regions, route contracts, and multi-route objectives
-  beyond the repeatable Worm Road Muster and the existing route-upgrade ladder;
+  beyond the repeatable Worm Road Muster, Wormsong Concord, and the existing
+  route-upgrade ladder;
 - systemic redesigns not supported by observed player problems.
