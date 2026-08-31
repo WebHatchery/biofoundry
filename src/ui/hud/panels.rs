@@ -235,10 +235,18 @@ pub(super) fn draw_top_bar(
         );
     }
 
-    let chrome_y = if compact { bar.y + 4.0 } else { bar.y + 8.0 };
-    let chrome_height = if compact { 40.0 } else { 32.0 };
+    // At 800x450 the virtual canvas is rendered at 0.625x. A 72px logical
+    // button therefore remains at least 44px on screen while the controls
+    // still fit across the fixed top bar.
+    let chrome_y = if compact { bar.y - 10.0 } else { bar.y + 8.0 };
+    let chrome_height = if compact { 72.0 } else { 32.0 };
     if hud_button(
-        Rect::new(bar.right() - 96.0, chrome_y, 84.0, chrome_height),
+        Rect::new(
+            bar.right() - if compact { 74.0 } else { 96.0 },
+            chrome_y,
+            if compact { 72.0 } else { 84.0 },
+            chrome_height,
+        ),
         "Menu",
         true,
         mouse,
@@ -246,7 +254,12 @@ pub(super) fn draw_top_bar(
         actions.push(UiAction::BackToMenu);
     }
     if hud_button(
-        Rect::new(bar.right() - 512.0, chrome_y, 74.0, chrome_height),
+        Rect::new(
+            bar.right() - if compact { 530.0 } else { 512.0 },
+            chrome_y,
+            if compact { 72.0 } else { 74.0 },
+            chrome_height,
+        ),
         if top_bar_state.paused {
             "Resume"
         } else {
@@ -258,7 +271,12 @@ pub(super) fn draw_top_bar(
         actions.push(UiAction::TogglePause);
     }
     if hud_button(
-        Rect::new(bar.right() - 354.0, bar.y + 4.0, 40.0, 40.0),
+        Rect::new(
+            bar.right() - if compact { 378.0 } else { 354.0 },
+            chrome_y,
+            if compact { 72.0 } else { 40.0 },
+            if compact { 72.0 } else { 40.0 },
+        ),
         "−",
         true,
         mouse,
@@ -266,7 +284,12 @@ pub(super) fn draw_top_bar(
         actions.push(UiAction::ZoomCamera(-1));
     }
     if hud_button(
-        Rect::new(bar.right() - 310.0, bar.y + 4.0, 40.0, 40.0),
+        Rect::new(
+            bar.right() - if compact { 302.0 } else { 310.0 },
+            chrome_y,
+            if compact { 72.0 } else { 40.0 },
+            if compact { 72.0 } else { 40.0 },
+        ),
         "+",
         true,
         mouse,
@@ -274,7 +297,12 @@ pub(super) fn draw_top_bar(
         actions.push(UiAction::ZoomCamera(1));
     }
     if hud_button(
-        Rect::new(bar.right() - 254.0, chrome_y, 74.0, chrome_height),
+        Rect::new(
+            bar.right() - if compact { 226.0 } else { 254.0 },
+            chrome_y,
+            if compact { 72.0 } else { 74.0 },
+            chrome_height,
+        ),
         "Save",
         true,
         mouse,
@@ -282,7 +310,12 @@ pub(super) fn draw_top_bar(
         actions.push(UiAction::Save);
     }
     if hud_button(
-        Rect::new(bar.right() - 176.0, chrome_y, 74.0, chrome_height),
+        Rect::new(
+            bar.right() - if compact { 150.0 } else { 176.0 },
+            chrome_y,
+            if compact { 72.0 } else { 74.0 },
+            chrome_height,
+        ),
         "Load",
         top_bar_state.save_exists,
         mouse,
@@ -290,7 +323,12 @@ pub(super) fn draw_top_bar(
         actions.push(UiAction::RequestLoad);
     }
     if hud_button(
-        Rect::new(bar.right() - 438.0, chrome_y, 74.0, chrome_height),
+        Rect::new(
+            bar.right() - if compact { 454.0 } else { 438.0 },
+            chrome_y,
+            if compact { 72.0 } else { 74.0 },
+            chrome_height,
+        ),
         "Help",
         true,
         mouse,
@@ -300,7 +338,12 @@ pub(super) fn draw_top_bar(
     if session.worm_awake
         && !session.outposts.is_empty()
         && hud_button(
-            Rect::new(bar.right() - 606.0, chrome_y, 74.0, chrome_height),
+            Rect::new(
+                bar.right() - 606.0,
+                chrome_y,
+                if compact { 72.0 } else { 74.0 },
+                chrome_height,
+            ),
             "Routes",
             true,
             mouse,
@@ -328,10 +371,10 @@ pub(super) fn draw_jobs_panel(
 
     let idle_reassignable = reassignable_job_count(session, data, Job::Idle);
     let x = panel.x + 14.0;
-    let mut y = panel.y + 44.0;
     let compact = compact_top_bar(ui_scale);
-    let job_button_height = if compact { 30.0 } else { 26.0 };
-    let job_row_step = if compact { 36.0 } else { 32.0 };
+    let mut y = panel.y + if compact { 40.0 } else { 44.0 };
+    let job_button_height = if compact { 72.0 } else { 26.0 };
+    let job_row_step = if compact { 72.0 } else { 32.0 };
 
     let raid_warning = session.raid_active || session.raid_in <= data.balance.raid_warning_sec;
     for job in [Job::Miner, Job::Carrier, Job::Cook, Job::Smith, Job::Guard] {
@@ -343,16 +386,31 @@ pub(super) fn draw_jobs_panel(
                     .with_border(1.0, dark::WARNING),
             );
         }
-        sprites.draw_job(job, vec2(x + 9.0, y + 13.0));
+        sprites.draw_job(
+            job,
+            vec2(
+                x + 9.0,
+                y + if compact {
+                    job_button_height * 0.5
+                } else {
+                    13.0
+                },
+            ),
+        );
         draw_ui_text_ex(
             &format!("{} {count}", job.label()),
             x + 22.0,
-            y + 19.0,
+            y + if compact { 43.0 } else { 19.0 },
             TextStyle::new(16.0, dark::TEXT).params(),
         );
         let reassignable = reassignable_job_count(session, data, job);
         if hud_button(
-            Rect::new(x + 130.0, y, 34.0, job_button_height),
+            Rect::new(
+                x + if compact { 93.0 } else { 130.0 },
+                y,
+                if compact { 72.0 } else { 34.0 },
+                job_button_height,
+            ),
             "-",
             reassignable > 0,
             mouse,
@@ -360,14 +418,19 @@ pub(super) fn draw_jobs_panel(
             actions.push(UiAction::Unassign(job));
         }
         if hud_button(
-            Rect::new(x + 172.0, y, 34.0, job_button_height),
+            Rect::new(
+                x + if compact { 167.0 } else { 172.0 },
+                y,
+                if compact { 72.0 } else { 34.0 },
+                job_button_height,
+            ),
             "+",
             idle_reassignable > 0,
             mouse,
         ) {
             actions.push(UiAction::Assign(job));
         }
-        if job == Job::Guard && raid_warning {
+        if job == Job::Guard && raid_warning && !compact {
             draw_ui_text_ex(
                 "RAID",
                 x + 84.0,
@@ -378,11 +441,14 @@ pub(super) fn draw_jobs_panel(
         y += job_row_step;
     }
 
-    sprites.draw_job(Job::Idle, vec2(x + 9.0, y + 13.0));
+    sprites.draw_job(
+        Job::Idle,
+        vec2(x + 9.0, y + if compact { 35.0 } else { 13.0 }),
+    );
     draw_ui_text_ex(
         &workforce_capacity_label(session, data),
         x + 22.0,
-        y + 18.0,
+        y + if compact { 41.0 } else { 18.0 },
         TextStyle::new(16.0, dark::TEXT_DIM).params(),
     );
     let workforce_pressure = workforce_pressure_label(session, data);
@@ -390,14 +456,22 @@ pub(super) fn draw_jobs_panel(
         draw_ui_text_ex(
             pressure,
             x + 22.0,
-            y + 36.0,
+            y + if compact { 59.0 } else { 36.0 },
             TextStyle::new(13.0, dark::WARNING).params(),
         );
     }
     y += if workforce_pressure.is_some() {
-        46.0
+        if compact {
+            70.0
+        } else {
+            46.0
+        }
     } else {
-        28.0
+        if compact {
+            58.0
+        } else {
+            28.0
+        }
     };
 
     if !advanced_systems_unlocked(session) {
@@ -548,8 +622,8 @@ pub(super) fn draw_tools_panel(
     let w = panel.w - 28.0;
     let cell = (w - 16.0) / 3.0;
     let compact = compact_top_bar(ui_scale);
-    let tool_button_height = if compact { 30.0 } else { 22.0 };
-    let tool_row_step = if compact { 34.0 } else { 26.0 };
+    let tool_button_height = if compact { 72.0 } else { 22.0 };
+    let tool_row_step = if compact { 74.0 } else { 26.0 };
 
     // Build buttons, two per row: label is the short name + cost. Locked
     // kinds stay visible but disabled (progression is discoverable).

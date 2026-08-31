@@ -727,7 +727,11 @@ pub(super) fn draw_inspect_panel(
 }
 
 fn inspection_button_metrics(kind: &str, compact: bool, equipment_count: usize) -> (f32, f32) {
-    if compact && kind == "blacksmith" && equipment_count > 4 {
+    if compact && kind == "worm_shrine" {
+        // The shrine is a critical-path handoff. Its pause/resume action must
+        // remain a full touch target even when the canvas is 800x450.
+        (72.0, 76.0)
+    } else if compact && kind == "blacksmith" && equipment_count > 4 {
         (46.0, 48.0)
     } else if compact && matches!(kind, "blacksmith" | "breeding_pit") {
         (36.0, 40.0)

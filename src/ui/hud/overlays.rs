@@ -30,6 +30,7 @@ pub(super) fn draw_goal_overlay(
     body: &str,
     dismiss: UiAction,
     continue_label: &str,
+    ui_scale: f32,
     mouse: Vec2,
     actions: &mut Vec<UiAction>,
 ) {
@@ -60,8 +61,11 @@ pub(super) fn draw_goal_overlay(
         dark::TEXT,
     );
 
+    let compact = super::panels::compact_top_bar(ui_scale);
+    let button_height = if compact { 72.0 } else { 38.0 };
+    let button_y = panel.bottom() - if compact { 78.0 } else { 56.0 };
     if hud_button(
-        Rect::new(panel.x + 40.0, panel.bottom() - 56.0, 195.0, 38.0),
+        Rect::new(panel.x + 40.0, button_y, 195.0, button_height),
         continue_label,
         true,
         mouse,
@@ -69,7 +73,7 @@ pub(super) fn draw_goal_overlay(
         actions.push(dismiss);
     }
     if hud_button(
-        Rect::new(panel.x + 245.0, panel.bottom() - 56.0, 195.0, 38.0),
+        Rect::new(panel.x + 245.0, button_y, 195.0, button_height),
         "Return to Menu",
         true,
         mouse,
@@ -83,6 +87,7 @@ pub(super) fn draw_goal_overlay(
 pub(super) fn draw_colony_failure_overlay(
     failure: ColonyFailure,
     save_exists: bool,
+    ui_scale: f32,
     mouse: Vec2,
     actions: &mut Vec<UiAction>,
 ) {
@@ -116,8 +121,11 @@ pub(super) fn draw_colony_failure_overlay(
 
     let ((primary_action, primary_label), (secondary_action, secondary_label)) =
         colony_failure_actions(save_exists);
+    let compact = super::panels::compact_top_bar(ui_scale);
+    let button_height = if compact { 72.0 } else { 38.0 };
+    let button_y = panel.bottom() - if compact { 82.0 } else { 56.0 };
     if hud_button(
-        Rect::new(panel.x + 40.0, panel.bottom() - 56.0, 195.0, 38.0),
+        Rect::new(panel.x + 40.0, button_y, 195.0, button_height),
         primary_label,
         true,
         mouse,
@@ -125,7 +133,7 @@ pub(super) fn draw_colony_failure_overlay(
         actions.push(primary_action);
     }
     if hud_button(
-        Rect::new(panel.x + 245.0, panel.bottom() - 56.0, 195.0, 38.0),
+        Rect::new(panel.x + 245.0, button_y, 195.0, button_height),
         secondary_label,
         true,
         mouse,
@@ -177,7 +185,7 @@ fn colony_failure_body(failure: ColonyFailure, save_exists: bool) -> &'static st
 /// Protect an active run from an accidental top-bar Load click. Recovery
 /// overlays still use the direct Load action because they already explain why
 /// the current Warren cannot continue.
-pub(super) fn draw_load_confirmation(mouse: Vec2, actions: &mut Vec<UiAction>) {
+pub(super) fn draw_load_confirmation(ui_scale: f32, mouse: Vec2, actions: &mut Vec<UiAction>) {
     draw_rectangle(
         0.0,
         0.0,
@@ -186,7 +194,12 @@ pub(super) fn draw_load_confirmation(mouse: Vec2, actions: &mut Vec<UiAction>) {
         Color::new(0.0, 0.0, 0.0, 0.62),
     );
     macroquad_toolkit::ui::occlude(Rect::new(0.0, 0.0, LOGICAL_WIDTH, LOGICAL_HEIGHT));
-    let panel = Rect::new(LOGICAL_WIDTH * 0.5 - 260.0, 250.0, 520.0, 210.0);
+    let compact = super::panels::compact_top_bar(ui_scale);
+    let panel = if compact {
+        Rect::new(LOGICAL_WIDTH * 0.5 - 260.0, 220.0, 520.0, 250.0)
+    } else {
+        Rect::new(LOGICAL_WIDTH * 0.5 - 260.0, 250.0, 520.0, 210.0)
+    };
     draw_surface_with_title(
         panel,
         Some("Load the Last Save?"),
@@ -203,8 +216,10 @@ pub(super) fn draw_load_confirmation(mouse: Vec2, actions: &mut Vec<UiAction>) {
         4.0,
         dark::TEXT,
     );
+    let button_height = if compact { 72.0 } else { 36.0 };
+    let button_y = panel.bottom() - if compact { 82.0 } else { 52.0 };
     if hud_button(
-        Rect::new(panel.x + 24.0, panel.bottom() - 52.0, 220.0, 36.0),
+        Rect::new(panel.x + 24.0, button_y, 220.0, button_height),
         "Load Last Save",
         true,
         mouse,
@@ -212,7 +227,7 @@ pub(super) fn draw_load_confirmation(mouse: Vec2, actions: &mut Vec<UiAction>) {
         actions.push(UiAction::Load);
     }
     if hud_button(
-        Rect::new(panel.x + 276.0, panel.bottom() - 52.0, 220.0, 36.0),
+        Rect::new(panel.x + 276.0, button_y, 220.0, button_height),
         "Keep Current",
         true,
         mouse,
@@ -227,6 +242,7 @@ pub(super) fn draw_load_confirmation(mouse: Vec2, actions: &mut Vec<UiAction>) {
 pub(super) fn draw_help_overlay(
     session: &GameSession,
     data: &GameData,
+    ui_scale: f32,
     mouse: Vec2,
     actions: &mut Vec<UiAction>,
 ) {
@@ -311,8 +327,11 @@ pub(super) fn draw_help_overlay(
         draw_text_block(body, x, y + 22.0, 460.0, 62.0, 14.0, 3.0, dark::TEXT);
     }
 
+    let compact = super::panels::compact_top_bar(ui_scale);
+    let button_height = if compact { 72.0 } else { 32.0 };
+    let footer_y = panel.bottom() - if compact { 82.0 } else { 48.0 };
     if hud_button(
-        Rect::new(panel.x + 28.0, panel.bottom() - 48.0, 160.0, 32.0),
+        Rect::new(panel.x + 28.0, footer_y, 160.0, button_height),
         "Recent events",
         true,
         mouse,
@@ -322,9 +341,9 @@ pub(super) fn draw_help_overlay(
     if hud_button(
         Rect::new(
             panel.x + panel.w * 0.5 - 70.0,
-            panel.bottom() - 48.0,
+            footer_y,
             140.0,
-            32.0,
+            button_height,
         ),
         "Close",
         true,
@@ -340,6 +359,7 @@ pub(super) fn draw_help_overlay(
 pub(super) fn draw_event_log_overlay(
     history: &[LoggedNotification],
     page: usize,
+    ui_scale: f32,
     mouse: Vec2,
     actions: &mut Vec<UiAction>,
 ) {
@@ -395,9 +415,11 @@ pub(super) fn draw_event_log_overlay(
         }
     }
 
-    let footer_y = panel.bottom() - 48.0;
+    let compact = super::panels::compact_top_bar(ui_scale);
+    let button_height = if compact { 72.0 } else { 32.0 };
+    let footer_y = panel.bottom() - if compact { 82.0 } else { 48.0 };
     if hud_button(
-        Rect::new(panel.x + 24.0, footer_y, 140.0, 32.0),
+        Rect::new(panel.x + 24.0, footer_y, 140.0, button_height),
         "Field Guide",
         true,
         mouse,
@@ -405,7 +427,7 @@ pub(super) fn draw_event_log_overlay(
         actions.push(UiAction::ToggleEventLog);
     }
     if hud_button(
-        Rect::new(panel.x + 196.0, footer_y, 104.0, 32.0),
+        Rect::new(panel.x + 196.0, footer_y, 104.0, button_height),
         "Older",
         page + 1 < page_count,
         mouse,
@@ -413,7 +435,7 @@ pub(super) fn draw_event_log_overlay(
         actions.push(UiAction::EventLogOlder);
     }
     if hud_button(
-        Rect::new(panel.x + 308.0, footer_y, 104.0, 32.0),
+        Rect::new(panel.x + 308.0, footer_y, 104.0, button_height),
         "Newer",
         page > 0,
         mouse,
@@ -421,7 +443,7 @@ pub(super) fn draw_event_log_overlay(
         actions.push(UiAction::EventLogNewer);
     }
     if hud_button(
-        Rect::new(panel.right() - 164.0, footer_y, 140.0, 32.0),
+        Rect::new(panel.right() - 164.0, footer_y, 140.0, button_height),
         "Close",
         true,
         mouse,

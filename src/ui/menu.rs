@@ -59,10 +59,13 @@ pub fn draw(
     );
 
     if settings_open {
-        draw_settings_panel(mouse, sfx_volume, &mut actions);
+        draw_settings_panel(mouse, ui.scale, sfx_volume, &mut actions);
     } else {
         let x = LOGICAL_WIDTH * 0.5 - 130.0;
-        let mut y = 316.0;
+        let compact = ui.scale.is_finite() && ui.scale < 0.9;
+        let menu_button_height = if compact { 72.0 } else { 48.0 };
+        let menu_button_step = if compact { 76.0 } else { 58.0 };
+        let mut y = if compact { 280.0 } else { 316.0 };
         let new_warren_action = if save_exists {
             UiAction::RequestNewWarren
         } else {
@@ -75,16 +78,21 @@ pub fn draw(
             ("Exit Game", true, UiAction::ExitGame),
         ];
         for (label, enabled, action) in entries {
-            if menu_button(Rect::new(x, y, 260.0, 48.0), label, enabled, mouse) {
+            if menu_button(
+                Rect::new(x, y, 260.0, menu_button_height),
+                label,
+                enabled,
+                mouse,
+            ) {
                 actions.push(action);
             }
-            y += 58.0;
+            y += menu_button_step;
         }
     }
 
     if confirm_new_warren {
         actions.clear();
-        draw_start_new_warren_confirmation(mouse, &mut actions);
+        draw_start_new_warren_confirmation(mouse, ui.scale, &mut actions);
     }
 
     let hint = "Feed the warren · forge with living furnaces · awaken the Colossal Worm";
@@ -111,7 +119,7 @@ pub fn draw(
 /// Protect the current campaign from an accidental fresh-start click. The
 /// existing autosave is intentionally named here because starting a new
 /// warren replaces that slot as soon as the new session begins.
-fn draw_start_new_warren_confirmation(mouse: Vec2, actions: &mut Vec<UiAction>) {
+fn draw_start_new_warren_confirmation(mouse: Vec2, ui_scale: f32, actions: &mut Vec<UiAction>) {
     draw_rectangle(
         0.0,
         0.0,
@@ -120,7 +128,12 @@ fn draw_start_new_warren_confirmation(mouse: Vec2, actions: &mut Vec<UiAction>) 
         Color::new(0.0, 0.0, 0.0, 0.62),
     );
     macroquad_toolkit::ui::occlude(Rect::new(0.0, 0.0, LOGICAL_WIDTH, LOGICAL_HEIGHT));
-    let panel = Rect::new(LOGICAL_WIDTH * 0.5 - 260.0, 260.0, 520.0, 190.0);
+    let compact = ui_scale.is_finite() && ui_scale < 0.9;
+    let panel = if compact {
+        Rect::new(LOGICAL_WIDTH * 0.5 - 260.0, 230.0, 520.0, 260.0)
+    } else {
+        Rect::new(LOGICAL_WIDTH * 0.5 - 260.0, 260.0, 520.0, 190.0)
+    };
     draw_surface_with_title(
         panel,
         Some("Start a New Warren?"),
@@ -138,8 +151,10 @@ fn draw_start_new_warren_confirmation(mouse: Vec2, actions: &mut Vec<UiAction>) 
         dark::TEXT,
     );
 
+    let button_height = if compact { 72.0 } else { 36.0 };
+    let button_y = panel.bottom() - if compact { 82.0 } else { 52.0 };
     if menu_button(
-        Rect::new(panel.x + 24.0, panel.bottom() - 52.0, 220.0, 36.0),
+        Rect::new(panel.x + 24.0, button_y, 220.0, button_height),
         "Start New Warren",
         true,
         mouse,
@@ -147,7 +162,7 @@ fn draw_start_new_warren_confirmation(mouse: Vec2, actions: &mut Vec<UiAction>) 
         actions.push(UiAction::StartWarren);
     }
     if menu_button(
-        Rect::new(panel.x + 276.0, panel.bottom() - 52.0, 220.0, 36.0),
+        Rect::new(panel.x + 276.0, button_y, 220.0, button_height),
         "Keep Save",
         true,
         mouse,
@@ -181,8 +196,13 @@ fn draw_backdrop(sprites: &MenuSprites) {
 }
 
 /// The volume stepper and a Done button, in place of the main menu stack.
-fn draw_settings_panel(mouse: Vec2, sfx_volume: f32, actions: &mut Vec<UiAction>) {
-    let panel = Rect::new(LOGICAL_WIDTH * 0.5 - 170.0, 316.0, 340.0, 168.0);
+fn draw_settings_panel(mouse: Vec2, ui_scale: f32, sfx_volume: f32, actions: &mut Vec<UiAction>) {
+    let compact = ui_scale.is_finite() && ui_scale < 0.9;
+    let panel = if compact {
+        Rect::new(LOGICAL_WIDTH * 0.5 - 210.0, 270.0, 420.0, 260.0)
+    } else {
+        Rect::new(LOGICAL_WIDTH * 0.5 - 170.0, 316.0, 340.0, 168.0)
+    };
     draw_surface_with_title(
         panel,
         Some("Settings"),
@@ -193,15 +213,27 @@ fn draw_settings_panel(mouse: Vec2, sfx_volume: f32, actions: &mut Vec<UiAction>
         TextStyle::new(17.0, dark::TEXT),
     );
 
-    let y = panel.y + 56.0;
+    let y = panel.y + if compact { 94.0 } else { 56.0 };
     draw_ui_text_ex(
         "Sound volume",
         panel.x + 20.0,
-        y + 21.0,
+        if compact { panel.y + 54.0 } else { y + 21.0 },
         TextStyle::new(17.0, dark::TEXT).params(),
     );
+    let stepper_height = if compact { 72.0 } else { 30.0 };
+    let stepper_width = if compact { 72.0 } else { 36.0 };
+    let stepper_y = y;
     if menu_button(
-        Rect::new(panel.right() - 152.0, y, 36.0, 30.0),
+        Rect::new(
+            if compact {
+                panel.x + 80.0
+            } else {
+                panel.right() - 152.0
+            },
+            stepper_y,
+            stepper_width,
+            stepper_height,
+        ),
         "-",
         sfx_volume > 0.0,
         mouse,
@@ -210,14 +242,27 @@ fn draw_settings_panel(mouse: Vec2, sfx_volume: f32, actions: &mut Vec<UiAction>
     }
     draw_text_centered_in_box_ex(
         &format!("{:.0}%", sfx_volume * 100.0),
-        panel.right() - 116.0,
+        if compact {
+            panel.x + 174.0
+        } else {
+            panel.right() - 116.0
+        },
         y,
-        64.0,
-        30.0,
+        if compact { 120.0 } else { 64.0 },
+        stepper_height,
         TextStyle::new(16.0, dark::TEXT_BRIGHT),
     );
     if menu_button(
-        Rect::new(panel.right() - 52.0, y, 36.0, 30.0),
+        Rect::new(
+            if compact {
+                panel.right() - 113.0
+            } else {
+                panel.right() - 52.0
+            },
+            stepper_y,
+            stepper_width,
+            stepper_height,
+        ),
         "+",
         sfx_volume < 1.0,
         mouse,
@@ -227,10 +272,10 @@ fn draw_settings_panel(mouse: Vec2, sfx_volume: f32, actions: &mut Vec<UiAction>
 
     if menu_button(
         Rect::new(
-            panel.x + (panel.w - 120.0) * 0.5,
-            panel.bottom() - 46.0,
-            120.0,
-            32.0,
+            panel.x + (panel.w - if compact { 160.0 } else { 120.0 }) * 0.5,
+            panel.bottom() - if compact { 84.0 } else { 46.0 },
+            if compact { 160.0 } else { 120.0 },
+            if compact { 72.0 } else { 32.0 },
         ),
         "Done",
         true,

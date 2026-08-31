@@ -24,7 +24,13 @@ pub fn draw_tutorial_panel(
     let step = crate::tutorial::current_step(session, data)?;
     let (done, total) = crate::tutorial::progress(session, data);
 
-    let panel = Rect::new(LOGICAL_WIDTH - 342.0, 72.0, 330.0, TUTORIAL_PANEL_HEIGHT);
+    let compact = compact_top_bar(ui_scale);
+    let panel_height = if compact {
+        230.0
+    } else {
+        TUTORIAL_PANEL_HEIGHT
+    };
+    let panel = Rect::new(LOGICAL_WIDTH - 342.0, 72.0, 330.0, panel_height);
     draw_surface_with_title(
         panel,
         Some(&format!("Tutorial {}/{} — {}", done + 1, total, step.title)),
@@ -44,16 +50,13 @@ pub fn draw_tutorial_panel(
         dark::TEXT,
     );
 
-    let skip_height = if compact_top_bar(ui_scale) {
-        30.0
-    } else {
-        22.0
-    };
+    let skip_width = if compact { 78.0 } else { 64.0 };
+    let skip_height = if compact { 72.0 } else { 22.0 };
     if hud_button(
         Rect::new(
-            panel.right() - 78.0,
-            panel.bottom() - 30.0,
-            64.0,
+            panel.right() - skip_width - 10.0,
+            panel.bottom() - skip_height - 8.0,
+            skip_width,
             skip_height,
         ),
         "Skip",

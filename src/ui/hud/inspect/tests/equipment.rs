@@ -72,6 +72,14 @@ fn compact_blacksmith_grid_keeps_recipe_buttons_tall_enough_to_read() {
 }
 
 #[test]
+fn compact_shrine_pause_control_keeps_the_critical_handoff_touchable() {
+    assert_eq!(
+        inspection_button_metrics("worm_shrine", true, 0),
+        (72.0, 76.0)
+    );
+}
+
+#[test]
 fn compact_blacksmith_grid_rounds_odd_recipe_catalogues_up_to_a_full_row() {
     assert_eq!(blacksmith_recipe_rows(0), 0);
     assert_eq!(blacksmith_recipe_rows(1), 1);

@@ -105,7 +105,9 @@ pub fn draw(
     let top_bar = Rect::new(12.0, 12.0, LOGICAL_WIDTH - 24.0, 48.0);
     let food_panel = Rect::new(12.0, 66.0, PANEL_W, 184.0);
     let jobs_panel_height = if panels::compact_top_bar(ui.scale) {
-        420.0
+        // Five job rows need room for 72px logical touch controls at the
+        // 800px compact canvas. Keep the status line inside the viewport too.
+        464.0
     } else {
         400.0
     };
@@ -114,11 +116,29 @@ pub fn draw(
     // show a 1200x675 canvas below a header; putting this panel at the bottom
     // makes its buttons disappear below the browser fold at 1280x720.
     let tools_panel_height = if panels::compact_top_bar(ui.scale) {
-        300.0
+        // The compact panel shows the full build catalogue in three columns;
+        // a tall card keeps every visible build choice touch-sized instead of
+        // forcing the player to use a keyboard or a hidden scroll gesture.
+        620.0
     } else {
         252.0
     };
-    let tools_panel = Rect::new(PANEL_W + 28.0, 66.0, PANEL_W, tools_panel_height);
+    let tools_panel_width = if panels::compact_top_bar(ui.scale) {
+        258.0
+    } else {
+        PANEL_W
+    };
+    let tools_panel = Rect::new(
+        PANEL_W
+            + if panels::compact_top_bar(ui.scale) {
+                26.0
+            } else {
+                28.0
+            },
+        66.0,
+        tools_panel_width,
+        tools_panel_height,
+    );
 
     panels::draw_top_bar(
         session,
@@ -191,15 +211,22 @@ pub fn draw(
         actions.clear();
     }
     if let Some(failure) = colony_failure {
-        overlays::draw_colony_failure_overlay(failure, options.save_exists, mouse, &mut actions);
+        overlays::draw_colony_failure_overlay(
+            failure,
+            options.save_exists,
+            ui.scale,
+            mouse,
+            &mut actions,
+        );
     } else if options.confirm_load {
-        overlays::draw_load_confirmation(mouse, &mut actions);
+        overlays::draw_load_confirmation(ui.scale, mouse, &mut actions);
     } else if worm_up {
         overlays::draw_goal_overlay(
             "The Colossal Worm Awakens",
             &worm_completion_body(session),
             UiAction::DismissWorm,
             "Continue in Endless",
+            ui.scale,
             mouse,
             &mut actions,
         );
@@ -209,6 +236,7 @@ pub fn draw(
             &factory_completion_body(session),
             UiAction::DismissFactory,
             "Continue to Worm",
+            ui.scale,
             mouse,
             &mut actions,
         );
@@ -218,6 +246,7 @@ pub fn draw(
             &warren_victory_body(session, data),
             UiAction::DismissVictory,
             warren_victory_continue_label(session),
+            ui.scale,
             mouse,
             &mut actions,
         );
@@ -239,11 +268,12 @@ pub fn draw(
             overlays::draw_event_log_overlay(
                 options.event_history,
                 options.event_log_page,
+                ui.scale,
                 mouse,
                 &mut actions,
             );
         } else {
-            overlays::draw_help_overlay(session, data, mouse, &mut actions);
+            overlays::draw_help_overlay(session, data, ui.scale, mouse, &mut actions);
         }
     }
 

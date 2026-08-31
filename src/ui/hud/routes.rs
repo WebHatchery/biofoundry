@@ -108,8 +108,10 @@ pub(super) fn draw_route_overview(
         summary_y,
         TextStyle::new(13.0, dark::TEXT).params(),
     );
+    let cycle_height = if compact { 72.0 } else { 32.0 };
+    let cycle_y = summary_y - if compact { 42.0 } else { 22.0 };
     if hud_button(
-        Rect::new(panel.right() - 164.0, summary_y - 22.0, 140.0, 32.0),
+        Rect::new(panel.right() - 164.0, cycle_y, 140.0, cycle_height),
         "Cycle order",
         true,
         mouse,
@@ -219,13 +221,10 @@ pub(super) fn draw_route_overview(
         });
     }
 
+    let close_height = if compact { 72.0 } else { 32.0 };
+    let close_y = panel.bottom() - if compact { 84.0 } else { 44.0 };
     if hud_button(
-        Rect::new(
-            panel.x + panel.w * 0.5 - 70.0,
-            panel.bottom() - 44.0,
-            140.0,
-            32.0,
-        ),
+        Rect::new(panel.x + panel.w * 0.5 - 70.0, close_y, 140.0, close_height),
         "Close",
         true,
         mouse,
@@ -297,8 +296,10 @@ fn draw_route_card(context: RouteCardContext<'_>) {
         TextStyle::new(11.0, dark::TEXT_DIM).params(),
     );
 
+    let inspect_height = if compact { 72.0 } else { 32.0 };
+    let inspect_y = card.y + if compact { 14.0 } else { 28.0 };
     if hud_button(
-        Rect::new(card.right() - 88.0, card.y + 28.0, 76.0, 32.0),
+        Rect::new(card.right() - 88.0, inspect_y, 76.0, inspect_height),
         "Inspect",
         true,
         mouse,

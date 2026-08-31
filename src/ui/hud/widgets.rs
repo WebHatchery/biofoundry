@@ -41,7 +41,14 @@ pub(super) fn hud_button(rect: Rect, text: &str, enabled: bool, mouse: Vec2) -> 
         rect.y,
         rect.w,
         rect.h,
-        TextStyle::new(15.0, if enabled { dark::TEXT } else { dark::TEXT_DIM }),
+        TextStyle::new(
+            if virtual_ui.scale.is_finite() && virtual_ui.scale < 0.9 {
+                18.0
+            } else {
+                15.0
+            },
+            if enabled { dark::TEXT } else { dark::TEXT_DIM },
+        ),
     );
     enabled && pointer.released_on(hit_rect)
 }
