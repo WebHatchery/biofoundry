@@ -16,6 +16,7 @@ use macroquad_toolkit::grid::TilePos;
 use macroquad_toolkit::prelude::*;
 use macroquad_toolkit::ui::draw_ui_text_ex;
 
+mod blacksmith;
 mod breeding;
 mod outpost;
 mod rooms;
@@ -23,6 +24,7 @@ mod status;
 mod study;
 mod workstations;
 
+use blacksmith::{draw_blacksmith_inspection, BlacksmithInspection};
 use breeding::{breed_button_label, breeding_unlock_hint};
 #[cfg(test)]
 use outpost::outpost_archive_summary;
@@ -42,11 +44,13 @@ use status::{
 };
 use study::{study_adaptation_line, study_rate_per_min};
 #[cfg(test)]
-use workstations::equipment_lock_label;
 use workstations::{
-    blacksmith_equipment_label, blacksmith_input_hint, blacksmith_queue_available,
-    cook_pot_input_hint, kiln_input_hint, local_smelter_staffed_at, local_smelter_worker_at,
-    local_smith_staffed_at, local_smith_worker_at, smelter_input_hint,
+    blacksmith_equipment_label, blacksmith_queue_available, equipment_lock_label,
+    local_smith_staffed_at, local_smith_worker_at,
+};
+use workstations::{
+    blacksmith_input_hint, cook_pot_input_hint, kiln_input_hint, local_smelter_staffed_at,
+    local_smelter_worker_at, smelter_input_hint,
 };
 
 const LOCKED_SPECIALIST_MARKER: &str = "[L]";
@@ -77,11 +81,8 @@ pub(super) fn draw_inspect_panel(
     // The blacksmith panel carries the production-order queue and craft
     // buttons, and the breeding pit its breed buttons — both taller.
     let height = match building.kind.as_str() {
-        "blacksmith" if compact && data.equipment.len() >= 13 => {
-            124.0 + data.equipment.len() as f32 * inspect_button_step
-        }
-        "blacksmith" if compact && data.equipment.len() >= 10 => {
-            154.0 + data.equipment.len() as f32 * inspect_button_step
+        "blacksmith" if compact => {
+            124.0 + data.equipment.len().div_ceil(2) as f32 * inspect_button_step
         }
         "blacksmith" => 194.0 + data.equipment.len() as f32 * inspect_button_step,
         "breeding_pit" => {
@@ -289,63 +290,21 @@ pub(super) fn draw_inspect_panel(
             );
         }
         "blacksmith" => {
-            let working = session
-                .creatures
-                .iter()
-                .any(|c| local_smith_worker_at(c, pos));
-            let staffed = session
-                .creatures
-                .iter()
-                .any(|c| local_smith_staffed_at(c, pos));
-            line(
-                if working {
-                    "Smith at work"
-                } else if staffed {
-                    "Smith stationed"
-                } else {
-                    "No smith — idle"
-                },
-                if staffed {
-                    dark::POSITIVE
-                } else {
-                    dark::WARNING
-                },
-                &mut y,
-            );
-            let queue_available = blacksmith_queue_available(building, data);
-            line(
-                &format!(
-                    "Ore {:.0}  Ingots {:.0}  Queue {}/{}",
-                    building.stock(Good::Ore),
-                    building.stock(Good::Ingot),
-                    building.orders.len(),
-                    data.balance.order_queue_size,
-                ),
-                dark::TEXT,
-                &mut y,
-            );
-            if !queue_available {
-                line("Queue full · finish orders first", dark::WARNING, &mut y);
-            }
-            // Production orders: one craft button per equipment item. A
-            // queued count and how many are already banked ride in the label.
-            y += 2.0;
-            let bw = panel.w - 28.0;
-            for eq in &data.equipment {
-                let banked = session.economy.gear_stock.get(&eq.id).copied().unwrap_or(0);
-                let queued = building.orders.iter().filter(|o| **o == eq.id).count();
-                let unlocked = session.equipment_unlocked(eq);
-                let label = blacksmith_equipment_label(data, eq, compact, unlocked, queued, banked);
-                if hud_button(
-                    Rect::new(x, y, bw, inspect_button_height),
-                    &label,
-                    queue_available && unlocked,
-                    mouse,
-                ) {
-                    actions.push(UiAction::QueueOrder(pos, eq.id.clone()));
-                }
-                y += inspect_button_step;
-            }
+            draw_blacksmith_inspection(BlacksmithInspection {
+                session,
+                data,
+                building,
+                pos,
+                x,
+                y: &mut y,
+                panel_width: panel.w,
+                mouse,
+                compact,
+                button_height: inspect_button_height,
+                button_step: inspect_button_step,
+                line_step,
+                actions,
+            });
         }
         "kiln" => {
             line(
@@ -768,10 +727,8 @@ pub(super) fn draw_inspect_panel(
 }
 
 fn inspection_button_metrics(kind: &str, compact: bool, equipment_count: usize) -> (f32, f32) {
-    if compact && kind == "blacksmith" && equipment_count >= 10 {
-        (30.0, 32.0)
-    } else if compact && kind == "blacksmith" && equipment_count >= 8 {
-        (34.0, 38.0)
+    if compact && kind == "blacksmith" && equipment_count > 4 {
+        (46.0, 48.0)
     } else if compact && matches!(kind, "blacksmith" | "breeding_pit") {
         (36.0, 40.0)
     } else if !compact && kind == "breeding_pit" {

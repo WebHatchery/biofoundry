@@ -7,7 +7,9 @@
     the debug exe and drives it through the env-var capture hook
     (BIOFOUNDRY_CAPTURE_*) provided by macroquad_toolkit::capture in
     src/main.rs. Scenes: menu, settings, new_warren_confirm, load_confirm, load_confirm_resolved, warren, tutorial_food, tutorial_factory, tutorial_worm, help, event_log, event_log_older, pause, save_failure, save_failure_first_save, menu_save_guard, save_recovery_failure, collapse, mine, blacksmith, smelter, cook_pot, kiln, waste, blacksmith_queue_full, equipment, overseer, factory, victory, security_stuck, factory_complete, optional, endless, endless_load_preview, endless_routes, endless_routes_busy, endless_auto_priority, endless_auto_return, endless_auto_resupply, endless_auto_load, endless_auto_load_started, endless_upgrade, endless_upgraded, endless_rest_hollow, endless_expedition_paused, endless_expedition_report, endless_forge, endless_empty, endless_failure, route_failure, endless_in_flight, endless_arrived, famine, food_warning, raid_food_warning, raid, raid_warning, study, study_expansion, study_empty, breeding, breeding_locked, shrine, worm, unreachable_workstation, completion. Prefix any scene with touch_audit_ (for example touch_audit_endless_routes) to print settled hit-target size and overlap diagnostics.
-    The focused Outpost expansion scenes are endless_crew_upgrade,
+    The `tutorial_blacksmith` scene holds the Blacksmith open beneath the
+    factory lesson to verify compact recipe layout. The focused Outpost
+    expansion scenes are endless_crew_upgrade,
     endless_crew_upgraded, endless_survey_upgrade, endless_survey_upgraded,
     endless_resonator_upgrade, endless_resonator_upgraded, endless_charter,
     endless_charter_awarded, endless_deep_survey, endless_deep_survey_upgrade,
@@ -43,6 +45,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 if (-not $PSBoundParameters.ContainsKey("Scenes")) {
+    $Scenes += "tutorial_blacksmith"
     $Scenes += "crowding"
     $Scenes += @(
         "endless_crew_upgrade",

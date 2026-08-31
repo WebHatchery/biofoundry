@@ -27,6 +27,7 @@ param(
         "event_log",
         "event_log_older",
         "blacksmith",
+        "tutorial_blacksmith",
         "breeding",
         "shrine",
         "completion",

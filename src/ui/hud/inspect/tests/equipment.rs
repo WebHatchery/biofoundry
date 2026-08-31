@@ -49,18 +49,18 @@ fn compact_blacksmith_labels_keep_recipe_and_gate_text_readable() {
 }
 
 #[test]
-fn compact_blacksmith_cards_keep_a_touchable_height_for_the_complete_wormsong_tier() {
+fn compact_blacksmith_grid_keeps_recipe_buttons_tall_enough_to_read() {
     assert_eq!(
         inspection_button_metrics("blacksmith", true, 8),
-        (34.0, 38.0)
+        (46.0, 48.0)
     );
     assert_eq!(
         inspection_button_metrics("blacksmith", true, 10),
-        (30.0, 32.0)
+        (46.0, 48.0)
     );
     assert_eq!(
         inspection_button_metrics("blacksmith", true, 13),
-        (30.0, 32.0)
+        (46.0, 48.0)
     );
     assert_eq!(
         inspection_button_metrics("blacksmith", false, 8),

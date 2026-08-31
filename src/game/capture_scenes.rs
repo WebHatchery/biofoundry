@@ -129,6 +129,27 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                 session.economy.ore_stock = 24;
             }
         }
+        "tutorial_blacksmith" => {
+            game.transition(StateTransition::StartWarren);
+            if let GameState::Warren(session) = &mut game.state {
+                session.tutorial_step = 2;
+                session.tutorial_built = true;
+                session.economy.food = 80.0;
+                session.economy.ore_stock = 24;
+                let spawn = session.spawn_tile();
+                let spot = session
+                    .world
+                    .tiles
+                    .iter_with_pos()
+                    .filter(|(pos, _)| session.can_place_building(*pos))
+                    .map(|(pos, _)| pos)
+                    .min_by_key(|p| (p.manhattan_distance(&spawn), p.x, p.y));
+                if let Some(spot) = spot {
+                    session.buildings.push(Building::new("blacksmith", spot));
+                    game.selected_building = Some(spot);
+                }
+            }
+        }
         "tutorial_worm" => {
             begin(game, "shrine");
             if let GameState::Warren(session) = &mut game.state {
