@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-31
-**Source revision:** `19c5641`
+**Source revision:** `ed815ad`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -77,7 +77,7 @@ automated simulation results into first-time-player evidence.
 | Network route summary | Pass (published capture evidence) | The Worm Route Ledger now summarizes the whole network above its cards: total routes, active routes, held cargo, remote crew, scouted ore, live Worm Road Charter progress/reward, routes needing attention, and aggregate `Cache kept N` earnings when any route has a cache. Each route card also mirrors the selected Outpost's persisted Signal Cache history, showing `Cache +N/haul · Kept N` at normal size; the compact 800×450 card keeps the short policy and a prioritized `Wormsong`/`Chorus +N/haul` marker rather than appending the full effect list. The summary is derived from the same persisted route state as the cards, so scaling from one route to several does not require opening each card to understand the network; at compact size, the network meters and Charter/earnings detail are split across two readable lines instead of clipping the diagnostic tail. Refreshed [ui_endless_routes.png](../verification/ui_endless_routes.png) and [ui_compact_endless_routes.png](../verification/ui_compact_endless_routes.png) keep the summary and route controls readable. |
 | Shared-worm transit diagnostic | Pass (capture and touch-audit evidence) | While one route is traveling, the Worm Route Ledger adds a warning line naming the route, direction, and seconds remaining: `Worm in transit · Route 1 returning · 7s remaining`. A second route with a ready hold now reads `Worm busy · payload ready`, while a home-fed route would read `Worm busy · load ready`, so the single-worm bottleneck is visible both globally and on the waiting card. Refreshed [ui_endless_routes_busy.png](../verification/ui_endless_routes_busy.png) and [ui_compact_endless_routes_busy.png](../verification/ui_compact_endless_routes_busy.png) show the normal and 800×450 states; the settled compact touch audit reports no grown-target overlap. |
 | World-space worm route links | Pass (published capture evidence) | After awakening, the world now draws each shrine-to-Outpost link beneath the buildings, using a bright solid path for active routes and a subdued dashed path for inactive ones. A purchased Waypoint adds a distinct midpoint marker, while an in-flight return shows a high-contrast pulse moving from the Outpost toward the shrine and outbound travel reverses that direction. Refreshed [ui_endless.png](../verification/ui_endless.png), [ui_endless_in_flight.png](../verification/ui_endless_in_flight.png), and [ui_endless_arrived.png](../verification/ui_endless_arrived.png) captures show the network feedback without changing route state or save data. |
-| Settled touch-target audit | Pass (focused evidence) | Every enabled menu/HUD button now registers with the shared touch audit. The opt-in `scripts/audit_touch_targets.ps1` sweep settles each screen for neighbor-aware hit growth, reports the smallest target and drawn density, and fails on actual grown-target overlap. The 800×450 sweep passed for the title, settings, New Warren and active-run Load confirmations, core HUD, crafting, shrine, completion, Recent Events newest and older pages, Outpost, automatic outbound loading enabled and in-flight states, automatic dispatch preview, multi-route ledger, Signal Cache purchase, award, completed-haul, and Worm Road Muster screens, and Worm Road Waypoint purchase and award screens; modal occlusion keeps covered controls out of the report. |
+| Settled touch-target audit | Pass (focused evidence) | Every enabled menu/HUD button now registers with the shared touch audit. The opt-in `scripts/audit_touch_targets.ps1` sweep settles each screen for neighbor-aware hit growth, reports the smallest target and drawn density, and fails on actual grown-target overlap. The 800×450 sweep passed for the title, settings, New Warren and active-run Load confirmations, core HUD, crafting, shrine, completion, Recent Events newest and older pages, Outpost, automatic outbound loading enabled and in-flight states, automatic dispatch preview, multi-route ledger, Signal Cache purchase, award, completed-haul, Worm Road Muster screens, Worm Road Waypoint purchase and award screens, and all three Wormsong Chorus states; modal occlusion keeps covered controls out of the report. |
 | State-aware awakened objective recovery | Pass (focused and capture evidence) | After the worm wakes, the Objective now names the visible recovery action when the forge chain is incomplete: place a Blacksmith, replace an exhausted Mine, staff a Smith, or staff a Carrier. The refreshed worm and completion captures show the first of these prompts, and focused coverage keeps the guidance honest for each recovery state. |
 | Multi-route objective ordering | Pass (focused evidence) | If several active Worm Outposts are present, the completed-campaign Objective prioritizes a route with cargo or crew ready, then a route that can be loaded, before an empty active route. This keeps the next visible instruction actionable as the existing outpost activity scales. |
 | Crowding recovery diagnosis | Pass (focused and capture evidence) | The Jobs panel now turns the existing local-capacity penalty into an actionable warning: when local workers exceed floor capacity it shows the estimated work-rate loss, the average local morale cost, and the visible `Dig` control to open more room. Once room is added, it keeps the morale recovery readout visible until wellbeing stabilizes. The warning is absent for a healthy workforce, and [ui_crowding.png](../verification/ui_crowding.png) keeps the diagnosis readable at 800×450. |
@@ -100,7 +100,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 483 unit tests and 2 integration/code-standard
+- `cargo test --all-targets` — 498 unit tests and 2 integration/code-standard
   targets pass,
   including fresh/simulated/remote-transit valid sessions, modal route
   planning, rejected malformed save shapes, and event-history save/load
@@ -530,8 +530,8 @@ automated simulation results into first-time-player evidence.
   Signal Cache purchase, award, and haul, and
   Worm Road Waypoint purchase and award, and
   the Muster-gated Wormsong Blacksmith, remote expedition, Concord, and
-  Circuit, Encore, and Encore-awarded scenes at 800×450 after the neighbor map
-  is warm. Enabled controls are
+  Circuit, Encore, Encore-awarded, Chorus, Chorus-awarded, and Chorus-haul scenes
+  at 800×450 after the neighbor map is warm. Enabled controls are
   measured, modal occlusion removes covered HUD controls, and the sweep reports
   no grown-target overlap. The
   compact branch now draws the top-bar controls at 40 logical pixels and the
