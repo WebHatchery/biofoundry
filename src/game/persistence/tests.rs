@@ -200,3 +200,29 @@ fn loaded_encore_progress_accepts_a_consistent_claimed_cycle() {
     validate_loaded_session(&session, &data)
         .expect("a claimed Encore with a complete haul cycle should load");
 }
+
+#[test]
+fn non_viable_run_prefers_a_surviving_safe_backup() {
+    let data = GameData::load().expect("embedded game data");
+    let mut session = GameSession::new(&data, 271);
+    session.creatures.clear();
+
+    assert!(should_load_safe_backup(&session, &data, true));
+    assert!(!should_load_safe_backup(&session, &data, false));
+
+    session.worm_awake = true;
+    assert!(!should_load_safe_backup(&session, &data, true));
+}
+
+#[test]
+fn campaign_autosaves_defer_while_the_larder_is_empty() {
+    let data = GameData::load().expect("embedded game data");
+    let mut session = GameSession::new(&data, 272);
+
+    assert!(autosave_checkpoint_is_safe(&session));
+    session.economy.food = 0.0;
+    assert!(!autosave_checkpoint_is_safe(&session));
+
+    session.worm_awake = true;
+    assert!(autosave_checkpoint_is_safe(&session));
+}

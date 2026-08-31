@@ -13,6 +13,7 @@ use macroquad_toolkit::persistence::{
 };
 use std::collections::HashSet;
 
+mod load;
 #[cfg(test)]
 mod tests;
 mod validation;
@@ -59,6 +60,10 @@ impl Game {
         if matches!(&self.state, GameState::Warren(session) if session.is_non_viable(&self.data)) {
             return false;
         }
+        if matches!(&self.state, GameState::Warren(session) if !autosave_checkpoint_is_safe(session))
+        {
+            return true;
+        }
         let had_existing_save = self.save_exists;
         match self.persist_current_session() {
             Ok(()) => {
@@ -88,27 +93,6 @@ impl Game {
             session.as_ref(),
             &config.version,
         )
-    }
-
-    pub(super) fn load_game(&mut self) {
-        // A confirmed load consumes the modal before storage work begins. If
-        // the slot is damaged or unavailable, the error notification must be
-        // readable over the live Warren rather than leaving the player trapped
-        // behind a stale confirmation overlay.
-        self.confirm_load = false;
-        let slot = self.data.config.save_slot.clone();
-        match self.load_session_from_slot(&slot) {
-            Ok(session) => {
-                self.install_loaded_session(session);
-                // The slot may have become available after startup (or after
-                // a prior failed recovery), so a successful load must restore
-                // the title screen's Continue affordance as well.
-                self.save_exists = true;
-                self.checkpoint_warning = None;
-                self.notifications.success("Warren loaded.");
-            }
-            Err(err) => self.recover_failed_load(&slot, err),
-        }
     }
 
     fn load_session_from_slot(&self, slot: &str) -> Result<GameSession, String> {
@@ -277,6 +261,18 @@ pub(super) fn should_restore_missing_primary(primary_exists: bool, backup_exists
 /// recoverable save even when the primary slot disappeared between launches.
 pub(super) fn save_slot_available(primary_exists: bool, backup_exists: bool) -> bool {
     primary_exists || backup_exists
+}
+
+pub(super) fn should_load_safe_backup(
+    session: &GameSession,
+    data: &GameData,
+    backup_exists: bool,
+) -> bool {
+    backup_exists && session.is_non_viable(data)
+}
+
+pub(super) fn autosave_checkpoint_is_safe(session: &GameSession) -> bool {
+    session.worm_awake || session.economy.food > 0.0
 }
 
 pub(super) fn no_saved_slot_available(primary_exists: bool, backup_exists: bool) -> bool {
