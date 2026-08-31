@@ -183,3 +183,14 @@ fn content_validation_rejects_broken_equipment_unlocks() {
         .expect_err("broken equipment gates should be rejected");
     assert!(error.contains("missing_unlock"));
 }
+
+#[test]
+fn content_validation_rejects_a_disabled_signal_cache() {
+    let mut data = GameData::load().unwrap();
+    data.balance.outpost_signal_cache_ingots_per_haul = 0;
+
+    let error = data
+        .validate()
+        .expect_err("a zero-payload Signal Cache should be rejected");
+    assert!(error.contains("Signal Cache"));
+}

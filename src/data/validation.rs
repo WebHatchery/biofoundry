@@ -52,6 +52,11 @@ fn validate_balance(data: &GameData) -> Result<(), String> {
     if balance.outpost_archive_haul_goal == 0 || balance.outpost_archive_reward_ingots == 0 {
         return Err("outpost archive goal and reward must be positive".to_owned());
     }
+    if balance.outpost_signal_cache_upgrade_ingots == 0
+        || balance.outpost_signal_cache_ingots_per_haul == 0
+    {
+        return Err("outpost Signal Cache cost and payload must be positive".to_owned());
+    }
     Ok(())
 }
 
