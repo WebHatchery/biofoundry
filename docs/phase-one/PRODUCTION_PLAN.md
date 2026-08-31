@@ -167,5 +167,5 @@ commit.
 - meta-progression, achievements, multiplayer, modding, and localization;
 - additional Outpost regions, route contracts, and multi-route objectives
   beyond the repeatable Worm Road Muster, Wormsong Concord, Wormsong Circuit,
-  and the existing route-upgrade ladder;
+  Wormsong Encore, and the existing route-upgrade ladder;
 - systemic redesigns not supported by observed player problems.
