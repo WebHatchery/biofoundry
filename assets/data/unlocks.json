@@ -132,7 +132,7 @@
   {
     "id": "resonance_forging",
     "name": "Resonance Forging",
-    "description": "A held Muster teaches the smiths to braid route-song through a carrier harness. The Blacksmith can forge a stronger Wormsong Harness.",
+    "description": "A held Muster teaches the smiths to braid route-song through a specialist kit. The Blacksmith can forge stronger Wormsong tools.",
     "counter": "outpost_muster_claims",
     "threshold": 1,
     "effect": "unlock_equipment",

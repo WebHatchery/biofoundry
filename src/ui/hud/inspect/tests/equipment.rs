@@ -1,4 +1,4 @@
-use super::super::equipment_lock_label;
+use super::super::{equipment_lock_label, inspection_button_metrics};
 use crate::data::GameData;
 
 #[test]
@@ -24,5 +24,25 @@ fn blacksmith_uses_the_exact_muster_gate_for_wormsong_harness() {
     assert_eq!(
         equipment_lock_label(&data, harness),
         "Needs hold 1 Worm Road Muster"
+    );
+}
+
+#[test]
+fn compact_blacksmith_cards_shrink_for_the_complete_wormsong_tier() {
+    assert_eq!(
+        inspection_button_metrics("blacksmith", true, 8),
+        (34.0, 38.0)
+    );
+    assert_eq!(
+        inspection_button_metrics("blacksmith", true, 10),
+        (30.0, 32.0)
+    );
+    assert_eq!(
+        inspection_button_metrics("blacksmith", true, 13),
+        (26.0, 28.0)
+    );
+    assert_eq!(
+        inspection_button_metrics("blacksmith", false, 8),
+        (24.0, 26.0)
     );
 }

@@ -84,5 +84,32 @@
     "effect": "carry_bonus",
     "value": 6.0,
     "requires_unlock": "resonance_forging"
+  },
+  {
+    "id": "wormsong_drill",
+    "name": "Wormsong Drill",
+    "job": "miner",
+    "cost_ingots": 26,
+    "effect": "mine_speed_mult",
+    "value": 2.5,
+    "requires_unlock": "resonance_forging"
+  },
+  {
+    "id": "wormsong_smiths_hammer",
+    "name": "Wormsong Smith's Hammer",
+    "job": "smith",
+    "cost_ingots": 28,
+    "effect": "smith_time_mult",
+    "value": 0.5,
+    "requires_unlock": "resonance_forging"
+  },
+  {
+    "id": "wormsong_guard_blade",
+    "name": "Wormsong Guard Blade",
+    "job": "guard",
+    "cost_ingots": 28,
+    "effect": "guard_dps_mult",
+    "value": 2.5,
+    "requires_unlock": "resonance_forging"
   }
 ]

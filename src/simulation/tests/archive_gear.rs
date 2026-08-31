@@ -99,6 +99,56 @@ fn first_muster_unlocks_and_replaces_the_archive_carrier_tool() {
 }
 
 #[test]
+fn resonance_tools_replace_weaker_specialist_tools() {
+    let (data, mut session, _) = super::novel::active_outpost(182);
+    session.unlocked.insert("resonance_forging".to_owned());
+    let stockpile = session.stockpile_pos();
+    session.creatures.clear();
+    for (species, job, weaker, stronger) in [
+        ("goblin", Job::Miner, "wormbone_drill", "wormsong_drill"),
+        (
+            "goblin",
+            Job::Smith,
+            "wormbone_smiths_hammer",
+            "wormsong_smiths_hammer",
+        ),
+        (
+            "goblin",
+            Job::Guard,
+            "wormbone_guard_blade",
+            "wormsong_guard_blade",
+        ),
+    ] {
+        session.spawn_creature(&data, species, job);
+        let creature = session.creatures.last_mut().expect("specialist spawned");
+        creature.equipment = Some(weaker.to_owned());
+        creature.x = stockpile.x as f32 + 0.5;
+        creature.y = stockpile.y as f32 + 0.5;
+        session.economy.gear_stock.insert(stronger.to_owned(), 1);
+    }
+
+    simulation::tick(&mut session, &data);
+
+    for (job, stronger, weaker) in [
+        (Job::Miner, "wormsong_drill", "wormbone_drill"),
+        (
+            Job::Smith,
+            "wormsong_smiths_hammer",
+            "wormbone_smiths_hammer",
+        ),
+        (Job::Guard, "wormsong_guard_blade", "wormbone_guard_blade"),
+    ] {
+        let creature = session
+            .creatures
+            .iter()
+            .find(|creature| creature.job == job)
+            .expect("specialist remains present");
+        assert_eq!(creature.equipment.as_deref(), Some(stronger));
+        assert_eq!(session.economy.gear_stock.get(weaker), Some(&1));
+    }
+}
+
+#[test]
 fn relay_contract_needs_two_active_routes_and_rewards_once() {
     let (data, mut session, _) = super::novel::active_outpost(173);
     session.outpost_charter_claimed = true;

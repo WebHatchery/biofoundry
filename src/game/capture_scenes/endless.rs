@@ -649,17 +649,25 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                         blacksmith.orders.clear();
                         blacksmith.stocks.clear();
                     }
-                    session.economy.ingots_stock = game
-                        .data
-                        .equipment_def("wormsong_harness")
+                    let resonance_tools = [
+                        "wormsong_harness",
+                        "wormsong_drill",
+                        "wormsong_smiths_hammer",
+                        "wormsong_guard_blade",
+                    ];
+                    session.economy.ingots_stock = resonance_tools
+                        .iter()
+                        .filter_map(|id| game.data.equipment_def(id))
                         .map(|equipment| equipment.cost_ingots)
-                        .unwrap_or(22);
-                    let _ = session.queue_equipment_order(
-                        &game.data,
-                        pos,
-                        "wormsong_harness".to_owned(),
-                        game.data.balance.order_queue_size,
-                    );
+                        .sum();
+                    for id in resonance_tools {
+                        let _ = session.queue_equipment_order(
+                            &game.data,
+                            pos,
+                            id.to_owned(),
+                            game.data.balance.order_queue_size,
+                        );
+                    }
                     game.selected_building = Some(pos);
                     focus_pos = Some(pos);
                 }
