@@ -302,6 +302,22 @@ fn jobs_panel_reports_morale_loss_alongside_crowding_pressure() {
 }
 
 #[test]
+fn jobs_panel_keeps_morale_recovery_visible_after_room_is_added() {
+    let data = GameData::load().expect("embedded game data");
+    let mut session = GameSession::new(&data, 7);
+    for creature in &mut session.creatures {
+        creature.morale = 0.72;
+    }
+
+    let pressure = workforce_pressure_label(&session, &data).expect("recovery warning");
+
+    assert_eq!(
+        pressure,
+        "Wellbeing recovering · morale 72% · work speed returns"
+    );
+}
+
+#[test]
 fn jobs_panel_hides_crowding_recovery_when_floor_is_sufficient() {
     let data = GameData::load().expect("embedded game data");
     let session = GameSession::new(&data, 7);

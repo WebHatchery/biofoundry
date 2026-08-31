@@ -693,6 +693,9 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                 for _ in 0..capacity + 8 {
                     session.spawn_creature(&game.data, "goblin", Job::Idle);
                 }
+                for creature in &mut session.creatures {
+                    creature.morale = 0.72;
+                }
             }
         }
         // "warren" and the harness default "gameplay" boot straight
