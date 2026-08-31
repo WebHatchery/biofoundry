@@ -49,7 +49,9 @@ fn field_guide_points_to_post_campaign_cargo_runs() {
     assert!(INSPECT_HELP_BODY.contains("resonance beacon"));
     assert!(INSPECT_HELP_BODY.contains("Archive pages"));
     assert!(INSPECT_HELP_BODY.contains("Archive Wayfinder"));
+    assert!(INSPECT_HELP_BODY.contains("Worm Road Relay"));
     assert!(OBJECTIVE_HELP_BODY.contains("first page"));
+    assert!(OBJECTIVE_HELP_BODY.contains("Worm Road Relay"));
 }
 
 #[test]

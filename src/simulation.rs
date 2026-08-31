@@ -44,6 +44,8 @@ pub struct TickReport {
     pub outpost_charter_awarded: bool,
     /// Number of repeatable Worm Road Archive pages rewarded this tick.
     pub outpost_archive_awarded: u32,
+    /// Whether the one-time multi-route Worm Road Relay was claimed this tick.
+    pub outpost_relay_awarded: bool,
     /// Outpost that automatically started a cargo-only return this tick.
     pub auto_return_started: Option<TilePos>,
     /// Outpost that automatically started a food-only resupply this tick.
@@ -116,6 +118,7 @@ pub fn tick(session: &mut GameSession, data: &GameData) -> TickReport {
     let expedition_completed = outposts::tick_expeditions(session, data, dt);
     let outpost_charter_awarded = outposts::claim_outpost_charter(session, data);
     let outpost_archive_awarded = outposts::claim_outpost_archive(session, data);
+    let outpost_relay_awarded = outposts::claim_outpost_relay(session, data);
     let auto_return_started = outposts::start_auto_return_if_full(session, data);
     let auto_resupply_started = outposts::start_auto_resupply_if_needed(session, data);
     let transit_target = session.worm_transit.as_ref().map(|transit| transit.outpost);
@@ -189,6 +192,7 @@ pub fn tick(session: &mut GameSession, data: &GameData) -> TickReport {
         expedition_completed,
         outpost_charter_awarded,
         outpost_archive_awarded,
+        outpost_relay_awarded,
         auto_return_started,
         auto_resupply_started,
         transit_completed,

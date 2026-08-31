@@ -59,6 +59,36 @@ fn route_network_summary_reports_archive_progress_after_charter() {
 }
 
 #[test]
+fn relay_summary_reports_live_route_and_haul_progress() {
+    let data = GameData::load().expect("embedded game data");
+    let mut session = GameSession::new(&data, 45);
+    session.outpost_archive_claims = 1;
+    let mut first = Outpost::new(TilePos::new(4, 4));
+    first.active = true;
+    first.expeditions_completed = 4;
+    session.outposts = vec![first];
+
+    let summary = relay_contract_summary(&session, &data).expect("relay should be visible");
+
+    assert!(summary.contains("1/2 routes"), "{summary}");
+    assert!(summary.contains("4/6 hauls"), "{summary}");
+    assert!(summary.contains("+20 ingots"), "{summary}");
+}
+
+#[test]
+fn relay_summary_confirms_a_claimed_contract() {
+    let data = GameData::load().expect("embedded game data");
+    let mut session = GameSession::new(&data, 46);
+    session.outpost_archive_claims = 1;
+    session.outpost_relay_claimed = true;
+
+    assert_eq!(
+        relay_contract_summary(&session, &data).as_deref(),
+        Some("Worm Road Relay complete · +20 ingots")
+    );
+}
+
+#[test]
 fn route_network_summary_counts_active_blockers_as_attention() {
     let data = GameData::load().expect("embedded game data");
     let mut session = GameSession::new(&data, 42);

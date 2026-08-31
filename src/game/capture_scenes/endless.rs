@@ -265,6 +265,42 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                 }
             }
         }
+        "endless_relay" => {
+            begin(game, "endless_routes");
+            game.notifications.clear();
+            game.paused = true;
+            if let GameState::Warren(session) = &mut game.state {
+                session.outpost_archive_claims = 1;
+                session.outpost_relay_claimed = false;
+                let first_haul_goal = game.data.balance.outpost_relay_haul_goal / 2;
+                if let Some(first) = session.outposts.first_mut() {
+                    first.active = true;
+                    first.expeditions_completed = first_haul_goal;
+                }
+                if let Some(second) = session.outposts.get_mut(1) {
+                    second.active = true;
+                    second.expeditions_completed = game
+                        .data
+                        .balance
+                        .outpost_relay_haul_goal
+                        .saturating_sub(first_haul_goal);
+                }
+            }
+        }
+        "endless_relay_awarded" => {
+            begin(game, "endless_relay");
+            game.routes_open = false;
+            if let GameState::Warren(session) = &mut game.state {
+                if simulation::outposts::claim_outpost_relay(session, &game.data) {
+                    game.notifications.success(format!(
+                        "Worm Road Relay · +{} ingots · twin routes linked.",
+                        game.data.balance.outpost_relay_reward_ingots
+                    ));
+                }
+            }
+            game.routes_open = true;
+            game.paused = true;
+        }
         "endless_wormbone_drill" => {
             super::post_campaign::begin(game, "endless");
             game.paused = true;

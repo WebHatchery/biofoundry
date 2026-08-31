@@ -242,6 +242,14 @@ impl Game {
                         ));
                         self.audio.play(Sfx::Complete);
                     }
+                    if report.outpost_relay_awarded {
+                        safe_beat_reached = true;
+                        self.notifications.success(format!(
+                            "Worm Road Relay · +{} ingots · twin routes linked.",
+                            self.data.balance.outpost_relay_reward_ingots,
+                        ));
+                        self.audio.play(Sfx::Complete);
+                    }
                     if report.auto_return_started.is_some() {
                         safe_beat_reached = true;
                         self.notifications.info(auto_return_notice());
@@ -683,6 +691,7 @@ fn progression_reaches_safe_beat(report: &simulation::TickReport) -> bool {
         || report.wild.captured > 0
         || !report.wild.unlocked.is_empty()
         || report.wild.bred_beetle
+        || report.outpost_relay_awarded
 }
 
 fn transit_completion_notice(completion: TransitCompletion) -> &'static str {

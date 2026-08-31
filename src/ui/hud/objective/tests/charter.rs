@@ -2,6 +2,7 @@
 
 use super::*;
 use crate::state::creatures::Good;
+use crate::state::outposts::Outpost;
 use crate::state::structures::Building;
 
 #[test]
@@ -60,4 +61,50 @@ fn completed_objective_returns_to_route_guidance_after_charter_claim() {
     session.outposts[0].expeditions_completed = data.balance.outpost_charter_haul_goal + 2;
     let objective = CampaignObjective::current(&session, &data);
     assert!(objective.next.contains("Archive 2/5"));
+}
+
+#[test]
+fn completed_objective_names_the_relay_after_the_first_archive_page() {
+    let (data, mut session) = boot();
+    session.worm_awake = true;
+    session.unlocked.insert("worm_transit".to_owned());
+    session.outpost_charter_claimed = true;
+    session.outpost_archive_claims = 1;
+    let first_pos = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(pos, _)| session.can_place_building(*pos))
+        .map(|(pos, _)| pos)
+        .unwrap();
+    session.buildings.push(Building::new("outpost", first_pos));
+    session.ensure_outpost(first_pos);
+    let crew_id = session.creatures.first().unwrap().id;
+    let first = session.outposts.first_mut().unwrap();
+    first.active = true;
+    first.crew.push(crew_id);
+    first.cargo.insert(Good::CookedFood, 1);
+    first.expeditions_completed = data.balance.outpost_relay_haul_goal;
+
+    let second_pos = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(pos, tile)| {
+            *pos != first_pos && tile.walkable() && session.can_place_building(*pos)
+        })
+        .map(|(pos, _)| pos)
+        .unwrap();
+    session.outposts.push(Outpost {
+        pos: second_pos,
+        active: true,
+        ..Outpost::new(second_pos)
+    });
+
+    let objective = CampaignObjective::current(&session, &data);
+
+    assert!(objective.next.contains("Worm Road Relay"));
+    assert!(objective.next.contains("2/2 active routes"));
+    assert!(objective.next.contains("6/6 hauls"));
+    assert!(objective.next.contains("+20 ingots"));
 }

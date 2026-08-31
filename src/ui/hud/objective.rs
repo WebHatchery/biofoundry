@@ -454,6 +454,9 @@ fn charter_guidance(session: &GameSession, data: &GameData) -> Option<String> {
         {
             return None;
         }
+        if let Some(guidance) = relay_contract_guidance(session, data) {
+            return Some(guidance);
+        }
         return Some(format!(
             "Next: keep scouting · Archive {}/{} · +{} ingots.",
             crate::simulation::outposts::outpost_archive_progress(session, data),
@@ -465,6 +468,24 @@ fn charter_guidance(session: &GameSession, data: &GameData) -> Option<String> {
     Some(format!(
         "Next: finish scouting · Charter {completed}/{goal} · +{} ingots.",
         data.balance.outpost_charter_reward_ingots
+    ))
+}
+
+fn relay_contract_guidance(session: &GameSession, data: &GameData) -> Option<String> {
+    if session.outpost_archive_claims == 0
+        || session.outpost_relay_claimed
+        || data.balance.outpost_relay_route_goal == 0
+        || data.balance.outpost_relay_haul_goal == 0
+    {
+        return None;
+    }
+    let (active_routes, completed_hauls) =
+        crate::simulation::outposts::outpost_relay_progress(session);
+    Some(format!(
+        "Next: run the Worm Road Relay · {active_routes}/{} active routes · {completed_hauls}/{} hauls · +{} ingots.",
+        data.balance.outpost_relay_route_goal,
+        data.balance.outpost_relay_haul_goal,
+        data.balance.outpost_relay_reward_ingots
     ))
 }
 

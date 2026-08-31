@@ -140,6 +140,8 @@ pub(super) fn begin(game: &mut Game, scene: &str) -> bool {
         | "endless_archive"
         | "endless_archive_awarded"
         | "endless_archive_wayfinder"
+        | "endless_relay"
+        | "endless_relay_awarded"
         | "endless_wormbone_drill" => {
             super::endless::begin(game, scene);
             true

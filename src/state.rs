@@ -162,6 +162,9 @@ pub struct GameSession {
     /// Number of repeatable Worm Road Archive pages already rewarded.
     #[serde(default)]
     pub outpost_archive_claims: u32,
+    /// Whether the one-time multi-route Worm Road Relay contract was claimed.
+    #[serde(default)]
+    pub outpost_relay_claimed: bool,
     #[serde(default)]
     pub worm_transit: Option<WormTransit>,
     #[serde(default)]
@@ -256,6 +259,7 @@ impl GameSession {
             auto_route_cursor: 0,
             outpost_charter_claimed: false,
             outpost_archive_claims: 0,
+            outpost_relay_claimed: false,
             worm_transit: None,
             last_transit_failure: None,
             event_history: Vec::new(),

@@ -62,3 +62,41 @@ pub fn claim_outpost_archive(session: &mut GameSession, data: &GameData) -> u32 
         .saturating_add(pages.saturating_mul(data.balance.outpost_archive_reward_ingots));
     pages
 }
+
+/// Return the live progress for the one-time multi-route Worm Road Relay.
+/// The contract only appears after the first Archive page has been claimed.
+pub fn outpost_relay_progress(session: &GameSession) -> (u32, u32) {
+    let active_routes = session
+        .outposts
+        .iter()
+        .filter(|outpost| outpost.active)
+        .count() as u32;
+    let completed_hauls = total_expeditions(session);
+    (active_routes, completed_hauls)
+}
+
+/// Award the one-time Relay contract once the first Archive page has opened
+/// the route ledger and both route-count and haul-count goals are met.
+pub fn claim_outpost_relay(session: &mut GameSession, data: &GameData) -> bool {
+    if session.outpost_relay_claimed
+        || !session.worm_awake
+        || session.outpost_archive_claims == 0
+        || data.balance.outpost_relay_route_goal == 0
+        || data.balance.outpost_relay_haul_goal == 0
+        || data.balance.outpost_relay_reward_ingots == 0
+    {
+        return false;
+    }
+    let (active_routes, completed_hauls) = outpost_relay_progress(session);
+    if active_routes < data.balance.outpost_relay_route_goal
+        || completed_hauls < data.balance.outpost_relay_haul_goal
+    {
+        return false;
+    }
+    session.outpost_relay_claimed = true;
+    session.economy.ingots_stock = session
+        .economy
+        .ingots_stock
+        .saturating_add(data.balance.outpost_relay_reward_ingots);
+    true
+}

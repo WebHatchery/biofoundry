@@ -12,6 +12,7 @@ use macroquad_toolkit::notifications::{
 };
 
 mod persistence;
+mod safety;
 mod unlocks;
 
 fn session() -> (GameData, GameSession) {

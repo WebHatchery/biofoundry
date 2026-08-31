@@ -11,7 +11,8 @@ use macroquad_toolkit::grid::TilePos;
 mod milestones;
 
 pub use milestones::{
-    claim_outpost_archive, claim_outpost_charter, outpost_archive_progress, total_expeditions,
+    claim_outpost_archive, claim_outpost_charter, claim_outpost_relay, outpost_archive_progress,
+    outpost_relay_progress, total_expeditions,
 };
 
 pub fn activate_outpost(session: &mut GameSession, pos: TilePos) -> bool {

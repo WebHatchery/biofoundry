@@ -2,6 +2,7 @@
 
 use crate::simulation::{self, outposts};
 use crate::state::creatures::Job;
+use crate::state::structures::Building;
 
 #[test]
 fn first_archive_page_unlocks_wayfinder_after_a_save_roundtrip() {
@@ -60,5 +61,49 @@ fn archive_wayfinder_replaces_a_weaker_carrier_tool() {
     assert_eq!(
         session.economy.gear_stock.get("wormbone_hauling_frame"),
         Some(&1)
+    );
+}
+
+#[test]
+fn relay_contract_needs_two_active_routes_and_rewards_once() {
+    let (data, mut session, _) = super::novel::active_outpost(173);
+    session.outpost_charter_claimed = true;
+    session.outpost_archive_claims = 1;
+    session.economy.ingots_stock = 0;
+
+    let first_pos = session.outposts[0].pos;
+    let second_pos = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(pos, tile)| {
+            *pos != first_pos && tile.walkable() && session.can_place_building(*pos)
+        })
+        .map(|(pos, _)| pos)
+        .expect("the relay test needs a second outpost site");
+    session.buildings.push(Building::new("outpost", second_pos));
+    session.ensure_outpost(second_pos);
+
+    let first_haul_goal = data.balance.outpost_relay_haul_goal / 2;
+    session.outposts[0].expeditions_completed = first_haul_goal;
+    session.outposts[1].expeditions_completed = data
+        .balance
+        .outpost_relay_haul_goal
+        .saturating_sub(first_haul_goal);
+    session.outposts[1].active = false;
+
+    assert!(!outposts::claim_outpost_relay(&mut session, &data));
+    session.outposts[1].active = true;
+
+    assert!(outposts::claim_outpost_relay(&mut session, &data));
+    assert!(session.outpost_relay_claimed);
+    assert_eq!(
+        session.economy.ingots_stock,
+        data.balance.outpost_relay_reward_ingots
+    );
+    assert!(!outposts::claim_outpost_relay(&mut session, &data));
+    assert_eq!(
+        session.economy.ingots_stock,
+        data.balance.outpost_relay_reward_ingots
     );
 }

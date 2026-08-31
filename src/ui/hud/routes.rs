@@ -37,8 +37,10 @@ pub(super) fn draw_route_overview(
     );
 
     let column_count = route_column_count(session.outposts.len());
+    let relay_summary = relay_contract_summary(session, data);
+    let summary_extra = if relay_summary.is_some() { 18.0 } else { 0.0 };
     let route_rows = session.outposts.len().div_ceil(column_count).max(1);
-    let desired_height = 112.0 + route_rows as f32 * CARD_HEIGHT + 56.0;
+    let desired_height = 112.0 + summary_extra + route_rows as f32 * CARD_HEIGHT + 56.0;
     let panel_height = desired_height.min(PANEL_BOTTOM - PANEL_TOP);
     let panel = Rect::new(PANEL_MARGIN_X, PANEL_TOP, PANEL_WIDTH, panel_height);
     draw_surface_with_title(
@@ -58,6 +60,14 @@ pub(super) fn draw_route_overview(
         panel.y + 58.0,
         TextStyle::new(14.0, dark::TEXT_DIM).params(),
     );
+    if let Some(summary) = relay_summary {
+        draw_ui_text_ex(
+            &summary,
+            panel.x + 24.0,
+            panel.y + 76.0,
+            TextStyle::new(13.0, dark::POSITIVE).params(),
+        );
+    }
 
     let card_width =
         (panel.w - 48.0 - CARD_GAP * (column_count as f32 - 1.0)) / column_count as f32;
@@ -66,7 +76,7 @@ pub(super) fn draw_route_overview(
         let row = index / column_count;
         let card = Rect::new(
             panel.x + 24.0 + column as f32 * (card_width + CARD_GAP),
-            panel.y + 74.0 + row as f32 * CARD_HEIGHT,
+            panel.y + 74.0 + summary_extra + row as f32 * CARD_HEIGHT,
             card_width,
             CARD_HEIGHT - CARD_GAP,
         );
@@ -211,6 +221,26 @@ fn charter_summary(session: &GameSession, data: &GameData) -> String {
         "Charter {completed}/{goal} · +{} ingots",
         data.balance.outpost_charter_reward_ingots
     )
+}
+
+fn relay_contract_summary(session: &GameSession, data: &GameData) -> Option<String> {
+    if session.outpost_archive_claims == 0 || data.balance.outpost_relay_route_goal == 0 {
+        return None;
+    }
+    if session.outpost_relay_claimed {
+        return Some(format!(
+            "Worm Road Relay complete · +{} ingots",
+            data.balance.outpost_relay_reward_ingots
+        ));
+    }
+    let (active_routes, completed_hauls) =
+        crate::simulation::outposts::outpost_relay_progress(session);
+    Some(format!(
+        "Worm Road Relay · {active_routes}/{} routes · {completed_hauls}/{} hauls · +{} ingots",
+        data.balance.outpost_relay_route_goal,
+        data.balance.outpost_relay_haul_goal,
+        data.balance.outpost_relay_reward_ingots
+    ))
 }
 
 fn route_needs_attention(outpost: &Outpost, data: &GameData) -> bool {
