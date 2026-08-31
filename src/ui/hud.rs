@@ -232,7 +232,7 @@ pub fn draw(
         // card. Clearing the underlying HUD intents prevents a tap on a route
         // row from also changing a job or tool beneath the overlay.
         actions.clear();
-        routes::draw_route_overview(session, data, mouse, &mut actions);
+        routes::draw_route_overview(session, data, mouse, ui.scale, &mut actions);
     }
 
     if options.help_open {

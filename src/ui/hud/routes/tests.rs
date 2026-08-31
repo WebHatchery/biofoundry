@@ -236,15 +236,37 @@ fn route_metrics_reports_signal_cache_payload() {
     let session = GameSession::new(&data, 47);
     let mut route = Outpost::new(TilePos::new(4, 4));
     route.signal_cache_upgraded = true;
+    route.signal_cache_ingots = 3;
 
     assert_eq!(
         route_metrics(&session, &data, &route),
         format!(
-            "Cargo 0/{} · Crew 0/{} · Cache +{}/haul",
+            "Cargo 0/{} · Crew 0/{} · Cache +{}/haul · Kept 3",
             data.balance.outpost_storage_cap,
             data.balance.outpost_capacity,
             data.balance.outpost_signal_cache_ingots_per_haul
         )
+    );
+}
+
+#[test]
+fn compact_route_cards_keep_signal_cache_history_in_the_policy_line() {
+    let data = GameData::load().expect("embedded game data");
+    let mut route = Outpost::new(TilePos::new(4, 4));
+    route.signal_cache_upgraded = true;
+    route.signal_cache_ingots = 3;
+    route.expedition_paused = true;
+
+    assert_eq!(
+        compact_route_metrics(&data, &route),
+        format!(
+            "0/{} cargo · 0/{} crew",
+            data.balance.outpost_storage_cap, data.balance.outpost_capacity
+        )
+    );
+    assert_eq!(
+        route_policy_summary(&route, &data, true),
+        "Paused · Cache +1 · Kept 3"
     );
 }
 

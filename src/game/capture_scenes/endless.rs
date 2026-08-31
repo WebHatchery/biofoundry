@@ -441,6 +441,8 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                         route.active = true;
                         route.cargo.clear();
                         route.cargo.insert(Good::Ingot, 5);
+                        route.signal_cache_upgraded = true;
+                        route.signal_cache_ingots = 3;
                         route.expedition_paused = true;
                         route.auto_return_cargo = true;
                     }

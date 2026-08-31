@@ -26,6 +26,7 @@ pub(super) fn draw_route_overview(
     session: &GameSession,
     data: &GameData,
     mouse: Vec2,
+    ui_scale: f32,
     actions: &mut Vec<UiAction>,
 ) {
     draw_rectangle(
@@ -71,6 +72,7 @@ pub(super) fn draw_route_overview(
 
     let card_width =
         (panel.w - 48.0 - CARD_GAP * (column_count as f32 - 1.0)) / column_count as f32;
+    let compact = super::panels::compact_top_bar(ui_scale);
     for (index, outpost) in session.outposts.iter().enumerate() {
         let column = index % column_count;
         let row = index / column_count;
@@ -80,7 +82,16 @@ pub(super) fn draw_route_overview(
             card_width,
             CARD_HEIGHT - CARD_GAP,
         );
-        draw_route_card(session, data, index, outpost, card, mouse, actions);
+        draw_route_card(RouteCardContext {
+            session,
+            data,
+            index,
+            outpost,
+            card,
+            mouse,
+            compact,
+            actions,
+        });
     }
 
     if hud_button(
@@ -98,15 +109,28 @@ pub(super) fn draw_route_overview(
     }
 }
 
-fn draw_route_card(
-    session: &GameSession,
-    data: &GameData,
+struct RouteCardContext<'a> {
+    session: &'a GameSession,
+    data: &'a GameData,
     index: usize,
-    outpost: &Outpost,
+    outpost: &'a Outpost,
     card: Rect,
     mouse: Vec2,
-    actions: &mut Vec<UiAction>,
-) {
+    compact: bool,
+    actions: &'a mut Vec<UiAction>,
+}
+
+fn draw_route_card(context: RouteCardContext<'_>) {
+    let RouteCardContext {
+        session,
+        data,
+        index,
+        outpost,
+        card,
+        mouse,
+        compact,
+        actions,
+    } = context;
     draw_surface(
         card,
         &SurfaceStyle::new(Color::new(0.08, 0.10, 0.13, 0.96))
@@ -130,14 +154,19 @@ fn draw_route_card(
         card.y + 42.0,
         TextStyle::new(13.0, status_color).params(),
     );
+    let metrics = if compact {
+        compact_route_metrics(data, outpost)
+    } else {
+        route_metrics(session, data, outpost)
+    };
     draw_ui_text_ex(
-        &route_metrics(session, data, outpost),
+        &metrics,
         x,
         card.y + 62.0,
         TextStyle::new(12.0, dark::TEXT).params(),
     );
     draw_ui_text_ex(
-        route_policy_label(outpost),
+        &route_policy_summary(outpost, data, compact),
         x,
         card.y + 80.0,
         TextStyle::new(11.0, dark::TEXT_DIM).params(),
@@ -297,8 +326,8 @@ fn route_metrics(session: &GameSession, data: &GameData, outpost: &Outpost) -> S
     };
     let cache_summary = if outpost.signal_cache_upgraded {
         format!(
-            " · Cache +{}/haul",
-            data.balance.outpost_signal_cache_ingots_per_haul
+            " · Cache +{}/haul · Kept {}",
+            data.balance.outpost_signal_cache_ingots_per_haul, outpost.signal_cache_ingots
         )
     } else {
         String::new()
@@ -333,6 +362,37 @@ fn route_policy_label(outpost: &Outpost) -> &'static str {
         (false, false, true) => "Auto food resupply",
         (false, false, false) => "Manual route",
     }
+}
+
+fn compact_route_metrics(data: &GameData, outpost: &Outpost) -> String {
+    format!(
+        "{}/{} cargo · {}/{} crew",
+        outpost.cargo_total(),
+        crate::simulation::outposts::storage_capacity(outpost, data),
+        outpost.crew.len(),
+        crate::simulation::outposts::crew_capacity(outpost, data)
+    )
+}
+
+fn route_policy_summary(outpost: &Outpost, data: &GameData, compact: bool) -> String {
+    if !compact || !outpost.signal_cache_upgraded {
+        return route_policy_label(outpost).to_owned();
+    }
+    let policy = match (
+        outpost.expedition_paused,
+        outpost.auto_return_cargo,
+        outpost.auto_resupply_food,
+    ) {
+        (true, _, _) => "Paused",
+        (false, true, true) => "Auto return + food",
+        (false, true, false) => "Auto return",
+        (false, false, true) => "Auto food",
+        (false, false, false) => "Manual",
+    };
+    format!(
+        "{policy} · Cache +{} · Kept {}",
+        data.balance.outpost_signal_cache_ingots_per_haul, outpost.signal_cache_ingots
+    )
 }
 
 #[cfg(test)]
