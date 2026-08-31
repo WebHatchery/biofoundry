@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-31
-**Source revision:** `837bd7a`
+**Source revision:** `002f2b3`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -64,7 +64,7 @@ automated simulation results into first-time-player evidence.
 | Engineer Mine slot accounting | Pass (focused and published build evidence) | The optional Engineer now uses the same live Mine-claim accounting as ordinary Miners, so it waits when every post is occupied and reserves a free slot before walking toward it. A stale over-capacity arrival is rejected instead of overbooking the Mine; focused simulation coverage verifies both branches. |
 | Multi-Outpost automatic scheduling | Pass (focused evidence) | Automatic returns and food-only resupplies share a persisted round-robin cursor, so a continuously needy first route cannot monopolize the single worm transit. The cursor advances only after a successful automatic departure and defaults safely for older saves; focused multi-route simulation and save-roundtrip coverage verifies that later eligible Outposts receive their turn. |
 | Multi-route ledger | Pass (published capture evidence) | The awakened HUD now exposes a visible Routes control that opens a modal Worm Route Ledger. Each route shows the same inspection status vocabulary, live `Scouting` state and percentage when active, cargo/hold and crew counts, policy state, and a touch-sized Inspect action into the existing Outpost card; selecting a route also centers the bounds-clamped map camera on it. The release [ui_endless_routes.png](../verification/ui_endless_routes.png) capture shows two routes together; the ledger pauses planning and keeps the Close action visible in the compact probe. |
-| Network route summary | Pass (published capture evidence) | The Worm Route Ledger now summarizes the whole network above its cards: total routes, active routes, held cargo, remote crew, scouted ore, live Worm Road Charter progress/reward, and routes needing attention. Each route card also mirrors the selected Outpost's persisted Signal Cache history, showing `Cache +N/haul · Kept N` at normal size and a compact `Cache +N · Kept N` policy line at 800×450. The summary is derived from the same persisted route state as the cards, so scaling from one route to several does not require opening each card to understand the network. Refreshed [ui_endless_routes.png](../verification/ui_endless_routes.png) and [ui_compact_endless_routes.png](../verification/ui_compact_endless_routes.png) keep the summary and route controls readable. |
+| Network route summary | Pass (published capture evidence) | The Worm Route Ledger now summarizes the whole network above its cards: total routes, active routes, held cargo, remote crew, scouted ore, live Worm Road Charter progress/reward, routes needing attention, and aggregate `Cache kept N` earnings when any route has a cache. Each route card also mirrors the selected Outpost's persisted Signal Cache history, showing `Cache +N/haul · Kept N` at normal size and a compact `Cache +N · Kept N` policy line at 800×450. The summary is derived from the same persisted route state as the cards, so scaling from one route to several does not require opening each card to understand the network. Refreshed [ui_endless_routes.png](../verification/ui_endless_routes.png) and [ui_compact_endless_routes.png](../verification/ui_compact_endless_routes.png) keep the summary and route controls readable. |
 | World-space worm route links | Pass (published capture evidence) | After awakening, the world now draws each shrine-to-Outpost link beneath the buildings, using a bright solid path for active routes and a subdued dashed path for inactive ones. An in-flight return shows a high-contrast pulse moving from the Outpost toward the shrine, while outbound travel reverses that direction. Refreshed [ui_endless.png](../verification/ui_endless.png), [ui_endless_in_flight.png](../verification/ui_endless_in_flight.png), and [ui_endless_arrived.png](../verification/ui_endless_arrived.png) captures show the network feedback without changing route state or save data. |
 | Settled touch-target audit | Pass (focused evidence) | Every enabled menu/HUD button now registers with the shared touch audit. The opt-in `scripts/audit_touch_targets.ps1` sweep settles each screen for neighbor-aware hit growth, reports the smallest target and drawn density, and fails on actual grown-target overlap. The 800×450 sweep passed for the title, settings, New Warren and active-run Load confirmations, core HUD, crafting, shrine, completion, Recent Events newest and older pages, Outpost, multi-route ledger, and Signal Cache purchase, award, and completed-haul screens; modal occlusion keeps covered controls out of the report. |
 | State-aware awakened objective recovery | Pass (focused and capture evidence) | After the worm wakes, the Objective now names the visible recovery action when the forge chain is incomplete: place a Blacksmith, replace an exhausted Mine, staff a Smith, or staff a Carrier. The refreshed worm and completion captures show the first of these prompts, and focused coverage keeps the guidance honest for each recovery state. |
@@ -86,7 +86,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 394 unit tests and 2 integration/code-standard
+- `cargo test --all-targets` — 396 unit tests and 2 integration/code-standard
   targets pass,
   including fresh/simulated/remote-transit valid sessions, modal route
   planning, rejected malformed save shapes, and event-history save/load
@@ -205,10 +205,12 @@ automated simulation results into first-time-player evidence.
   captures show the live and completed ledger states; compact variants and
   the 800×450 touch audit preserve the controls without grown-target overlap.
 - Network route ledger cache history — pass; each multi-route card mirrors the
-  persisted Signal Cache rate and `Kept N` total from the selected Outpost card.
-  The normal [ui_endless_routes.png](../verification/ui_endless_routes.png)
+  persisted Signal Cache rate and `Kept N` total from the selected Outpost card,
+  while the ledger header aggregates the network's cached ingots as `Cache kept
+  N`. The normal [ui_endless_routes.png](../verification/ui_endless_routes.png)
   and compact [ui_compact_endless_routes.png](../verification/ui_compact_endless_routes.png)
-  captures keep the added history readable in their respective card layouts.
+  captures keep the per-route history and aggregate readable in their respective
+  card layouts.
 - Endless Signal Cache route upgrade — pass; after the Relay and Deep Survey,
   an active route can spend a save-compatible 28-ingot upgrade once to add one
   ingot to every later completed haul, bounded by remote hold capacity. Each
