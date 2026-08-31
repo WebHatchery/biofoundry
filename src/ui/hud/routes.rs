@@ -740,13 +740,22 @@ fn route_policy_summary(
             outpost.signal_cache_ingots
         ) + waypoint.as_deref().unwrap_or_default()
     };
-    if let Some(bonus) =
-        crate::simulation::outposts::route_bonus_summary(session, data, outpost, compact)
-    {
-        format!("{policy} · {bonus}")
+    let bonus = if compact {
+        let chorus_ingots =
+            crate::simulation::outposts::route_chorus_ingots(session, data, outpost);
+        if chorus_ingots > 0 {
+            Some(format!("Chorus +{chorus_ingots}/haul"))
+        } else if !crate::simulation::outposts::wormsong_route_bonus(session, data, outpost)
+            .is_empty()
+        {
+            Some("Wormsong".to_owned())
+        } else {
+            None
+        }
     } else {
-        policy
-    }
+        crate::simulation::outposts::route_bonus_summary(session, data, outpost, false)
+    };
+    bonus.map_or(policy.clone(), |bonus| format!("{policy} · {bonus}"))
 }
 
 #[cfg(test)]

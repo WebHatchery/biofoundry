@@ -613,6 +613,24 @@ fn compact_route_policy_keeps_auto_loading_visible_with_signal_cache() {
 }
 
 #[test]
+fn compact_route_policy_summarizes_wormsong_without_overflowing() {
+    let data = GameData::load().expect("embedded game data");
+    let mut session = GameSession::new(&data, 66);
+    session.spawn_creature(&data, "goblin", Job::Carrier);
+    let carrier = session.creatures.last_mut().expect("carrier spawned");
+    carrier.equipment = Some("wormsong_harness".to_owned());
+    let mut route = Outpost::new(TilePos::new(4, 4));
+    route.signal_cache_upgraded = true;
+    route.signal_cache_ingots = 3;
+    route.crew.push(carrier.id);
+
+    assert_eq!(
+        route_policy_summary(&session, &route, &data, true),
+        "Manual · Cache +1 · Kept 3 · Wormsong"
+    );
+}
+
+#[test]
 fn route_policy_summary_reports_the_worm_road_waypoint() {
     let data = GameData::load().expect("embedded game data");
     let mut route = Outpost::new(TilePos::new(4, 4));
