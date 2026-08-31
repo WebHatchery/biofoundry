@@ -6,6 +6,10 @@ use crate::simulation::TickReport;
 use crate::state::outposts::ExpeditionCompletion;
 use macroquad_toolkit::notifications::NotificationManager;
 
+pub(crate) fn famine_notice() -> &'static str {
+    "Famine! Stockpile empty — add food. Autosave is held; tap Save to keep this crisis state."
+}
+
 /// Announce route milestones and return whether the tick should be checkpointed.
 pub(super) fn announce_outpost_milestones(
     report: &TickReport,

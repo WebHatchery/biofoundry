@@ -291,8 +291,7 @@ impl Game {
 
             if session.economy.food <= 0.0 && !self.famine_announced {
                 self.famine_announced = true;
-                self.notifications
-                    .warning("Famine! Stockpile empty — add food.");
+                self.notifications.warning(notifications::famine_notice());
                 self.audio.play(Sfx::Alarm);
             } else if session.economy.food > 5.0 {
                 self.famine_announced = false;

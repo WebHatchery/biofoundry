@@ -1,3 +1,4 @@
+use super::super::notifications::famine_notice;
 use super::super::{
     auto_load_notice, auto_resupply_notice, auto_return_notice, format_expedition_completion,
     progression_reaches_safe_beat,
@@ -113,4 +114,10 @@ fn automatic_route_notices_name_their_payload_policies() {
         auto_load_notice(),
         "Auto-load departed — cargo and available scouts are on the worm road."
     );
+}
+
+#[test]
+fn famine_notice_explains_the_checkpoint_choice() {
+    assert!(famine_notice().contains("Autosave is held"));
+    assert!(famine_notice().contains("tap Save"));
 }
