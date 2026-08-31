@@ -352,7 +352,9 @@ fn active_outpost_next_step(session: &GameSession, data: &GameData) -> String {
                 .filter(|outpost| outpost.active)
                 .find(|outpost| {
                     matches!(
-                        crate::simulation::outposts::expedition_state(outpost, data),
+                        crate::simulation::outposts::expedition_state_with_session(
+                            session, data, outpost,
+                        ),
                         crate::simulation::outposts::ExpeditionState::Paused
                     )
                 })
@@ -364,7 +366,9 @@ fn active_outpost_next_step(session: &GameSession, data: &GameData) -> String {
                 .filter(|outpost| outpost.active)
                 .find(|outpost| {
                     matches!(
-                        crate::simulation::outposts::expedition_state(outpost, data),
+                        crate::simulation::outposts::expedition_state_with_session(
+                            session, data, outpost,
+                        ),
                         crate::simulation::outposts::ExpeditionState::NeedsFood { .. }
                     )
                 })
@@ -392,7 +396,7 @@ fn active_outpost_next_step(session: &GameSession, data: &GameData) -> String {
             .to_owned();
     }
     if has_crew {
-        match crate::simulation::outposts::expedition_state(outpost, data) {
+        match crate::simulation::outposts::expedition_state_with_session(session, data, outpost) {
             crate::simulation::outposts::ExpeditionState::NeedsFood { .. } => {
                 if outpost.auto_resupply_food
                     && session.economy.food - data.balance.worm_feed_reserve >= 1.0
@@ -622,7 +626,7 @@ fn outpost_has_loadable_payload(
     data: &GameData,
     outpost: &crate::state::outposts::Outpost,
 ) -> bool {
-    let room = crate::simulation::outposts::storage_capacity(outpost, data)
+    let room = crate::simulation::outposts::route_storage_capacity(session, data, outpost)
         .saturating_sub(outpost.cargo_total());
     let food_ready = session.economy.food - data.balance.worm_feed_reserve >= 1.0;
     let cargo_ready = room > 0

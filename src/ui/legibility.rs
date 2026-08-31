@@ -209,7 +209,8 @@ pub fn building_status(
             if !session.worm_awake {
                 return None;
             }
-            match crate::simulation::outposts::expedition_state(outpost, data) {
+            match crate::simulation::outposts::expedition_state_with_session(session, data, outpost)
+            {
                 crate::simulation::outposts::ExpeditionState::Paused => {
                     Some(BuildingStatus::ExpeditionPaused)
                 }

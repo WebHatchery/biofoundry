@@ -541,6 +541,20 @@ pub struct EquipmentDef {
     /// "guard_dps_mult".
     pub effect: String,
     pub value: f32,
+    /// Additional route hold slots contributed by a stationed wearer.
+    #[serde(default)]
+    pub remote_storage_bonus: u32,
+    /// Additional ore returned by a remote haul when a stationed wearer has
+    /// this kit.
+    #[serde(default)]
+    pub remote_ore_bonus: u32,
+    /// Additional ingots returned by a remote haul when a stationed wearer
+    /// has this kit and the route has a Signal Cache.
+    #[serde(default)]
+    pub remote_ingot_bonus: u32,
+    /// Seconds removed from the remote scouting cycle by a stationed wearer.
+    #[serde(default)]
+    pub remote_cycle_reduction: f32,
     /// Optional persisted progression gate. Most gates reference an unlock
     /// in `unlocks.json`; the Charter uses the special `outpost_charter`
     /// milestone rather than a counter unlock.

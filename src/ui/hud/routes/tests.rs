@@ -196,7 +196,7 @@ fn route_network_summary_counts_active_blockers_as_attention() {
     route.crew.push(1);
     session.outposts.push(route);
 
-    assert!(route_needs_attention(&session.outposts[0], &data));
+    assert!(route_needs_attention(&session, &session.outposts[0], &data));
     assert!(route_network_summary(&session, &data).ends_with("Attention 1"));
 }
 
@@ -452,14 +452,14 @@ fn compact_route_cards_keep_signal_cache_history_in_the_policy_line() {
     route.expedition_paused = true;
 
     assert_eq!(
-        compact_route_metrics(&data, &route),
+        compact_route_metrics(&GameSession::new(&data, 57), &data, &route),
         format!(
             "0/{} cargo · 0/{} crew",
             data.balance.outpost_storage_cap, data.balance.outpost_capacity
         )
     );
     assert_eq!(
-        route_policy_summary(&route, &data, true),
+        route_policy_summary(&GameSession::new(&data, 58), &route, &data, true),
         "Paused · Cache +1 · Kept 3"
     );
 }
@@ -473,7 +473,7 @@ fn compact_route_policy_keeps_auto_loading_visible_with_signal_cache() {
     route.auto_return_cargo = true;
 
     assert_eq!(
-        route_policy_summary(&route, &data, true),
+        route_policy_summary(&GameSession::new(&data, 59), &route, &data, true),
         "Auto-load + return · Cache +1 · Kept 0"
     );
 }
@@ -485,11 +485,11 @@ fn route_policy_summary_reports_the_worm_road_waypoint() {
     route.waypoint_upgraded = true;
 
     assert_eq!(
-        route_policy_summary(&route, &data, false),
+        route_policy_summary(&GameSession::new(&data, 60), &route, &data, false),
         "Manual route · Waypoint 12s transit"
     );
     assert_eq!(
-        route_policy_summary(&route, &data, true),
+        route_policy_summary(&GameSession::new(&data, 61), &route, &data, true),
         "Manual route · Waypoint 12s"
     );
 }

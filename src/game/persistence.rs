@@ -570,7 +570,7 @@ pub(super) fn validate_loaded_session(
                 outpost.pos
             ));
         }
-        validate_outpost_cargo(outpost, data)?;
+        validate_outpost_cargo(session, outpost, data)?;
         validate_nonnegative_finite(outpost.expedition_progress, "outpost expedition progress")?;
 
         let crew_count = outpost
@@ -601,7 +601,7 @@ pub(super) fn validate_loaded_session(
                 transit.outpost
             ));
         };
-        let capacity = crate::simulation::outposts::storage_capacity(outpost, data);
+        let capacity = crate::simulation::outposts::route_storage_capacity(session, data, outpost);
         let cargo_without_food = transit
             .ore
             .checked_add(transit.ingots)

@@ -8,8 +8,11 @@ use crate::state::structures::Building;
 use crate::state::GameState;
 use macroquad_toolkit::grid::TilePos;
 
+mod remote_specialists;
+
 pub(super) fn begin(game: &mut Game, scene: &str) {
     match scene {
+        "endless_wormsong_route" => remote_specialists::begin(game),
         "endless_auto_return" => {
             super::begin(game, "endless_load_preview");
             if let GameState::Warren(session) = &mut game.state {

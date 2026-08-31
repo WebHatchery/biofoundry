@@ -10,12 +10,17 @@ use crate::state::GameSession;
 use macroquad_toolkit::grid::TilePos;
 
 mod milestones;
+mod specialists;
 mod upgrades;
 
 pub use milestones::{
     claim_outpost_archive, claim_outpost_charter, claim_outpost_convoy, claim_outpost_muster,
     claim_outpost_relay, outpost_archive_progress, outpost_convoy_progress,
     outpost_muster_progress, outpost_relay_progress, total_expeditions,
+};
+pub use specialists::{
+    route_bonus_summary, route_expedition_cycle_sec, route_expedition_ore,
+    route_signal_cache_ingots, route_storage_capacity, wormsong_route_bonus,
 };
 pub use upgrades::{
     upgrade_outpost, upgrade_outpost_crew, upgrade_outpost_deep_survey, upgrade_outpost_resonator,
@@ -224,7 +229,7 @@ pub fn preview_outbound_cargo(
 /// route. This mirrors the player-facing Load action while keeping automatic
 /// dispatch from launching empty trips.
 pub fn has_loadable_payload(session: &GameSession, data: &GameData, outpost: &Outpost) -> bool {
-    let capacity = storage_capacity(outpost, data);
+    let capacity = route_storage_capacity(session, data, outpost);
     if outpost.cargo_total() >= capacity {
         return false;
     }
@@ -266,7 +271,7 @@ pub fn automatic_route_preview(
     for priority in session.auto_route_priority.order() {
         let index = match priority {
             AutoRoutePriority::Return => {
-                next_auto_route_index(session, |outpost| auto_return_ready(outpost, data))
+                next_auto_route_index(session, |outpost| auto_return_ready(session, data, outpost))
             }
             AutoRoutePriority::Resupply => next_auto_route_index(session, |outpost| {
                 auto_resupply_ready(session, data, outpost)
@@ -285,10 +290,10 @@ pub fn automatic_route_preview(
     None
 }
 
-fn auto_return_ready(outpost: &Outpost, data: &GameData) -> bool {
+fn auto_return_ready(session: &GameSession, data: &GameData, outpost: &Outpost) -> bool {
     outpost.active
         && outpost.auto_return_cargo
-        && outpost.cargo_total() >= storage_capacity(outpost, data)
+        && outpost.cargo_total() >= route_storage_capacity(session, data, outpost)
 }
 
 fn auto_resupply_ready(session: &GameSession, data: &GameData, outpost: &Outpost) -> bool {
@@ -302,7 +307,7 @@ fn auto_resupply_ready(session: &GameSession, data: &GameData, outpost: &Outpost
         && outpost.auto_resupply_food
         && !outpost.expedition_paused
         && !outpost.crew.is_empty()
-        && outpost.cargo_total() < storage_capacity(outpost, data)
+        && outpost.cargo_total() < route_storage_capacity(session, data, outpost)
         && food_available < food_required
         && food_ready_at_warren > 0
 }
@@ -314,7 +319,35 @@ fn auto_load_ready(session: &GameSession, data: &GameData, outpost: &Outpost) ->
         && has_loadable_payload(session, data, outpost)
 }
 
+#[cfg(test)]
 pub fn expedition_state(outpost: &Outpost, data: &GameData) -> ExpeditionState {
+    expedition_state_with_route_bonus(outpost, data, 0, 0.0, 0)
+}
+
+/// Derive the player-facing expedition state with stationed Wormsong kits
+/// included in the route's live capacity, yield, and cycle.
+pub fn expedition_state_with_session(
+    session: &GameSession,
+    data: &GameData,
+    outpost: &Outpost,
+) -> ExpeditionState {
+    let bonus = wormsong_route_bonus(session, data, outpost);
+    expedition_state_with_route_bonus(
+        outpost,
+        data,
+        bonus.storage_slots,
+        bonus.cycle_reduction,
+        bonus.ore,
+    )
+}
+
+fn expedition_state_with_route_bonus(
+    outpost: &Outpost,
+    data: &GameData,
+    storage_bonus: u32,
+    cycle_reduction: f32,
+    ore_bonus: u32,
+) -> ExpeditionState {
     if !outpost.active {
         return ExpeditionState::Inactive;
     }
@@ -325,7 +358,8 @@ pub fn expedition_state(outpost: &Outpost, data: &GameData) -> ExpeditionState {
     if outpost.expedition_paused {
         return ExpeditionState::Paused;
     }
-    if outpost.cargo_total() >= storage_capacity(outpost, data) {
+    let capacity = storage_capacity(outpost, data).saturating_add(storage_bonus);
+    if outpost.cargo_total() >= capacity {
         return ExpeditionState::HoldFull;
     }
     let food_required = crew.saturating_mul(data.balance.outpost_expedition_food_per_crew);
@@ -336,13 +370,15 @@ pub fn expedition_state(outpost: &Outpost, data: &GameData) -> ExpeditionState {
             available: food_available,
         };
     }
-    let cycle = expedition_cycle_sec(outpost, data);
+    let cycle = (expedition_cycle_sec(outpost, data) - cycle_reduction).max(0.5);
     let progress_percent = (outpost.expedition_progress.max(0.0) / cycle * 100.0)
         .floor()
         .clamp(0.0, 100.0) as u32;
     ExpeditionState::Scouting {
         progress_percent,
-        ore_yield: crew.saturating_mul(ore_per_crew(outpost, data)),
+        ore_yield: crew
+            .saturating_mul(ore_per_crew(outpost, data))
+            .saturating_add(ore_bonus),
         food_cost: food_required,
     }
 }
@@ -357,33 +393,34 @@ pub fn tick_expeditions(
     }
     let food_per_crew = data.balance.outpost_expedition_food_per_crew;
     let mut completed = Vec::new();
-    for outpost in &mut session.outposts {
-        if !outpost.active || outpost.expedition_paused || outpost.crew.is_empty() {
+    for index in 0..session.outposts.len() {
+        let snapshot = session.outposts[index].clone();
+        if !snapshot.active || snapshot.expedition_paused || snapshot.crew.is_empty() {
             continue;
         }
-        let cycle = expedition_cycle_sec(outpost, data);
-        let crew = outpost.crew.len() as u32;
-        let room = storage_capacity(outpost, data).saturating_sub(outpost.cargo_total());
+        let cycle = route_expedition_cycle_sec(session, data, &snapshot);
+        let crew = snapshot.crew.len() as u32;
+        let room =
+            route_storage_capacity(session, data, &snapshot).saturating_sub(snapshot.cargo_total());
         let food_cost = crew.saturating_mul(food_per_crew);
-        let food_available = outpost.cargo.get(&Good::CookedFood).copied().unwrap_or(0);
+        let food_available = snapshot.cargo.get(&Good::CookedFood).copied().unwrap_or(0);
         if room == 0 || food_available < food_cost {
             continue;
         }
+        let ore = route_expedition_ore(session, data, &snapshot).min(room);
+        let remaining_room = room.saturating_sub(ore);
+        let ingots = if snapshot.signal_cache_upgraded {
+            route_signal_cache_ingots(session, data, &snapshot).min(remaining_room)
+        } else {
+            0
+        };
+        let outpost = &mut session.outposts[index];
         outpost.expedition_progress = (outpost.expedition_progress.max(0.0) + dt).min(cycle);
         if outpost.expedition_progress < cycle {
             continue;
         }
         take_cargo(outpost, Good::CookedFood, food_cost);
-        let ore = crew.saturating_mul(ore_per_crew(outpost, data)).min(room);
         add_cargo(outpost, Good::Ore, ore);
-        let remaining_room = room.saturating_sub(ore);
-        let ingots = if outpost.signal_cache_upgraded {
-            data.balance
-                .outpost_signal_cache_ingots_per_haul
-                .min(remaining_room)
-        } else {
-            0
-        };
         add_cargo(outpost, Good::Ingot, ingots);
         outpost.expedition_progress -= cycle;
         outpost.expeditions_completed = outpost.expeditions_completed.saturating_add(1);
@@ -406,7 +443,8 @@ pub fn start_auto_return_if_full(session: &mut GameSession, data: &GameData) -> 
     if session.worm_transit.is_some() {
         return None;
     }
-    let index = next_auto_route_index(session, |outpost| auto_return_ready(outpost, data))?;
+    let index =
+        next_auto_route_index(session, |outpost| auto_return_ready(session, data, outpost))?;
     let pos = session.outposts[index].pos;
     if start_transit(
         session,
@@ -520,7 +558,7 @@ fn start_transit(
     if !outpost.active {
         return false;
     }
-    let cap = storage_capacity(outpost, data);
+    let cap = route_storage_capacity(session, data, outpost);
     let transit_time = transit_time_sec(outpost, data);
     let (ore, ingots, food) = match (direction, plan) {
         (TransitDirection::ToOutpost, TransitPlan::FoodResupply) => {

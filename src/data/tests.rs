@@ -113,6 +113,30 @@ fn equipment_loads_with_valid_job_affinities() {
         assert_eq!(tool.value, value);
         assert_eq!(tool.requires_unlock.as_deref(), Some("resonance_forging"));
     }
+    assert_eq!(
+        data.equipment_def("wormsong_harness")
+            .unwrap()
+            .remote_storage_bonus,
+        2
+    );
+    assert_eq!(
+        data.equipment_def("wormsong_drill")
+            .unwrap()
+            .remote_ore_bonus,
+        2
+    );
+    assert_eq!(
+        data.equipment_def("wormsong_smiths_hammer")
+            .unwrap()
+            .remote_ingot_bonus,
+        1
+    );
+    assert_eq!(
+        data.equipment_def("wormsong_guard_blade")
+            .unwrap()
+            .remote_cycle_reduction,
+        4.0
+    );
     assert!(
         data.equipment_def("wormsong_harness").unwrap().value > wayfinder.value,
         "the first Muster should improve the carrier tier"

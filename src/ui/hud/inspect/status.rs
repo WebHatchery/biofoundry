@@ -85,7 +85,7 @@ pub(super) fn outpost_load_hint(
         .floor() as u32;
     let load = crate::simulation::outposts::preview_outbound_cargo(
         outpost,
-        crate::simulation::outposts::storage_capacity(outpost, data),
+        crate::simulation::outposts::route_storage_capacity(session, data, outpost),
         session.economy.ore_stock,
         session.economy.ingots_stock,
         food_available,
@@ -95,7 +95,8 @@ pub(super) fn outpost_load_hint(
             "Load · Ore {} · Ingots {} · Food {}",
             load.ore, load.ingots, load.food
         ))
-    } else if outpost.cargo_total() >= crate::simulation::outposts::storage_capacity(outpost, data)
+    } else if outpost.cargo_total()
+        >= crate::simulation::outposts::route_storage_capacity(session, data, outpost)
     {
         Some("Hold full · return to shrine".to_owned())
     } else {
@@ -103,8 +104,33 @@ pub(super) fn outpost_load_hint(
     }
 }
 
+#[cfg(test)]
 pub(super) fn outpost_expedition_hint(data: &GameData, outpost: &Outpost) -> Option<String> {
-    match crate::simulation::outposts::expedition_state(outpost, data) {
+    expedition_hint_for_state(
+        outpost,
+        crate::simulation::outposts::expedition_state(outpost, data),
+        crate::simulation::outposts::expedition_cycle_sec(outpost, data),
+    )
+}
+
+pub(super) fn outpost_expedition_hint_with_session(
+    session: &GameSession,
+    data: &GameData,
+    outpost: &Outpost,
+) -> Option<String> {
+    expedition_hint_for_state(
+        outpost,
+        crate::simulation::outposts::expedition_state_with_session(session, data, outpost),
+        crate::simulation::outposts::route_expedition_cycle_sec(session, data, outpost),
+    )
+}
+
+fn expedition_hint_for_state(
+    outpost: &Outpost,
+    state: crate::simulation::outposts::ExpeditionState,
+    cycle: f32,
+) -> Option<String> {
+    match state {
         crate::simulation::outposts::ExpeditionState::Inactive => None,
         crate::simulation::outposts::ExpeditionState::NoCrew => Some("Need scout crew".to_owned()),
         crate::simulation::outposts::ExpeditionState::Paused => {
@@ -128,7 +154,7 @@ pub(super) fn outpost_expedition_hint(data: &GameData, outpost: &Outpost) -> Opt
             let hint = if outpost.resonator_upgraded {
                 format!(
                     "Expedition {progress_percent}% · +{ore_yield}/-{food_cost} food · {:.0}s",
-                    crate::simulation::outposts::expedition_cycle_sec(outpost, data)
+                    cycle
                 )
             } else {
                 format!("Expedition {progress_percent}% · +{ore_yield} ore / -{food_cost} food")
@@ -170,7 +196,9 @@ pub(in crate::ui::hud) fn inspect_status(
                 return ("Route inactive", dark::WARNING);
             }
             if session.worm_awake {
-                match crate::simulation::outposts::expedition_state(outpost, data) {
+                match crate::simulation::outposts::expedition_state_with_session(
+                    session, data, outpost,
+                ) {
                     crate::simulation::outposts::ExpeditionState::Paused => {
                         return ("Scouting paused", dark::WARNING);
                     }
@@ -205,7 +233,7 @@ pub(in crate::ui::hud) fn inspect_status(
                 data,
                 0,
                 0,
-                crate::simulation::outposts::storage_capacity(outpost, data),
+                crate::simulation::outposts::route_storage_capacity(session, data, outpost),
                 crate::simulation::outposts::crew_capacity(outpost, data),
                 outpost.crew_dispatch_limit,
             ) {

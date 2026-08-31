@@ -28,11 +28,13 @@ use outpost::{
     outpost_signal_cache_summary, outpost_waypoint_summary, CompactRouteContext, FullRouteContext,
 };
 pub(super) use status::inspect_status;
+#[cfg(test)]
+use status::outpost_expedition_hint;
 use status::{
     local_mine_staffed_at, local_mine_worker_at, mine_staffing_label,
-    outpost_cargo_only_return_label, outpost_expedition_hint, outpost_has_loadable_payload,
-    outpost_load_hint, outpost_return_label, transit_destination, transit_payload_line,
-    waste_inspection_hint,
+    outpost_cargo_only_return_label, outpost_expedition_hint_with_session,
+    outpost_has_loadable_payload, outpost_load_hint, outpost_return_label, transit_destination,
+    transit_payload_line, waste_inspection_hint,
 };
 use study::{study_adaptation_line, study_rate_per_min};
 use workstations::{
@@ -540,7 +542,9 @@ pub(super) fn draw_inspect_panel(
                 .unwrap_or(data.balance.outpost_capacity);
             let crew_dispatch_limit = outpost.and_then(|route| route.crew_dispatch_limit);
             let storage_cap = outpost
-                .map(|route| crate::simulation::outposts::storage_capacity(route, data))
+                .map(|route| {
+                    crate::simulation::outposts::route_storage_capacity(session, data, route)
+                })
                 .unwrap_or(data.balance.outpost_storage_cap);
             let cargo_ore = outpost
                 .and_then(|o| o.cargo.get(&Good::Ore))
@@ -588,6 +592,21 @@ pub(super) fn draw_inspect_panel(
                         dark::TEXT_DIM,
                         &mut y,
                     );
+                    if let Some(route_bonus) = crate::simulation::outposts::route_bonus_summary(
+                        session, data, route, compact,
+                    ) {
+                        if compact {
+                            draw_ui_text_ex(
+                                &route_bonus,
+                                x,
+                                y,
+                                TextStyle::new(11.0, dark::POSITIVE).params(),
+                            );
+                            y += 16.0;
+                        } else {
+                            line(&route_bonus, dark::POSITIVE, &mut y);
+                        }
+                    }
                     if let Some(archive_summary) = outpost_archive_summary(session, data) {
                         line(&archive_summary, dark::TEXT_DIM, &mut y);
                     }
@@ -604,9 +623,9 @@ pub(super) fn draw_inspect_panel(
                     .as_ref()
                     .is_some_and(|transit| transit.outpost == pos);
                 if !in_transit {
-                    if let Some(expedition_hint) =
-                        outpost.and_then(|route| outpost_expedition_hint(data, route))
-                    {
+                    if let Some(expedition_hint) = outpost.and_then(|route| {
+                        outpost_expedition_hint_with_session(session, data, route)
+                    }) {
                         line(&expedition_hint, dark::TEXT_DIM, &mut y);
                     }
                 }

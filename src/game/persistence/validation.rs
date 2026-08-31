@@ -7,7 +7,11 @@ use crate::state::GameSession;
 use macroquad_toolkit::grid::TilePos;
 use std::collections::HashSet;
 
-pub(super) fn validate_outpost_cargo(outpost: &Outpost, data: &GameData) -> Result<(), String> {
+pub(super) fn validate_outpost_cargo(
+    session: &GameSession,
+    outpost: &Outpost,
+    data: &GameData,
+) -> Result<(), String> {
     for good in outpost.cargo.keys() {
         if !matches!(good, Good::Ore | Good::Ingot | Good::CookedFood) {
             return Err(format!(
@@ -21,7 +25,7 @@ pub(super) fn validate_outpost_cargo(outpost: &Outpost, data: &GameData) -> Resu
         .values()
         .try_fold(0u32, |total, amount| total.checked_add(*amount))
         .ok_or_else(|| format!("outpost cargo total overflows at {:?}", outpost.pos))?;
-    let capacity = crate::simulation::outposts::storage_capacity(outpost, data);
+    let capacity = crate::simulation::outposts::route_storage_capacity(session, data, outpost);
     if cargo_total > capacity {
         return Err(format!(
             "outpost cargo exceeds its {capacity}-slot hold at {:?}",

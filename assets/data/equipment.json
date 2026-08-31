@@ -83,6 +83,7 @@
     "cost_ingots": 22,
     "effect": "carry_bonus",
     "value": 6.0,
+    "remote_storage_bonus": 2,
     "requires_unlock": "resonance_forging"
   },
   {
@@ -92,6 +93,7 @@
     "cost_ingots": 26,
     "effect": "mine_speed_mult",
     "value": 2.5,
+    "remote_ore_bonus": 2,
     "requires_unlock": "resonance_forging"
   },
   {
@@ -101,6 +103,7 @@
     "cost_ingots": 28,
     "effect": "smith_time_mult",
     "value": 0.5,
+    "remote_ingot_bonus": 1,
     "requires_unlock": "resonance_forging"
   },
   {
@@ -110,6 +113,7 @@
     "cost_ingots": 28,
     "effect": "guard_dps_mult",
     "value": 2.5,
+    "remote_cycle_reduction": 4.0,
     "requires_unlock": "resonance_forging"
   }
 ]

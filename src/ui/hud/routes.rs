@@ -213,7 +213,7 @@ fn draw_route_card(context: RouteCardContext<'_>) {
         TextStyle::new(13.0, status_color).params(),
     );
     let metrics = if compact {
-        compact_route_metrics(data, outpost)
+        compact_route_metrics(session, data, outpost)
     } else {
         route_metrics(session, data, outpost)
     };
@@ -224,7 +224,7 @@ fn draw_route_card(context: RouteCardContext<'_>) {
         TextStyle::new(12.0, dark::TEXT).params(),
     );
     draw_ui_text_ex(
-        &route_policy_summary(outpost, data, compact),
+        &route_policy_summary(session, outpost, data, compact),
         x,
         card.y + 80.0,
         TextStyle::new(11.0, dark::TEXT_DIM).params(),
@@ -273,7 +273,7 @@ fn route_network_summary(session: &GameSession, data: &GameData) -> String {
     let attention = session
         .outposts
         .iter()
-        .filter(|outpost| route_needs_attention(outpost, data))
+        .filter(|outpost| route_needs_attention(session, outpost, data))
         .count();
     let charter = charter_summary(session, data);
     let cache_summary = if cached_ingots > 0 {
@@ -429,11 +429,11 @@ fn automatic_route_summary(session: &GameSession, data: &GameData) -> String {
     )
 }
 
-fn route_needs_attention(outpost: &Outpost, data: &GameData) -> bool {
+fn route_needs_attention(session: &GameSession, outpost: &Outpost, data: &GameData) -> bool {
     !outpost.active
         || outpost.last_failure.is_some()
         || matches!(
-            crate::simulation::outposts::expedition_state(outpost, data),
+            crate::simulation::outposts::expedition_state_with_session(session, data, outpost),
             crate::simulation::outposts::ExpeditionState::NoCrew
                 | crate::simulation::outposts::ExpeditionState::Paused
                 | crate::simulation::outposts::ExpeditionState::NeedsFood { .. }
@@ -477,7 +477,7 @@ fn route_metrics(session: &GameSession, data: &GameData, outpost: &Outpost) -> S
     let resonator_summary = if outpost.resonator_upgraded {
         format!(
             " · Cycle {:.0}s",
-            crate::simulation::outposts::expedition_cycle_sec(outpost, data)
+            crate::simulation::outposts::route_expedition_cycle_sec(session, data, outpost)
         )
     } else {
         String::new()
@@ -485,7 +485,8 @@ fn route_metrics(session: &GameSession, data: &GameData, outpost: &Outpost) -> S
     let cache_summary = if outpost.signal_cache_upgraded {
         format!(
             " · Cache +{}/haul · Kept {}",
-            data.balance.outpost_signal_cache_ingots_per_haul, outpost.signal_cache_ingots
+            crate::simulation::outposts::route_signal_cache_ingots(session, data, outpost),
+            outpost.signal_cache_ingots
         )
     } else {
         String::new()
@@ -493,14 +494,14 @@ fn route_metrics(session: &GameSession, data: &GameData, outpost: &Outpost) -> S
     let cargo_summary = format!(
         "Cargo {}/{} · Crew {}/{}{}{}",
         outpost.cargo_total(),
-        crate::simulation::outposts::storage_capacity(outpost, data),
+        crate::simulation::outposts::route_storage_capacity(session, data, outpost),
         outpost.crew.len(),
         crate::simulation::outposts::crew_capacity(outpost, data),
         survey_summary,
         cache_summary
     );
     let cargo_summary = format!("{cargo_summary}{resonator_summary}");
-    match crate::simulation::outposts::expedition_state(outpost, data) {
+    match crate::simulation::outposts::expedition_state_with_session(session, data, outpost) {
         crate::simulation::outposts::ExpeditionState::Scouting {
             progress_percent, ..
         } => format!("{cargo_summary} · Scout {progress_percent}%"),
@@ -527,17 +528,22 @@ fn route_policy_label(outpost: &Outpost) -> &'static str {
     }
 }
 
-fn compact_route_metrics(data: &GameData, outpost: &Outpost) -> String {
+fn compact_route_metrics(session: &GameSession, data: &GameData, outpost: &Outpost) -> String {
     format!(
         "{}/{} cargo · {}/{} crew",
         outpost.cargo_total(),
-        crate::simulation::outposts::storage_capacity(outpost, data),
+        crate::simulation::outposts::route_storage_capacity(session, data, outpost),
         outpost.crew.len(),
         crate::simulation::outposts::crew_capacity(outpost, data)
     )
 }
 
-fn route_policy_summary(outpost: &Outpost, data: &GameData, compact: bool) -> String {
+fn route_policy_summary(
+    session: &GameSession,
+    outpost: &Outpost,
+    data: &GameData,
+    compact: bool,
+) -> String {
     let waypoint = outpost.waypoint_upgraded.then(|| {
         let transit_time = crate::simulation::outposts::transit_time_sec(outpost, data);
         if compact {
@@ -546,33 +552,42 @@ fn route_policy_summary(outpost: &Outpost, data: &GameData, compact: bool) -> St
             format!(" · Waypoint {transit_time:.0}s transit")
         }
     });
-    if !compact || !outpost.signal_cache_upgraded {
-        return format!(
+    let policy = if !compact || !outpost.signal_cache_upgraded {
+        format!(
             "{}{}",
             route_policy_label(outpost),
             waypoint.unwrap_or_default()
-        );
-    }
-    let policy = match (
-        outpost.expedition_paused,
-        outpost.auto_load,
-        outpost.auto_return_cargo,
-        outpost.auto_resupply_food,
-    ) {
-        (true, _, _, _) => "Paused",
-        (false, true, true, true) => "Auto-load + return + food",
-        (false, true, true, false) => "Auto-load + return",
-        (false, true, false, true) => "Auto-load + food",
-        (false, true, false, false) => "Auto-load",
-        (false, false, true, true) => "Auto return + food",
-        (false, false, true, false) => "Auto return",
-        (false, false, false, true) => "Auto food",
-        (false, false, false, false) => "Manual",
+        )
+    } else {
+        let policy = match (
+            outpost.expedition_paused,
+            outpost.auto_load,
+            outpost.auto_return_cargo,
+            outpost.auto_resupply_food,
+        ) {
+            (true, _, _, _) => "Paused",
+            (false, true, true, true) => "Auto-load + return + food",
+            (false, true, true, false) => "Auto-load + return",
+            (false, true, false, true) => "Auto-load + food",
+            (false, true, false, false) => "Auto-load",
+            (false, false, true, true) => "Auto return + food",
+            (false, false, true, false) => "Auto return",
+            (false, false, false, true) => "Auto food",
+            (false, false, false, false) => "Manual",
+        };
+        format!(
+            "{policy} · Cache +{} · Kept {}",
+            crate::simulation::outposts::route_signal_cache_ingots(session, data, outpost),
+            outpost.signal_cache_ingots
+        ) + waypoint.as_deref().unwrap_or_default()
     };
-    format!(
-        "{policy} · Cache +{} · Kept {}",
-        data.balance.outpost_signal_cache_ingots_per_haul, outpost.signal_cache_ingots
-    ) + waypoint.as_deref().unwrap_or_default()
+    if let Some(bonus) =
+        crate::simulation::outposts::route_bonus_summary(session, data, outpost, compact)
+    {
+        format!("{policy} · {bonus}")
+    } else {
+        policy
+    }
 }
 
 #[cfg(test)]

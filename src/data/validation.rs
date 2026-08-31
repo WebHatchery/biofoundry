@@ -225,6 +225,12 @@ fn validate_equipment(data: &GameData) -> Result<(), String> {
                 equipment.id
             ));
         }
+        if !equipment.remote_cycle_reduction.is_finite() || equipment.remote_cycle_reduction < 0.0 {
+            return Err(format!(
+                "equipment '{}' has an invalid remote cycle reduction",
+                equipment.id
+            ));
+        }
         if let Some(unlock) = &equipment.requires_unlock {
             if unlock != OUTPOST_CHARTER_UNLOCK
                 && !data.unlocks.iter().any(|candidate| candidate.id == *unlock)
