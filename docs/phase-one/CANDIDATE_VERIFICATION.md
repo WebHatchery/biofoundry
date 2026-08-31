@@ -1,7 +1,7 @@
 # Current Candidate Verification
 
 **Date:** 2026-08-31
-**Source revision:** `ed815ad`
+**Source revision:** `d2fb9b8`
 **Published target:** WebGL Preview at `/games/biofoundry/`  
 **Browser viewport:** 1280×720; game canvas 1200×675  
 **Input used:** visible pointer controls only
@@ -100,7 +100,7 @@ automated simulation results into first-time-player evidence.
 ## Automated candidate checks
 
 - `cargo fmt -- --check` — pass.
-- `cargo test --all-targets` — 498 unit tests and 2 integration/code-standard
+- `cargo test --all-targets` — 499 unit tests and 2 integration/code-standard
   targets pass,
   including fresh/simulated/remote-transit valid sessions, modal route
   planning, rejected malformed save shapes, and event-history save/load
@@ -122,7 +122,8 @@ automated simulation results into first-time-player evidence.
   and [ui_compact_endless_auto_load_started.png](../verification/ui_compact_endless_auto_load_started.png)
   captures keep the new Dispatch policy and departure notice visible.
   The new [ui_compact_endless_muster_harness.png](../verification/ui_compact_endless_muster_harness.png)
-  capture keeps the ten-recipe Muster-gated Blacksmith card on-canvas.
+  capture keeps the complete 13-recipe Muster-gated Blacksmith card on-canvas
+  with 30-pixel recipe actions.
   Remaining text density remains a human-readability follow-up.
 - Endless cargo priority — pass; the outbound hold obeys Ore, Ingots, or Food
   priority, preserves the local food reserve, and persists the selected order
@@ -536,8 +537,9 @@ automated simulation results into first-time-player evidence.
   no grown-target overlap. The
   compact branch now draws the top-bar controls at 40 logical pixels and the
   Jobs, Build & Dig, Outpost route, Blacksmith, and Breeding Pit controls at 30
-  logical pixels or more; the craft and specialist cards report 36-pixel drawn
-  targets with no grown-target overlap. Remaining text density and first-time-
+  logical pixels or more; the compact recipe card reports 30-pixel drawn
+  targets and specialist cards retain 36-pixel actions with no grown-target
+  overlap. Remaining text density and first-time-
   player comprehension remain honest human follow-ups.
 - Native release critical-scene capture — pass; the optimized project binary
   captured completion, Endless outpost, Shrine, and Blacksmith at 800×450.
