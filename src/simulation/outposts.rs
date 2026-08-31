@@ -3,18 +3,19 @@
 use crate::data::GameData;
 use crate::state::creatures::Good;
 use crate::state::outposts::{
-    AutoRoutePriority, CargoPriority, ExpeditionCompletion, Outpost, TransitCompletion,
-    TransitDirection, WormTransit,
+    AutoRoutePriority, CargoPriority, Outpost, TransitCompletion, TransitDirection, WormTransit,
 };
 use crate::state::GameSession;
 use macroquad_toolkit::grid::TilePos;
 
 mod encore;
+mod expeditions;
 mod milestones;
 mod specialists;
 mod upgrades;
 
 pub use encore::{claim_outpost_encore, outpost_encore_progress};
+pub use expeditions::tick_expeditions;
 pub use milestones::{
     claim_outpost_archive, claim_outpost_charter, claim_outpost_circuit, claim_outpost_concord,
     claim_outpost_convoy, claim_outpost_muster, claim_outpost_relay, outpost_archive_progress,
@@ -386,60 +387,6 @@ fn expedition_state_with_route_bonus(
     }
 }
 
-pub fn tick_expeditions(
-    session: &mut GameSession,
-    data: &GameData,
-    dt: f32,
-) -> Vec<ExpeditionCompletion> {
-    if !session.worm_awake {
-        return Vec::new();
-    }
-    let food_per_crew = data.balance.outpost_expedition_food_per_crew;
-    let mut completed = Vec::new();
-    for index in 0..session.outposts.len() {
-        let snapshot = session.outposts[index].clone();
-        if !snapshot.active || snapshot.expedition_paused || snapshot.crew.is_empty() {
-            continue;
-        }
-        let cycle = route_expedition_cycle_sec(session, data, &snapshot);
-        let crew = snapshot.crew.len() as u32;
-        let room =
-            route_storage_capacity(session, data, &snapshot).saturating_sub(snapshot.cargo_total());
-        let food_cost = crew.saturating_mul(food_per_crew);
-        let food_available = snapshot.cargo.get(&Good::CookedFood).copied().unwrap_or(0);
-        if room == 0 || food_available < food_cost {
-            continue;
-        }
-        let ore = route_expedition_ore(session, data, &snapshot).min(room);
-        let remaining_room = room.saturating_sub(ore);
-        let ingots = if snapshot.signal_cache_upgraded {
-            route_signal_cache_ingots(session, data, &snapshot).min(remaining_room)
-        } else {
-            0
-        };
-        let outpost = &mut session.outposts[index];
-        outpost.expedition_progress = (outpost.expedition_progress.max(0.0) + dt).min(cycle);
-        if outpost.expedition_progress < cycle {
-            continue;
-        }
-        take_cargo(outpost, Good::CookedFood, food_cost);
-        add_cargo(outpost, Good::Ore, ore);
-        add_cargo(outpost, Good::Ingot, ingots);
-        outpost.expedition_progress -= cycle;
-        outpost.expeditions_completed = outpost.expeditions_completed.saturating_add(1);
-        outpost.ore_scouted = outpost.ore_scouted.saturating_add(ore);
-        outpost.signal_cache_ingots = outpost.signal_cache_ingots.saturating_add(ingots);
-        completed.push(ExpeditionCompletion {
-            outpost: outpost.pos,
-            ore,
-            ingots,
-            food_spent: food_cost,
-        });
-        encore::record_concord_haul(session, data, &snapshot);
-    }
-    completed
-}
-
 /// Start one opt-in cargo-only return when an active route has filled its
 /// remote hold. The global worm can carry one transit at a time, so routes are
 /// considered in their persisted order and the next full route waits its turn.
@@ -747,7 +694,7 @@ pub fn tick_transit(
     })
 }
 
-fn take_cargo(outpost: &mut Outpost, good: Good, amount: u32) {
+pub(super) fn take_cargo(outpost: &mut Outpost, good: Good, amount: u32) {
     let current = outpost.cargo.get(&good).copied().unwrap_or(0);
     if current <= amount {
         outpost.cargo.remove(&good);
@@ -756,7 +703,7 @@ fn take_cargo(outpost: &mut Outpost, good: Good, amount: u32) {
     }
 }
 
-fn add_cargo(outpost: &mut Outpost, good: Good, amount: u32) {
+pub(super) fn add_cargo(outpost: &mut Outpost, good: Good, amount: u32) {
     if amount > 0 {
         *outpost.cargo.entry(good).or_insert(0) += amount;
     }
