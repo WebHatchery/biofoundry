@@ -164,6 +164,47 @@ fn route_network_summary_counts_active_blockers_as_attention() {
 }
 
 #[test]
+fn worm_transit_summary_explains_the_shared_route_wait() {
+    let data = GameData::load().expect("embedded game data");
+    let mut session = GameSession::new(&data, 51);
+    let outpost_pos = TilePos::new(8, 8);
+    session.outposts.push(Outpost::new(outpost_pos));
+    session.worm_transit = Some(crate::state::outposts::WormTransit {
+        outpost: outpost_pos,
+        direction: TransitDirection::ToShrine,
+        remaining: 7.4,
+        ore: 3,
+        ingots: 0,
+        food: 0.0,
+        passengers: Vec::new(),
+    });
+
+    assert_eq!(
+        worm_transit_summary(&session).as_deref(),
+        Some("Worm in transit · Route 1 returning · 7s remaining")
+    );
+}
+
+#[test]
+fn worm_transit_summary_keeps_an_unlisted_route_diagnostic_readable() {
+    let mut session = GameSession::new(&GameData::load().expect("embedded game data"), 52);
+    session.worm_transit = Some(crate::state::outposts::WormTransit {
+        outpost: TilePos::new(11, 6),
+        direction: TransitDirection::ToOutpost,
+        remaining: 2.1,
+        ore: 0,
+        ingots: 0,
+        food: 1.0,
+        passengers: Vec::new(),
+    });
+
+    assert_eq!(
+        worm_transit_summary(&session).as_deref(),
+        Some("Worm in transit · Route at (11, 6) outbound · 2s remaining")
+    );
+}
+
+#[test]
 fn route_policy_label_explains_automatic_choices() {
     let mut route = Outpost::new(TilePos::new(4, 4));
     assert_eq!(route_policy_label(&route), "Manual route");

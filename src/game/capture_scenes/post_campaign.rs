@@ -121,6 +121,21 @@ pub(super) fn begin(game: &mut Game, scene: &str) -> bool {
             }
             true
         }
+        "endless_routes_busy" => {
+            begin(game, "endless_routes");
+            game.notifications.clear();
+            game.paused = true;
+            if let GameState::Warren(session) = &mut game.state {
+                if let Some(outpost) = session.outposts.first().map(|route| route.pos) {
+                    if simulation::outposts::start_to_shrine(session, &game.data, outpost) {
+                        if let Some(transit) = session.worm_transit.as_mut() {
+                            transit.remaining = 7.4;
+                        }
+                    }
+                }
+            }
+            true
+        }
         "endless_routes"
         | "endless_auto_return"
         | "endless_auto_resupply"

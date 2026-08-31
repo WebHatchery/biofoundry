@@ -40,7 +40,10 @@ pub(super) fn draw_route_overview(
     let column_count = route_column_count(session.outposts.len());
     let relay_summary = relay_contract_summary(session, data);
     let convoy_summary = convoy_contract_summary(session, data);
-    let summary_lines = relay_summary.is_some() as u32 + convoy_summary.is_some() as u32;
+    let transit_summary = worm_transit_summary(session);
+    let summary_lines = relay_summary.is_some() as u32
+        + convoy_summary.is_some() as u32
+        + transit_summary.is_some() as u32;
     let summary_extra = summary_lines as f32 * 18.0;
     let route_rows = session.outposts.len().div_ceil(column_count).max(1);
     let desired_height = 112.0 + summary_extra + route_rows as f32 * CARD_HEIGHT + 56.0;
@@ -63,26 +66,31 @@ pub(super) fn draw_route_overview(
         panel.y + 58.0,
         TextStyle::new(14.0, dark::TEXT_DIM).params(),
     );
+    let mut summary_y = panel.y + 76.0;
     if let Some(summary) = relay_summary {
         draw_ui_text_ex(
             &summary,
             panel.x + 24.0,
-            panel.y + 76.0,
+            summary_y,
             TextStyle::new(13.0, dark::POSITIVE).params(),
         );
+        summary_y += 18.0;
     }
     if let Some(summary) = convoy_summary {
         draw_ui_text_ex(
             &summary,
             panel.x + 24.0,
-            panel.y
-                + 76.0
-                + if relay_contract_summary(session, data).is_some() {
-                    18.0
-                } else {
-                    0.0
-                },
+            summary_y,
             TextStyle::new(13.0, dark::POSITIVE).params(),
+        );
+        summary_y += 18.0;
+    }
+    if let Some(summary) = transit_summary {
+        draw_ui_text_ex(
+            &summary,
+            panel.x + 24.0,
+            summary_y,
+            TextStyle::new(13.0, dark::WARNING).params(),
         );
     }
 
@@ -320,6 +328,24 @@ fn convoy_contract_summary(session: &GameSession, data: &GameData) -> Option<Str
         data.balance.outpost_convoy_route_goal,
         data.balance.outpost_convoy_haul_goal,
         data.balance.outpost_convoy_reward_ingots
+    ))
+}
+
+fn worm_transit_summary(session: &GameSession) -> Option<String> {
+    let transit = session.worm_transit.as_ref()?;
+    let route = session
+        .outposts
+        .iter()
+        .position(|outpost| outpost.pos == transit.outpost)
+        .map(|index| format!("Route {}", index + 1))
+        .unwrap_or_else(|| format!("Route at ({}, {})", transit.outpost.x, transit.outpost.y));
+    let direction = match transit.direction {
+        TransitDirection::ToOutpost => "outbound",
+        TransitDirection::ToShrine => "returning",
+    };
+    Some(format!(
+        "Worm in transit · {route} {direction} · {:.0}s remaining",
+        transit.remaining.max(0.0)
     ))
 }
 
