@@ -134,3 +134,58 @@ fn loaded_waypoint_requires_a_cleared_worm_road_convoy() {
 
     assert!(error.contains("Worm Road Convoy"), "{error}");
 }
+
+#[test]
+fn loaded_encore_claims_require_enough_concord_hauls() {
+    let (data, mut session) = session_with_outpost();
+    session.outpost_concord_claimed = true;
+    session.outpost_circuit_claimed = true;
+    session.outpost_concord_hauls = data.balance.outpost_encore_haul_goal - 1;
+    session.outpost_encore_claims = 1;
+
+    let error = validate_loaded_session(&session, &data)
+        .expect_err("an Encore claim cannot exceed completed Concord hauls");
+
+    assert!(error.contains("exceed completed Concord hauls"), "{error}");
+}
+
+#[test]
+fn loaded_wormsong_haul_counter_requires_the_concord_claim() {
+    let (data, mut session) = session_with_outpost();
+    session.outpost_concord_hauls = 1;
+
+    let error = validate_loaded_session(&session, &data)
+        .expect_err("a boosted haul cannot exist before the Concord claim");
+
+    assert!(error.contains("before the Concord claim"), "{error}");
+}
+
+#[test]
+fn loaded_circuit_and_encore_flags_require_their_predecessors() {
+    let (data, mut session) = session_with_outpost();
+    session.outpost_circuit_claimed = true;
+
+    let error = validate_loaded_session(&session, &data)
+        .expect_err("a Circuit cannot exist before the Concord claim");
+
+    assert!(error.contains("Circuit exists before"), "{error}");
+
+    session.outpost_circuit_claimed = false;
+    session.outpost_encore_claims = 1;
+    let error = validate_loaded_session(&session, &data)
+        .expect_err("Encore claims cannot exist before the Circuit claim");
+
+    assert!(error.contains("Encore claims exist before"), "{error}");
+}
+
+#[test]
+fn loaded_encore_progress_accepts_a_consistent_claimed_cycle() {
+    let (data, mut session) = session_with_outpost();
+    session.outpost_concord_claimed = true;
+    session.outpost_circuit_claimed = true;
+    session.outpost_concord_hauls = data.balance.outpost_encore_haul_goal + 1;
+    session.outpost_encore_claims = 1;
+
+    validate_loaded_session(&session, &data)
+        .expect("a claimed Encore with a complete haul cycle should load");
+}

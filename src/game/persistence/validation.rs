@@ -35,6 +35,29 @@ pub(super) fn validate_outpost_cargo(
     Ok(())
 }
 
+pub(super) fn validate_outpost_milestones(
+    session: &GameSession,
+    data: &GameData,
+) -> Result<(), String> {
+    if session.outpost_concord_hauls > 0 && !session.outpost_concord_claimed {
+        return Err("Wormsong haul counter exists before the Concord claim".to_owned());
+    }
+    if session.outpost_circuit_claimed && !session.outpost_concord_claimed {
+        return Err("Wormsong Circuit exists before the Concord claim".to_owned());
+    }
+    if session.outpost_encore_claims > 0 && !session.outpost_circuit_claimed {
+        return Err("Wormsong Encore claims exist before the Circuit claim".to_owned());
+    }
+    let goal = data.balance.outpost_encore_haul_goal;
+    if goal == 0 {
+        return Err("outpost Wormsong Encore goal is zero".to_owned());
+    }
+    if session.outpost_encore_claims > session.outpost_concord_hauls / goal {
+        return Err("Wormsong Encore claims exceed completed Concord hauls".to_owned());
+    }
+    Ok(())
+}
+
 pub(super) fn validate_nonnegative_finite(value: f32, field: &str) -> Result<(), String> {
     if !value.is_finite() || value < 0.0 {
         return Err(format!("{field} is not a finite non-negative value"));

@@ -19,8 +19,9 @@ mod validation;
 
 use validation::{
     validate_actor_position, validate_map_position, validate_map_timer,
-    validate_nonnegative_finite, validate_outpost_cargo, validate_task_positions,
-    validate_unique_ids, validate_walkable_position, validate_wild_behavior,
+    validate_nonnegative_finite, validate_outpost_cargo, validate_outpost_milestones,
+    validate_task_positions, validate_unique_ids, validate_walkable_position,
+    validate_wild_behavior,
 };
 
 impl Game {
@@ -356,6 +357,7 @@ pub(super) fn validate_loaded_session(
     if !session.world.spawn.in_bounds(tiles.width, tiles.height) {
         return Err("world spawn is outside the stored map".to_owned());
     }
+    validate_outpost_milestones(session, data)?;
 
     let mut occupied = HashSet::new();
     for building in &session.buildings {
