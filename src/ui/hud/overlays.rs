@@ -243,6 +243,11 @@ pub(super) fn draw_help_overlay(
     let left = panel.x + 28.0;
     let right = panel.x + 550.0;
     let recovery_body = recovery_guide_body(session, data);
+    let inspect_help_body = format!(
+        "{INSPECT_HELP_BODY} Keep a complete Wormsong crew scouting for repeatable Encore rewards."
+    );
+    let objective_help_body =
+        format!("{OBJECTIVE_HELP_BODY} The repeatable Wormsong Encore follows the Circuit.");
     for (x, title, body, y) in [
         (
             left,
@@ -265,7 +270,7 @@ pub(super) fn draw_help_overlay(
         (
             left,
             "Inspect & craft",
-            INSPECT_HELP_BODY,
+            inspect_help_body.as_str(),
             478.0,
         ),
         (
@@ -277,7 +282,7 @@ pub(super) fn draw_help_overlay(
         (
             right,
             "Objective",
-            OBJECTIVE_HELP_BODY,
+            objective_help_body.as_str(),
             270.0,
         ),
         (

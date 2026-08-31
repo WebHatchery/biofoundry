@@ -97,6 +97,23 @@ pub(super) fn announce_outpost_milestones(
         ));
         audio.play(Sfx::Complete);
     }
+    if report.outpost_encore_awarded > 0 {
+        awarded = true;
+        let reward = report
+            .outpost_encore_awarded
+            .saturating_mul(data.balance.outpost_encore_reward_ingots);
+        notifications.success(format!(
+            "Wormsong Encore · +{} ingots · {} boosted haul{} replayed.",
+            reward,
+            report.outpost_encore_awarded,
+            if report.outpost_encore_awarded == 1 {
+                ""
+            } else {
+                "s"
+            }
+        ));
+        audio.play(Sfx::Complete);
+    }
     awarded
 }
 

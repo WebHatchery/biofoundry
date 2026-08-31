@@ -55,6 +55,8 @@ pub struct TickReport {
     /// Whether the one-time multi-route Wormsong Circuit was claimed this
     /// tick.
     pub outpost_circuit_awarded: bool,
+    /// Number of repeatable Wormsong Encore rewards claimed this tick.
+    pub outpost_encore_awarded: u32,
     /// Outpost that automatically started a cargo-only return this tick.
     pub auto_return_started: Option<TilePos>,
     /// Outpost that automatically started a food-only resupply this tick.
@@ -134,6 +136,7 @@ pub fn tick(session: &mut GameSession, data: &GameData) -> TickReport {
     let outpost_muster_awarded = outposts::claim_outpost_muster(session, data);
     let outpost_concord_awarded = outposts::claim_outpost_concord(session, data);
     let outpost_circuit_awarded = outposts::claim_outpost_circuit(session, data);
+    let outpost_encore_awarded = outposts::claim_outpost_encore(session, data);
     let mut auto_return_started = None;
     let mut auto_resupply_started = None;
     let mut auto_load_started = None;
@@ -232,6 +235,7 @@ pub fn tick(session: &mut GameSession, data: &GameData) -> TickReport {
         outpost_muster_awarded,
         outpost_concord_awarded,
         outpost_circuit_awarded,
+        outpost_encore_awarded,
         auto_return_started,
         auto_resupply_started,
         auto_load_started,

@@ -171,6 +171,21 @@ fn saves_from_before_wormsong_circuit_load_unclaimed() {
 }
 
 #[test]
+fn saves_from_before_wormsong_encore_load_with_no_progress() {
+    let data = GameData::load().unwrap();
+    let session = GameSession::new(&data, 42);
+    let mut encoded = serde_json::to_value(&session).unwrap();
+    let object = encoded.as_object_mut().unwrap();
+    object.remove("outpost_concord_hauls");
+    object.remove("outpost_encore_claims");
+
+    let restored: GameSession = serde_json::from_value(encoded).unwrap();
+
+    assert_eq!(restored.outpost_concord_hauls, 0);
+    assert_eq!(restored.outpost_encore_claims, 0);
+}
+
+#[test]
 fn blacksmith_orders_reserve_banked_ingots_before_forging_the_balance() {
     let data = GameData::load().unwrap();
     let mut session = GameSession::new(&data, 42);

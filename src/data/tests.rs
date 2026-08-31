@@ -197,6 +197,8 @@ fn balance_values_are_playable() {
     assert_eq!(b.outpost_concord_cycle_reduction, 2.0);
     assert!(b.outpost_circuit_route_goal >= 2);
     assert!(b.outpost_circuit_reward_ingots > b.outpost_concord_reward_ingots);
+    assert!(b.outpost_encore_haul_goal > 0);
+    assert!(b.outpost_encore_reward_ingots > 0);
     assert!(b.outpost_signal_cache_upgrade_ingots > b.outpost_relay_reward_ingots);
     assert!(b.outpost_signal_cache_ingots_per_haul > 0);
     assert!(b.outpost_waypoint_upgrade_ingots > b.outpost_signal_cache_upgrade_ingots);

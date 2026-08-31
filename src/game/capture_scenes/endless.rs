@@ -11,6 +11,7 @@ use macroquad_toolkit::grid::TilePos;
 mod remote_specialists;
 mod wormsong_circuit;
 mod wormsong_concord;
+mod wormsong_encore;
 
 pub(super) fn begin(game: &mut Game, scene: &str) {
     match scene {
@@ -30,6 +31,8 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
             game.routes_open = true;
             game.paused = true;
         }
+        "endless_wormsong_encore" => wormsong_encore::begin(game),
+        "endless_wormsong_encore_awarded" => wormsong_encore::award(game),
         "endless_auto_return" => {
             super::begin(game, "endless_load_preview");
             if let GameState::Warren(session) = &mut game.state {

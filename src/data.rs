@@ -306,6 +306,12 @@ pub struct Balance {
     /// Ingots awarded when the Wormsong Circuit is completed.
     #[serde(default = "default_outpost_circuit_reward_ingots")]
     pub outpost_circuit_reward_ingots: u32,
+    /// Boosted Wormsong hauls required for each repeatable Encore.
+    #[serde(default = "default_outpost_encore_haul_goal")]
+    pub outpost_encore_haul_goal: u32,
+    /// Ingots awarded for each completed Wormsong Encore.
+    #[serde(default = "default_outpost_encore_reward_ingots")]
+    pub outpost_encore_reward_ingots: u32,
     /// Ingot cost for the post-Relay Signal Cache route upgrade.
     #[serde(default = "default_outpost_signal_cache_upgrade_ingots")]
     pub outpost_signal_cache_upgrade_ingots: u32,
@@ -479,6 +485,12 @@ fn default_outpost_circuit_route_goal() -> u32 {
 }
 fn default_outpost_circuit_reward_ingots() -> u32 {
     64
+}
+fn default_outpost_encore_haul_goal() -> u32 {
+    3
+}
+fn default_outpost_encore_reward_ingots() -> u32 {
+    20
 }
 fn default_outpost_signal_cache_upgrade_ingots() -> u32 {
     28

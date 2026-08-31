@@ -98,6 +98,27 @@ fn circuit_summary_reports_complete_route_progress_and_claimed_reward() {
 }
 
 #[test]
+fn encore_summary_reports_boosted_haul_progress_and_repeat_claims() {
+    let data = GameData::load().expect("embedded game data");
+    let mut session = GameSession::new(&data, 64);
+    session.worm_awake = true;
+    session.outpost_circuit_claimed = true;
+    session.outpost_concord_hauls = 1;
+
+    assert_eq!(
+        encore_contract_summary(&session, &data).as_deref(),
+        Some("Wormsong Encore · 1/3 boosted hauls · +20 ingots")
+    );
+
+    session.outpost_concord_hauls = data.balance.outpost_encore_haul_goal + 1;
+    session.outpost_encore_claims = 1;
+    assert_eq!(
+        encore_contract_summary(&session, &data).as_deref(),
+        Some("Wormsong Encore · 1 cleared · next 1/3 boosted hauls · +20 ingots")
+    );
+}
+
+#[test]
 fn route_network_summary_confirms_a_claimed_charter() {
     let data = GameData::load().expect("embedded game data");
     let mut session = GameSession::new(&data, 42);

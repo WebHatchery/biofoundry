@@ -181,6 +181,12 @@ pub struct GameSession {
     /// Whether the one-time multi-route Wormsong Circuit reward was claimed.
     #[serde(default)]
     pub outpost_circuit_claimed: bool,
+    /// Number of hauls completed while a Concord crew was active.
+    #[serde(default)]
+    pub outpost_concord_hauls: u32,
+    /// Number of repeatable Wormsong Encore rewards already claimed.
+    #[serde(default)]
+    pub outpost_encore_claims: u32,
     #[serde(default)]
     pub worm_transit: Option<WormTransit>,
     #[serde(default)]
@@ -281,6 +287,8 @@ impl GameSession {
             outpost_muster_claims: 0,
             outpost_concord_claimed: false,
             outpost_circuit_claimed: false,
+            outpost_concord_hauls: 0,
+            outpost_encore_claims: 0,
             worm_transit: None,
             last_transit_failure: None,
             event_history: Vec::new(),

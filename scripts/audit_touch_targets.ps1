@@ -47,7 +47,9 @@ param(
         "endless_wormsong_route",
         "endless_wormsong_concord",
         "endless_wormsong_circuit",
-        "endless_wormsong_circuit_awarded"
+        "endless_wormsong_circuit_awarded",
+        "endless_wormsong_encore",
+        "endless_wormsong_encore_awarded"
     ),
     [int]$WindowWidth = 1280,
     [int]$WindowHeight = 720,

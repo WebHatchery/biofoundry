@@ -88,6 +88,9 @@ fn validate_balance(data: &GameData) -> Result<(), String> {
     {
         return Err("outpost Wormsong Circuit goal and reward must exceed Concord".to_owned());
     }
+    if balance.outpost_encore_haul_goal == 0 || balance.outpost_encore_reward_ingots == 0 {
+        return Err("outpost Wormsong Encore goal and reward must be positive".to_owned());
+    }
     if balance.outpost_signal_cache_upgrade_ingots == 0
         || balance.outpost_signal_cache_ingots_per_haul == 0
     {

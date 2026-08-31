@@ -69,6 +69,7 @@ fn stationed_wormsong_specialists_improve_a_real_expedition() {
     assert_eq!(completed[0].ingots, 2);
     assert_eq!(completed[0].food_spent, 4);
     assert_eq!(session.outposts[0].ore_scouted, 14);
+    assert_eq!(session.outpost_concord_hauls, 0);
 }
 
 #[test]
@@ -180,6 +181,7 @@ fn claimed_concord_gives_a_complete_route_an_ongoing_song_bonus() {
 
     assert_eq!(completed.len(), 1);
     assert_eq!(completed[0].ore, 15);
+    assert_eq!(session.outpost_concord_hauls, 1);
     session.outposts[0].crew.clear();
     assert_eq!(
         outposts::route_expedition_ore(&session, &data, &session.outposts[0]),
@@ -243,4 +245,28 @@ fn wormsong_circuit_requires_two_complete_route_crews_and_pays_once() {
 
     session.outposts[1].crew.pop();
     assert_eq!(outposts::outpost_circuit_progress(&session, &data), (1, 2));
+}
+
+#[test]
+fn wormsong_encore_pays_for_boosted_hauls_and_preserves_partial_progress() {
+    let (data, mut session, _) = active_outpost(188);
+    session.outpost_circuit_claimed = true;
+    session.outpost_concord_hauls = data.balance.outpost_encore_haul_goal + 1;
+    session.economy.ingots_stock = 6;
+
+    assert_eq!(
+        outposts::outpost_encore_progress(&session, &data),
+        data.balance.outpost_encore_haul_goal
+    );
+    assert_eq!(outposts::claim_outpost_encore(&mut session, &data), 1);
+    assert_eq!(session.outpost_encore_claims, 1);
+    assert_eq!(
+        session.economy.ingots_stock,
+        6 + data.balance.outpost_encore_reward_ingots
+    );
+    assert_eq!(outposts::outpost_encore_progress(&session, &data), 1);
+
+    session.outpost_concord_hauls += data.balance.outpost_encore_haul_goal - 1;
+    assert_eq!(outposts::claim_outpost_encore(&mut session, &data), 1);
+    assert_eq!(session.outpost_encore_claims, 2);
 }

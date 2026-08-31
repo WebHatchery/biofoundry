@@ -9,10 +9,12 @@ use crate::state::outposts::{
 use crate::state::GameSession;
 use macroquad_toolkit::grid::TilePos;
 
+mod encore;
 mod milestones;
 mod specialists;
 mod upgrades;
 
+pub use encore::{claim_outpost_encore, outpost_encore_progress};
 pub use milestones::{
     claim_outpost_archive, claim_outpost_charter, claim_outpost_circuit, claim_outpost_concord,
     claim_outpost_convoy, claim_outpost_muster, claim_outpost_relay, outpost_archive_progress,
@@ -433,6 +435,7 @@ pub fn tick_expeditions(
             ingots,
             food_spent: food_cost,
         });
+        encore::record_concord_haul(session, data, &snapshot);
     }
     completed
 }

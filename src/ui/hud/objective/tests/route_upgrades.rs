@@ -179,3 +179,16 @@ fn completed_objective_guides_the_wormsong_circuit_after_concord() {
     assert!(guidance.contains("0/2 complete routes"));
     assert!(guidance.contains("+64 ingots"));
 }
+
+#[test]
+fn completed_objective_guides_the_wormsong_encore_after_circuit() {
+    let (data, mut session) = boot();
+    session.worm_awake = true;
+    session.outpost_circuit_claimed = true;
+    session.outpost_concord_hauls = 1;
+
+    let guidance = encore_contract_guidance(&session, &data).expect("Encore should guide");
+
+    assert!(guidance.contains("Encore 1/3 boosted hauls"));
+    assert!(guidance.contains("+20 ingots"));
+}

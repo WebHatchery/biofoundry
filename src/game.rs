@@ -681,6 +681,7 @@ fn progression_reaches_safe_beat(report: &simulation::TickReport) -> bool {
         || report.outpost_muster_awarded > 0
         || report.outpost_concord_awarded
         || report.outpost_circuit_awarded
+        || report.outpost_encore_awarded > 0
         || report.auto_load_started.is_some()
 }
 
