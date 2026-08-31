@@ -518,7 +518,7 @@ automated simulation results into first-time-player evidence.
   testing of optional-system value.
 - Study adaptation capture — [ui_study.png](../verification/ui_study.png) and
   [ui_compact_study.png](../verification/ui_compact_study.png) show a selected Study
-  Pen with two housed specimens, `+2.0/min` observation, `24.0 observed`, and the
+  Pen with two housed specimens, `+2.0/min` observation, `24.1 observed`, and the
   mastered `Haulers +20% · Brood +20%` payoff at both viewport sizes.
 - Breeding upkeep capture — [ui_breeding.png](../verification/ui_breeding.png)
   and [ui_compact_breeding.png](../verification/ui_compact_breeding.png) show the
