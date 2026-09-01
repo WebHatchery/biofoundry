@@ -2,6 +2,25 @@ use crate::data::GameData;
 use crate::state::creatures::Job;
 use crate::state::GameSession;
 
+/// Compact population readout for the quiet top-left corner of the map HUD.
+/// Local room and idle workers are the two values that most often require a
+/// decision; remote workers only appear after the Warren has outposts.
+pub(crate) fn population_stats(session: &GameSession, data: &GameData) -> String {
+    let local = session.local_creature_count();
+    let capacity = session.local_warren_capacity(data);
+    let idle = session.job_count(Job::Idle);
+    let remote = session
+        .creatures
+        .iter()
+        .filter(|creature| creature.is_remote())
+        .count();
+    if remote > 0 {
+        format!("POP {local}/{capacity} · IDLE {idle} · REMOTE {remote}")
+    } else {
+        format!("POP {local}/{capacity} · IDLE {idle}")
+    }
+}
+
 /// Keep a combined food/raid banner short while naming the visible Guard
 /// control that resolves the incoming threat.
 pub(crate) fn compact_raid_defense_hint(session: &GameSession, data: &GameData) -> String {

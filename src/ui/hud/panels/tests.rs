@@ -156,6 +156,30 @@ fn compact_top_bar_only_applies_below_the_design_scale() {
 }
 
 #[test]
+fn population_stats_prioritize_local_room_and_idle_workers() {
+    let data = GameData::load().expect("embedded game data");
+    let session = GameSession::new(&data, 7);
+
+    assert_eq!(
+        population_stats(&session, &data),
+        format!(
+            "POP {}/{} · IDLE 0",
+            session.local_creature_count(),
+            session.local_warren_capacity(&data)
+        )
+    );
+}
+
+#[test]
+fn population_stats_add_remote_workers_only_when_present() {
+    let data = GameData::load().expect("embedded game data");
+    let mut session = GameSession::new(&data, 7);
+    session.creatures[0].remote_outpost = Some(macroquad_toolkit::grid::TilePos::new(3, 3));
+
+    assert!(population_stats(&session, &data).contains("REMOTE 1"));
+}
+
+#[test]
 fn hints_do_not_promise_reassignment_of_a_specialist() {
     let data = GameData::load().expect("embedded game data");
     let mut session = GameSession::new(&data, 7);

@@ -11,7 +11,8 @@ pub(super) use food::draw_food_grid_panel;
 use specialists::{optional_specialist_button_label, optional_support_button_label};
 pub(super) use top_bar::{
     compact_food_recovery_hint, compact_raid_defense_hint, compact_top_bar,
-    condensed_food_recovery_hint, condensed_raid_defense_hint, reassignable_job_count,
+    condensed_food_recovery_hint, condensed_raid_defense_hint, population_stats,
+    reassignable_job_count,
 };
 pub(super) use tutorial::draw_tutorial_panel;
 #[cfg(test)]
@@ -56,11 +57,16 @@ pub(super) fn draw_top_bar(
             .with_border(1.0, Color::new(0.38, 0.45, 0.58, 0.55)),
     );
 
+    let pop_color = if session.local_creature_count() > session.local_warren_capacity(data) {
+        dark::NEGATIVE
+    } else {
+        dark::TEXT_BRIGHT
+    };
     draw_ui_text_ex(
-        "Biofoundry — Warren",
+        &population_stats(session, data),
         bar.x + 16.0,
         bar.y + 31.0,
-        TextStyle::new(22.0, dark::TEXT_BRIGHT).params(),
+        TextStyle::new(14.0, pop_color).params(),
     );
 
     let seconds = simulation::sim_seconds(session);
