@@ -8,7 +8,7 @@ use crate::state::creatures::Job;
 use crate::state::outposts::{TransitCompletion, TransitDirection};
 use crate::state::{GameSession, GameState, StateTransition};
 use crate::tutorial::{self, TutorialInputs};
-use crate::ui::{self, UiAction, UiMode};
+use crate::ui::{self, HudPanel, UiAction, UiMode};
 use macroquad::prelude::*;
 use macroquad_toolkit::camera::Camera2D;
 use macroquad_toolkit::events::EventBus;
@@ -61,6 +61,8 @@ pub struct Game {
     help_open: bool,
     /// The recent event history is showing inside the field guide shell.
     event_log_open: bool,
+    /// The single compact management drawer open above the world map.
+    hud_panel: Option<HudPanel>,
     /// Zero is the newest page; larger values reveal older event history.
     event_log_page: usize,
     /// Whether the fixed-timestep simulation is paused by the player.
@@ -128,6 +130,7 @@ impl Game {
             confirm_load: false,
             help_open: false,
             event_log_open: false,
+            hud_panel: None,
             event_log_page: 0,
             paused: false,
             save_exists,
@@ -415,6 +418,7 @@ impl Game {
                         event_log_open: self.event_log_open,
                         event_log_page: self.event_log_page,
                         event_history: self.notifications.history(),
+                        hud_panel: self.hud_panel,
                         routes_open: self.routes_open,
                         confirm_load: self.confirm_load,
                         paused: self.paused,
@@ -506,6 +510,7 @@ impl Game {
             } else {
                 None
             };
+            self.hud_panel = None;
             return;
         }
         let GameState::Warren(session) = &mut self.state else {
@@ -579,6 +584,7 @@ impl Game {
                 self.event_log_open = false;
                 self.event_log_page = 0;
                 self.routes_open = false;
+                self.hud_panel = None;
                 self.paused = false;
                 self.confirm_new_warren = false;
                 self.confirm_load = false;

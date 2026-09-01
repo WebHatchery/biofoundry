@@ -6,6 +6,7 @@ use crate::state::creatures::{Good, Job};
 use crate::state::structures::{BuildSite, Building};
 use crate::state::world::Tile;
 use crate::state::{GameState, StateTransition};
+use crate::ui::HudPanel;
 use macroquad_toolkit::grid::TilePos;
 
 mod endless;
@@ -94,8 +95,25 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
                 }
             }
         }
+        "hud_food" => {
+            begin(game, "warren");
+            game.hud_panel = Some(HudPanel::Food);
+        }
+        "hud_jobs" => {
+            begin(game, "warren");
+            game.hud_panel = Some(HudPanel::Jobs);
+        }
+        "hud_build" => {
+            begin(game, "factory");
+            game.hud_panel = Some(HudPanel::Build);
+        }
+        "hud_objective" => {
+            begin(game, "warren");
+            game.hud_panel = Some(HudPanel::Objective);
+        }
         "tutorial_food" => {
             game.transition(StateTransition::StartWarren);
+            game.hud_panel = Some(HudPanel::Tutorial);
             if let GameState::Warren(session) = &mut game.state {
                 session.tutorial_step = 1;
                 session.economy.food = 36.0;
@@ -120,6 +138,7 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
         }
         "tutorial_factory" => {
             game.transition(StateTransition::StartWarren);
+            game.hud_panel = Some(HudPanel::Tutorial);
             if let GameState::Warren(session) = &mut game.state {
                 // Hold on the factory lesson so its distinction between the
                 // prebuilt Mine and the Mine build button is reviewable.
@@ -131,6 +150,7 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
         }
         "tutorial_blacksmith" => {
             game.transition(StateTransition::StartWarren);
+            game.hud_panel = Some(HudPanel::Tutorial);
             if let GameState::Warren(session) = &mut game.state {
                 session.tutorial_step = 2;
                 session.tutorial_built = true;
@@ -152,6 +172,7 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
         }
         "tutorial_worm" => {
             begin(game, "shrine");
+            game.hud_panel = Some(HudPanel::Tutorial);
             if let GameState::Warren(session) = &mut game.state {
                 session.tutorial_dismissed = false;
                 session.tutorial_step = 4;

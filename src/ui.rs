@@ -34,6 +34,18 @@ impl UiMode {
     }
 }
 
+/// The single non-modal management drawer that is open above the world.
+/// Keeping this exclusive makes the map the default composition instead of
+/// stacking every ledger around it.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum HudPanel {
+    Food,
+    Jobs,
+    Build,
+    Objective,
+    Tutorial,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum UiAction {
     StartWarren,
@@ -90,6 +102,8 @@ pub enum UiAction {
     SkipTutorial,
     /// Toggle a tool mode (clicking the active mode returns to Inspect).
     SetMode(UiMode),
+    /// Open or close one of the compact management drawers above the map.
+    ToggleHudPanel(HudPanel),
     /// Open or close the post-awakening route ledger.
     ToggleRoutes,
     /// Cycle the global automatic route policy order in the route ledger.

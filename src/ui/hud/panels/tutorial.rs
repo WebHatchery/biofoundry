@@ -5,7 +5,7 @@ use crate::data::{GameData, TutorialStepDef};
 use crate::state::creatures::Job;
 use crate::state::GameSession;
 use crate::ui::hud::widgets::{hud_button, panel_style};
-use crate::ui::{UiAction, LOGICAL_WIDTH};
+use crate::ui::{HudPanel, UiAction, LOGICAL_WIDTH};
 use macroquad::prelude::*;
 use macroquad_toolkit::prelude::*;
 
@@ -52,6 +52,19 @@ pub fn draw_tutorial_panel(
 
     let skip_width = if compact { 78.0 } else { 64.0 };
     let skip_height = if compact { 72.0 } else { 22.0 };
+    if hud_button(
+        Rect::new(
+            panel.x + 10.0,
+            panel.bottom() - skip_height - 8.0,
+            skip_width,
+            skip_height,
+        ),
+        "Close",
+        true,
+        mouse,
+    ) {
+        actions.push(UiAction::ToggleHudPanel(HudPanel::Tutorial));
+    }
     if hud_button(
         Rect::new(
             panel.right() - skip_width - 10.0,

@@ -489,12 +489,6 @@ fn recovery_guide_body(session: &GameSession, data: &GameData) -> String {
 /// the bottom of the world view (shown only while a node is stalled).
 pub(super) fn draw_status_legend(session: &GameSession, data: &GameData) {
     use crate::ui::legibility::BuildingStatus as St;
-    let strip = Rect::new(280.0, LOGICAL_HEIGHT - 30.0, LOGICAL_WIDTH - 292.0, 24.0);
-    draw_surface(
-        strip,
-        &SurfaceStyle::new(Color::new(0.06, 0.07, 0.09, 0.88))
-            .with_border(1.0, Color::new(0.38, 0.45, 0.58, 0.4)),
-    );
     let items = [
         (St::NoWorker, Color::new(0.95, 0.85, 0.30, 1.0)),
         (St::NoValidRoute, Color::new(0.70, 0.62, 0.85, 1.0)),
@@ -512,16 +506,34 @@ pub(super) fn draw_status_legend(session: &GameSession, data: &GameData) {
         (St::ShrineNeedsIngots, Color::new(0.95, 0.85, 0.30, 1.0)),
         (St::WasteOverflow, Color::new(0.65, 0.85, 0.35, 1.0)),
     ];
+    let visible: Vec<_> = items
+        .iter()
+        .filter(|(status, _)| {
+            session.buildings.iter().any(|building| {
+                crate::ui::legibility::building_status(session, data, building) == Some(*status)
+            })
+        })
+        .collect();
+    let content_width: f32 = visible
+        .iter()
+        .map(|(status, _)| 20.0 + status.label().len() as f32 * 8.0)
+        .sum();
+    let strip = Rect::new(
+        24.0,
+        LOGICAL_HEIGHT - 100.0,
+        (content_width + 24.0).min(LOGICAL_WIDTH - 48.0),
+        24.0,
+    );
+    draw_surface(
+        strip,
+        &SurfaceStyle::new(Color::new(0.06, 0.07, 0.09, 0.88))
+            .with_border(1.0, Color::new(0.38, 0.45, 0.58, 0.4)),
+    );
     let mut lx = strip.x + 12.0;
     let cy = strip.y + strip.h * 0.5;
-    for (status, color) in items {
-        if !session.buildings.iter().any(|building| {
-            crate::ui::legibility::building_status(session, data, building) == Some(status)
-        }) {
-            continue;
-        }
+    for (status, color) in visible {
         draw_circle(lx, cy, 7.5, Color::new(0.08, 0.08, 0.10, 0.92));
-        crate::ui::warren::draw_status_glyph(vec2(lx, cy), 6.0, status, color);
+        crate::ui::warren::draw_status_glyph(vec2(lx, cy), 6.0, *status, *color);
         let label = status.label();
         draw_ui_text_ex(
             label,

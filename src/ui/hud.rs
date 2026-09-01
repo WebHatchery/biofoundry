@@ -6,6 +6,7 @@
 //! (`panels`, `inspect`, `overlays`), and folds their output into one
 //! `HudFrame`.
 
+mod dock;
 mod inspect;
 mod objective;
 mod overlays;
@@ -18,7 +19,7 @@ use crate::data::GameData;
 use crate::simulation;
 use crate::state::creatures::Job;
 use crate::state::GameSession;
-use crate::ui::{HudFrame, UiAction, UiMode, LOGICAL_WIDTH};
+use crate::ui::{HudFrame, HudPanel, UiAction, UiMode, LOGICAL_WIDTH};
 use macroquad::prelude::*;
 use macroquad_toolkit::grid::TilePos;
 use macroquad_toolkit::notifications::LoggedNotification;
@@ -27,8 +28,6 @@ use macroquad_toolkit::sprite::SpriteAtlas;
 use macroquad_toolkit::ui::MIN_TARGET;
 
 const JOB_ICON_ATLAS_BYTES: &[u8] = include_bytes!("../../assets/sprites/job-icon-atlas.png");
-
-const PANEL_W: f32 = 252.0;
 
 /// Compact illustrated role markers used inside the text-forward HUD.
 #[derive(Debug, Clone)]
@@ -43,6 +42,7 @@ pub struct HudOptions<'a> {
     pub event_log_open: bool,
     pub event_log_page: usize,
     pub event_history: &'a [LoggedNotification],
+    pub hud_panel: Option<HudPanel>,
     pub routes_open: bool,
     pub confirm_load: bool,
     pub paused: bool,
@@ -102,43 +102,31 @@ pub fn draw(
     // through to a world action underneath it.
     let interaction_point = interaction_point(ui, mouse, options.touch_position);
 
+    let compact = panels::compact_top_bar(ui.scale);
     let top_bar = Rect::new(12.0, 12.0, LOGICAL_WIDTH - 24.0, 48.0);
-    let food_panel = Rect::new(12.0, 66.0, PANEL_W, 184.0);
-    let jobs_panel_height = if panels::compact_top_bar(ui.scale) {
-        // Five job rows need room for 72px logical touch controls at the
-        // 800px compact canvas. Keep the status line inside the viewport too.
-        464.0
-    } else {
-        400.0
-    };
-    let jobs_panel = Rect::new(12.0, 256.0, PANEL_W, jobs_panel_height);
-    // Keep Build & Dig beside the other opening controls. The WebGL page can
-    // show a 1200x675 canvas below a header; putting this panel at the bottom
-    // makes its buttons disappear below the browser fold at 1280x720.
-    let tools_panel_height = if panels::compact_top_bar(ui.scale) {
-        // The compact panel shows the full build catalogue in three columns;
-        // a tall card keeps every visible build choice touch-sized instead of
-        // forcing the player to use a keyboard or a hidden scroll gesture.
-        620.0
-    } else {
-        252.0
-    };
-    let tools_panel_width = if panels::compact_top_bar(ui.scale) {
-        258.0
-    } else {
-        PANEL_W
-    };
-    let tools_panel = Rect::new(
-        PANEL_W
-            + if panels::compact_top_bar(ui.scale) {
-                26.0
-            } else {
-                28.0
-            },
-        66.0,
-        tools_panel_width,
-        tools_panel_height,
+    let routes_available = session.worm_awake && !session.outposts.is_empty();
+    let tutorial_available = crate::tutorial::current_step(session, data).is_some();
+    let command_strip = dock::draw_command_strip(
+        session,
+        options.hud_panel,
+        options.routes_open,
+        tutorial_available,
+        routes_available,
+        mouse,
+        ui.scale,
+        &mut actions,
     );
+
+    // These drawers all share the same left landing zone. Only one is drawn
+    // at a time, leaving the rest of the map available for panning and play.
+    let drawer_x = 24.0;
+    let drawer_top = 76.0;
+    let food_panel = Rect::new(drawer_x, drawer_top, 300.0, 184.0);
+    let jobs_panel_height = if compact { 464.0 } else { 400.0 };
+    let jobs_panel = Rect::new(drawer_x, drawer_top, 300.0, jobs_panel_height);
+    let tools_panel_height = if compact { 520.0 } else { 252.0 };
+    let tools_panel_width = if compact { 360.0 } else { 330.0 };
+    let tools_panel = Rect::new(drawer_x, drawer_top, tools_panel_width, tools_panel_height);
 
     panels::draw_top_bar(
         session,
@@ -153,28 +141,39 @@ pub fn draw(
         },
         &mut actions,
     );
-    panels::draw_food_grid_panel(session, data, food_panel);
-    panels::draw_jobs_panel(
-        session,
-        data,
-        sprites,
-        jobs_panel,
-        mouse,
-        ui.scale,
-        &mut actions,
-    );
-    panels::draw_tools_panel(
-        session,
-        data,
-        tools_panel,
-        mode,
-        mouse,
-        ui.scale,
-        &mut actions,
-    );
-    let tutorial_panel = panels::draw_tutorial_panel(session, data, mouse, ui.scale, &mut actions);
-    let objective_panel = panels::draw_objective_panel(session, data);
-    let inspect_top = inspect_panel_top(tutorial_panel, panels::compact_top_bar(ui.scale));
+    if options.hud_panel == Some(HudPanel::Food) {
+        panels::draw_food_grid_panel(session, data, food_panel);
+    }
+    if options.hud_panel == Some(HudPanel::Jobs) {
+        panels::draw_jobs_panel(
+            session,
+            data,
+            sprites,
+            jobs_panel,
+            mouse,
+            ui.scale,
+            &mut actions,
+        );
+    }
+    if options.hud_panel == Some(HudPanel::Build) {
+        panels::draw_tools_panel(
+            session,
+            data,
+            tools_panel,
+            mode,
+            mouse,
+            ui.scale,
+            &mut actions,
+        );
+    }
+    let tutorial_panel = if options.hud_panel == Some(HudPanel::Tutorial) {
+        panels::draw_tutorial_panel(session, data, mouse, ui.scale, &mut actions)
+    } else {
+        None
+    };
+    let objective_panel = (options.hud_panel == Some(HudPanel::Objective))
+        .then(|| panels::draw_objective_panel(session, data));
+    let inspect_top = inspect_panel_top(tutorial_panel, compact);
     let outpost_open = selected.is_some_and(|pos| {
         session
             .building_at(pos)
@@ -293,17 +292,24 @@ pub fn draw(
         options.confirm_load,
     ) || tutorial_panel
         .is_some_and(|r| panel_input_rect(r, ui.scale).contains_point(interaction_point))
-        || panel_input_rect(objective_panel, ui.scale).contains_point(interaction_point)
+        || objective_panel
+            .is_some_and(|r| panel_input_rect(r, ui.scale).contains_point(interaction_point))
         || inspect_panel
             .is_some_and(|r| panel_input_rect(r, ui.scale).contains_point(interaction_point))
         || [
             top_bar_input_rect(top_bar, ui.scale),
-            panel_input_rect(food_panel, ui.scale),
-            panel_input_rect(jobs_panel, ui.scale),
-            panel_input_rect(tools_panel, ui.scale),
+            panel_input_rect(command_strip, ui.scale),
         ]
         .iter()
-        .any(|r| r.contains_point(interaction_point));
+        .any(|r| r.contains_point(interaction_point))
+        || [
+            (options.hud_panel == Some(HudPanel::Food)).then_some(food_panel),
+            (options.hud_panel == Some(HudPanel::Jobs)).then_some(jobs_panel),
+            (options.hud_panel == Some(HudPanel::Build)).then_some(tools_panel),
+        ]
+        .into_iter()
+        .flatten()
+        .any(|r| panel_input_rect(r, ui.scale).contains_point(interaction_point));
 
     HudFrame {
         actions,
@@ -423,10 +429,8 @@ fn interaction_point(ui: &VirtualUi, mouse: Vec2, touch_position: Option<Vec2>) 
         .unwrap_or(mouse)
 }
 
-fn inspect_panel_top(tutorial_panel: Option<Rect>, compact: bool) -> f32 {
-    tutorial_panel.map_or(if compact { 60.0 } else { 210.0 }, |panel| {
-        panel.y + panel.h + 10.0
-    })
+fn inspect_panel_top(tutorial_panel: Option<Rect>, _compact: bool) -> f32 {
+    tutorial_panel.map_or(76.0, |panel| panel.y + panel.h + 10.0)
 }
 
 #[cfg(test)]

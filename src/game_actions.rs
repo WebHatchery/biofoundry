@@ -176,6 +176,7 @@ impl Game {
                         self.audio.play(Sfx::Select);
                     }
                 }
+                self.hud_panel = None;
                 if dismissed {
                     self.autosave_game();
                 }
@@ -188,6 +189,18 @@ impl Game {
                 };
                 self.audio.play(Sfx::Select);
             }
+            UiAction::ToggleHudPanel(panel) => {
+                if matches!(&self.state, GameState::Warren(_)) {
+                    self.hud_panel = if self.hud_panel == Some(panel) {
+                        None
+                    } else {
+                        Some(panel)
+                    };
+                    self.selected_building = None;
+                    self.routes_open = false;
+                    self.audio.play(Sfx::Select);
+                }
+            }
             UiAction::ToggleRoutes => {
                 let available = matches!(
                     &self.state,
@@ -196,6 +209,8 @@ impl Game {
                 );
                 if available {
                     self.routes_open = !self.routes_open;
+                    self.hud_panel = None;
+                    self.selected_building = None;
                     self.audio.play(Sfx::Select);
                 } else {
                     self.routes_open = false;
@@ -227,6 +242,7 @@ impl Game {
                     self.focus_camera_on_tile(pos);
                     self.selected_building = Some(pos);
                     self.routes_open = false;
+                    self.hud_panel = None;
                     self.mode = UiMode::Inspect;
                     self.audio.play(Sfx::Select);
                 }
@@ -559,11 +575,13 @@ impl Game {
             }
             UiAction::ToggleHelp => {
                 self.help_open = !self.help_open;
+                self.hud_panel = None;
                 self.event_log_open = false;
                 self.audio.play(Sfx::Select);
             }
             UiAction::ToggleEventLog => {
                 self.help_open = true;
+                self.hud_panel = None;
                 self.event_log_open = !self.event_log_open;
                 if self.event_log_open {
                     self.event_log_page = 0;

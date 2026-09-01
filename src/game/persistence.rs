@@ -137,6 +137,7 @@ impl Game {
         self.event_log_open = false;
         self.event_log_page = 0;
         self.routes_open = false;
+        self.hud_panel = None;
         self.paused = false;
         super::clear_replacement_confirmations(
             &mut self.confirm_new_warren,
