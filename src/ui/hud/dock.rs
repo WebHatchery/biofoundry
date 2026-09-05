@@ -14,8 +14,7 @@ const DOCK_MARGIN: f32 = 16.0;
 /// the ledgers appear only after one of these controls is tapped.
 pub(super) fn draw_command_strip(
     session: &GameSession,
-    active_panel: Option<HudPanel>,
-    routes_open: bool,
+    options: &super::HudOptions<'_>,
     tutorial_available: bool,
     routes_available: bool,
     mouse: Vec2,
@@ -61,7 +60,7 @@ pub(super) fn draw_command_strip(
         if hud_button(rect, label, true, mouse) {
             actions.push(UiAction::ToggleHudPanel(panel));
         }
-        if active_panel == Some(panel) {
+        if options.hud_panel == Some(panel) {
             draw_active_marker(rect);
         }
         x += width + 8.0;
@@ -85,7 +84,7 @@ pub(super) fn draw_command_strip(
             actions.push(UiAction::ToggleHelp);
         }
     }
-    if active_panel == Some(HudPanel::Tutorial) {
+    if options.hud_panel == Some(HudPanel::Tutorial) {
         draw_active_marker(guide_rect);
     }
     x += guide_width + 8.0;
@@ -95,7 +94,7 @@ pub(super) fn draw_command_strip(
         if hud_button(routes_rect, "Routes", true, mouse) {
             actions.push(UiAction::ToggleRoutes);
         }
-        if routes_open {
+        if options.routes_open {
             draw_active_marker(routes_rect);
         }
     }

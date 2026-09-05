@@ -108,8 +108,7 @@ pub fn draw(
     let tutorial_available = crate::tutorial::current_step(session, data).is_some();
     let command_strip = dock::draw_command_strip(
         session,
-        options.hud_panel,
-        options.routes_open,
+        &options,
         tutorial_available,
         routes_available,
         mouse,
