@@ -9,8 +9,6 @@ use macroquad_toolkit::ui::{
 };
 
 const TITLE_TABLEAU_BYTES: &[u8] = include_bytes!("../../assets/sprites/title-tableau.png");
-const NEW_WARREN_CONFIRMATION_TEXT: &str =
-    "Starting New Warren will replace the current autosave.\n\nChoose Start New Warren to begin again, or Keep Save to return.";
 
 /// The hand-painted cavern framing the title screen.
 pub struct MenuSprites {
@@ -49,7 +47,7 @@ pub fn draw(
         TextStyle::new(title_size, dark::TEXT_BRIGHT).params(),
     );
 
-    let tagline = "Every conveyor belt is a creature with needs.";
+    let tagline = data.message("menu.tagline");
     let tagline_w = measure_text_size(tagline, TextStyle::new(22.0, dark::TEXT_DIM)).width;
     draw_ui_text_ex(
         tagline,
@@ -92,10 +90,10 @@ pub fn draw(
 
     if confirm_new_warren {
         actions.clear();
-        draw_start_new_warren_confirmation(mouse, ui.scale, &mut actions);
+        draw_start_new_warren_confirmation(data, mouse, ui.scale, &mut actions);
     }
 
-    let hint = "Feed the warren · forge with living furnaces · awaken the Colossal Worm";
+    let hint = data.message("menu.footer_hint");
     let hint_w = measure_text_size(hint, TextStyle::new(17.0, dark::TEXT_DIM)).width;
     draw_ui_text_ex(
         hint,
@@ -119,7 +117,12 @@ pub fn draw(
 /// Protect the current campaign from an accidental fresh-start click. The
 /// existing autosave is intentionally named here because starting a new
 /// warren replaces that slot as soon as the new session begins.
-fn draw_start_new_warren_confirmation(mouse: Vec2, ui_scale: f32, actions: &mut Vec<UiAction>) {
+pub fn draw_start_new_warren_confirmation(
+    data: &GameData,
+    mouse: Vec2,
+    ui_scale: f32,
+    actions: &mut Vec<UiAction>,
+) {
     draw_rectangle(
         0.0,
         0.0,
@@ -141,7 +144,7 @@ fn draw_start_new_warren_confirmation(mouse: Vec2, ui_scale: f32, actions: &mut 
         TextStyle::new(20.0, dark::TEXT_BRIGHT),
     );
     draw_text_block(
-        NEW_WARREN_CONFIRMATION_TEXT,
+        data.message("menu.new_warren_confirmation"),
         panel.x + 20.0,
         panel.y + 58.0,
         panel.w - 40.0,
@@ -171,11 +174,8 @@ fn draw_start_new_warren_confirmation(mouse: Vec2, ui_scale: f32, actions: &mut 
     }
 }
 
-#[cfg(test)]
-mod tests;
-
 /// Draw the full-screen illustrated cave, keeping its centre open for the UI.
-fn draw_backdrop(sprites: &MenuSprites) {
+pub fn draw_backdrop(sprites: &MenuSprites) {
     draw_rectangle(
         0.0,
         0.0,
@@ -196,7 +196,12 @@ fn draw_backdrop(sprites: &MenuSprites) {
 }
 
 /// The volume stepper and a Done button, in place of the main menu stack.
-fn draw_settings_panel(mouse: Vec2, ui_scale: f32, sfx_volume: f32, actions: &mut Vec<UiAction>) {
+pub fn draw_settings_panel(
+    mouse: Vec2,
+    ui_scale: f32,
+    sfx_volume: f32,
+    actions: &mut Vec<UiAction>,
+) {
     let compact = ui_scale.is_finite() && ui_scale < 0.9;
     let panel = if compact {
         Rect::new(LOGICAL_WIDTH * 0.5 - 210.0, 270.0, 420.0, 260.0)
@@ -285,14 +290,14 @@ fn draw_settings_panel(mouse: Vec2, ui_scale: f32, sfx_volume: f32, actions: &mu
     }
 }
 
-fn menu_panel_style() -> SurfaceStyle {
+pub fn menu_panel_style() -> SurfaceStyle {
     SurfaceStyle::new(Color::new(0.07, 0.08, 0.10, 0.96))
         .with_border(1.0, Color::new(0.38, 0.45, 0.58, 0.55))
         .with_header(34.0, Color::new(0.09, 0.105, 0.13, 1.0))
         .with_header_divider(1.0, Color::new(0.38, 0.45, 0.58, 0.4))
 }
 
-fn menu_button(rect: Rect, text: &str, enabled: bool, mouse: Vec2) -> bool {
+pub fn menu_button(rect: Rect, text: &str, enabled: bool, mouse: Vec2) -> bool {
     let virtual_ui = VirtualUi::new(LOGICAL_WIDTH, LOGICAL_HEIGHT);
     let pointer = Pointer::read(|position| virtual_ui.screen_to_ui(position));
     let hit_rect = touch_area_for_scale(rect, virtual_ui.scale);

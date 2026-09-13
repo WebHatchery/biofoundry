@@ -19,6 +19,21 @@ const UNLOCK_COUNTERS: &[&str] = &[
     "outpost_muster_claims",
 ];
 
+/// Every message referenced by menu/HUD startup and modal paths must be
+/// present before a session can begin. UI code may then use `GameData::message`
+/// without carrying fallback copy that could silently diverge.
+pub const REQUIRED_COPY_IDS: &[&str] = &[
+    "menu.tagline",
+    "menu.footer_hint",
+    "menu.new_warren_confirmation",
+    "help.inspect",
+    "help.objective",
+    "help.endless_inspect",
+    "help.endless_objective",
+    "help.field_guide_intro",
+    "load.confirmation",
+];
+
 pub(super) fn validate(data: &GameData) -> Result<(), String> {
     validate_config(data)?;
     validate_balance(data)?;
@@ -27,6 +42,7 @@ pub(super) fn validate(data: &GameData) -> Result<(), String> {
     validate_unlocks(data)?;
     validate_equipment(data)?;
     validate_tutorial(data)?;
+    validate_copy(data)?;
 
     for required_species in ["goblin"] {
         if !data.species.contains(required_species) {
@@ -40,6 +56,20 @@ pub(super) fn validate(data: &GameData) -> Result<(), String> {
             return Err(format!(
                 "building data is missing required id '{required_building}'"
             ));
+        }
+    }
+    Ok(())
+}
+
+fn validate_copy(data: &GameData) -> Result<(), String> {
+    for message in data.copy.iter().map(|(_, message)| message) {
+        if message.id.trim().is_empty() || message.text.trim().is_empty() {
+            return Err("copy message ids and text must be non-empty".to_owned());
+        }
+    }
+    for id in REQUIRED_COPY_IDS {
+        if data.copy.get(id).is_none() {
+            return Err(format!("copy data is missing required message id '{id}'"));
         }
     }
     Ok(())

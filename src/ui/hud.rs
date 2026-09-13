@@ -6,14 +6,14 @@
 //! (`panels`, `inspect`, `overlays`), and folds their output into one
 //! `HudFrame`.
 
-mod dock;
-mod inspect;
-mod objective;
-mod overlays;
-mod panels;
-mod requirements;
-mod routes;
-mod widgets;
+pub mod dock;
+pub mod inspect;
+pub mod objective;
+pub mod overlays;
+pub mod panels;
+pub mod requirements;
+pub mod routes;
+pub mod widgets;
 
 use crate::data::GameData;
 use crate::simulation;
@@ -55,7 +55,7 @@ pub struct HudOptions<'a> {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub(super) enum ColonyFailure {
+pub enum ColonyFailure {
     Silent,
     GuardHandoff,
 }
@@ -85,7 +85,7 @@ impl HudSprites {
     }
 }
 
-pub fn draw(
+pub(crate) fn draw(
     session: &GameSession,
     data: &GameData,
     ui: &VirtualUi,
@@ -223,7 +223,7 @@ pub fn draw(
             &mut actions,
         );
     } else if options.confirm_load {
-        overlays::draw_load_confirmation(ui.scale, mouse, &mut actions);
+        overlays::draw_load_confirmation(data, ui.scale, mouse, &mut actions);
     } else if worm_up {
         overlays::draw_goal_overlay(
             "The Colossal Worm Awakens",
@@ -316,7 +316,7 @@ pub fn draw(
     }
 }
 
-fn modal_owns_world_input(
+pub fn modal_owns_world_input(
     victory_up: bool,
     factory_up: bool,
     worm_up: bool,
@@ -328,7 +328,7 @@ fn modal_owns_world_input(
     victory_up || factory_up || worm_up || routes_up || colony_failure || help_open || confirm_load
 }
 
-fn colony_failure_reason(session: &GameSession, data: &GameData) -> Option<ColonyFailure> {
+pub fn colony_failure_reason(session: &GameSession, data: &GameData) -> Option<ColonyFailure> {
     if session.worm_awake {
         return None;
     }
@@ -340,7 +340,7 @@ fn colony_failure_reason(session: &GameSession, data: &GameData) -> Option<Colon
         .then_some(ColonyFailure::GuardHandoff)
 }
 
-fn worm_completion_body(session: &GameSession) -> String {
+pub fn worm_completion_body(session: &GameSession) -> String {
     format!(
         "Fed on {:.0} food and {} ingots, the great worm rises from the deep and coils around the warren that raised it.\n\nThe campaign is complete in {:.0} minutes. Tap Continue in Endless to keep the warren growing, or tap Return to Menu.",
         session.worm_fed,
@@ -349,7 +349,7 @@ fn worm_completion_body(session: &GameSession) -> String {
     )
 }
 
-fn warren_victory_body(session: &GameSession, data: &GameData) -> String {
+pub fn warren_victory_body(session: &GameSession, data: &GameData) -> String {
     let base = format!(
         "The warren thrives: the {:.0}-food surplus and {} ore delivered in {:.0} minutes secure the colony.",
         data.balance.win_food_surplus,
@@ -369,7 +369,7 @@ fn warren_victory_body(session: &GameSession, data: &GameData) -> String {
     }
 }
 
-fn warren_victory_continue_label(session: &GameSession) -> &'static str {
+pub fn warren_victory_continue_label(session: &GameSession) -> &'static str {
     if session.job_count(Job::Guard) > 0 {
         "Continue to Factory"
     } else {
@@ -377,7 +377,7 @@ fn warren_victory_continue_label(session: &GameSession) -> &'static str {
     }
 }
 
-fn factory_completion_body(session: &GameSession) -> String {
+pub fn factory_completion_body(session: &GameSession) -> String {
     format!(
         "The Biofoundry roars: {} ingots forged by hammer and living furnace in {:.0} minutes.\n\nEvery belt breathes. Tap Continue to Worm, then tap Shrine in Build & Dig and tap open floor, or tap Return to Menu.",
         session.economy.ingots_forged,
@@ -388,7 +388,7 @@ fn factory_completion_body(session: &GameSession) -> String {
 /// Claim the small invisible margins around top-bar buttons for the HUD too.
 /// Otherwise a release on a scaled touch target just outside the drawn bar can
 /// activate the button and also fall through to a world tile click.
-fn top_bar_input_rect(bar: Rect, ui_scale: f32) -> Rect {
+pub fn top_bar_input_rect(bar: Rect, ui_scale: f32) -> Rect {
     let scale = if ui_scale.is_finite() && ui_scale > 0.0 {
         ui_scale
     } else {
@@ -407,7 +407,7 @@ fn top_bar_input_rect(bar: Rect, ui_scale: f32) -> Rect {
 /// Tutorial, inspection, and tool controls can otherwise trigger their action
 /// while a release just outside the drawn card still falls through to a map
 /// click.
-fn panel_input_rect(panel: Rect, ui_scale: f32) -> Rect {
+pub fn panel_input_rect(panel: Rect, ui_scale: f32) -> Rect {
     let scale = if ui_scale.is_finite() && ui_scale > 0.0 {
         ui_scale
     } else {
@@ -422,15 +422,12 @@ fn panel_input_rect(panel: Rect, ui_scale: f32) -> Rect {
     )
 }
 
-fn interaction_point(ui: &VirtualUi, mouse: Vec2, touch_position: Option<Vec2>) -> Vec2 {
+pub fn interaction_point(ui: &VirtualUi, mouse: Vec2, touch_position: Option<Vec2>) -> Vec2 {
     touch_position
         .and_then(|position| ui.screen_to_ui_checked(position))
         .unwrap_or(mouse)
 }
 
-fn inspect_panel_top(tutorial_panel: Option<Rect>, _compact: bool) -> f32 {
+pub fn inspect_panel_top(tutorial_panel: Option<Rect>, _compact: bool) -> f32 {
     tutorial_panel.map_or(76.0, |panel| panel.y + panel.h + 10.0)
 }
-
-#[cfg(test)]
-mod tests;

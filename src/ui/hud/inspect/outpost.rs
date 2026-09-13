@@ -14,7 +14,7 @@ mod compact_controls;
 
 use compact_controls::{draw_compact_route_return_controls, draw_compact_route_upgrade_controls};
 
-pub(super) fn outpost_archive_summary(session: &GameSession, data: &GameData) -> Option<String> {
+pub fn outpost_archive_summary(session: &GameSession, data: &GameData) -> Option<String> {
     if !session.outpost_charter_claimed || data.balance.outpost_archive_haul_goal == 0 {
         return None;
     }
@@ -58,7 +58,7 @@ pub(super) fn draw_archive_summary(
     }
 }
 
-pub(super) fn compact_archive_summary(session: &GameSession, data: &GameData) -> Option<String> {
+pub fn compact_archive_summary(session: &GameSession, data: &GameData) -> Option<String> {
     if !session.outpost_charter_claimed || data.balance.outpost_archive_haul_goal == 0 {
         return None;
     }
@@ -79,7 +79,7 @@ pub(super) fn compact_archive_summary(session: &GameSession, data: &GameData) ->
     ))
 }
 
-pub(super) fn outpost_signal_cache_summary(
+pub fn outpost_signal_cache_summary(
     outpost: &Outpost,
     data: &GameData,
     compact: bool,
@@ -116,7 +116,7 @@ pub(super) fn outpost_signal_cache_summary(
     }
 }
 
-pub(super) fn outpost_waypoint_summary(
+pub fn outpost_waypoint_summary(
     outpost: &Outpost,
     data: &GameData,
     compact: bool,

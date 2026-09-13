@@ -36,6 +36,12 @@ jobs:
           repository: Kalaith/macroquad-toolkit
           path: macroquad-toolkit
 
+      - name: Checkout canonical project standards
+        uses: actions/checkout@v4
+        with:
+          repository: WebHatchery/rust_management
+          path: rust_management
+
       - name: Install Linux build dependencies
         run: |
           sudo apt-get update
@@ -78,6 +84,12 @@ jobs:
           if [ ! -s catalog_thumbnail.png ]; then
             echo "::warning::catalog_thumbnail.png is missing or empty"
           fi
+
+      - name: Check project standards drift
+        shell: pwsh
+        working-directory: .
+        run: |
+          & "$env:GITHUB_WORKSPACE/rust_management/docs/check-project-docs.ps1" -ProjectRoot "$env:GITHUB_WORKSPACE/game"
 
       - name: Check formatting
         run: cargo fmt --manifest-path Cargo.toml -- --check

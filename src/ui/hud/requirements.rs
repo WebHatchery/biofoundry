@@ -5,7 +5,7 @@ use crate::simulation::wildlife;
 use crate::state::GameSession;
 
 /// Translate a data-driven unlock into a concise action the player can take.
-pub(super) fn unlock_requirement(data: &GameData, id: &str) -> Option<String> {
+pub fn unlock_requirement(data: &GameData, id: &str) -> Option<String> {
     let unlock = data.unlocks.iter().find(|candidate| candidate.id == id)?;
     let phrase = match unlock.counter.as_str() {
         "beetles_captured" => format!("capture {} beetles", unlock.threshold),
@@ -41,7 +41,7 @@ pub(super) fn unlock_requirement(data: &GameData, id: &str) -> Option<String> {
 
 /// Translate a data-driven unlock into an actionable phrase with live
 /// progress, using the same counter lookup that grants the unlock.
-pub(super) fn unlock_requirement_progress(
+pub fn unlock_requirement_progress(
     session: &GameSession,
     data: &GameData,
     id: &str,
@@ -51,6 +51,3 @@ pub(super) fn unlock_requirement_progress(
     let current = wildlife::counter_value(session, &unlock.counter);
     Some(format!("{phrase} ({current}/{})", unlock.threshold))
 }
-
-#[cfg(test)]
-mod tests;

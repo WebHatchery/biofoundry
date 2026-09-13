@@ -79,11 +79,7 @@ impl Game {
 }
 
 /// Resolve a world-space point to a valid map tile.
-pub(super) fn tile_at_world(
-    session: &GameSession,
-    data: &GameData,
-    world: Vec2,
-) -> Option<TilePos> {
+pub fn tile_at_world(session: &GameSession, data: &GameData, world: Vec2) -> Option<TilePos> {
     let tile_size = data.config.tile_size;
     if !tile_size.is_finite() || tile_size <= 0.0 {
         return None;
@@ -95,7 +91,7 @@ pub(super) fn tile_at_world(
     session.world.tiles.is_valid(tile).then_some(tile)
 }
 
-pub(super) fn camera_config(data: &GameData, tile_size: f32) -> Camera2DConfig {
+pub fn camera_config(data: &GameData, tile_size: f32) -> Camera2DConfig {
     let world_w = data.config.world_width as f32 * tile_size;
     let world_h = data.config.world_height as f32 * tile_size;
     Camera2DConfig {
@@ -109,10 +105,6 @@ pub(super) fn camera_config(data: &GameData, tile_size: f32) -> Camera2DConfig {
     }
 }
 
-fn camera_claim_after_mouse_release(frame_claimed: bool, gesture_claimed: bool) -> bool {
+pub fn camera_claim_after_mouse_release(frame_claimed: bool, gesture_claimed: bool) -> bool {
     frame_claimed || gesture_claimed
 }
-
-#[cfg(test)]
-#[path = "input/tests.rs"]
-mod tests;

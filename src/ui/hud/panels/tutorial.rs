@@ -14,7 +14,7 @@ const TUTORIAL_BODY_HEIGHT: f32 = 94.0;
 
 /// The tutorial card, top-right: current step, progress chip, and a skip
 /// button. Returns its rect while visible (for pointer-over-UI checks).
-pub fn draw_tutorial_panel(
+pub(crate) fn draw_tutorial_panel(
     session: &GameSession,
     data: &GameData,
     mouse: Vec2,

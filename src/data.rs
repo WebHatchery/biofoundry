@@ -8,6 +8,7 @@ use macroquad_toolkit::data_loader::{load_embedded_json_labeled, DataRegistry};
 use serde::{Deserialize, Serialize};
 
 mod validation;
+pub use validation::REQUIRED_COPY_IDS;
 
 const GAME_CONFIG_JSON: &str =
     macroquad_toolkit::include_json_str!("../assets/data/game_config.json");
@@ -17,6 +18,7 @@ const BUILDINGS_JSON: &str = macroquad_toolkit::include_json_str!("../assets/dat
 const UNLOCKS_JSON: &str = macroquad_toolkit::include_json_str!("../assets/data/unlocks.json");
 const EQUIPMENT_JSON: &str = macroquad_toolkit::include_json_str!("../assets/data/equipment.json");
 const TUTORIAL_JSON: &str = macroquad_toolkit::include_json_str!("../assets/data/tutorial.json");
+const COPY_JSON: &str = macroquad_toolkit::include_json_str!("../assets/data/copy.json");
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct GameConfig {
@@ -674,6 +676,14 @@ pub struct TutorialStepDef {
     pub done: TutorialDone,
 }
 
+/// A player-facing message kept outside the Rust implementation so copy can
+/// be reviewed, validated, and translated without changing game logic.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CopyDef {
+    pub id: String,
+    pub text: String,
+}
+
 #[derive(Debug, Clone)]
 pub struct GameData {
     pub config: GameConfig,
@@ -682,6 +692,7 @@ pub struct GameData {
     pub unlocks: Vec<UnlockDef>,
     pub equipment: Vec<EquipmentDef>,
     pub tutorial: Vec<TutorialStepDef>,
+    pub copy: DataRegistry<CopyDef>,
     pub balance: Balance,
 }
 
@@ -689,6 +700,14 @@ impl GameData {
     /// The equipment definition of an item id, if any.
     pub fn equipment_def(&self, id: &str) -> Option<&EquipmentDef> {
         self.equipment.iter().find(|e| e.id == id)
+    }
+
+    /// Return validated player-facing copy by its stable message id.
+    pub fn message(&self, id: &str) -> &str {
+        self.copy
+            .get(id)
+            .map(|message| message.text.as_str())
+            .unwrap_or_else(|| panic!("validated copy id is missing: {id}"))
     }
 
     /// Validate cross-file references before the runtime starts using them.
@@ -703,6 +722,7 @@ impl GameData {
         let unlocks: Vec<UnlockDef> = load_embedded_json_labeled("unlocks", UNLOCKS_JSON)?;
         let equipment: Vec<EquipmentDef> = load_embedded_json_labeled("equipment", EQUIPMENT_JSON)?;
         let tutorial: Vec<TutorialStepDef> = load_embedded_json_labeled("tutorial", TUTORIAL_JSON)?;
+        let copy = DataRegistry::from_embedded_json(COPY_JSON, "id")?;
         let balance = load_embedded_json_labeled("balance", BALANCE_JSON)?;
 
         let data = Self {
@@ -712,12 +732,10 @@ impl GameData {
             unlocks,
             equipment,
             tutorial,
+            copy,
             balance,
         };
         data.validate()?;
         Ok(data)
     }
 }
-
-#[cfg(test)]
-mod tests;

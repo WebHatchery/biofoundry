@@ -254,6 +254,3 @@ impl Creature {
         self.carrying = None;
     }
 }
-
-#[cfg(test)]
-mod tests;

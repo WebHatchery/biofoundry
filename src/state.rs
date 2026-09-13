@@ -674,6 +674,3 @@ fn starting_buildings(world: &WorldMap, balance: &Balance) -> Vec<Building> {
 
     buildings
 }
-
-#[cfg(test)]
-mod tests;

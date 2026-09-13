@@ -9,7 +9,7 @@
 mod carrier;
 mod cook;
 mod engineer;
-mod equipment;
+pub mod equipment;
 mod guard;
 mod hauling;
 mod janitor;

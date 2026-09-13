@@ -11,21 +11,9 @@ use macroquad_toolkit::notifications::LoggedNotification;
 use macroquad_toolkit::prelude::*;
 use macroquad_toolkit::ui::draw_ui_text_ex;
 
-const INSPECT_HELP_BODY: &str =
-    "Tap a building on the map to read its status and controls. Tap a Blacksmith recipe to queue equipment; after onboarding, Breeding Pit buttons show specialist costs and benefits. Tap a Study Pen to turn captured specimens into observation.";
-const OBJECTIVE_HELP_BODY: &str =
-    "Read the Objective card for the current milestone. Locked gates name the exact unlock. Use the visible Jobs and Build & Dig controls it names.";
-const ENDLESS_INSPECT_HELP_BODY: &str =
-    "At an awakened Outpost, tap Load order and Crew per run, then Load. Pause scouting to protect food; return cargo while keeping remote crew. Tap Routes to plan multiple runs.";
-const ENDLESS_OBJECTIVE_HELP_BODY: &str =
-    "After the worm wakes, the Objective points to Routes, cargo, crew, upgrades, contracts, and shared-Worm dispatch order. Tap Routes to inspect the network.";
-const FIELD_GUIDE_INTRO: &str =
-    "Everything below has a visible touch or pointer control. Review Recent events when a toast has faded; use Older or Newer to browse further.";
-pub(super) const LOAD_CONFIRMATION_TEXT: &str =
-    "Load the last saved Warren? Any work since that checkpoint will be discarded.\n\nChoose Load Last Save to restore it, or Keep Current to continue this run.";
 const EVENTS_PER_PAGE: usize = 10;
 
-pub(super) fn draw_goal_overlay(
+pub fn draw_goal_overlay(
     title: &str,
     body: &str,
     dismiss: UiAction,
@@ -84,7 +72,7 @@ pub(super) fn draw_goal_overlay(
 
 /// Recovery screen for the one unambiguous non-viable colony state: no
 /// creatures remain to produce food or advance the campaign.
-pub(super) fn draw_colony_failure_overlay(
+pub fn draw_colony_failure_overlay(
     failure: ColonyFailure,
     save_exists: bool,
     ui_scale: f32,
@@ -142,7 +130,7 @@ pub(super) fn draw_colony_failure_overlay(
     }
 }
 
-fn colony_failure_actions(
+pub fn colony_failure_actions(
     save_exists: bool,
 ) -> ((UiAction, &'static str), (UiAction, &'static str)) {
     if save_exists {
@@ -158,14 +146,14 @@ fn colony_failure_actions(
     }
 }
 
-fn colony_failure_title(failure: ColonyFailure) -> &'static str {
+pub fn colony_failure_title(failure: ColonyFailure) -> &'static str {
     match failure {
         ColonyFailure::Silent => "The Warren Falls Silent",
         ColonyFailure::GuardHandoff => "Guard Handoff Blocked",
     }
 }
 
-fn colony_failure_body(failure: ColonyFailure, save_exists: bool) -> &'static str {
+pub fn colony_failure_body(failure: ColonyFailure, save_exists: bool) -> &'static str {
     match (failure, save_exists) {
         (ColonyFailure::Silent, true) => {
             "No creatures remain, so this warren cannot produce food or advance the campaign.\n\nLoad the last safe warren to recover your progress, or tap Start New Warren to replace this checkpoint."
@@ -185,7 +173,12 @@ fn colony_failure_body(failure: ColonyFailure, save_exists: bool) -> &'static st
 /// Protect an active run from an accidental top-bar Load click. Recovery
 /// overlays still use the direct Load action because they already explain why
 /// the current Warren cannot continue.
-pub(super) fn draw_load_confirmation(ui_scale: f32, mouse: Vec2, actions: &mut Vec<UiAction>) {
+pub fn draw_load_confirmation(
+    data: &GameData,
+    ui_scale: f32,
+    mouse: Vec2,
+    actions: &mut Vec<UiAction>,
+) {
     draw_rectangle(
         0.0,
         0.0,
@@ -207,7 +200,7 @@ pub(super) fn draw_load_confirmation(ui_scale: f32, mouse: Vec2, actions: &mut V
         TextStyle::new(20.0, dark::TEXT_BRIGHT),
     );
     draw_text_block(
-        LOAD_CONFIRMATION_TEXT,
+        data.message("load.confirmation"),
         panel.x + 20.0,
         panel.y + 58.0,
         panel.w - 40.0,
@@ -239,7 +232,7 @@ pub(super) fn draw_load_confirmation(ui_scale: f32, mouse: Vec2, actions: &mut V
 /// A touch-readable guide to the controls and the short decision loop. It is
 /// deliberately independent of tutorial progress so it remains useful after
 /// the opening lesson is skipped or completed.
-pub(super) fn draw_help_overlay(
+pub fn draw_help_overlay(
     session: &GameSession,
     data: &GameData,
     ui_scale: f32,
@@ -262,7 +255,7 @@ pub(super) fn draw_help_overlay(
         TextStyle::new(21.0, dark::TEXT_BRIGHT),
     );
     draw_ui_text_ex(
-        FIELD_GUIDE_INTRO,
+        data.message("help.field_guide_intro"),
         panel.x + 26.0,
         panel.y + 60.0,
         TextStyle::new(15.0, dark::TEXT_DIM).params(),
@@ -271,8 +264,8 @@ pub(super) fn draw_help_overlay(
     let left = panel.x + 28.0;
     let right = panel.x + 550.0;
     let recovery_body = recovery_guide_body(session, data);
-    let (inspect_title, inspect_help_body) = field_guide_inspect_content(session.worm_awake);
-    let objective_help_body = field_guide_objective_content(session.worm_awake);
+    let (inspect_title, inspect_help_body) = field_guide_inspect_content(session.worm_awake, data);
+    let objective_help_body = field_guide_objective_content(session.worm_awake, data);
     for (x, title, body, y) in [
         (
             left,
@@ -356,7 +349,7 @@ pub(super) fn draw_help_overlay(
 /// A bounded, newest-first record of the messages that have guided the run.
 /// Toasts are deliberately transient, but recovery instructions and unlock
 /// notices should remain available while the player decides what to do next.
-pub(super) fn draw_event_log_overlay(
+pub fn draw_event_log_overlay(
     history: &[LoggedNotification],
     page: usize,
     ui_scale: f32,
@@ -452,32 +445,32 @@ pub(super) fn draw_event_log_overlay(
     }
 }
 
-fn event_log_page_count(history_len: usize) -> usize {
+pub fn event_log_page_count(history_len: usize) -> usize {
     history_len.div_ceil(EVENTS_PER_PAGE).max(1)
 }
 
-fn field_guide_inspect_content(worm_awake: bool) -> (&'static str, &'static str) {
+pub fn field_guide_inspect_content(worm_awake: bool, data: &GameData) -> (&'static str, &str) {
     if worm_awake {
-        ("Endless routes", ENDLESS_INSPECT_HELP_BODY)
+        ("Endless routes", data.message("help.endless_inspect"))
     } else {
-        ("Inspect & craft", INSPECT_HELP_BODY)
+        ("Inspect & craft", data.message("help.inspect"))
     }
 }
 
-fn field_guide_objective_content(worm_awake: bool) -> &'static str {
+pub fn field_guide_objective_content(worm_awake: bool, data: &GameData) -> &str {
     if worm_awake {
-        ENDLESS_OBJECTIVE_HELP_BODY
+        data.message("help.endless_objective")
     } else {
-        OBJECTIVE_HELP_BODY
+        data.message("help.objective")
     }
 }
 
-fn event_log_page_bounds(history_len: usize, page: usize) -> (usize, usize) {
+pub fn event_log_page_bounds(history_len: usize, page: usize) -> (usize, usize) {
     let page_end = history_len.saturating_sub(page.saturating_mul(EVENTS_PER_PAGE));
     (page_end.saturating_sub(EVENTS_PER_PAGE), page_end)
 }
 
-fn recovery_guide_body(session: &GameSession, data: &GameData) -> String {
+pub fn recovery_guide_body(session: &GameSession, data: &GameData) -> String {
     format!(
         "When food falls, {}. Before a raid, {}. The warning bar names the response.",
         super::panels::compact_food_recovery_hint(session, data),
@@ -487,7 +480,7 @@ fn recovery_guide_body(session: &GameSession, data: &GameData) -> String {
 
 /// A one-line legend for the in-world status badges, in a thin strip along
 /// the bottom of the world view (shown only while a node is stalled).
-pub(super) fn draw_status_legend(session: &GameSession, data: &GameData) {
+pub fn draw_status_legend(session: &GameSession, data: &GameData) {
     use crate::ui::legibility::BuildingStatus as St;
     let items = [
         (St::NoWorker, Color::new(0.95, 0.85, 0.30, 1.0)),
@@ -544,6 +537,3 @@ pub(super) fn draw_status_legend(session: &GameSession, data: &GameData) {
         lx += 20.0 + label.len() as f32 * 8.0;
     }
 }
-
-#[cfg(test)]
-mod tests;

@@ -1,0 +1,234 @@
+//! The sim is a pure function of (seed, inputs): same seed → same run, and
+//! a save/load roundtrip must not perturb it.
+
+use super::*;
+use biofoundry::state::creatures::Job;
+use biofoundry::state::outposts::{AutoRoutePriority, CargoPriority};
+use biofoundry::state::structures::{BuildSite, Building};
+
+#[test]
+fn ticks_accumulate_deterministically() {
+    let (data, mut session) = boot(42);
+    for _ in 0..600 {
+        tick(&mut session, &data);
+    }
+    assert_eq!(session.tick, 600);
+    assert!((sim_seconds(&session) - 60.0).abs() < 1e-3);
+}
+
+#[test]
+fn same_seed_same_outcome() {
+    let (data, mut a) = boot(7);
+    let (_, mut b) = boot(7);
+    for _ in 0..3000 {
+        tick(&mut a, &data);
+        tick(&mut b, &data);
+    }
+    assert_eq!(a.economy.ore_delivered_total, b.economy.ore_delivered_total);
+    assert!((a.economy.food - b.economy.food).abs() < 1e-3);
+    assert_eq!(a.creatures.len(), b.creatures.len());
+    for (ca, cb) in a.creatures.iter().zip(&b.creatures) {
+        assert_eq!(ca.task, cb.task);
+        assert!((ca.x - cb.x).abs() < 1e-4);
+    }
+}
+
+/// Equipment survives a save/load roundtrip (on creatures and in the
+/// stockpile pool).
+#[test]
+fn save_roundtrip_preserves_equipment() {
+    let (_data, mut session) = boot_on_config_seed();
+    session.creatures[0].equipment = Some("iron_pickaxe".to_owned());
+    session
+        .economy
+        .gear_stock
+        .insert("guard_blade".to_owned(), 2);
+
+    let json = serde_json::to_string(&session).expect("serialize");
+    let restored: GameSession = serde_json::from_str(&json).expect("deserialize");
+
+    assert_eq!(
+        restored.creatures[0].equipment.as_deref(),
+        Some("iron_pickaxe")
+    );
+    assert_eq!(
+        restored.economy.gear_stock.get("guard_blade").copied(),
+        Some(2)
+    );
+}
+
+#[test]
+fn save_roundtrip_preserves_outpost_dispatch_settings() {
+    let (data, mut session) = boot_on_config_seed();
+    let pos = session.spawn_tile();
+    session.ensure_outpost(pos);
+    session.outposts[0].crew_dispatch_limit = Some(2);
+    session.outposts[0].storage_upgraded = true;
+    session.outposts[0].crew_upgraded = true;
+    session.outposts[0].survey_upgraded = true;
+    session.outposts[0].resonator_upgraded = true;
+    session.outposts[0].deep_survey_upgraded = true;
+    session.outposts[0].signal_cache_upgraded = true;
+    session.outposts[0].waypoint_upgraded = true;
+    session.outposts[0].cargo_priority = CargoPriority::Food;
+    session.outposts[0].expedition_paused = true;
+    session.outposts[0].auto_return_cargo = true;
+    session.outposts[0].auto_resupply_food = true;
+    session.outposts[0].auto_load = true;
+    session.auto_route_cursor = 1;
+    session.auto_route_priority = AutoRoutePriority::Load;
+    session.outpost_charter_claimed = true;
+    session.outpost_archive_claims = 2;
+    session.outpost_relay_claimed = true;
+    session.outpost_convoy_claims = 1;
+
+    let json = serde_json::to_string(&session).expect("serialize");
+    let restored: GameSession = serde_json::from_str(&json).expect("deserialize");
+
+    assert_eq!(restored.outposts[0].crew_dispatch_limit, Some(2));
+    assert!(restored.outposts[0].storage_upgraded);
+    assert!(restored.outposts[0].crew_upgraded);
+    assert!(restored.outposts[0].survey_upgraded);
+    assert!(restored.outposts[0].resonator_upgraded);
+    assert!(restored.outposts[0].deep_survey_upgraded);
+    assert!(restored.outposts[0].signal_cache_upgraded);
+    assert!(restored.outposts[0].waypoint_upgraded);
+    assert_eq!(restored.outposts[0].cargo_priority, CargoPriority::Food);
+    assert!(restored.outposts[0].expedition_paused);
+    assert!(restored.outposts[0].auto_return_cargo);
+    assert!(restored.outposts[0].auto_resupply_food);
+    assert!(restored.outposts[0].auto_load);
+    assert_eq!(restored.auto_route_cursor, 1);
+    assert_eq!(restored.auto_route_priority, AutoRoutePriority::Load);
+    assert!(restored.outpost_charter_claimed);
+    assert_eq!(restored.outpost_archive_claims, 2);
+    assert!(restored.outpost_relay_claimed);
+    assert_eq!(restored.outpost_convoy_claims, 1);
+    assert_eq!(
+        biofoundry::simulation::outposts::storage_capacity(&restored.outposts[0], &data),
+        data.balance.outpost_upgraded_storage_cap
+    );
+    assert_eq!(
+        biofoundry::simulation::outposts::crew_capacity(&restored.outposts[0], &data),
+        data.balance.outpost_upgraded_capacity
+    );
+    assert_eq!(
+        biofoundry::simulation::outposts::ore_per_crew(&restored.outposts[0], &data),
+        data.balance.outpost_deep_survey_ore_per_crew
+    );
+    assert_eq!(
+        biofoundry::simulation::outposts::expedition_cycle_sec(&restored.outposts[0], &data),
+        data.balance.outpost_resonator_cycle_sec
+    );
+}
+
+#[test]
+fn save_roundtrip_preserves_shrine_feeding_pause() {
+    let (_data, mut session) = boot_on_config_seed();
+    session.worm_feeding_paused = true;
+
+    let json = serde_json::to_string(&session).expect("serialize");
+    let restored: GameSession = serde_json::from_str(&json).expect("deserialize");
+
+    assert!(restored.worm_feeding_paused);
+}
+
+#[test]
+fn save_roundtrip_preserves_player_decisions() {
+    let (data, mut session) = boot_on_config_seed();
+    session.tutorial_dismissed = true;
+    session.tutorial_reassigned = true;
+    session.victory_shown = true;
+    session.factory_shown = true;
+    session.worm_shown = true;
+    session.creatures[0].job = Job::Carrier;
+
+    let blacksmith_pos = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(pos, tile)| tile.walkable() && session.can_place_building(*pos))
+        .map(|(pos, _)| pos)
+        .expect("open blacksmith site");
+    let mut blacksmith = Building::new("blacksmith", blacksmith_pos);
+    blacksmith.orders = vec!["iron_pickaxe".to_owned(), "guard_blade".to_owned()];
+    session.buildings.push(blacksmith);
+
+    let dig_pos = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(_, tile)| **tile == biofoundry::state::world::Tile::Rock)
+        .map(|(pos, _)| pos)
+        .expect("rock designation");
+    session.dig_marks.insert(dig_pos);
+
+    let build_site_pos = session
+        .world
+        .tiles
+        .iter_with_pos()
+        .find(|(pos, tile)| tile.walkable() && session.can_place_building(*pos))
+        .map(|(pos, _)| pos)
+        .expect("open construction site");
+    session.build_sites.push(BuildSite {
+        kind: "farm".to_owned(),
+        pos: build_site_pos,
+        ore_needed: 6,
+        ore_delivered: 2,
+    });
+
+    let json = serde_json::to_string(&session).expect("serialize");
+    let restored: GameSession = serde_json::from_str(&json).expect("deserialize");
+
+    assert!(restored.tutorial_dismissed);
+    assert!(restored.tutorial_reassigned);
+    assert!(restored.victory_shown);
+    assert!(restored.factory_shown);
+    assert!(restored.worm_shown);
+    assert_eq!(restored.creatures[0].job, Job::Carrier);
+    assert_eq!(
+        restored.buildings_of("blacksmith").next().unwrap().orders,
+        ["iron_pickaxe".to_owned(), "guard_blade".to_owned()]
+    );
+    assert!(restored.dig_marks.contains(&dig_pos));
+    assert_eq!(restored.dig_marks.len(), 1);
+    assert_eq!(restored.build_sites.len(), 1);
+    assert_eq!(restored.build_sites[0].kind, "farm");
+    assert_eq!(restored.build_sites[0].pos, build_site_pos);
+    assert_eq!(restored.build_sites[0].ore_delivered, 2);
+
+    // Keep the data binding meaningful: this roundtrip remains valid for the
+    // same configured game that supplies the building and tutorial schema.
+    assert!(data.buildings.get("blacksmith").is_some());
+}
+
+/// Full-session serde roundtrip: a loaded save simulates identically
+/// to the original.
+#[test]
+fn save_roundtrip_preserves_simulation() {
+    let (data, mut original) = boot_on_config_seed();
+    // Make the state interesting first.
+    for _ in 0..1200 {
+        tick(&mut original, &data);
+    }
+
+    let json = serde_json::to_string(&original).expect("serialize");
+    let mut restored: GameSession = serde_json::from_str(&json).expect("deserialize");
+
+    for _ in 0..1200 {
+        tick(&mut original, &data);
+        tick(&mut restored, &data);
+    }
+
+    assert_eq!(
+        original.economy.ore_delivered_total,
+        restored.economy.ore_delivered_total
+    );
+    assert!((original.economy.food - restored.economy.food).abs() < 1e-3);
+    assert_eq!(original.creatures.len(), restored.creatures.len());
+    for (a, b) in original.creatures.iter().zip(&restored.creatures) {
+        assert_eq!(a.task, b.task);
+        assert!((a.x - b.x).abs() < 1e-4);
+        assert!((a.y - b.y).abs() < 1e-4);
+    }
+}

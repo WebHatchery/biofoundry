@@ -1,82 +1,42 @@
 # Biofoundry TODO
 
-This backlog records work identified while reviewing the updated `AGENTS.md`
-and `CODE_STANDARDS.md` on 2026-09-12. It focuses on standards gaps found in
-the current project rather than repeating items that already pass validation.
-
-## P0 — standards migrations
-
-- [ ] Move the legacy unit and integration tests out of `src/` and into the
-  crate's `tests/` directory. The current tree contains 92 source files with
-  test declarations and 515 legacy test functions. Preserve useful coverage,
-  split suites by responsibility, and remove the corresponding `#[cfg(test)]`,
-  `mod tests`, and path-based test wiring from implementation modules.
-- [ ] Add `src/lib.rs` as the public test seam for the binary-only crate, then
-  make the migrated tests exercise the public game, data, simulation, state,
-  and UI contracts. Keep implementation details private unless an intentional
-  public seam is required.
-- [ ] Reconcile `GAME_DEVELOPMENT_GUIDE.md` with
-  `rust_management/docs/GAME_DEVELOPMENT_GUIDE.md`. The project copy currently
-  adds the `roost_slug` example field, so either promote that documentation
-  change to the canonical source and sync it or remove the local-only drift.
-  The shared `check-project-docs.ps1` check must pass afterward.
-
-## P1 — structure and maintainability
-
-- [ ] Split the implementation files already at or above the 600-line
-  planning threshold before adding more behavior. Start with
-  `src/game.rs` (800 lines), `src/ui/hud/panels.rs` (789),
-  `src/game/capture_scenes/endless.rs` (791), `src/game/persistence.rs`
-  (757), `src/game/capture_scenes.rs` (754), `src/ui/hud/routes.rs` (763),
-  `src/ui/hud/inspect.rs` (761), and `src/ui/hud/objective.rs` (721).
-  Keep each extracted module cohesive and preserve the empty exception list in
-  the source gate.
-- [ ] Add a short `//!` module-purpose comment to the five implementation
-  modules that currently lack one: `src/simulation/outposts/milestones.rs`,
-  `src/ui/hud/inspect/layout.rs`, `src/ui/hud/inspect/study.rs`,
-  `src/ui/hud/panels/top_bar.rs`, and `src/ui/hud/panels/workforce.rs`.
-- [ ] Review test suites after migration against the five-case target per
-  major feature. Current umbrella suites are well above that target, including
-  `src/game/tests.rs` (44), `src/ui/hud/inspect/tests.rs` (40),
-  `src/ui/hud/routes/tests.rs` (37), `src/ui/hud/panels/tests.rs` (31),
-  `src/state/tests.rs` (31), `src/ui/hud/objective/tests.rs` (32), and
-  `src/simulation/tests/novel.rs` (27). Consolidate related inputs with
-  table-driven assertions where that improves signal; retain and explain
-  distinct regression coverage when five cases are not enough.
-- [ ] Correct the description at the top of `tests/code_standards.rs`: it says
-  the gate checks “non-test lines”, while the toolkit gate counts every
-  physical line, including tests, comments, attributes, and whitespace.
-
-## P1 — data and player-facing copy
-
-- [ ] Audit player-facing strings still embedded in Rust and move them into
-  typed JSON content/localization data under `assets/`, loaded through the
-  toolkit. The first areas are `src/ui/menu.rs`, `src/ui/hud.rs`,
-  `src/ui/legibility.rs`, `src/ui/hud/panels/`,
-  `src/ui/hud/inspect/`, and status/notification builders in `src/game.rs`.
-  Keep IDs, state keys, and semantic validation in Rust while making the copy
-  data-driven.
-- [ ] Add schema and semantic validation for the new copy tables: required
-  message IDs, references used by UI actions and tutorials, and no missing
-  player-facing strings at startup.
-
-## P2 — verification and workflow
-
-- [ ] Run a pointer/touch-only browser acceptance pass at common desktop and
-  compact sizes covering start, every tutorial step, core building and route
-  interactions, and save/load recovery. Replace duplicate captures in
-  `docs/verification/` and record any remaining keyboard-only or unclear
-  instruction in the relevant production documentation.
-- [ ] Add the project standards drift check to the repository workflow so a
-  local copy can no longer diverge silently from the canonical documents.
-
-## Already verified during this review
-
-- The project copies of `AGENTS.md`, `CODE_STANDARDS.md`, and
-  `MACROQUAD_TOOLKIT.md` match their canonical documents.
-- Game JSON is embedded and parsed through `macroquad_toolkit` with
-  project-local semantic validation; no project-local generic JSON loader was
-  found.
-- `publish.ps1`, `game_page.json`, and the root `catalog_thumbnail.png` are
-  present, and no `mod.rs` files or Rust files over the 800-line hard limit
-  were found.
+- [ ] Finish moving player-facing labels, notifications, and dynamic message
+  templates into typed JSON (`CODE_STANDARDS.md` §5.3). Start with
+  `src/game/messages.rs`, `src/game/persistence.rs`, `src/ui/menu.rs`, and
+  `src/ui/hud/`; include the tutorial overrides in `panels/tutorial.rs` and
+  derive their numeric goals from balance data. Extend required-ID and
+  template validation, and correct `docs/COPY_AUDIT.md` to reflect the scope.
+- [ ] Refactor functions exceeding the 100-line maximum into cohesive helpers
+  (§4.1). Prioritize `game_actions::apply_action` (614 lines),
+  `inspect::draw::draw_inspect_panel` (457),
+  `persistence::session_validation::validate_loaded_session` (346), and
+  `panels::draw_top_bar` (316); include the large capture-scene dispatchers
+  and remaining simulation, update, and rendering functions. Preserve behavior
+  and use context structs for long argument lists such as `draw_outpost_details`.
+- [ ] Plan cohesive splits before expanding the remaining implementation
+  modules above 600 lines (§2.2): `src/simulation/outposts.rs` (743),
+  `src/data.rs` (741), `src/game_actions.rs` (698),
+  `src/ui/hud/inspect/outpost.rs` (681), and `src/state.rs` (676).
+- [ ] Correct `tests/TEST_COVERAGE.md` and review suites against the target of
+  **no more than five cases per major feature** (§11.3), rather than its
+  current "at least five" interpretation. Consolidate related inputs and
+  document concrete reasons for retained exceptions without losing regressions.
+  Split near-limit suites by responsibility: `tests/unit/ui_hud_objective.rs`
+  and `ui_hud_inspect.rs` (798 lines each), `game.rs` (790), and
+  `simulation/novel.rs` (780); splitting files alone does not meet the target.
+- [ ] Remove the unused `data` parameter and `let _ = data` suppression from
+  `src/simulation/outposts.rs::tick_transit`; update production and test callers
+  (§1.4).
+- [ ] Handle audio and settings errors in `src/audio.rs` (§6.2): log failed
+  sound loads and settings writes, and distinguish absent settings from corrupt
+  or unreadable settings while preserving graceful fallback.
+- [ ] Enlarge the small Build & Dig, tutorial, and inspection controls in
+  `src/ui/hud/panels.rs`, `panels/tutorial.rs`, and `inspect/layout.rs`.
+  Address the 22–40-pixel targets recorded in
+  `docs/verification/pointer-touch-acceptance.md`; measure effective touch
+  targets after virtual-resolution scaling at desktop and compact sizes (§7.5).
+- [ ] Complete a live pointer/touch-only browser acceptance pass at 1280×720
+  and 800×450: start, every tutorial step, building, routes, pan/zoom, and
+  save/load recovery. Fix any inaccessible controls or unclear instructions,
+  update `docs/verification/pointer-touch-acceptance.md` with observed results,
+  and replace same-state screenshots directly in `docs/verification/` (§§7.5, 12).

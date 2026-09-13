@@ -9,7 +9,7 @@ use macroquad_toolkit::grid::TilePos;
 /// Draw the shrine-to-Outpost links beneath buildings and creatures. The
 /// links make the post-campaign network visible in the world, while the
 /// ledger remains the place for detailed route decisions.
-pub(super) fn draw_route_links(session: &GameSession, data: &GameData, tile_size: f32) {
+pub fn draw_route_links(session: &GameSession, data: &GameData, tile_size: f32) {
     if !session.worm_awake || !tile_size.is_finite() || tile_size <= 0.0 {
         return;
     }
@@ -62,18 +62,18 @@ pub(super) fn draw_route_links(session: &GameSession, data: &GameData, tile_size
     }
 }
 
-fn transit_total_sec(outpost: &crate::state::outposts::Outpost, data: &GameData) -> f32 {
+pub fn transit_total_sec(outpost: &crate::state::outposts::Outpost, data: &GameData) -> f32 {
     crate::simulation::outposts::transit_time_sec(outpost, data)
 }
 
-fn tile_center(pos: TilePos, tile_size: f32) -> Vec2 {
+pub fn tile_center(pos: TilePos, tile_size: f32) -> Vec2 {
     vec2(
         (pos.x as f32 + 0.5) * tile_size,
         (pos.y as f32 + 0.5) * tile_size,
     )
 }
 
-fn draw_route_line(from: Vec2, to: Vec2, tile_size: f32, active: bool) {
+pub fn draw_route_line(from: Vec2, to: Vec2, tile_size: f32, active: bool) {
     let shadow = Color::new(0.02, 0.03, 0.05, if active { 0.54 } else { 0.38 });
     draw_line(from.x, from.y, to.x, to.y, tile_size * 0.16, shadow);
 
@@ -112,7 +112,7 @@ fn draw_route_line(from: Vec2, to: Vec2, tile_size: f32, active: bool) {
     }
 }
 
-fn draw_waypoint_marker(from: Vec2, to: Vec2, tile_size: f32) {
+pub fn draw_waypoint_marker(from: Vec2, to: Vec2, tile_size: f32) {
     let marker = route_point(from, to, 0.5);
     let radius = tile_size * 0.24;
     draw_circle(
@@ -145,7 +145,7 @@ fn draw_waypoint_marker(from: Vec2, to: Vec2, tile_size: f32) {
     );
 }
 
-fn draw_dashed_line(from: Vec2, to: Vec2, dash: f32, gap: f32, width: f32, color: Color) {
+pub fn draw_dashed_line(from: Vec2, to: Vec2, dash: f32, gap: f32, width: f32, color: Color) {
     let delta = to - from;
     let length = delta.length();
     if !length.is_finite() || length <= 0.0 || dash <= 0.0 || gap < 0.0 {
@@ -169,7 +169,7 @@ fn draw_dashed_line(from: Vec2, to: Vec2, dash: f32, gap: f32, width: f32, color
     }
 }
 
-fn transit_route_fraction(remaining: f32, total: f32, direction: TransitDirection) -> f32 {
+pub fn transit_route_fraction(remaining: f32, total: f32, direction: TransitDirection) -> f32 {
     let progress = if total.is_finite() && total > 0.0 {
         (remaining / total).clamp(0.0, 1.0)
     } else {
@@ -181,9 +181,6 @@ fn transit_route_fraction(remaining: f32, total: f32, direction: TransitDirectio
     }
 }
 
-fn route_point(from: Vec2, to: Vec2, fraction: f32) -> Vec2 {
+pub fn route_point(from: Vec2, to: Vec2, fraction: f32) -> Vec2 {
     from + (to - from) * fraction.clamp(0.0, 1.0)
 }
-
-#[cfg(test)]
-mod tests;

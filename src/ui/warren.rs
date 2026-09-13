@@ -2,8 +2,8 @@
 //! creatures in camera space. Pure view — reads the session and draws.
 
 mod buildings;
-mod routes;
-mod sprites;
+pub mod routes;
+pub mod sprites;
 
 use crate::data::GameData;
 use crate::state::world::Tile;

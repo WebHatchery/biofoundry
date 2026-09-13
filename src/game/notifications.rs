@@ -6,7 +6,7 @@ use crate::simulation::TickReport;
 use crate::state::outposts::ExpeditionCompletion;
 use macroquad_toolkit::notifications::NotificationManager;
 
-pub(crate) fn famine_notice() -> &'static str {
+pub fn famine_notice() -> &'static str {
     "Famine! Stockpile empty — add food. Autosave is held; tap Save to keep this crisis state."
 }
 
@@ -129,7 +129,7 @@ pub(super) fn announce_outpost_milestones(
     awarded
 }
 
-pub(crate) fn format_expedition_completion(completion: ExpeditionCompletion) -> String {
+pub fn format_expedition_completion(completion: ExpeditionCompletion) -> String {
     if completion.ingots > 0 {
         format!(
             "Outpost haul · +{} ore · +{} ingot{} / -{} food.",

@@ -4,10 +4,7 @@ use super::{charter_summary, route_needs_attention};
 use crate::data::GameData;
 use crate::state::GameSession;
 
-pub(super) fn compact_route_network_summary(
-    session: &GameSession,
-    data: &GameData,
-) -> (String, String) {
+pub fn compact_route_network_summary(session: &GameSession, data: &GameData) -> (String, String) {
     let active = session
         .outposts
         .iter()

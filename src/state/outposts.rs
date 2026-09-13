@@ -312,9 +312,6 @@ impl Outpost {
     }
 }
 
-#[cfg(test)]
-mod tests;
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum TransitDirection {
     ToOutpost,

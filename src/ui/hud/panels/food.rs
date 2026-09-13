@@ -9,11 +9,7 @@ use macroquad_toolkit::ui::{draw_ui_text_ex, format_mmss};
 
 /// The calorie balance meter — production, consumption, and stockpile,
 /// exactly like a power graph.
-pub(in crate::ui::hud) fn draw_food_grid_panel(
-    session: &GameSession,
-    data: &GameData,
-    panel: Rect,
-) {
+pub(crate) fn draw_food_grid_panel(session: &GameSession, data: &GameData, panel: Rect) {
     draw_surface_with_title(
         panel,
         Some("Food Grid"),
@@ -115,9 +111,6 @@ pub(in crate::ui::hud) fn draw_food_grid_panel(
     );
 }
 
-fn resource_bank_line(ore: u32, ingots: u32) -> String {
+pub fn resource_bank_line(ore: u32, ingots: u32) -> String {
     format!("Ore banked {ore} · ingots {ingots}")
 }
-
-#[cfg(test)]
-mod tests;

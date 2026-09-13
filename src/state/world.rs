@@ -227,6 +227,3 @@ fn floor_positions(tiles: &FlatGrid<Tile>) -> Vec<TilePos> {
 fn pick<'a, T>(slice: &'a [T], rng: &mut SeededRng) -> Option<&'a T> {
     rng.choose(slice)
 }
-
-#[cfg(test)]
-mod tests;

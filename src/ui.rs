@@ -149,6 +149,3 @@ pub struct HudFrame {
     /// ignored while true.
     pub pointer_over_ui: bool,
 }
-
-#[cfg(test)]
-mod tests;

@@ -19,19 +19,24 @@ use macroquad_toolkit::notifications::{
 };
 use macroquad_toolkit::persistence::{slot_backup_exists, slot_exists};
 use macroquad_toolkit::prelude::{begin_virtual_ui_frame, dark, end_virtual_ui_frame, InputState};
+mod messages;
+pub use messages::{
+    advanced_building_hidden, auto_load_notice, auto_resupply_notice, auto_return_notice,
+    clear_replacement_confirmations, emit_touch_target_audit_report, progression_reaches_safe_beat,
+    report_touch_target_audit, simulation_blocked_by_modal, tile_world_center,
+    transit_completion_notice, transit_failure_notice, unlock_notice, warren_secured_notice,
+};
 
 mod capture_scenes;
 #[path = "game_actions.rs"]
-mod game_actions;
-mod input;
-mod notifications;
-mod persistence;
-pub(super) use notifications::format_expedition_completion;
-#[cfg(test)]
-mod tests;
+pub mod game_actions;
+pub mod input;
+pub mod notifications;
+pub mod persistence;
+mod render;
 
-#[cfg(test)]
-use persistence::{
+pub use notifications::format_expedition_completion;
+pub use persistence::{
     migrate_tutorial_progress, missing_save_notice, no_saved_slot_available,
     non_viable_save_notice, save_failure_banner, save_failure_notice, save_recovery_failure_banner,
     save_slot_available, should_restore_missing_primary,
@@ -160,7 +165,7 @@ impl Game {
     /// needed because safe hit-area growth uses the previous frame's control
     /// neighbours; reporting the first frame would measure a state the player
     /// never actually receives after the UI has settled.
-    pub(super) fn arm_touch_target_audit(&mut self) {
+    pub fn arm_touch_target_audit(&mut self) {
         self.touch_audit_frames = 2;
         macroquad_toolkit::ui::begin_target_audit();
     }
@@ -356,142 +361,8 @@ impl Game {
         }
     }
 
-    pub fn draw(&mut self) {
-        clear_background(dark::BACKGROUND);
-
-        if self.touch_audit_frames > 0 {
-            macroquad_toolkit::ui::begin_target_frame();
-        }
-
-        // Preserve readable text when the fixed 1280x720 layout is letterboxed
-        // into a smaller browser canvas. The toolkit keeps this bounded so the
-        // established candidate scale remains unchanged at the design size.
-        let ui_text_scale = macroquad_toolkit::ui::set_ui_text_scale_for_screen(
-            ui::LOGICAL_WIDTH,
-            ui::LOGICAL_HEIGHT,
-            1.25,
-        );
-
-        let actions = match &self.state {
-            GameState::Menu => {
-                let virtual_ui = begin_virtual_ui_frame(ui::LOGICAL_WIDTH, ui::LOGICAL_HEIGHT);
-                let actions = ui::menu::draw(
-                    &self.data,
-                    &virtual_ui,
-                    &self.menu_sprites,
-                    self.save_exists,
-                    self.settings_open,
-                    self.confirm_new_warren,
-                    self.audio.volume(),
-                );
-                end_virtual_ui_frame();
-                actions
-            }
-            GameState::Warren(session) => {
-                let hover = self.hover_tile(session);
-                let touch_tap = self.touch_tap.and_then(|screen| {
-                    let world = self.camera.screen_to_world(screen);
-                    input::tile_at_world(session, &self.data, world)
-                });
-
-                self.camera.begin();
-                ui::warren::draw_world(
-                    session,
-                    &self.data,
-                    &self.world_sprites,
-                    self.data.config.tile_size,
-                    &self.mode,
-                    hover,
-                );
-                set_default_camera();
-
-                let virtual_ui = begin_virtual_ui_frame(ui::LOGICAL_WIDTH, ui::LOGICAL_HEIGHT);
-                let frame = ui::hud::draw(
-                    session,
-                    &self.data,
-                    &virtual_ui,
-                    &self.hud_sprites,
-                    &self.mode,
-                    self.selected_building,
-                    ui::hud::HudOptions {
-                        help_open: self.help_open,
-                        event_log_open: self.event_log_open,
-                        event_log_page: self.event_log_page,
-                        event_history: self.notifications.history(),
-                        hud_panel: self.hud_panel,
-                        routes_open: self.routes_open,
-                        confirm_load: self.confirm_load,
-                        paused: self.paused,
-                        save_exists: self.save_exists,
-                        checkpoint_warning: self.checkpoint_warning,
-                        touch_position: self.touch_tap,
-                    },
-                );
-                end_virtual_ui_frame();
-
-                let mut actions = frame.actions;
-                // A claimed drag must not activate a HUD button when the
-                // browser delivers the touch/mouse release over that button.
-                if self.camera_input_claimed {
-                    actions.clear();
-                }
-                // Left-click routes to the world in every mode: tools act,
-                // Inspect selects the building under the cursor.
-                if !frame.pointer_over_ui && !self.camera_input_claimed {
-                    if let Some(tile) = touch_tap {
-                        actions.push(UiAction::WorldClick(tile));
-                    } else if is_mouse_button_released(MouseButton::Left) {
-                        if let Some(tile) = hover {
-                            actions.push(UiAction::WorldClick(tile));
-                        }
-                    }
-                }
-                actions
-            }
-        };
-
-        // Roll the HUD's visible controls into the next frame's neighbor map
-        // so the shared toolkit can grow their touch hit areas safely.
-        macroquad_toolkit::ui::end_frame_neighbours();
-
-        if self.touch_audit_frames > 0 {
-            self.touch_audit_frames -= 1;
-            if self.touch_audit_frames == 0 {
-                report_touch_target_audit();
-                macroquad_toolkit::ui::end_target_audit();
-            }
-        }
-
-        for action in actions {
-            self.events.push(action);
-        }
-
-        // The published game page reserves its lower-right corner for the
-        // Report a Bug widget and the tall Outpost inspection card both use
-        // the lower-right corner. Keep the toast stack anchored there while
-        // lifting it clear of the page chrome and shifting it left of the
-        // card's footprint.
-        // Modal guides already provide a larger surface for the same
-        // messages. Keep transient toasts behind that surface so they do not
-        // cover its controls or duplicate the recent-events list.
-        if !self.help_open && !self.routes_open {
-            self.notifications.draw_with_config_and_offset(
-                &NotificationRenderConfig {
-                    anchor: NotificationAnchor::BottomRight,
-                    // Notifications are already positioned in screen space.
-                    // Counter the logical HUD's readability multiplier so a
-                    // compact canvas does not enlarge the toast text past
-                    // its fixed screen-space row width.
-                    font_size: 16.0 / ui_text_scale,
-                    ..Default::default()
-                },
-                vec2(-250.0, -82.0),
-            );
-        }
-    }
-
     /// World tile under the mouse cursor, if inside the map.
-    fn hover_tile(&self, session: &GameSession) -> Option<TilePos> {
+    pub fn hover_tile(&self, session: &GameSession) -> Option<TilePos> {
         input::tile_at_world(
             session,
             &self.data,
@@ -499,7 +370,7 @@ impl Game {
         )
     }
 
-    fn world_click(&mut self, tile: TilePos) {
+    pub fn world_click(&mut self, tile: TilePos) {
         let mode = self.mode.clone();
         if mode == UiMode::Inspect {
             // Toggle-select the building under the cursor for inspection.
@@ -552,7 +423,7 @@ impl Game {
         }
     }
 
-    fn reassign(&mut self, from: Job, to: Job) {
+    pub fn reassign(&mut self, from: Job, to: Job) {
         let changed = if let GameState::Warren(session) = &mut self.state {
             let species = &self.data.species;
             session.reassign(from, to, |s| {
@@ -567,7 +438,7 @@ impl Game {
         }
     }
 
-    fn transition(&mut self, transition: StateTransition) {
+    pub fn transition(&mut self, transition: StateTransition) {
         match transition {
             StateTransition::StartWarren => {
                 let session = GameSession::new(&self.data, self.data.config.world_seed);
@@ -593,7 +464,7 @@ impl Game {
         }
     }
 
-    fn reset_camera_for(&mut self, session: &GameSession) {
+    pub fn reset_camera_for(&mut self, session: &GameSession) {
         let tile = self.data.config.tile_size;
         let (sx, sy) = session.world.spawn.to_f32();
         let center = vec2((sx + 0.5) * tile, (sy + 0.5) * tile);
@@ -604,197 +475,9 @@ impl Game {
 
     /// Center the map on a building selected through a HUD shortcut while
     /// preserving the camera's configured world bounds.
-    pub(super) fn focus_camera_on_tile(&mut self, tile: TilePos) {
+    pub fn focus_camera_on_tile(&mut self, tile: TilePos) {
         if let Some(center) = tile_world_center(tile, self.data.config.tile_size) {
             self.camera.pan(center - self.camera.target);
         }
     }
-}
-
-fn report_touch_target_audit() {
-    let mut report = String::new();
-    if !macroquad_toolkit::ui::neighbours_warm() {
-        report.push_str("touch targets: no settled controls were recorded\n");
-        emit_touch_target_audit_report(&report);
-        return;
-    }
-
-    if let Some((width, worst)) = macroquad_toolkit::ui::smallest_touchable_width(ui::LOGICAL_WIDTH)
-    {
-        report.push_str(&format!(
-            "touch targets: need a {:.0}px-wide window; worst is {}\n",
-            width, worst
-        ));
-    }
-    for (side, label) in macroquad_toolkit::ui::undersized_targets() {
-        report.push_str(&format!("touch targets: drawn {:.0}px — {}\n", side, label));
-    }
-    for (a, b, area) in macroquad_toolkit::ui::overlapping_targets() {
-        report.push_str(&format!(
-            "touch targets: {} and {} overlap by {:.0}px² once grown\n",
-            a, b, area
-        ));
-    }
-    emit_touch_target_audit_report(&report);
-}
-
-fn emit_touch_target_audit_report(report: &str) {
-    print!("{report}");
-    if let Ok(path) = std::env::var("BIOFOUNDRY_TOUCH_AUDIT_REPORT") {
-        if let Err(error) = std::fs::write(&path, report) {
-            eprintln!("touch targets: could not write {path}: {error}");
-        }
-    }
-}
-
-fn tile_world_center(tile: TilePos, tile_size: f32) -> Option<Vec2> {
-    if !tile_size.is_finite() || tile_size <= 0.0 {
-        return None;
-    }
-    let (x, y) = tile.to_f32();
-    Some(vec2((x + 0.5) * tile_size, (y + 0.5) * tile_size))
-}
-
-fn simulation_blocked_by_modal(
-    session: &GameSession,
-    data: &GameData,
-    help_open: bool,
-    routes_open: bool,
-    confirm_load: bool,
-) -> bool {
-    help_open
-        || routes_open
-        || confirm_load
-        || (session.won && !session.victory_shown)
-        || (session.factory_complete && !session.factory_shown)
-        || (session.worm_awake && !session.worm_shown)
-        || (!session.worm_awake && session.is_non_viable(data))
-}
-
-fn clear_replacement_confirmations(confirm_new_warren: &mut bool, confirm_load: &mut bool) {
-    *confirm_new_warren = false;
-    *confirm_load = false;
-}
-
-fn progression_reaches_safe_beat(report: &simulation::TickReport) -> bool {
-    report.wild.raid_survived
-        || report.wild.captured > 0
-        || !report.wild.unlocked.is_empty()
-        || report.wild.bred_beetle
-        || report.outpost_relay_awarded
-        || report.outpost_convoy_awarded > 0
-        || report.outpost_muster_awarded > 0
-        || report.outpost_concord_awarded
-        || report.outpost_circuit_awarded
-        || report.outpost_encore_awarded > 0
-        || report.outpost_chorus_awarded
-        || report.auto_load_started.is_some()
-}
-
-fn transit_completion_notice(completion: TransitCompletion) -> &'static str {
-    let payload = match (completion.cargo_units > 0, completion.passenger_count > 0) {
-        (true, true) => "cargo and crew delivered",
-        (true, false) => "cargo delivered",
-        (false, true) => "crew delivered",
-        (false, false) => "route complete",
-    };
-    match completion.direction {
-        TransitDirection::ToOutpost => match payload {
-            "cargo and crew delivered" => {
-                "The worm reaches the outpost — cargo and crew delivered."
-            }
-            "cargo delivered" => "The worm reaches the outpost — cargo delivered.",
-            "crew delivered" => "The worm reaches the outpost — crew delivered.",
-            _ => "The worm reaches the outpost — route complete.",
-        },
-        TransitDirection::ToShrine => match payload {
-            "cargo and crew delivered" => {
-                "The worm returns to the shrine — cargo and crew delivered."
-            }
-            "cargo delivered" => "The worm returns to the shrine — cargo delivered.",
-            "crew delivered" => "The worm returns to the shrine — crew delivered.",
-            _ => "The worm returns to the shrine — route complete.",
-        },
-    }
-}
-
-fn auto_return_notice() -> &'static str {
-    "Outpost hold full — cargo returning while scouts remain remote."
-}
-
-fn auto_resupply_notice() -> &'static str {
-    "Outpost scouts need food — a food-only resupply is on its way."
-}
-
-fn auto_load_notice() -> &'static str {
-    "Auto-load departed — cargo and available scouts are on the worm road."
-}
-
-fn transit_failure_notice() -> &'static str {
-    "The worm route failed — tap the outpost, then reactivate the route before trying again."
-}
-
-fn warren_secured_notice(session: &GameSession) -> &'static str {
-    if session.job_count(Job::Guard) > 0 {
-        "The warren is secure — onboarding complete."
-    } else {
-        "The reserve gate is secure — assign a Guard to finish onboarding."
-    }
-}
-
-fn unlock_notice(data: &GameData, session: &GameSession, name: &str) -> String {
-    let Some(unlock) = data.unlocks.iter().find(|unlock| unlock.name == name) else {
-        return format!("Unlocked: {name}");
-    };
-
-    let detail = match unlock.effect.as_str() {
-        "unlock_building" => unlock
-            .building
-            .as_deref()
-            .and_then(|id| data.buildings.get(id).map(|building| (id, building)))
-            .map(|(id, building)| {
-                if advanced_building_hidden(session, id) {
-                    "available in Build & Dig after onboarding".to_owned()
-                } else {
-                    format!("tap {} in Build & Dig", building.name)
-                }
-            })
-            .unwrap_or_else(|| "available in Build & Dig".to_owned()),
-        "unlock_creature" => {
-            let route = match unlock.id.as_str() {
-                "slime_janitor" => "tap Slime in Jobs".to_owned(),
-                "bat_courier" => "tap Bat in Jobs".to_owned(),
-                _ => data
-                    .species
-                    .get(&unlock.id)
-                    .map(|species| format!("tap {} in the Breeding Pit", species.name))
-                    .unwrap_or_else(|| "tap the specialist button in the Breeding Pit".to_owned()),
-            };
-            if crate::ui::legibility::advanced_systems_unlocked(session) {
-                route
-            } else {
-                format!("{route} after onboarding")
-            }
-        }
-        "guard_dps_mult" => format!("Guards deal +{:.0}% damage", (unlock.value - 1.0) * 100.0),
-        "farm_cap_mult" => format!("Farms hold +{:.0}% food", (unlock.value - 1.0) * 100.0),
-        "beetle_carry_mult" => {
-            format!("Beetle Haulers carry +{:.0}%", (unlock.value - 1.0) * 100.0)
-        }
-        "breed_interval_mult" => format!(
-            "Breeding Pits hatch {:.0}% sooner",
-            (1.0 - unlock.value) * 100.0
-        ),
-        "unlock_equipment" => format!("tap {} at the Blacksmith", unlock.name),
-        _ => unlock.description.trim_end_matches('.').to_owned(),
-    };
-
-    format!("Unlocked: {} — {detail}.", unlock.name)
-}
-
-fn advanced_building_hidden(session: &GameSession, building_id: &str) -> bool {
-    !matches!(
-        building_id,
-        "blacksmith" | "cook_pot" | "farm" | "mine" | "worm_shrine"
-    ) && !crate::ui::legibility::advanced_systems_unlocked(session)
 }

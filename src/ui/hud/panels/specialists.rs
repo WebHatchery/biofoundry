@@ -2,7 +2,7 @@
 
 use crate::data::GameData;
 
-pub(super) fn optional_specialist_label(species: &str, posted: bool) -> &'static str {
+pub fn optional_specialist_label(species: &str, posted: bool) -> &'static str {
     match (species, posted) {
         ("slime_janitor", false) => "Slime · clean",
         ("slime_janitor", true) => "Slime · posted",
@@ -15,11 +15,7 @@ pub(super) fn optional_specialist_label(species: &str, posted: bool) -> &'static
 /// Add the ongoing supply draw to an available specialist action. The first
 /// line keeps the familiar role/cost label; the second line makes the upkeep
 /// visible before a player commits to the optional recruit.
-pub(super) fn optional_specialist_button_label(
-    species: &str,
-    posted: bool,
-    data: &GameData,
-) -> String {
+pub fn optional_specialist_button_label(species: &str, posted: bool, data: &GameData) -> String {
     let label = optional_specialist_label(species, posted);
     if posted {
         return label.to_owned();
@@ -27,7 +23,7 @@ pub(super) fn optional_specialist_button_label(
     format!("{label}\n{}", optional_upkeep_label(species, data))
 }
 
-pub(super) fn optional_support_label(species: &str, cost: u32, local_count: usize) -> String {
+pub fn optional_support_label(species: &str, cost: u32, local_count: usize) -> String {
     match (species, local_count) {
         ("beetle", count) if count > 0 => format!("Beetle x{count} haul"),
         ("salamander", count) if count > 0 => format!("Salam x{count} forge"),
@@ -40,7 +36,7 @@ pub(super) fn optional_support_label(species: &str, cost: u32, local_count: usiz
 /// Add the ongoing supply draw to a Beetle or Salamander action. Existing
 /// local specialists keep their benefit label because the recruitment action
 /// is no longer available for them.
-pub(super) fn optional_support_button_label(
+pub fn optional_support_button_label(
     species: &str,
     cost: u32,
     local_count: usize,
@@ -53,7 +49,7 @@ pub(super) fn optional_support_button_label(
     format!("{label}\n{}", optional_upkeep_label(species, data))
 }
 
-fn optional_upkeep_label(species: &str, data: &GameData) -> String {
+pub fn optional_upkeep_label(species: &str, data: &GameData) -> String {
     if species == "salamander" {
         return format!(
             "{:.0} charcoal/batch",

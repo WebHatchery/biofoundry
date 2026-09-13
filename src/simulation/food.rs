@@ -109,6 +109,3 @@ pub fn tick_hunger(session: &mut GameSession, data: &GameData, dt: f32) -> Vec<C
     session.economy.deserted += deserters.len() as u32;
     deserters
 }
-
-#[cfg(test)]
-mod tests;

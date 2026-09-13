@@ -70,6 +70,3 @@ fn step_done(done: &TutorialDone, session: &GameSession, inputs: TutorialInputs)
         TutorialDone::WormAwake => session.worm_awake,
     }
 }
-
-#[cfg(test)]
-mod tests;

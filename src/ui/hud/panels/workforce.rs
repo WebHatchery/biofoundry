@@ -1,8 +1,10 @@
+//! Workforce pressure and specialist capacity labels for the HUD.
+
 use crate::data::GameData;
 use crate::state::creatures::Job;
 use crate::state::GameSession;
 
-pub(super) fn engineer_status_label(local: usize, total: usize) -> String {
+pub fn engineer_status_label(local: usize, total: usize) -> String {
     if local > 0 {
         format!("Engineer {local} local · Mine +25%")
     } else if total > 0 {
@@ -12,7 +14,7 @@ pub(super) fn engineer_status_label(local: usize, total: usize) -> String {
     }
 }
 
-pub(super) fn workforce_capacity_label(session: &GameSession, data: &GameData) -> String {
+pub fn workforce_capacity_label(session: &GameSession, data: &GameData) -> String {
     format!(
         "Idle {} · Local {}/{}",
         session.job_count(Job::Idle),
@@ -21,7 +23,7 @@ pub(super) fn workforce_capacity_label(session: &GameSession, data: &GameData) -
     )
 }
 
-pub(super) fn workforce_pressure_label(session: &GameSession, data: &GameData) -> Option<String> {
+pub fn workforce_pressure_label(session: &GameSession, data: &GameData) -> Option<String> {
     let capacity = session.local_warren_capacity(data);
     let local = session.local_creature_count();
     if local == 0 {

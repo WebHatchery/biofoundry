@@ -1,3 +1,5 @@
+//! Compact and desktop top-bar status copy for food, raids, and workforce.
+
 use crate::data::GameData;
 use crate::state::creatures::Job;
 use crate::state::GameSession;
@@ -5,7 +7,7 @@ use crate::state::GameSession;
 /// Compact population readout for the quiet top-left corner of the map HUD.
 /// Local room and idle workers are the two values that most often require a
 /// decision; remote workers only appear after the Warren has outposts.
-pub(crate) fn population_stats(session: &GameSession, data: &GameData) -> String {
+pub fn population_stats(session: &GameSession, data: &GameData) -> String {
     let local = session.local_creature_count();
     let capacity = session.local_warren_capacity(data);
     let idle = session.job_count(Job::Idle);
@@ -23,7 +25,7 @@ pub(crate) fn population_stats(session: &GameSession, data: &GameData) -> String
 
 /// Keep a combined food/raid banner short while naming the visible Guard
 /// control that resolves the incoming threat.
-pub(crate) fn compact_raid_defense_hint(session: &GameSession, data: &GameData) -> String {
+pub fn compact_raid_defense_hint(session: &GameSession, data: &GameData) -> String {
     if reassignable_job_count(session, data, Job::Guard) > 0 {
         "guards on watch".to_owned()
     } else if reassignable_job_count(session, data, Job::Idle) > 0 {
@@ -39,7 +41,7 @@ pub(crate) fn compact_raid_defense_hint(session: &GameSession, data: &GameData) 
 
 /// Shorten the opening response enough to share the top bar with its buttons.
 /// The full control names remain in the tutorial card beside the banner.
-pub(crate) fn compact_food_recovery_hint(session: &GameSession, data: &GameData) -> String {
+pub fn compact_food_recovery_hint(session: &GameSession, data: &GameData) -> String {
     if reassignable_job_count(session, data, Job::Idle) > 0 {
         "tap + Carrier or Cook".to_owned()
     } else {
@@ -54,7 +56,7 @@ pub(crate) fn compact_food_recovery_hint(session: &GameSession, data: &GameData)
 /// Compress alert guidance when the fixed HUD is letterboxed into a narrow
 /// browser canvas. The Jobs panel and tutorial card still carry the full
 /// wording; these banners only need to identify the next visible control.
-pub(crate) fn condensed_raid_defense_hint(session: &GameSession, data: &GameData) -> String {
+pub fn condensed_raid_defense_hint(session: &GameSession, data: &GameData) -> String {
     if reassignable_job_count(session, data, Job::Guard) > 0 {
         "guards ready".to_owned()
     } else if reassignable_job_count(session, data, Job::Idle) > 0 {
@@ -68,7 +70,7 @@ pub(crate) fn condensed_raid_defense_hint(session: &GameSession, data: &GameData
     }
 }
 
-pub(crate) fn condensed_food_recovery_hint(session: &GameSession, data: &GameData) -> String {
+pub fn condensed_food_recovery_hint(session: &GameSession, data: &GameData) -> String {
     if reassignable_job_count(session, data, Job::Idle) > 0 {
         "tap + Carrier/Cook".to_owned()
     } else {
@@ -80,11 +82,11 @@ pub(crate) fn condensed_food_recovery_hint(session: &GameSession, data: &GameDat
     }
 }
 
-pub(crate) fn compact_top_bar(ui_scale: f32) -> bool {
+pub fn compact_top_bar(ui_scale: f32) -> bool {
     ui_scale.is_finite() && ui_scale < 0.9
 }
 
-pub(crate) fn reassignable_job_count(session: &GameSession, data: &GameData, job: Job) -> usize {
+pub fn reassignable_job_count(session: &GameSession, data: &GameData, job: Job) -> usize {
     session
         .creatures
         .iter()

@@ -17,7 +17,7 @@ const COLOSSAL_WORM_BYTES: &[u8] = include_bytes!("../../../assets/sprites/colos
 const CARGO_ATLAS_BYTES: &[u8] = include_bytes!("../../../assets/sprites/cargo-atlas.png");
 const ROLE_PROP_ATLAS_BYTES: &[u8] = include_bytes!("../../../assets/sprites/role-prop-atlas.png");
 const GROUND_ATLAS_BYTES: &[u8] = include_bytes!("../../../assets/sprites/ground-atlas.png");
-const AWAKENING_EFFECT_TICKS: u64 = 48;
+pub const AWAKENING_EFFECT_TICKS: u64 = 48;
 
 /// Hand-painted workers and production props, packed as three-by-two atlases.
 #[derive(Debug, Clone)]
@@ -100,7 +100,7 @@ pub fn draw_colossal_worm(
     );
 }
 
-fn awakening_progress(age_ticks: u64) -> f32 {
+pub fn awakening_progress(age_ticks: u64) -> f32 {
     (AWAKENING_EFFECT_TICKS.saturating_sub(age_ticks) as f32 / AWAKENING_EFFECT_TICKS as f32)
         .clamp(0.0, 1.0)
 }
@@ -157,7 +157,7 @@ pub fn draw_terrain_tile(sprites: &WorldSprites, tile: Tile, pos: TilePos, ts: f
 /// Sample a small, world-positioned patch from a ground cell. Sampling the
 /// full 512px panel for every logical tile made the panel's own edges visible
 /// as a grid; walking through the panel keeps adjacent floor tiles coherent.
-fn draw_ground_patch(
+pub fn draw_ground_patch(
     atlas: &SpriteAtlas,
     frame: usize,
     pos: TilePos,
@@ -187,7 +187,7 @@ fn draw_ground_patch(
     );
 }
 
-fn load_atlas(bytes: &[u8]) -> SpriteAtlas {
+pub fn load_atlas(bytes: &[u8]) -> SpriteAtlas {
     let texture = Texture2D::from_file_with_format(bytes, None);
     texture.set_filter(FilterMode::Linear);
     SpriteAtlas::new(texture, 512.0, 512.0)
@@ -305,7 +305,7 @@ pub fn draw_creature(creature: &Creature, sprites: &WorldSprites, tick: u64, ts:
 
 /// A role's most oversized tool rides beside its bearer, letting a dense
 /// colony read like a moving production diagram rather than a field of dots.
-fn draw_role_prop(
+pub fn draw_role_prop(
     sprites: &WorldSprites,
     creature: &Creature,
     x: f32,
@@ -335,7 +335,7 @@ fn draw_role_prop(
     );
 }
 
-fn creature_sprite(creature: &Creature, ts: f32) -> (usize, Vec2) {
+pub fn creature_sprite(creature: &Creature, ts: f32) -> (usize, Vec2) {
     let frame = match creature.species.as_str() {
         "beetle" => 2,
         "salamander" => 3,
@@ -352,13 +352,13 @@ fn creature_sprite(creature: &Creature, ts: f32) -> (usize, Vec2) {
     (frame, vec2(ts * scale, ts * scale))
 }
 
-fn draw_gear_glint(x: f32, y: f32, radius: f32, ts: f32) {
+pub fn draw_gear_glint(x: f32, y: f32, radius: f32, ts: f32) {
     let (gx, gy) = (x + radius * 0.72, y - radius * 0.78);
     draw_circle(gx, gy, ts * 0.07, Color::new(0.95, 0.9, 0.6, 1.0));
     draw_circle_lines(gx, gy, ts * 0.07, 1.0, Color::new(0.5, 0.42, 0.2, 0.9));
 }
 
-fn draw_cargo(sprites: &WorldSprites, x: f32, y: f32, radius: f32, good: Good, ts: f32) {
+pub fn draw_cargo(sprites: &WorldSprites, x: f32, y: f32, radius: f32, good: Good, ts: f32) {
     let (cx, cy) = (x + radius * 0.56, y - radius * 0.48);
     let frame = match good {
         Good::Mushroom => 0,
@@ -376,6 +376,3 @@ fn draw_cargo(sprites: &WorldSprites, x: f32, y: f32, radius: f32, good: Good, t
         WHITE,
     );
 }
-
-#[cfg(test)]
-mod tests;

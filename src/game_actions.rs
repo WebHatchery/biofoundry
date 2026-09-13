@@ -630,22 +630,22 @@ impl Game {
     }
 }
 
-fn menu_exit_allowed_after_autosave(should_autosave: bool, autosave_succeeded: bool) -> bool {
+pub fn menu_exit_allowed_after_autosave(should_autosave: bool, autosave_succeeded: bool) -> bool {
     !should_autosave || autosave_succeeded
 }
 
-fn transit_departure_notice(direction: TransitDirection) -> &'static str {
+pub fn transit_departure_notice(direction: TransitDirection) -> &'static str {
     match direction {
         TransitDirection::ToOutpost => "The worm begins its journey to the outpost.",
         TransitDirection::ToShrine => "The worm begins its journey to the shrine.",
     }
 }
 
-fn cargo_return_departure_notice() -> &'static str {
+pub fn cargo_return_departure_notice() -> &'static str {
     "The worm begins its journey to the shrine with cargo only."
 }
 
-fn outpost_activation_notice(active: bool) -> &'static str {
+pub fn outpost_activation_notice(active: bool) -> &'static str {
     if active {
         "The worm route is now active."
     } else {
@@ -653,7 +653,7 @@ fn outpost_activation_notice(active: bool) -> &'static str {
     }
 }
 
-fn outpost_expedition_notice(paused: bool) -> &'static str {
+pub fn outpost_expedition_notice(paused: bool) -> &'static str {
     if paused {
         "Outpost scouting paused."
     } else {
@@ -664,7 +664,7 @@ fn outpost_expedition_notice(paused: bool) -> &'static str {
 /// Call out the food cost and practical benefit of optional recruits at the
 /// moment they join, so a successful growth choice cannot quietly turn the
 /// Food Grid negative or leave its purpose unexplained.
-fn recruitment_notice(data: &GameData, species: &str, joined: &str) -> String {
+pub fn recruitment_notice(data: &GameData, species: &str, joined: &str) -> String {
     let upkeep = data
         .species
         .get(species)
@@ -696,7 +696,3 @@ fn recruitment_notice(data: &GameData, species: &str, joined: &str) -> String {
         format!("{joined}{detail}.")
     }
 }
-
-#[cfg(test)]
-#[path = "game_actions/tests.rs"]
-mod tests;

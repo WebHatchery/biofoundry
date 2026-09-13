@@ -1,18 +1,20 @@
+//! Shared geometry and recipe rows for building inspection cards.
+
 use crate::ui::{LOGICAL_HEIGHT, LOGICAL_WIDTH};
 use macroquad::prelude::Rect;
 
-pub(super) struct InspectionLayout {
-    pub(super) panel: Rect,
-    pub(super) compact_outpost: bool,
-    pub(super) content_x: f32,
-    pub(super) content_y: f32,
-    pub(super) outpost_button_height: f32,
-    pub(super) outpost_button_step: f32,
-    pub(super) line_step: f32,
+pub struct InspectionLayout {
+    pub panel: Rect,
+    pub compact_outpost: bool,
+    pub content_x: f32,
+    pub content_y: f32,
+    pub outpost_button_height: f32,
+    pub outpost_button_step: f32,
+    pub line_step: f32,
 }
 
 impl InspectionLayout {
-    pub(super) fn new(
+    pub fn new(
         kind: &str,
         compact: bool,
         equipment_count: usize,
@@ -51,7 +53,7 @@ impl InspectionLayout {
     }
 }
 
-fn inspection_panel_height(
+pub fn inspection_panel_height(
     kind: &str,
     compact: bool,
     equipment_count: usize,
@@ -72,11 +74,7 @@ fn inspection_panel_height(
     }
 }
 
-pub(super) fn inspection_button_metrics(
-    kind: &str,
-    compact: bool,
-    equipment_count: usize,
-) -> (f32, f32) {
+pub fn inspection_button_metrics(kind: &str, compact: bool, equipment_count: usize) -> (f32, f32) {
     if compact && kind == "worm_shrine" {
         // The shrine is a critical-path handoff. Its pause/resume action must
         // remain a full touch target even when the canvas is 800x450.
@@ -94,9 +92,6 @@ pub(super) fn inspection_button_metrics(
     }
 }
 
-pub(super) fn blacksmith_recipe_rows(equipment_count: usize) -> usize {
+pub fn blacksmith_recipe_rows(equipment_count: usize) -> usize {
     equipment_count.div_ceil(2)
 }
-
-#[cfg(test)]
-mod tests;

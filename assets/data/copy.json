@@ -1,0 +1,38 @@
+[
+  {
+    "id": "menu.tagline",
+    "text": "Every conveyor belt is a creature with needs."
+  },
+  {
+    "id": "menu.footer_hint",
+    "text": "Feed the warren · forge with living furnaces · awaken the Colossal Worm"
+  },
+  {
+    "id": "menu.new_warren_confirmation",
+    "text": "Starting New Warren will replace the current autosave.\n\nChoose Start New Warren to begin again, or Keep Save to return."
+  },
+  {
+    "id": "help.inspect",
+    "text": "Tap a building on the map to read its status and controls. Tap a Blacksmith recipe to queue equipment; after onboarding, Breeding Pit buttons show specialist costs and benefits. Tap a Study Pen to turn captured specimens into observation."
+  },
+  {
+    "id": "help.objective",
+    "text": "Read the Objective card for the current milestone. Locked gates name the exact unlock. Use the visible Jobs and Build & Dig controls it names."
+  },
+  {
+    "id": "help.endless_inspect",
+    "text": "At an awakened Outpost, tap Load order and Crew per run, then Load. Pause scouting to protect food; return cargo while keeping remote crew. Tap Routes to plan multiple runs."
+  },
+  {
+    "id": "help.endless_objective",
+    "text": "After the worm wakes, the Objective points to Routes, cargo, crew, upgrades, contracts, and shared-Worm dispatch order. Tap Routes to inspect the network."
+  },
+  {
+    "id": "help.field_guide_intro",
+    "text": "Everything below has a visible touch or pointer control. Review Recent events when a toast has faded; use Older or Newer to browse further."
+  },
+  {
+    "id": "load.confirmation",
+    "text": "Load the last saved Warren? Any work since that checkpoint will be discarded.\n\nChoose Load Last Save to restore it, or Keep Current to continue this run."
+  }
+]

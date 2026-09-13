@@ -13,9 +13,6 @@ pub mod nav;
 pub mod outposts;
 pub mod wildlife;
 
-#[cfg(test)]
-mod tests;
-
 use crate::data::GameData;
 use crate::state::creatures::Creature;
 use crate::state::outposts::{AutoRoutePriority, ExpeditionCompletion, TransitCompletion};

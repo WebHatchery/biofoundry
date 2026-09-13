@@ -4,7 +4,7 @@ use crate::data::GameData;
 use crate::state::GameSession;
 use crate::ui::hud::requirements::unlock_requirement_progress;
 
-pub(super) fn breed_label(id: &str, name: &str, cost: u32, data: &GameData) -> String {
+pub fn breed_label(id: &str, name: &str, cost: u32, data: &GameData) -> String {
     match id {
         "hobgoblin" => {
             let work = data
@@ -33,7 +33,7 @@ pub(super) fn breed_label(id: &str, name: &str, cost: u32, data: &GameData) -> S
 /// Add the ongoing food draw to an available bred-specialist action. The
 /// benefit and one-time ingot price stay on the first line; the second line
 /// makes the continuing cost visible before the player commits.
-pub(super) fn breed_button_label(id: &str, name: &str, cost: u32, data: &GameData) -> String {
+pub fn breed_button_label(id: &str, name: &str, cost: u32, data: &GameData) -> String {
     let label = breed_label(id, name, cost, data);
     let Some(species) = data.species.get(id) else {
         return label;
@@ -51,7 +51,7 @@ pub(super) fn breed_button_label(id: &str, name: &str, cost: u32, data: &GameDat
     )
 }
 
-pub(super) fn breeding_unlock_hint(
+pub fn breeding_unlock_hint(
     session: &GameSession,
     data: &GameData,
     unlock: &str,

@@ -380,7 +380,6 @@ Only `title` is required; the publisher derives defaults for omitted values:
 {
   "title": "My Game",
   "wasm": "my_game",
-  "roost_slug": "rust_my_game",
   "status": { "text": "In Development", "class": "in-development" },
   "controls_hint": "Tap the visible controls to play",
   "canvas_rendering": "pixelated",

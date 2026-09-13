@@ -1,3 +1,5 @@
+//! Progression checks and rewards for the Worm Road milestone chain.
+
 use crate::data::GameData;
 use crate::state::GameSession;
 

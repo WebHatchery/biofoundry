@@ -101,7 +101,7 @@ impl BuildingStatus {
 }
 
 /// Is any creature of `job` currently working (or waiting) at `pos`?
-fn staffed_at(session: &GameSession, pos: TilePos, job: Job) -> bool {
+pub fn staffed_at(session: &GameSession, pos: TilePos, job: Job) -> bool {
     session.creatures.iter().any(|c| {
         !c.is_remote()
             && (c.job == job || (job == Job::Miner && c.job == Job::Engineer))
@@ -239,7 +239,7 @@ pub fn building_status(
     }
 }
 
-fn requires_local_route(kind: &str) -> bool {
+pub fn requires_local_route(kind: &str) -> bool {
     matches!(
         kind,
         "farm" | "mine" | "cook_pot" | "blacksmith" | "kiln" | "smelter" | "feeding_trough"
@@ -249,14 +249,14 @@ fn requires_local_route(kind: &str) -> bool {
 /// Whether the Shrine is below the food reserve needed to keep its offerings
 /// running. Kept beside the map status so the map badge and inspection card
 /// can share the same blocker definition.
-pub(crate) fn shrine_waiting_for_food(session: &GameSession, data: &GameData) -> bool {
+pub fn shrine_waiting_for_food(session: &GameSession, data: &GameData) -> bool {
     session.worm_fed < data.balance.worm_awaken_at
         && session.economy.food <= data.balance.worm_feed_reserve
 }
 
 /// Whether the Shrine has earned another food offering but cannot spend the
 /// next ingot without dipping below the protected bank reserve.
-pub(crate) fn shrine_waiting_for_ingots(session: &GameSession, data: &GameData) -> bool {
+pub fn shrine_waiting_for_ingots(session: &GameSession, data: &GameData) -> bool {
     if session.worm_fed >= data.balance.worm_awaken_at {
         return session.worm_ingots_fed < data.balance.worm_awaken_ingots
             && session.economy.ingots_stock <= data.balance.worm_ingot_reserve;
@@ -272,7 +272,7 @@ pub(crate) fn shrine_waiting_for_ingots(session: &GameSession, data: &GameData) 
         && session.economy.ingots_stock <= data.balance.worm_ingot_reserve
 }
 
-fn blacksmith_needs_ore(building: &Building, data: &GameData) -> bool {
+pub fn blacksmith_needs_ore(building: &Building, data: &GameData) -> bool {
     let has_ore = building.stock(Good::Ore) >= data.balance.smith_batch_ore as f32;
     if has_ore {
         return false;
@@ -306,6 +306,3 @@ pub fn pending_hauls(session: &GameSession) -> usize {
         .count();
     n
 }
-
-#[cfg(test)]
-mod tests;

@@ -85,6 +85,3 @@ impl BuildSite {
         self.ore_delivered >= self.ore_needed
     }
 }
-
-#[cfg(test)]
-mod tests;

@@ -12,11 +12,11 @@ use macroquad::prelude::*;
 use macroquad_toolkit::grid::TilePos;
 use macroquad_toolkit::prelude::*;
 
-pub(super) fn local_mine_worker_at(creature: &Creature, pos: TilePos) -> bool {
+pub fn local_mine_worker_at(creature: &Creature, pos: TilePos) -> bool {
     !creature.is_remote() && matches!(&creature.task, Task::WorkMine(p) if *p == pos)
 }
 
-pub(super) fn mine_staffing_label(staffed: usize, slots: u32, deposit_exhausted: bool) -> String {
+pub fn mine_staffing_label(staffed: usize, slots: u32, deposit_exhausted: bool) -> String {
     if deposit_exhausted {
         "Deposit exhausted".to_owned()
     } else if staffed == 0 {
@@ -26,7 +26,7 @@ pub(super) fn mine_staffing_label(staffed: usize, slots: u32, deposit_exhausted:
     }
 }
 
-pub(super) fn waste_inspection_hint(
+pub fn waste_inspection_hint(
     session: &GameSession,
     data: &GameData,
     building: &Building,
@@ -53,7 +53,7 @@ pub(super) fn waste_inspection_hint(
     format!("Waste {:.1} · {action}", building.waste)
 }
 
-pub(super) fn local_mine_staffed_at(creature: &Creature, pos: TilePos) -> bool {
+pub fn local_mine_staffed_at(creature: &Creature, pos: TilePos) -> bool {
     !creature.is_remote()
         && (creature.job == Job::Miner || creature.job == Job::Engineer)
         && match &creature.task {
@@ -62,7 +62,7 @@ pub(super) fn local_mine_staffed_at(creature: &Creature, pos: TilePos) -> bool {
         }
 }
 
-pub(super) fn outpost_return_label(cargo: u32, crew: usize) -> String {
+pub fn outpost_return_label(cargo: u32, crew: usize) -> String {
     match (cargo > 0, crew > 0) {
         (true, true) => format!("Send {cargo} cargo + {crew} crew to shrine"),
         (true, false) => format!("Send {cargo} cargo to shrine"),
@@ -71,11 +71,11 @@ pub(super) fn outpost_return_label(cargo: u32, crew: usize) -> String {
     }
 }
 
-pub(super) fn outpost_cargo_only_return_label(cargo: u32) -> String {
+pub fn outpost_cargo_only_return_label(cargo: u32) -> String {
     format!("Send {cargo} cargo · keep crew")
 }
 
-pub(super) fn outpost_load_hint(
+pub fn outpost_load_hint(
     session: &GameSession,
     data: &GameData,
     outpost: &Outpost,
@@ -104,8 +104,7 @@ pub(super) fn outpost_load_hint(
     }
 }
 
-#[cfg(test)]
-pub(super) fn outpost_expedition_hint(data: &GameData, outpost: &Outpost) -> Option<String> {
+pub fn outpost_expedition_hint(data: &GameData, outpost: &Outpost) -> Option<String> {
     expedition_hint_for_state(
         outpost,
         crate::simulation::outposts::expedition_state(outpost, data),
@@ -113,7 +112,7 @@ pub(super) fn outpost_expedition_hint(data: &GameData, outpost: &Outpost) -> Opt
     )
 }
 
-pub(super) fn outpost_expedition_hint_with_session(
+pub fn outpost_expedition_hint_with_session(
     session: &GameSession,
     data: &GameData,
     outpost: &Outpost,
@@ -125,7 +124,7 @@ pub(super) fn outpost_expedition_hint_with_session(
     )
 }
 
-fn expedition_hint_for_state(
+pub fn expedition_hint_for_state(
     outpost: &Outpost,
     state: crate::simulation::outposts::ExpeditionState,
     cycle: f32,
@@ -166,7 +165,7 @@ fn expedition_hint_for_state(
 
 /// Give every inspected building the same first-read answer: is it working,
 /// stalled, paused, or on a route that needs attention?
-pub(in crate::ui::hud) fn inspect_status(
+pub fn inspect_status(
     session: &GameSession,
     data: &GameData,
     building: &Building,
@@ -265,7 +264,7 @@ pub(in crate::ui::hud) fn inspect_status(
     }
 }
 
-fn worm_shrine_status(session: &GameSession, data: &GameData) -> (&'static str, Color) {
+pub fn worm_shrine_status(session: &GameSession, data: &GameData) -> (&'static str, Color) {
     if session.worm_awake {
         ("Awakened", dark::POSITIVE)
     } else if session.worm_feeding_paused {
@@ -279,14 +278,14 @@ fn worm_shrine_status(session: &GameSession, data: &GameData) -> (&'static str, 
     }
 }
 
-pub(super) fn transit_destination(direction: TransitDirection) -> &'static str {
+pub fn transit_destination(direction: TransitDirection) -> &'static str {
     match direction {
         TransitDirection::ToOutpost => "outpost",
         TransitDirection::ToShrine => "shrine",
     }
 }
 
-pub(super) fn transit_payload_line(transit: &WormTransit) -> String {
+pub fn transit_payload_line(transit: &WormTransit) -> String {
     let cargo = transit
         .ore
         .saturating_add(transit.ingots)
@@ -297,7 +296,7 @@ pub(super) fn transit_payload_line(transit: &WormTransit) -> String {
     )
 }
 
-pub(super) fn outpost_has_loadable_payload(
+pub fn outpost_has_loadable_payload(
     session: &GameSession,
     data: &GameData,
     cargo: u32,
@@ -315,7 +314,7 @@ pub(super) fn outpost_has_loadable_payload(
     outpost_has_loadable_cargo(session, data, cargo, capacity) || crew_ready
 }
 
-fn outpost_has_loadable_cargo(
+pub fn outpost_has_loadable_cargo(
     session: &GameSession,
     data: &GameData,
     cargo: u32,

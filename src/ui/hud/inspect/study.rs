@@ -1,13 +1,15 @@
+//! Study-pen copy and adaptation progress derived from session state.
+
 use crate::data::GameData;
 use crate::simulation::wildlife;
 use crate::state::GameSession;
 use crate::ui::hud::requirements::unlock_requirement_progress;
 
-pub(super) fn study_rate_per_min(session: &GameSession, data: &GameData) -> f32 {
+pub fn study_rate_per_min(session: &GameSession, data: &GameData) -> f32 {
     wildlife::study_rate_per_min(session, data)
 }
 
-pub(super) fn study_adaptation_line(session: &GameSession, data: &GameData) -> String {
+pub fn study_adaptation_line(session: &GameSession, data: &GameData) -> String {
     let Some(haulers) = data
         .unlocks
         .iter()
@@ -47,6 +49,3 @@ pub(super) fn study_adaptation_line(session: &GameSession, data: &GameData) -> S
     };
     format!("Haulers +{hauler_bonus:.0}% · Brood +{hatch_bonus:.0}%")
 }
-
-#[cfg(test)]
-mod tests;

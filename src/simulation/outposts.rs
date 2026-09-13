@@ -324,7 +324,6 @@ fn auto_load_ready(session: &GameSession, data: &GameData, outpost: &Outpost) ->
         && has_loadable_payload(session, data, outpost)
 }
 
-#[cfg(test)]
 pub fn expedition_state(outpost: &Outpost, data: &GameData) -> ExpeditionState {
     expedition_state_with_route_bonus(outpost, data, 0, 0.0, 0)
 }
