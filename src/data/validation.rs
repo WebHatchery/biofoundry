@@ -32,6 +32,14 @@ pub const REQUIRED_COPY_IDS: &[&str] = &[
     "help.endless_objective",
     "help.field_guide_intro",
     "load.confirmation",
+    "storage.mushrooms",
+    "storage.wood",
+    "storage.charcoal",
+    "storage.range",
+    "storage.supply",
+    "storage.change",
+    "storage.cycle",
+    "storage.empty_first",
 ];
 
 pub(super) fn validate(data: &GameData) -> Result<(), String> {
@@ -179,6 +187,14 @@ fn validate_registry_ids(data: &GameData) -> Result<(), String> {
 
 fn validate_building_references(data: &GameData) -> Result<(), String> {
     for building in data.buildings.iter().map(|(_, building)| building) {
+        if let Some(storage) = &building.storage {
+            if storage.capacity == 0 || storage.supply_radius == 0 {
+                return Err(format!(
+                    "building '{}' storage capacity and radius must be positive",
+                    building.id
+                ));
+            }
+        }
         if let Some(unlock) = &building.requires_unlock {
             if !data.unlocks.iter().any(|candidate| candidate.id == *unlock) {
                 return Err(format!(

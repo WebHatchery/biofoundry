@@ -93,6 +93,14 @@
     "requires_unlock": "worm_transit"
   },
   {
+    "id": "material_stockpile",
+    "name": "Material Stockpile",
+    "cost_ore": 6,
+    "buildable": true,
+    "requires_unlock": null,
+    "storage": { "capacity": 24, "supply_radius": 6 }
+  },
+  {
     "id": "stockpile",
     "name": "Stockpile",
     "cost_ore": 0,

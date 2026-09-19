@@ -38,6 +38,44 @@ pub(super) fn draw(
         "worm_shrine" => draw_worm_shrine(session, data, building, x, y, tile_size),
         "outpost" => draw_outpost(session, building, x, y, tile_size),
         "stockpile" => draw_stockpile(session, x, y, tile_size),
+        "material_stockpile" => {
+            draw_rectangle(
+                x + 2.0,
+                y + 2.0,
+                tile_size - 4.0,
+                tile_size - 4.0,
+                Color::new(0.36, 0.24, 0.13, 1.0),
+            );
+            draw_rectangle_lines(
+                x + 2.0,
+                y + 2.0,
+                tile_size - 4.0,
+                tile_size - 4.0,
+                2.0,
+                Color::new(0.75, 0.57, 0.30, 1.0),
+            );
+            let tint = match building.accepted_good() {
+                Good::Wood => Color::new(0.65, 0.40, 0.18, 1.0),
+                Good::Charcoal => Color::new(0.25, 0.25, 0.30, 1.0),
+                _ => Color::new(0.90, 0.70, 0.60, 1.0),
+            };
+            draw_circle(
+                x + tile_size * 0.5,
+                y + tile_size * 0.45,
+                tile_size * 0.18,
+                tint,
+            );
+            if let Some(def) = crate::simulation::storage::definition(building, data) {
+                let fill = building.stock(building.accepted_good()) / def.capacity as f32;
+                draw_rectangle(
+                    x + 4.0,
+                    y + tile_size - 6.0,
+                    (tile_size - 8.0) * fill.clamp(0.0, 1.0),
+                    3.0,
+                    GREEN,
+                );
+            }
+        }
         _ => {}
     }
 }

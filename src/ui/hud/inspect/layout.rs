@@ -60,6 +60,7 @@ pub fn inspection_panel_height(
     inspect_button_step: f32,
 ) -> f32 {
     match kind {
+        "material_stockpile" => 280.0,
         "blacksmith" if compact => {
             124.0 + blacksmith_recipe_rows(equipment_count) as f32 * inspect_button_step
         }
@@ -75,7 +76,9 @@ pub fn inspection_panel_height(
 }
 
 pub fn inspection_button_metrics(kind: &str, compact: bool, equipment_count: usize) -> (f32, f32) {
-    if compact && kind == "worm_shrine" {
+    if kind == "material_stockpile" {
+        (72.0, 76.0)
+    } else if compact && kind == "worm_shrine" {
         // The shrine is a critical-path handoff. Its pause/resume action must
         // remain a full touch target even when the canvas is 800x450.
         (72.0, 76.0)

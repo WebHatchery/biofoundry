@@ -28,6 +28,16 @@ ledger. Runtime facts and balance values remain owned by `assets/data/*.json`.
 
 ## Run
 
+Build a Material Stockpile by tapping **Build → Stockpile**, then open floor
+near a production building. It costs 6 ore and holds 24 units of one material.
+New stockpiles accept mushrooms; inspect an empty stockpile and tap **Change
+material** to cycle mushrooms, wood, and charcoal. Cooks fetch mushrooms for
+nearby pots, while carriers move stored wood and charcoal to kilns and smelters.
+Unhaulable scraps below one unit become waste when changing material.
+Supply buildings must be reachable and within 6 tiles (Manhattan distance).
+Carriers replenish useful stockpiles and deliver excess directly when storage
+is full. The central ore-and-ingot bank continues to serve construction.
+
 ```powershell
 cargo run
 ```

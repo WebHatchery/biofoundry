@@ -582,6 +582,15 @@ pub struct BuildingDef {
     /// Staffing, for buildings creatures work at a fixed post.
     #[serde(default)]
     pub workstation: Option<WorkstationDef>,
+    #[serde(default)]
+    pub storage: Option<StorageDef>,
+}
+
+/// Local material buffers supply production within this many tiles.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct StorageDef {
+    pub capacity: u32,
+    pub supply_radius: u32,
 }
 
 /// A progression unlock: an event counter the player naturally advances,

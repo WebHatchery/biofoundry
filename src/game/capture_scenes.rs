@@ -26,6 +26,31 @@ pub(super) fn begin(game: &mut Game, scene: &str) {
         return;
     }
     match scene {
+        "material_storage" | "material_storage_empty" => {
+            game.transition(StateTransition::StartWarren);
+            game.paused = true;
+            if let GameState::Warren(session) = &mut game.state {
+                session.tutorial_dismissed = true;
+                let pot = session.buildings_of("cook_pot").next().map(|b| b.pos);
+                if let Some(pot) = pot {
+                    let spot = session
+                        .world
+                        .tiles
+                        .iter_with_pos()
+                        .filter(|(pos, _)| session.can_place_building(*pos))
+                        .map(|(pos, _)| pos)
+                        .min_by_key(|p| (p.manhattan_distance(&pot), p.x, p.y));
+                    if let Some(spot) = spot {
+                        let mut store = Building::new("material_stockpile", spot);
+                        if scene == "material_storage" {
+                            store.add_stock(Good::Mushroom, 12.0);
+                        }
+                        session.buildings.push(store);
+                        game.selected_building = Some(spot);
+                    }
+                }
+            }
+        }
         "security_stuck" => {
             game.transition(StateTransition::StartWarren);
             if let GameState::Warren(session) = &mut game.state {

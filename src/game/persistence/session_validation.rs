@@ -34,6 +34,19 @@ pub fn validate_loaded_session(session: &GameSession, data: &GameData) -> Result
         for (good, amount) in &building.stocks {
             validate_nonnegative_finite(*amount, &format!("building stock {good:?}"))?;
         }
+        if let Some(storage) = crate::simulation::storage::definition(building, data) {
+            use crate::state::creatures::Good;
+            let accepted = building.accepted_good();
+            if !matches!(accepted, Good::Mushroom | Good::Wood | Good::Charcoal)
+                || building
+                    .stocks
+                    .iter()
+                    .any(|(good, amount)| *amount > 0.0 && *good != accepted)
+                || building.stocks.values().sum::<f32>() > storage.capacity as f32
+            {
+                return Err(format!("invalid material storage at {:?}", building.pos));
+            }
+        }
         for order in &building.orders {
             let Some(equipment) = data.equipment_def(order) else {
                 return Err(format!("unknown equipment order id {order:?}"));

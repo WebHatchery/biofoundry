@@ -15,6 +15,9 @@ pub struct Building {
     pub kind: String,
     pub pos: TilePos,
     pub stocks: HashMap<Good, f32>,
+    /// Local storage filter. Missing fields in older saves default to mushrooms.
+    #[serde(default)]
+    pub storage_good: Option<Good>,
     /// Extractable deposit remaining, for reserve-bearing workstations
     /// (the Mine). Zero for everything else. `#[serde(default)]` keeps
     /// pre-Phase-6 saves loading.
@@ -35,6 +38,7 @@ impl Building {
             kind: kind.to_owned(),
             pos,
             stocks: HashMap::new(),
+            storage_good: None,
             reserve: 0.0,
             orders: Vec::new(),
             waste: 0.0,
@@ -50,6 +54,10 @@ impl Building {
 
     pub fn stock(&self, good: Good) -> f32 {
         self.stocks.get(&good).copied().unwrap_or(0.0)
+    }
+
+    pub fn accepted_good(&self) -> Good {
+        self.storage_good.unwrap_or(Good::Mushroom)
     }
 
     pub fn add_stock(&mut self, good: Good, amount: f32) {

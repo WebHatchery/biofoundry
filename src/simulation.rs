@@ -11,6 +11,7 @@ pub mod food;
 pub mod jobs;
 pub mod nav;
 pub mod outposts;
+pub mod storage;
 pub mod wildlife;
 
 use crate::data::GameData;

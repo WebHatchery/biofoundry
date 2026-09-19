@@ -100,6 +100,53 @@ pub(crate) fn draw_inspect_panel(
     }
 
     match building.kind.as_str() {
+        "material_stockpile" => {
+            let good = building.accepted_good();
+            let copy_id = match good {
+                Good::Wood => "storage.wood",
+                Good::Charcoal => "storage.charcoal",
+                _ => "storage.mushrooms",
+            };
+            if let Some(storage) = crate::simulation::storage::definition(building, data) {
+                line(
+                    &format!(
+                        "{} {:.0}/{}",
+                        data.message(copy_id),
+                        building.stock(good),
+                        storage.capacity
+                    ),
+                    dark::TEXT,
+                    &mut y,
+                );
+                line(
+                    &data
+                        .message("storage.range")
+                        .replace("{radius}", &storage.supply_radius.to_string()),
+                    dark::TEXT_DIM,
+                    &mut y,
+                );
+                line(data.message("storage.supply"), dark::TEXT_DIM, &mut y);
+                let empty = building.stocks.values().sum::<f32>() < 1.0;
+                if hud_button(
+                    Rect::new(x, y, panel.w - 28.0, inspect_button_height),
+                    data.message("storage.change"),
+                    empty,
+                    mouse,
+                ) {
+                    actions.push(UiAction::CycleStorageGood(pos));
+                }
+                y += inspect_button_step + 14.0;
+                line(
+                    data.message(if empty {
+                        "storage.cycle"
+                    } else {
+                        "storage.empty_first"
+                    }),
+                    dark::TEXT_DIM,
+                    &mut y,
+                );
+            }
+        }
         "mine" => {
             let staffed = session
                 .creatures

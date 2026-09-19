@@ -9,6 +9,7 @@ use crate::simulation::jobs::hauling::{
 use crate::simulation::jobs::routing::{
     nearest_building, nearest_building_where, send_to, set_path, sporewood_sources_nearest_first,
 };
+use crate::simulation::storage;
 use crate::state::creatures::{Creature, Good, Task};
 use crate::state::GameSession;
 use macroquad_toolkit::grid::TilePos;
@@ -43,20 +44,7 @@ pub(super) fn tick_carrier(
                 return;
             }
             harvest_source(creature, session, data, species, source);
-            // Ore (from a Mine) and ingots (from a forge) always bank at the
-            // stockpile; other goods route through the normal chain.
-            if creature.carried(Good::Ore) > 0 {
-                send_to(creature, session, session.stockpile_pos(), Task::DeliverOre);
-            } else if creature.carried(Good::Ingot) > 0 {
-                send_to(
-                    creature,
-                    session,
-                    session.stockpile_pos(),
-                    Task::DeliverIngot,
-                );
-            } else {
-                creature.task = Task::Idle;
-            }
+            route_harvest(creature, session, data, source);
         }
         Task::DeliverTo(pos) => {
             if creature.tile() == pos {
@@ -117,6 +105,12 @@ fn choose_carrier_work(
     species: &SpeciesDef,
 ) {
     // 1. Deliver whatever is already carried.
+    if let Some((good, _)) = creature.carrying {
+        if let Some(target) = storage::deposit_destination(session, data, creature.tile(), good) {
+            send_to(creature, session, target, Task::DeliverTo(target));
+            return;
+        }
+    }
     if creature.carried(Good::Ore) > 0 {
         if let Some(target) = ore_destination(creature, session, data) {
             send_to(creature, session, target, Task::DeliverTo(target));
@@ -183,7 +177,7 @@ fn choose_carrier_work(
     };
 }
 
-/// A pending Farm is food infrastructure, not discretionary industry. Keep
+/// A pending Farm or material buffer is food infrastructure. Keep
 /// one carrier moving its ore through the construction site during a crisis;
 /// otherwise the reserve-first rule can leave the mine backed up while the
 /// player's recommended food expansion waits indefinitely.
@@ -192,11 +186,10 @@ fn try_food_expansion_chain(
     session: &mut GameSession,
     data: &GameData,
 ) -> bool {
-    let farm_waiting = session
-        .build_sites
-        .iter()
-        .any(|site| site.kind == "farm" && site.remaining() > 0);
-    if !farm_waiting {
+    let food_building_waiting = session.build_sites.iter().any(|site| {
+        matches!(site.kind.as_str(), "farm" | "material_stockpile") && site.remaining() > 0
+    });
+    if !food_building_waiting {
         return false;
     }
 
@@ -274,6 +267,24 @@ fn try_mine_drain(creature: &mut Creature, session: &mut GameSession) -> bool {
 /// Construction ore, smelter supply, charcoal, and wood runs — the
 /// *finite* industry sinks. Returns true when a task was started.
 fn try_industry_chain(creature: &mut Creature, session: &mut GameSession, data: &GameData) -> bool {
+    let from = creature.tile();
+    let mut stored_sources: Vec<_> = session
+        .buildings
+        .iter()
+        .filter(|b| {
+            storage::definition(b, data).is_some()
+                && b.stock(b.accepted_good()) >= 1.0
+                && storage::consumer_for(session, data, b.pos, b.accepted_good()).is_some()
+        })
+        .map(|b| b.pos)
+        .collect();
+    stored_sources.sort_by_key(|p| (p.manhattan_distance(&from), p.x, p.y));
+    for source in stored_sources {
+        if set_path(creature, session, source) {
+            creature.task = Task::GoFetch(source);
+            return true;
+        }
+    }
     // Ore runs: build sites, blacksmiths, and hungry smelters, from the bank.
     if session.economy.ore_stock > 0 && ore_wanted(session, data) > 0 {
         send_to(
@@ -328,4 +339,38 @@ fn try_industry_chain(creature: &mut Creature, session: &mut GameSession, data: 
         }
     }
     false
+}
+
+/// Finish a pickup without sending stored goods back into their buffer.
+fn route_harvest(
+    creature: &mut Creature,
+    session: &mut GameSession,
+    data: &GameData,
+    source: TilePos,
+) {
+    if session
+        .building_at(source)
+        .is_some_and(|b| storage::definition(b, data).is_some())
+    {
+        if let Some((good, _)) = creature.carrying {
+            if let Some(target) = storage::consumer_for(session, data, source, good) {
+                send_to(creature, session, target, Task::DeliverTo(target));
+                return;
+            }
+        }
+    }
+    // Ore (from a Mine) and ingots (from a forge) always bank at the
+    // stockpile; other goods route through the normal chain.
+    if creature.carried(Good::Ore) > 0 {
+        send_to(creature, session, session.stockpile_pos(), Task::DeliverOre);
+    } else if creature.carried(Good::Ingot) > 0 {
+        send_to(
+            creature,
+            session,
+            session.stockpile_pos(),
+            Task::DeliverIngot,
+        );
+    } else {
+        creature.task = Task::Idle;
+    }
 }

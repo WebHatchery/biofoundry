@@ -47,6 +47,14 @@ impl Game {
                 self.transition(StateTransition::BackToMenu);
             }
             UiAction::Assign(job) => self.reassign(Job::Idle, job),
+            UiAction::CycleStorageGood(pos) => {
+                if let GameState::Warren(session) = &mut self.state {
+                    if simulation::storage::cycle_filter(session, &self.data, pos) {
+                        self.audio.play(Sfx::Select);
+                        self.autosave_game();
+                    }
+                }
+            }
             UiAction::Unassign(job) => self.reassign(job, Job::Idle),
             UiAction::AttractBeetle => {
                 let mut recruited = false;

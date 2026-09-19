@@ -13,7 +13,7 @@
   },
   {
     "id": "help.inspect",
-    "text": "Tap a building on the map to read its status and controls. Tap a Blacksmith recipe to queue equipment; after onboarding, Breeding Pit buttons show specialist costs and benefits. Tap a Study Pen to turn captured specimens into observation."
+    "text": "Tap a building on the map to read its status and controls. For local storage, tap Build, Stockpile, then open floor within 6 tiles of a pot, kiln or den. Inspect an empty stockpile and tap Change material to cycle mushrooms, wood and charcoal. Tap a Blacksmith recipe to queue equipment; after onboarding, Breeding Pit buttons show specialist costs and benefits. Tap a Study Pen to turn captured specimens into observation."
   },
   {
     "id": "help.objective",
@@ -34,5 +34,13 @@
   {
     "id": "load.confirmation",
     "text": "Load the last saved Warren? Any work since that checkpoint will be discarded.\n\nChoose Load Last Save to restore it, or Keep Current to continue this run."
-  }
+  },
+  { "id": "storage.mushrooms", "text": "Mushrooms" },
+  { "id": "storage.wood", "text": "Wood" },
+  { "id": "storage.charcoal", "text": "Charcoal" },
+  { "id": "storage.range", "text": "Supply radius: {radius} tiles" },
+  { "id": "storage.supply", "text": "Place near a pot, kiln or den" },
+  { "id": "storage.change", "text": "Change material" },
+  { "id": "storage.cycle", "text": "Scraps become waste" },
+  { "id": "storage.empty_first", "text": "Empty first to change" }
 ]

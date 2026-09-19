@@ -66,6 +66,7 @@ pub enum UiAction {
     /// Breeding Pit.
     Breed(String),
     ToggleShrineFeeding(TilePos),
+    CycleStorageGood(TilePos),
     ActivateOutpost(TilePos),
     /// Rotate the outbound cargo fill order for an awakened worm route.
     CycleOutpostCargo(TilePos),

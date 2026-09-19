@@ -82,6 +82,10 @@ pub(super) fn ore_wanted(session: &GameSession, data: &GameData) -> u32 {
 /// What a fetch at this tile would yield right now.
 pub(super) fn fetchable_good(session: &GameSession, source: TilePos) -> Option<Good> {
     if let Some(building) = session.building_at(source) {
+        if building.kind == "material_stockpile" {
+            let good = building.accepted_good();
+            return (building.stock(good) >= 1.0).then_some(good);
+        }
         return match building.kind.as_str() {
             "farm" if building.stock(Good::Mushroom) >= 1.0 => Some(Good::Mushroom),
             "mine" if building.stock(Good::Ore) >= 1.0 => Some(Good::Ore),
@@ -120,8 +124,8 @@ pub(super) fn harvest_source(
         return;
     }
     if let Some(building) = session.building_at_mut(source) {
-        let take = building.take_stock(good, space as f32).floor() as u32;
-        // take_stock floors can strand fractions; put any remainder back.
+        let take = space.min(building.stock(good).floor() as u32);
+        building.take_stock(good, take as f32);
         creature.add_carried(good, take);
         return;
     }
@@ -159,6 +163,13 @@ pub(super) fn drop_load(
     let Some(building) = session.buildings.iter_mut().find(|b| b.pos == pos) else {
         return;
     };
+    if crate::simulation::storage::definition(building, data).is_some() {
+        let good = building.accepted_good();
+        let space = crate::simulation::storage::free_space(building, data);
+        let delivered = creature.take_carried(good, space);
+        building.add_stock(good, delivered as f32);
+        return;
+    }
     match building.kind.as_str() {
         "cook_pot" => {
             let n = creature.take_carried(Good::Mushroom, u32::MAX);

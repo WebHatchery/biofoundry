@@ -484,7 +484,7 @@ pub fn construction_progress_label(site_count: usize, ore_remaining: u32) -> Str
 pub fn is_core_building(id: &str) -> bool {
     matches!(
         id,
-        "blacksmith" | "cook_pot" | "farm" | "mine" | "worm_shrine"
+        "blacksmith" | "cook_pot" | "farm" | "mine" | "worm_shrine" | "material_stockpile"
     )
 }
 

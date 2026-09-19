@@ -134,6 +134,9 @@ pub fn building_status(
         return Some(BuildingStatus::NoValidRoute);
     }
     match building.kind.as_str() {
+        "material_stockpile" if crate::simulation::storage::free_space(building, data) == 0 => {
+            Some(BuildingStatus::OutputFull)
+        }
         "mine" => {
             if building.reserve <= 0.0 {
                 return Some(BuildingStatus::Exhausted);
@@ -242,7 +245,14 @@ pub fn building_status(
 pub fn requires_local_route(kind: &str) -> bool {
     matches!(
         kind,
-        "farm" | "mine" | "cook_pot" | "blacksmith" | "kiln" | "smelter" | "feeding_trough"
+        "farm"
+            | "mine"
+            | "cook_pot"
+            | "blacksmith"
+            | "kiln"
+            | "smelter"
+            | "feeding_trough"
+            | "material_stockpile"
     )
 }
 
