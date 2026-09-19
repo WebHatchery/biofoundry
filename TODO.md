@@ -17,9 +17,8 @@
   modules above 600 lines (§2.2): `src/simulation/outposts.rs` (743),
   `src/data.rs` (741), `src/game_actions.rs` (698),
   `src/ui/hud/inspect/outpost.rs` (681), and `src/state.rs` (676).
-- [ ] Correct `tests/TEST_COVERAGE.md` and review suites against the target of
-  **no more than five cases per major feature** (§11.3), rather than its
-  current "at least five" interpretation. Consolidate related inputs and
+- [ ] Review suites against the strong target of **no more than five cases
+  per major feature** (`CODE_STANDARDS.md` §11.3). Consolidate related inputs and
   document concrete reasons for retained exceptions without losing regressions.
   Split near-limit suites by responsibility: `tests/unit/ui_hud_objective.rs`
   and `ui_hud_inspect.rs` (798 lines each), `game.rs` (790), and
