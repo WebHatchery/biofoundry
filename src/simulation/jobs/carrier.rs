@@ -146,7 +146,9 @@ fn choose_carrier_work(
             return;
         }
     }
-    if creature.carried(Good::Mushroom) >= carry_capacity(creature, session, species, data) {
+    // A partial harvest still feeds the kitchen. Waiting for a full load can
+    // strand mushrooms behind an endless stream of gathering or industry.
+    if creature.carried(Good::Mushroom) > 0 {
         if let Some(pot) = nearest_building(creature, session, "cook_pot") {
             send_to(creature, session, pot, Task::DeliverTo(pot));
         }
@@ -164,35 +166,21 @@ fn choose_carrier_work(
     //    Wild patches are scattered and slow — always the last resort.
     let food = session.economy.food;
     let bal = &data.balance;
-    if food < bal.carrier_food_reserve {
-        if try_food_expansion_chain(creature, session, data)
+    let _ = if food < bal.carrier_food_reserve {
+        try_food_expansion_chain(creature, session, data)
             || try_farm_haul(creature, session)
             || (species.id != "bat_courier" && try_patch_forage(creature, session))
-        {
-            return;
-        }
     } else if food < bal.carrier_food_comfortable {
-        if try_industry_chain(creature, session, data)
+        try_industry_chain(creature, session, data)
             || try_farm_haul(creature, session)
             || try_mine_drain(creature, session)
             || (species.id != "bat_courier" && try_patch_forage(creature, session))
-        {
-            return;
-        }
-    } else if try_industry_chain(creature, session, data)
-        || try_mine_drain(creature, session)
-        || try_farm_haul(creature, session)
-        || (species.id != "bat_courier" && try_patch_forage(creature, session))
-    {
-        return;
-    }
-
-    // 3. Nothing to start: at least finish a partial mushroom load.
-    if creature.carried(Good::Mushroom) > 0 {
-        if let Some(pot) = nearest_building(creature, session, "cook_pot") {
-            send_to(creature, session, pot, Task::DeliverTo(pot));
-        }
-    }
+    } else {
+        try_industry_chain(creature, session, data)
+            || try_mine_drain(creature, session)
+            || try_farm_haul(creature, session)
+            || (species.id != "bat_courier" && try_patch_forage(creature, session))
+    };
 }
 
 /// A pending Farm is food infrastructure, not discretionary industry. Keep
